@@ -64,14 +64,4 @@ class LinearKernel(AbstractKernel):
         if self.bias != 0:
             K += self.bias
         return K
-    
-    def getName(self):
-        """Return the name of the kernel
-        
-        Returns
-        -------
-        kname: string
-        """
-        return "linear kernel"
-        
-        
+

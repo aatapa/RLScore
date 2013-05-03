@@ -22,9 +22,7 @@ class AbstractLearner(object):
     
     
     def loadResources(self):
-        if self.resource_pool.has_key(data_sources.PARAMETERS):
-            params = self.resource_pool[data_sources.PARAMETERS]
-            self.resource_pool.update(params)
+        pass
     
     
     def train(self):
@@ -51,7 +49,6 @@ class AbstractSupervisedLearner(AbstractLearner):
     
     
     def loadResources(self):
-        AbstractLearner.loadResources(self)
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
         self.setLabels(Y)
     
@@ -66,7 +63,6 @@ class AbstractSvdLearner(AbstractLearner):
     """Base class for singular value decomposition based learners"""
     
     def loadResources(self):
-        AbstractLearner.loadResources(self)
         #THE GREAT MONOLITH!!!
         if self.resource_pool.has_key(data_sources.KMATRIX):
             self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**self.resource_pool)
@@ -79,14 +75,10 @@ class AbstractSvdLearner(AbstractLearner):
                 self.svdad = LinearSvdAdapter.createAdapter(**self.resource_pool)
             else:
                 self.svdad = SvdAdapter.createAdapter(**self.resource_pool)
-        self.setDecomposition(self.svdad.svals, self.svdad.rsvecs)
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
         if not self.resource_pool.has_key(data_sources.TIKHONOV_REGULARIZATION_PARAMETER):
             self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = 1.
-    
-    
-    def setDecomposition(self, svals, svecs, U = None, Z = None):
-        self.svals = svals
-        self.svecs = svecs
     
     
     def getModel(self):
@@ -122,8 +114,8 @@ class AbstractSvdSupervisedLearner(AbstractSupervisedLearner,AbstractSvdLearner)
         After the learner is trained, one can call the method getModel
         to get the trained model
         """
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
-        self.solve(regparam)
+        #regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        self.solve()
         
     
     def solve(self, regparam):
@@ -152,12 +144,11 @@ class AbstractIterativeLearner(AbstractLearner):
     
     
     def loadResources(self):
-        AbstractLearner.loadResources(self)
         if self.resource_pool.has_key(data_sources.CALLBACK_FUNCTION):
             self.callbackfun = self.resource_pool[data_sources.CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
-            #self.callbackfun = CallbackFunction()
+
     
     
     def callback(self):

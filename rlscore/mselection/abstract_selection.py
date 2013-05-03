@@ -108,13 +108,11 @@ class AbstractSelection(object):
                     self.best_regparam = regparam
             if self.verbose:
                 if performance != None:
-                    #print "%f %s (averaged), %f regularization parameter" % (performance, self.measure.getName(), regparam)
                     print "%f %s (averaged), %f regularization parameter" % (performance, measure_name, regparam)
                 else:
                     print "Performance undefined for %f regularization parameter" %regparam
         if self.verbose:
             if self.best_performance != None:
-                #print "Best performance %f %s with regularization parameter %f" % (self.best_performance, self.measure.getName(), self.best_regparam)
                 print "Best performance %f %s with regularization parameter %f" % (self.best_performance, measure_name, self.best_regparam)
             else:
                 print "Performance undefined for all tried values"

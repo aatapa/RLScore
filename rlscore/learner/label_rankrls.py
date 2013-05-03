@@ -7,6 +7,8 @@ import scipy.sparse
 from rlscore import data_sources
 from rlscore.utilities import decomposition
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
+from rlscore.utilities import array_tools
+from rlscore.utilities import creators
 
 class LabelRankRLS(AbstractSvdSupervisedLearner):
     """RankRLS algorithm for learning to rank
@@ -56,17 +58,38 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
     """
+
+    def __init__(self, svdad, train_labels, train_qids, regparam=1.0):
+        self.svdad = svdad
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.size = self.Y.shape[0]
+        self.regparam = regparam
+        self.svals = svdad.svals
+        self.svecs = svdad.rsvecs
+        self.setQids(train_qids)
+        self.results = {}
+
+    def createLearner(cls, **kwargs):
+        new_kwargs = {}
+        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        new_kwargs["train_labels"] = kwargs["train_labels"]
+        new_kwargs["train_qids"] = kwargs["train_qids"]
+        if kwargs.has_key("regparam"):
+            new_kwargs['regparam'] = kwargs["regparam"]
+        learner = cls(**new_kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     
     
-    def loadResources(self):
-        AbstractSvdSupervisedLearner.loadResources(self)
-        qids = self.resource_pool[data_sources.TRAIN_QIDS]
-        #qids = qsource.readQids()
-        #qids = qsource.readFolds()
-        if not self.resource_pool.has_key(data_sources.CVFOLDS):
-            self.resource_pool[data_sources.CVFOLDS] = qids
-        self.setQids(qids)
+    #def loadResources(self):
+    #    AbstractSvdSupervisedLearner.loadResources(self)
+    #    qids = self.resource_pool[data_sources.TRAIN_QIDS]
+    #    #qids = qsource.readQids()
+    #    #qids = qsource.readFolds()
+    #    if not self.resource_pool.has_key(data_sources.CVFOLDS):
+    #        self.resource_pool[data_sources.CVFOLDS] = qids
+    #    self.setQids(qids)
     
     
     def setQids(self, qids):
@@ -96,7 +119,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             else:
                 self.qidmap[qid] = [i]  
     
-    def solve(self, regparam):
+    def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
                
         Parameters
@@ -161,6 +184,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             #Primal RLS
             #self.A = self.U.T * (self.LRevecs * multiply(self.neweigvals.T, self.multipleright))
             #self.A = self.U.T * multiply(self.svals.T,  self.svecs.T * self.A)
+        self.results[data_sources.MODEL] = self.getModel()
     
     
     def computeHO(self, indices):

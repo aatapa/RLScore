@@ -16,11 +16,6 @@ MEASURE_NAME = 'measure'
 MSELECTION_NAME = 'mselection'
 CALLBACK_NAME = 'callback'
 
-DEFAULT_PARAMS = {data_sources.TIKHONOV_REGULARIZATION_PARAMETER:'1', 'reggrid':'-5_5', 'bias':'0'}
-
-
-
-
 def loadCore(modules, parameters, input_file, output_file, input_reader = {}, output_writer = {}):
     """Runs RLScore.
     
@@ -50,9 +45,6 @@ def loadCore(modules, parameters, input_file, output_file, input_reader = {}, ou
     """
     
     rpool = {}
-    for key in DEFAULT_PARAMS.keys():
-        if not key in parameters:
-            parameters[key] = DEFAULT_PARAMS[key]
     if 'importpath' in parameters:
         paths = parameters['importpath'].split(";")
         for path in paths:
@@ -131,16 +123,17 @@ def trainModel(**kwargs):
         kwargs.update(mselector.resource_pool)
     else:
         learner.train()
-        kwargs.update(learner.resource_pool)
+        #kwargs.update(learner.resource_pool)
         model = learner.getModel()
+    kwargs.update(learner.results)
     kwargs[data_sources.MODEL] = model
     return kwargs
 
 
 def createLearner(**kwargs):
-    if kwargs.has_key(KERNEL_NAME):
-        kernel = creators.createKernelByModuleName(**kwargs)
-        kwargs[data_sources.KERNEL_OBJ] = kernel
+    #if kwargs.has_key(KERNEL_NAME):
+    #    kernel = creators.createKernelByModuleName(**kwargs)
+    #    kwargs[data_sources.KERNEL_OBJ] = kernel
     learner = createLearnerByModuleName(**kwargs)
     return learner
 

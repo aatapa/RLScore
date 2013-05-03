@@ -101,16 +101,4 @@ class GaussianKernel(AbstractKernel):
             K += self.bias
         return K.A
 
- 
-    def getName(self):
-        """Return the name of the kernel
-        
-        Returns
-        -------
-        kname: string
-        """
-        return "Gaussian kernel"
 
-
-        
-        

@@ -390,24 +390,38 @@ def read_qids(fname):
     return Q
 
 
+#def mapQids(qids):
+#    """Maps qids to running numbering starting from zero, and partitions
+#    the training data indices so that each partition corresponds to one
+#    query"""
+#    #Used in FileReader, rls_predict
+#    qid_dict = {}
+#    folds = {}
+#    counter = 0
+#    for index, qid in enumerate(qids):
+#        if not qid in qid_dict:
+#            qid_dict[qid] = counter
+#            folds[qid] = []
+#            counter += 1
+#        folds[qid].append(index)
+#    final_folds = []
+#    for f in folds.values():
+#        final_folds.append(f)
+#    return final_folds
+
 def mapQids(qids):
-    """Maps qids to running numbering starting from zero, and partitions
-    the training data indices so that each partition corresponds to one
-    query"""
-    #Used in FileReader, rls_predict
-    qid_dict = {}
-    folds = {}
-    counter = 0
-    for index, qid in enumerate(qids):
-        if not qid in qid_dict:
-            qid_dict[qid] = counter
-            folds[qid] = []
-            counter += 1
-        folds[qid].append(index)
-    final_folds = []
-    for f in folds.values():
-        final_folds.append(f)
-    return final_folds
+    q_partition = []
+    prev = qids[0]
+    query = [0]
+    for i in range(1,len(qids)):
+        if qids[i] == prev:
+            query.append(i)
+        else:
+            q_partition.append(query)
+            prev = qids[i]
+            query = [i]
+    q_partition.append(query)
+    return q_partition
 
 
 DEFAULT_READERS = {

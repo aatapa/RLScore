@@ -6,6 +6,8 @@ from numpy import *
 from rlscore import data_sources
 from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
+from rlscore.utilities import array_tools
+from rlscore.utilities import creators
 
 class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     """RLS-based maximum-margin clustering.
@@ -47,7 +49,85 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     Fast Evolutionary Maximum Margin Clustering.
     Proceedings of the 26th International Conference on Machine Learning,
     361-368, ACM, 2009.
-    """    
+    """
+    
+    def __init__(self, svdad, number_of_clusters=2, regparam=1.0, train_labels = None, fixed_indices=None, callback_obj=None):
+        self.labelcount = number_of_clusters
+        self.svdad = svdad
+        self.regparam = regparam
+        self.svals = svdad.svals
+        self.svecs = svdad.rsvecs
+        self.constraint = 0
+        if self.labelcount == 2:
+            self.oneclass = True
+        else:
+            self.oneclass = False
+        #if not self.resource_pool.has_key('number_of_clusters'):
+        #    raise Exception("Parameter 'number_of_clusters' must be given.")
+        self.labelcount = number_of_clusters
+        self.callbackfun = callback_obj
+        if train_labels != None:
+            Y_orig = array_tools.as_labelmatrix(train_labels)
+            if Y_orig.shape[1] == 1:
+                self.Y = mat(zeros((Y_orig.shape[0], 2)))
+                self.Y[:, 0] = Y_orig
+                self.Y[:, 1] = - Y_orig
+                self.oneclass = True
+            else:
+                self.Y = Y_orig.copy()
+                self.oneclass = False
+            for i in range(self.Y.shape[0]):
+                largestind = 0
+                largestval = self.Y[i, 0]
+                for j in range(self.Y.shape[1]):
+                    if self.Y[i, j] > largestval:
+                        largestind = j
+                        largestval = self.Y[i, j]
+                    self.Y[i, j] = -1.
+                self.Y[i, largestind] = 1.
+        else:
+            size = self.svecs.shape[0]
+            ysize = self.labelcount
+            if self.labelcount == None: self.labelcount = 2
+            self.Y = RandomLabelSource(size, ysize).readLabels()
+        self.size = self.Y.shape[0]
+        self.labelcount = self.Y.shape[1]
+        self.classvec = - mat(ones((self.size, 1), dtype = int32))
+        self.classcounts = mat(zeros((self.labelcount, 1), dtype = int32))
+        for i in range(self.size):
+            clazzind = 0
+            largestlabel = self.Y[i, 0]
+            for j in range(self.labelcount):
+                if self.Y[i, j] > largestlabel:
+                    largestlabel = self.Y[i, j]
+                    clazzind = j
+            self.classvec[i] = clazzind
+            self.classcounts[clazzind] = self.classcounts[clazzind] + 1
+        
+        self.svecs_list = []
+        for i in range(self.size):
+            self.svecs_list.append(self.svecs[i].T)
+        self.fixedindices = []
+        if fixed_indices != None:
+            self.fixedindices = fixed_indices
+        self.results = {}
+
+    def createLearner(cls, **kwargs):
+        new_kwargs = {}
+        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        if kwargs.has_key("regparam"):
+            new_kwargs['regparam'] = float(kwargs["regparam"])
+        if kwargs.has_key("train_labels"):
+            new_kwargs["train_labels"] = kwargs["train_labels"]
+        if kwargs.has_key("number_of_clusters"):
+            new_kwargs['number_of_clusters'] = int(kwargs["number_of_clusters"])
+        if kwargs.has_key("fixed_indices"):
+            new_kwargs["fixed_indices"] = kwargs["fixed_indices"]
+        if kwargs.has_key("callback_obj"):
+            new_kwargs["callback_obj"] = kwargs["callback_obj"]
+        learner = cls(**new_kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     def loadResources(self):
         AbstractSvdLearner.loadResources(self)
@@ -115,8 +195,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     def train(self):
         """Trains the learning algorithm.
         """
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
-        self.solve(regparam)
+        #regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        self.solve(self.regparam)
        
     
     
@@ -192,7 +272,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         #    self.giveAndTakeALT(1000/ (ii+1))
         if self.oneclass:
             self.Y = self.Y[:, 0]
-        self.resource_pool[data_sources.PREDICTED_CLUSTERS_FOR_TRAINING_DATA] = self.Y
+        self.results[data_sources.PREDICTED_CLUSTERS_FOR_TRAINING_DATA] = self.Y
+        self.results[data_sources.MODEL] = self.getModel()
     
     
     def computeGlobalFitness(self):

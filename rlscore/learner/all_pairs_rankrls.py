@@ -7,6 +7,8 @@ import scipy.sparse.linalg as sla
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore import model
 from rlscore import data_sources
+from rlscore.utilities import array_tools
+from rlscore.utilities import creators
 
 class AllPairsRankRLS(AbstractSvdSupervisedLearner):
     """RankRLS algorithm for learning to rank
@@ -64,8 +66,27 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
 
     """
     
+    def __init__(self, svdad, train_labels, regparam=1.0):
+        self.svdad = svdad
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.size = self.Y.shape[0]
+        self.regparam = regparam
+        self.svals = svdad.svals
+        self.svecs = svdad.rsvecs
+        self.results = {}
+
+    def createLearner(cls, **kwargs):
+        new_kwargs = {}
+        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        new_kwargs["train_labels"] = kwargs["train_labels"]
+        if kwargs.has_key("regparam"):
+            new_kwargs['regparam'] = kwargs["regparam"]
+        learner = cls(**new_kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
-    def solve(self, regparam):
+    
+    def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
            
         Parameters
@@ -97,6 +118,7 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         self.A = self.svecs * multiply(1. / self.svals.T, \
             (multiply(neweigvals.T, self.multipleright) \
             - nP * (fastinv * (nP.T * self.multipleright))))
+        self.results["model"] = self.getModel()
     
     
     def computePairwiseCV(self, pairs, oind=0):

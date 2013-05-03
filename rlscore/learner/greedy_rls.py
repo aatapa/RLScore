@@ -58,6 +58,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.measure = self.resource_pool[data_sources.PERFORMANCE_MEASURE]
         else:
             self.measure = None
+        self.results = {}
     
     
     def train(self):
@@ -191,8 +192,9 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * sqrt(self.bias)
-        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
-        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results[data_sources.SELECTED_FEATURES] = self.selected
+        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results[data_sources.MODEL] = self.getModel()
     
     
     def getModel(self):

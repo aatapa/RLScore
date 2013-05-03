@@ -22,16 +22,16 @@ class DualModel(object):
     rpool: resource pool
     """
     
-    def __init__(self, A, kernel, rpool):
+    def __init__(self, A, kernel):
         self.kernel = kernel
         nonz = A.nonzero()
-        newbasis = list(set(nonz[0].tolist()))
+        #newbasis = list(set(nonz[0].tolist()))
         self.A = A
-        if len(newbasis) != A.shape[0]:
-            self.A = A.todense()[newbasis]
-            newpool = rpool.copy()
-            newpool[data_sources.BASIS_VECTORS] = newbasis
-            self.kernel = kernel.__class__.createKernel(**newpool)
+        #if len(newbasis) != A.shape[0]:
+        #    self.A = A.todense()[newbasis]
+        #    newpool = rpool.copy()
+        #    newpool[data_sources.BASIS_VECTORS] = newbasis
+        #    self.kernel = kernel.__class__.createKernel(**newpool)
         self.A = array_tools.as_array(self.A)
 
     

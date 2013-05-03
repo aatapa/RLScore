@@ -107,6 +107,7 @@ class CGRankRLS(AbstractIterativeLearner):
         if data_sources.TRAIN_QIDS in self.resource_pool:
             qids = self.resource_pool[data_sources.TRAIN_QIDS]
             self.setQids(qids)
+        self.results = {}
             
     def setQids(self, qids):
         """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
@@ -201,6 +202,7 @@ class CGRankRLS(AbstractIterativeLearner):
         except Finished, e:
             pass
         self.b = np.mat(np.zeros((1,1)))
+        self.results[data_sources.MODEL] = self.getModel()
     
     
     def trainWithPreferences(self):
@@ -230,6 +232,7 @@ class CGRankRLS(AbstractIterativeLearner):
         XLY = X_csr * (pairs_csc.T * M)
         self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
         self.b = np.mat(np.zeros((1,self.A.shape[1])))
+        self.results[data_sources.MODEL] = self.getModel()
     
     
     def getModel(self):

@@ -28,10 +28,16 @@ class SvdAdapter(object):
     def createAdapter(cls, **kwargs):
         adapter = cls()
         svals, rsvecs, U, Z = adapter.decompositionFromPool(kwargs)
+        if data_sources.KERNEL_OBJ in kwargs:
+            adapter.kernel = kwargs[data_sources.KERNEL_OBJ]
         adapter.svals = svals
         adapter.rsvecs = rsvecs
         adapter.U = U
         adapter.Z = Z
+        if data_sources.BASIS_VECTORS in kwargs:
+            adapter.bvectors = kwargs[data_sources.BASIS_VECTORS]
+        else:
+            adapter.bvectors = None
         return adapter
     createAdapter = classmethod(createAdapter)
     
@@ -61,24 +67,24 @@ class SvdAdapter(object):
         return svals, evecs, U, Z
     
     
-    def reducedSetTransformation(self, A, svdlearner):
+    def reducedSetTransformation(self, A):
         if self.Z != None:
             AA = mat(zeros(A.shape, dtype = A.dtype))
             #Maybe we could somehow guarantee that Z is always coupled with bvectors?
-            if not svdlearner.resource_pool.has_key(data_sources.BASIS_VECTORS):
-                raise Exception("Provided decomposition of the reduced set approximation of kernel matrix, but not the indices of the basis vectors")
+            #if not svdlearner.resource_pool.has_key(data_sources.BASIS_VECTORS):
+            #    raise Exception("Provided decomposition of the reduced set approximation of kernel matrix, but not the indices of the basis vectors")
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
-            bvecs = svdlearner.resource_pool[data_sources.BASIS_VECTORS]
-            AA[bvecs, :] = A_red
-            return csr_matrix(AA)
+            #bvecs = svdlearner.resource_pool[data_sources.BASIS_VECTORS]
+            #AA[self.bvectors, :] = A_red
+            #return csr_matrix(AA)
+            return A_red
         else: return csr_matrix(A)
     
     
     def createModel(self, svdlearner):
         A = svdlearner.A
-        A = self.reducedSetTransformation(A, svdlearner)
-        kernel = svdlearner.resource_pool[data_sources.KERNEL_OBJ]
-        mod = model.DualModel(A, kernel, svdlearner.resource_pool)
+        A = self.reducedSetTransformation(A)
+        mod = model.DualModel(A, self.kernel)
         return mod
 
 class LinearSvdAdapter(SvdAdapter):
@@ -89,17 +95,17 @@ class LinearSvdAdapter(SvdAdapter):
     
     def decompositionFromPool(self, rpool):
         kernel = rpool[data_sources.KERNEL_OBJ]
-        X = rpool[data_sources.TRAIN_FEATURES]
+        self.X = rpool[data_sources.TRAIN_FEATURES]
         if rpool.has_key(data_sources.BASIS_VECTORS):
             bvectors = rpool[data_sources.BASIS_VECTORS]
         else:
             bvectors = None
         if "bias" in rpool:
-            bias = float(rpool["bias"])
+            self.bias = float(rpool["bias"])
         else:
-            bias = 0.
-        if bvectors != None or X.shape[1] > X.shape[0]:
-            K = kernel.getKM(X)
+            self.bias = 0.
+        if bvectors != None or self.X.shape[1] > self.X.shape[0]:
+            K = kernel.getKM(self.X)
             #First possibility: subset of regressors has been invoked
             if bvectors != None:
                 svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, bvectors)
@@ -110,7 +116,7 @@ class LinearSvdAdapter(SvdAdapter):
         #Third possibility, primal decomposition
         else:
             #Invoking getPrimalDataMatrix adds the bias feature
-            X = getPrimalDataMatrix(X,bias)
+            X = getPrimalDataMatrix(self.X,self.bias)
             svals, evecs, U = decomposition.decomposeDataMatrix(X.T)
             U, Z = None, None
         return svals, evecs, U, Z
@@ -118,12 +124,16 @@ class LinearSvdAdapter(SvdAdapter):
     
     def createModel(self, svdlearner):
         A = svdlearner.A
-        A = self.reducedSetTransformation(A, svdlearner)
-        fs = svdlearner.resource_pool[data_sources.TRAIN_FEATURES]
-        if "bias" in svdlearner.resource_pool:
-            bias = float(svdlearner.resource_pool["bias"])
-        else:
-            bias = 0.
+        A = self.reducedSetTransformation(A)
+        #fs = svdlearner.resource_pool[data_sources.TRAIN_FEATURES]
+        fs = self.X
+        if self.bvectors != None:
+            fs = self.X[self.bvectors]
+        bias = self.bias
+        #if "bias" in svdlearner.resource_pool:
+        #    bias = float(svdlearner.resource_pool["bias"])
+        #else:
+        #    bias = 0.
         X = getPrimalDataMatrix(fs, bias)
         #The hyperplane is a linear combination of the feature vectors of the basis examples
         W = X.T * A
@@ -176,6 +186,6 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     
     def createModel(self, svdlearner):
         A = svdlearner.A
-        A = self.reducedSetTransformation(A, svdlearner)
+        A = self.reducedSetTransformation(A)
         mod = model.LinearModel(A, 0.)
         return mod

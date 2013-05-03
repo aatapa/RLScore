@@ -92,15 +92,3 @@ class PolynomialKernel(AbstractKernel):
             K += self.bias
         return K
 
-    def getName(self):
-        """Return the name of the kernel
-        
-        Returns
-        -------
-        kname: string
-        """
-        return "polynomial kernel"
-
-
-
-

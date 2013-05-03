@@ -51,6 +51,40 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     Everything old is new again : a fresh look at historical approaches in machine learning
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
+
+    def __init__(self, train_features, train_labels, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0):
+        X = train_features
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.X = csc_matrix(X.T)
+        self.bias = bias
+        self.regparam = regparam
+        if self.bias != 0.:
+            bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
+            self.X = sparse.vstack([self.X,bias_slice]).tocsc()
+        else:
+            self.bias = 0.
+        self.X_csr = self.X.tocsr()
+        if validation_features != None and validation_labels != None:
+            self.callbackfun = EarlyStopCB(validation_features, validation_labels)
+        else:
+            self.callbackfun = None
+        self.results = {}
+
+    def createLearner(cls, **kwargs):
+        new_kwargs = {}
+        new_kwargs["train_features"] = kwargs["train_features"]
+        new_kwargs["train_labels"] = kwargs["train_labels"]
+        if kwargs.has_key("regparam"):
+            new_kwargs['regparam'] = float(kwargs["regparam"])
+        if kwargs.has_key("bias"):
+            new_kwargs['bias'] = float(kwargs["bias"])
+        if kwargs.has_key(data_sources.VALIDATION_FEATURES) and kwargs.has_key(data_sources.VALIDATION_LABELS):
+            new_kwargs[data_sources.VALIDATION_FEATURES] = kwargs[data_sources.VALIDATION_FEATURES]
+            new_kwargs[data_sources.VALIDATION_LABELS] = kwargs[data_sources.VALIDATION_LABELS]
+        learner = cls(**new_kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
+
     def loadResources(self):
         AbstractIterativeLearner.loadResources(self)
         AbstractSupervisedLearner.loadResources(self)
@@ -82,7 +116,8 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         regparam: float (regparam > 0)
             regularization parameter
         """
-        self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
+        #self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
+        self.regparam = regparam
         self.train()   
     
     
@@ -92,7 +127,7 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         After the learner is trained, one can call the method getModel
         to get the trained model
         """
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = self.regparam
         Y = self.Y
         X = self.X
         X_csr = self.X_csr
@@ -117,6 +152,7 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         else:
             self.b = sqrt(self.bias)*self.A[-1]
             self.A = self.A[:-1]
+        self.results[data_sources.MODEL] = self.getModel()
 
     def getModel(self):
         """Returns the trained model, call this only after training.

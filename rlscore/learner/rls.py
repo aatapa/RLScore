@@ -1,6 +1,8 @@
 
 from numpy import float64, identity, multiply, mat, zeros, sum
 import numpy.linalg as la
+from rlscore.utilities import array_tools
+from rlscore.utilities import creators
 
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 
@@ -59,8 +61,27 @@ class RLS(AbstractSvdSupervisedLearner):
     83-90, Otamedia Oy, 2006.
 
     """
+    
+    def __init__(self, svdad, train_labels, regparam=1.0):
+        self.svdad = svdad
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.regparam = regparam
+        self.svals = svdad.svals
+        self.svecs = svdad.rsvecs
+        self.results = {}
+
+    def createLearner(cls, **kwargs):
+        new_kwargs = {}
+        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        new_kwargs["train_labels"] = kwargs["train_labels"]
+        if kwargs.has_key("regparam"):
+            new_kwargs['regparam'] = kwargs["regparam"]
+        learner = cls(**new_kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
+
    
-    def solve(self, regparam):
+    def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
                
         Parameters
@@ -79,6 +100,7 @@ class RLS(AbstractSvdSupervisedLearner):
         self.newevals = 1. / (self.evals + regparam)
         self.regparam = regparam
         self.A = self.svecs * multiply(self.newevals.T, self.multiplyright)
+        self.results["model"] = self.getModel()
         #if self.U == None:
         #    pass
             #Dual RLS
@@ -132,7 +154,6 @@ class RLS(AbstractSvdSupervisedLearner):
         F : matrix, shape = [n_samples, n_labels]
             leave-one-out predictions
         """
-        #LOO = mat(zeros((self.size, self.ysize), dtype=float64))
         bevals = multiply(self.evals, self.newevals)
         #rightall = multiply(bevals.T, self.svecs.T * self.Y)
         '''for i in range(self.size):
