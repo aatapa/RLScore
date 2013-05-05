@@ -1,15 +1,10 @@
 import unittest
 
 import numpy as np
-from rlscore.measure import auc
-from rlscore.measure import sqerror
 from rlscore.kernel import GaussianKernel
 from rlscore.kernel import LinearKernel
-from rlscore.learner.conditional_ranking import ConditionalRanking
-from rlscore.learner.kron_rls import KronRLS, PairwiseModelLinearHack
 from rlscore.learner.cg_kron_rls import CGKronRLS
 from rlscore.learner.rls import RLS
-from rlscore.learner.label_rankrls import LabelRankRLS
 
 
 class Test(unittest.TestCase):
