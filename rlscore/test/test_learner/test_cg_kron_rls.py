@@ -79,29 +79,20 @@ class Test(unittest.TestCase):
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
         rows, columns = Y_train.shape
-        print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns #,'foo'
+        print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns
         trainlabelcount = rows * columns
         indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
         
-        nonzeros_x_coord = []
-        nonzeros_y_coord = []
-        nonzeros_x_coord = [0,0,1,1,2,2,3,4,5,6,6,7]
-        nonzeros_y_coord = [0,1,0,1,1,2,3,4,4,4,5,5]
-        #for i in range(rows):
-        #    for j in range(columns):
-        #        nonzeros_y_coord.append(i)
-        #        nonzeros_x_coord.append(j)
-        
+        label_row_inds = [0,0,1,1,2,2,3,4,5,6,6,7]
+        label_col_inds = [0,1,0,1,1,2,3,4,4,4,5,5]
         
         Y_train_nonzeros = []
-        B = np.mat(np.zeros((len(nonzeros_x_coord),trainlabelcount)))
-        for ind in range(len(nonzeros_x_coord)):
-            i, j = nonzeros_y_coord[ind], nonzeros_x_coord[ind]
+        B = np.mat(np.zeros((len(label_row_inds),trainlabelcount)))
+        for ind in range(len(label_row_inds)):
+            i, j = label_col_inds[ind], label_row_inds[ind]
             Y_train_nonzeros.append(Y_train[i, j])
             B[ind, i * columns + j] = 1.
-            #B[ind, j * rows + i] = 1.
-        print B
-        #Y_train_nonzeros = np.array(Y_train_nonzeros)
+        #print B
         Y_train_nonzeros = B * Y_train.reshape(trainlabelcount, 1)
         
         #Train linear Kronecker RLS
@@ -110,8 +101,8 @@ class Test(unittest.TestCase):
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
         params["train_labels"] = Y_train_nonzeros
-        params["nonzeros_x_coord"] = nonzeros_x_coord
-        params["nonzeros_y_coord"] = nonzeros_y_coord
+        params["label_row_inds"] = label_row_inds
+        params["label_col_inds"] = label_col_inds
         linear_kron_learner = CGKronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
@@ -123,8 +114,8 @@ class Test(unittest.TestCase):
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
         params["train_labels"] = Y_train_nonzeros
-        params["nonzeros_x_coord"] = nonzeros_x_coord
-        params["nonzeros_y_coord"] = nonzeros_y_coord
+        params["label_row_inds"] = label_row_inds
+        params["label_col_inds"] = label_col_inds
         kernel_kron_learner = CGKronRLS.createLearner(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
