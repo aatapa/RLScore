@@ -17,15 +17,43 @@ from rlscore.utilities import decomposition
 
 from rlscore.utilities import sparse_kronecker_multiplication_tools
 
-class CGKronRLS(AbstractLearner):
 
+def c_gets_axb(x, A, B, nonzeros_x_coord, nonzeros_y_coord):
+    rc_a, cc_a = A.shape
+    rc_b, cc_b = B.shape
+    nzc_x = len(nonzeros_x_coord)
+    len_c = rc_a * cc_b
+    
+    if rc_a * cc_a * cc_b + cc_b * nzc_x < rc_b * cc_a * cc_b + cc_a * nzc_x:
+    #if False:
+        #print 'foo'
+        temp = mat(zeros((cc_a, cc_b)))
+        sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, array(nonzeros_x_coord, dtype=int32), array(nonzeros_y_coord, dtype=int32), nzc_x, cc_b)
+        temp = A * temp
+        return temp.reshape((len_c,), order='F')
+    else:
+        #print 'bar'
+        temp = mat(zeros((rc_a, rc_b)))
+        sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, x, A, array(nonzeros_x_coord, dtype=int32), array(nonzeros_y_coord, dtype=int32), nzc_x, rc_a)
+        temp = temp * B
+        return temp.reshape((len_c,), order='F')
+
+class CGKronRLS(AbstractLearner):
+    
+    '''def __init__(self, train_labels, nonzeros_x_coord, nonzeros_y_coord, regparam=1.0):
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.regparam = regparam
+        self.nonzeros_x_coord = nonzeros_x_coord
+        self.nonzeros_y_coord = nonzeros_y_coord
+        self.results = {}'''
+    
+    
     def loadResources(self):
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
         #self.K1 = mat(self.resource_pool['kmatrix1'])
         #self.K2 = mat(self.resource_pool['kmatrix2'])
         self.nonzeros_x_coord = self.resource_pool["nonzeros_x_coord"]
         self.nonzeros_y_coord = self.resource_pool["nonzeros_y_coord"]
-        self.B = self.resource_pool["B"]
         Y = array_tools.as_labelmatrix(Y)
         #assert Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
         self.Y = Y
@@ -34,10 +62,13 @@ class CGKronRLS(AbstractLearner):
     
     def train(self):
         regparam = self.resource_pool['regparam']
-        self.solve(regparam)
+        if self.resource_pool.has_key('kmatrix1'):
+            self.solve_kernel(regparam)
+        else:
+            self.solve_linear(regparam)
     
     
-    def solve(self, regparam):
+    def solve_kernel(self, regparam):
         self.regparam = regparam
         K1 = mat(self.resource_pool['kmatrix1'])
         K2 = mat(self.resource_pool['kmatrix2'])
@@ -65,11 +96,8 @@ class CGKronRLS(AbstractLearner):
             return None
         
         G = LinearOperator((len(self.nonzeros_x_coord), len(self.nonzeros_x_coord)), matvec=mv, rmatvec=mvr, dtype=float64)
-        #self.A = (mat(bicgstab(G, self.Y, maxiter = 1000)[0]).T)
-        self.A = (mat(bicgstab(G, self.Y)[0]).T)
-        #self.A = self.A.reshape((K1.shape[1],K2.shape[0]),order='F')
-        self.A = (self.B.T*self.A).reshape((K1.shape[1],K2.shape[0]))
-        self.model = PairwiseModel(self.A)
+        self.A = bicgstab(G, self.Y)[0]
+        self.model = KernelPairwiseModel(self.A, self.nonzeros_x_coord, self.nonzeros_y_coord)
     
     
     def solve_linear(self, regparam):
@@ -134,7 +162,9 @@ class CGKronRLS(AbstractLearner):
                 i, j = self.nonzeros_y_coord[ind], self.nonzeros_x_coord[ind]
                 v_after[ind] = X1[i] * temp[:, j] + regparam * v[ind]'''
             v_after = u_gets_bxv(v)
-            v_after = v_gets_xbu(v_after) + regparam * v
+            #v_after = c_gets_axb(v, X1.T, X2, self.nonzeros_x_coord, self.nonzeros_y_coord)
+            #v_after = v_gets_xbu(v_after) + regparam * v
+            v_after = c_gets_axb(v_after, X1.T, X2, self.nonzeros_x_coord, self.nonzeros_y_coord) + regparam * v
             return v_after
         
         def mvr(v):
@@ -142,15 +172,12 @@ class CGKronRLS(AbstractLearner):
             return None
         
         G = LinearOperator((kronfcount, kronfcount), matvec=mv, rmatvec=mvr, dtype=float64)
-        #self.A = (mat(bicgstab(G, self.Y, maxiter = 1000)[0]).T)
         
         v_init = array(self.Y).reshape(self.Y.shape[0])
         v_init = v_gets_xbu(v_init)
         v_init = array(v_init).reshape(kronfcount)
-        #print G.shape, v_init.shape
         self.W = mat(bicgstab(G, v_init)[0]).T.reshape((x1fsize, x2fsize),order='F')
         #self.A = self.A.reshape((K1.shape[1],K2.shape[0]),order='F')
-        #self.A = (self.B.T*self.A).reshape((K1.shape[1],K2.shape[0]))
         self.model = LinearPairwiseModel(self.W)
     
     
@@ -158,18 +185,21 @@ class CGKronRLS(AbstractLearner):
         return self.model
 
     
-class PairwiseModel(object):
+class KernelPairwiseModel(object):
     
-    def __init__(self, A, kernel = None):
+    def __init__(self, A, nonzeros_x_coord, nonzeros_y_coord, kernel = None):
         """Initializes the dual model
         @param A: dual coefficient matrix
         @type A: numpy matrix"""
         self.A = A
+        self.nonzeros_x_coord, self.nonzeros_y_coord = nonzeros_x_coord, nonzeros_y_coord
         self.kernel = kernel
     
     
     def predictWithKernelMatrices(self, K1pred, K2pred):
-        P = K1pred.T * self.A * K2pred
+        #P = K1pred.T * self.A * K2pred
+        P = c_gets_axb(self.A, K1pred, K2pred.T, self.nonzeros_x_coord, self.nonzeros_y_coord)
+        P = mat(P).reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
         return P
 
 

@@ -40,7 +40,7 @@ class ValidationSetSelection(AbstractSelection):
         if isinstance(mod, model.DualModel):
             if self.K == None:
                 self.K = mod.kernel.getKM(self.validation_X)
-            P = np.dot(self.K.T, mod.A)
+            P = np.dot(self.K, mod.A)
         else:        
             P = mod.predict(self.validation_X)
         #performance = self.measure.multiVariatePerformance(self.validation_Y, P, self.validation_qids)

@@ -34,11 +34,11 @@ class RsetKernel(AbstractKernel):
     
     def buildPredictionCache(self, train_X, bvectors = None):
         Krr = self.base_kernel.getKM(self.basis_features)
-        Kr_ = self.base_kernel.getKM(train_X)
+        K_r = self.base_kernel.getKM(train_X)
         invKrr = la.inv(Krr)
-        self.predcache = np.dot(Kr_.T, invKrr)
+        self.predcache = np.dot(K_r, invKrr)
     
     
     def getKM(self, test_X):
-        Krt = self.base_kernel.getKM(test_X)
-        return np.dot(self.predcache, Krt)
+        Ktr = self.base_kernel.getKM(test_X)
+        return np.dot(Ktr, self.predcache.T)

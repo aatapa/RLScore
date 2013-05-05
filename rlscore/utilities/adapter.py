@@ -58,10 +58,10 @@ class SvdAdapter(object):
         kernel = rpool[data_sources.KERNEL_OBJ]
         if rpool.has_key(data_sources.BASIS_VECTORS):
             bvectors = rpool[data_sources.BASIS_VECTORS]
-            K = kernel.getKM(train_X)
+            K = kernel.getKM(train_X).T
             svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, bvectors)
         else:
-            K = kernel.getKM(train_X)
+            K = kernel.getKM(train_X).T
             svals, evecs = decomposition.decomposeKernelMatrix(K)
             U, Z = None, None
         return svals, evecs, U, Z
@@ -105,7 +105,7 @@ class LinearSvdAdapter(SvdAdapter):
         else:
             self.bias = 0.
         if bvectors != None or self.X.shape[1] > self.X.shape[0]:
-            K = kernel.getKM(self.X)
+            K = kernel.getKM(self.X).T
             #First possibility: subset of regressors has been invoked
             if bvectors != None:
                 svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, bvectors)

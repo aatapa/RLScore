@@ -74,7 +74,7 @@ class GaussianKernel(AbstractKernel):
         
         Returns
         -------
-        K : array, shape = [n_bvectors, n_samples]
+        K : array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         test_X = X 
@@ -99,6 +99,6 @@ class GaussianKernel(AbstractKernel):
         K = np.exp(K)
         if self.bias != 0:
             K += self.bias
-        return K.A
+        return K.A.T
 
 

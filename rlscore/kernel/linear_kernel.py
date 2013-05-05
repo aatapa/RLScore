@@ -50,7 +50,7 @@ class LinearKernel(AbstractKernel):
         
         Returns
         -------
-        K : array, shape = [n_bvectors, n_samples]
+        K : array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         test_X = X
@@ -63,5 +63,5 @@ class LinearKernel(AbstractKernel):
         K = array_tools.as_array(K)
         if self.bias != 0:
             K += self.bias
-        return K
+        return K.T
 

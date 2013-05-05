@@ -25,17 +25,6 @@ class AbstractKernel(object):
         """
         return 0
     
-    def trainKMFromPool(self, rpool):
-        """Builds kernel matrix for the training data from resource pool. Used by Core."""
-        X = rpool[data_sources.TRAIN_FEATURES]
-        return self.getKM(X)
-    
-    
-    def testKMFromPool(self, rpool):
-        """Builds kernel matrix between training and test examples, from the resource pool. Used by Core."""
-        X = rpool[data_sources.PREDICTION_FEATURES]
-        return self.getKM(X)
-    
     
     def getKM(self, test_X):
         """Returns the kernel matrix between the basis vectors and X.
@@ -46,7 +35,7 @@ class AbstractKernel(object):
         
         Returns
         -------
-        K : array, shape = [n_bvectors, n_samples]
+        K : array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         m = len(train_X)
@@ -59,5 +48,5 @@ class AbstractKernel(object):
                 K[i,j] = self.kernel(x1, x2)
         if self.bias != 0:
             K += self.bias
-        return K
+        return K.T
 

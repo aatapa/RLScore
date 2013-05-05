@@ -37,8 +37,8 @@ class DualModel(object):
     
     def predictFromPool(self, rpool):
         """Makes real-valued predictions for new examples"""
-        K = self.kernel.testKMFromPool(rpool)
-        P = np.dot(K.T, self.A)
+        self.kernel.getKM(rpool[data_sources.PREDICTION_FEATURES])
+        P = np.dot(K, self.A)
         P = array_tools.as_array(P)
         return P
     
@@ -57,7 +57,7 @@ class DualModel(object):
             predictions
         """
         K = self.kernel.getKM(X)
-        P = np.dot(K.T, self.A)
+        P = np.dot(K, self.A)
         P = array_tools.as_array(P)
         return P
 
