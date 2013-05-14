@@ -321,7 +321,7 @@ free(t);
 }
 
 
-double swapped_pairs(int len1, double* s, int len2, double* f, int len3, int* o) {
+double swapped_pairs(int len1, double* s, int len2, double* f) {
   int size = len1;
   int ind;
   int i = 0;
@@ -338,9 +338,8 @@ double swapped_pairs(int len1, double* s, int len2, double* f, int len3, int* o)
     ties = 0;
     m = i;
     //The smallest-largest prediction pass
-    ind = o[i];
-    f_i = f[ind];
-    while(j<size && f[o[j]] == f_i){
+    f_i = f[i];
+    while(j<size && f[j] == f_i){
         j+=1;
     }
     ties = j-i;
@@ -348,16 +347,16 @@ double swapped_pairs(int len1, double* s, int len2, double* f, int len3, int* o)
     if(ties > 1){
        for(k=i; k<j-1; k++){
             for(l=k+1; l<j; l++){
-                if(s[o[k]] != s[o[l]]){
+                if(s[k] != s[l]){
                     swpairs += 0.5;}
               			}
     			     }
     		  }
     while(m<j){
-        swpairs += rbtree_larger(t, s[o[m]]);
+        swpairs += rbtree_larger(t, s[m]);
         m += 1;}
     while(i<j){
-        rbtree_insert(t, s[o[i]]);
+        rbtree_insert(t, s[i]);
         i += 1;}
       
   }

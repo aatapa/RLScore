@@ -10,20 +10,13 @@ def auc_singletask(Y, P):
     #P: predicted labels
     #Y: true labels, y_i \in {-1,1} for each y_i \in Y
     #
-    #This catches any obvious mistakes the caller could do
-    assert len(P) == len(Y), 'len(P) != len(Y). len(P) == '+str(len(P))+', len(Y) == '+str(len(Y))
-    for y in Y:
-        assert y in [-1,1]
+    Y = np.array(Y).T[0]
+    P = np.array(P).T[0]
     size = len(P)
     #form a list of prediction-label pairs
-    pairs = [(p, y) for p,y in zip(P,Y)]
-    #sort these according to the predictions
-    pairs.sort(key=operator.itemgetter(0))
-    #Now we have P and Y sorted according to values of P
-    P = [pair[0] for pair in pairs]
-    Y = [pair[1] for pair in pairs]
-    #the number of positive labels that have lower prediction
-    #than the current P[i] value
+    I = np.argsort(P)
+    Y = Y[I]
+    P = P[I]
     poscount = 0.
     #The number of positive labels that have the same prediction
     #as the current P[i] value

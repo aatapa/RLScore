@@ -5,8 +5,7 @@ from Cython.Distutils import build_ext
 ext_modules = [Extension(
     name="rlscore.utilities.swapped",
     sources=["ext_src/swapped.pyx", "ext_src/c_swapped.c"],
-    language="c",
-    )]
+    language="c")]
 
 setup(
     name = 'swapped',

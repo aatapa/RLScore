@@ -25,15 +25,9 @@ def cindex_singletask(Y, P):
         pairs += i-c_ties
     if pairs == 0:
         raise UndefinedPerformance("No pairs, all the instances have the same output")
-    #P = [(x, y) for y, x in enumerate(predictions)]
-    #P.sort(key=operator.itemgetter(0))
-    #P = [x[1] for x in P]
-    I = np.argsort(P)
-    #c code will not work, unless we ensure this
     correct = array(correct).reshape(correct.shape[0],)
     predictions = array(predictions).reshape(predictions.shape[0],)
-    I = I.astype(np.int32)
-    s = swapped.count_swapped(correct, predictions, I)
+    s = swapped.count_swapped(correct, predictions)
     disagreement = float(s)/float(pairs)
     return 1. - disagreement
 

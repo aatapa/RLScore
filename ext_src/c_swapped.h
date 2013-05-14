@@ -47,7 +47,7 @@ typedef struct rbtree_t {
 //void rbtree_insert(rbtree t, double key);
 //int rbtree_smaller(rbtree t, double key);
 //int rbtree_larger(rbtree t, double key);
-double swapped_pairs(int len1, double* s, int len2, double* f, int len3, int* o);
+double swapped_pairs(int len1, double* s, int len2, double* f);
 
 #endif
 

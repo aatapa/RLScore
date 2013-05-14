@@ -26,18 +26,19 @@ def testLearners():
         unittest.TextTestRunner(verbosity=2).run(suite)
     
 def testMeasures():
-    from rlscore.test.test_measure.test_accuracy import Test as atest
-    from rlscore.test.test_measure.test_sqerror import Test as btest
+    #from rlscore.test.test_measure.test_accuracy import Test as atest
+    #from rlscore.test.test_measure.test_sqerror import Test as btest
     from rlscore.test.test_measure.test_auc import Test as ctest
-    from rlscore.test.test_measure.test_disagreement import Test as dtest
-    from rlscore.test.test_measure.test_multiaccuracy import Test as etest
-    from rlscore.test.test_measure.test_sqmprank import Test as ftest
-    from rlscore.test.test_measure.test_fscore import Test as gtest
-    for test in [atest,btest,ctest,dtest,etest,ftest,gtest]:
+    #from rlscore.test.test_measure.test_disagreement import Test as dtest
+    #from rlscore.test.test_measure.test_multiaccuracy import Test as etest
+    #from rlscore.test.test_measure.test_sqmprank import Test as ftest
+    #from rlscore.test.test_measure.test_fscore import Test as gtest
+    from rlscore.test.test_measure.test_cindex import Test as htest    
+    for test in [ctest,htest]:#[atest,btest,ctest,dtest,etest,ftest,gtest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
 if __name__=="__main__":
     #testKernels()
     testLearners()
-    #testMeasures()
+    testMeasures()
