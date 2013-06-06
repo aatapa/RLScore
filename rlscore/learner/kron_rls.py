@@ -34,25 +34,26 @@ class KronRLS(AbstractLearner):
         self.regparam = regparam
         K1 = mat(self.resource_pool['kmatrix1'])
         K2 = mat(self.resource_pool['kmatrix2'])
+        self.K1, self.K2 = K1, K2
         Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
         #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
         
         if not self.trained:
             self.trained = True
-            L, V  = la.eigh(K1)
-            L = mat(L).T
+            evals1, V  = la.eigh(K1)
+            evals1 = mat(evals1).T
             V = mat(V)
-            self.L = L
+            self.evals1 = evals1
             self.V = V
             
-            S, U = la.eigh(K2)
-            S = mat(S).T
+            evals2, U = la.eigh(K2)
+            evals2 = mat(evals2).T
             U = mat(U)
-            self.S = S
+            self.evals2 = evals2
             self.U = U
             self.VTYU = V.T * self.Y * U
         
-        newevals = 1. / (self.L * self.S.T + regparam)
+        newevals = 1. / (self.evals1 * self.evals2.T + regparam)
         
         self.A = multiply(self.VTYU, newevals)
         self.A = self.V * self.A * self.U.T
@@ -66,19 +67,21 @@ class KronRLS(AbstractLearner):
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
         if not self.trained:
             self.trained = True
-            L, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
-            self.L = L.T
+            svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
+            self.svals1 = svals1.T
+            self.evals1 = multiply(self.svals1, self.svals1)
             self.V = V
             self.rsvecs1 = mat(rsvecs1)
             
-            S, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
-            self.S = S.T
+            svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
+            self.svals2 = svals2.T
+            self.evals2 = multiply(self.svals2, self.svals2)
             self.U = U
             self.rsvecs2 = mat(rsvecs2)
             
             self.VTYU = V.T * Y * U
         
-        kronsvals = self.L * self.S.T
+        kronsvals = self.svals1 * self.svals2.T
         
         newevals = divide(kronsvals, multiply(kronsvals, kronsvals) + regparam)
         self.W = multiply(self.VTYU, newevals)
@@ -87,11 +90,16 @@ class KronRLS(AbstractLearner):
     
     
     def imputationLOO(self):
-        K1 = mat(self.resource_pool['kmatrix1'])
-        K2 = mat(self.resource_pool['kmatrix2'])
-        P = K1 * self.A * K2.T
+        if not hasattr(self, "P"):
+            if not hasattr(self, "K1"):
+                X1 = mat(self.resource_pool['xmatrix1'])
+                X2 = mat(self.resource_pool['xmatrix2'])
+                self.P = X1 * self.W * X2.T
+            else:
+                self.P = self.K1 * self.A * self.K2.T
+        P = self.P
         
-        newevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
+        newevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         Vsqr = multiply(self.V, self.V)
         Usqr = multiply(self.U, self.U)
         #loopred = mat(zeros((self.V.shape[0], self.U.shape[0])))
@@ -108,10 +116,14 @@ class KronRLS(AbstractLearner):
     
     
     def compute_ho(self, row_inds, col_inds):
+        if not hasattr(self, "K1"):
+            X1 = mat(self.resource_pool['xmatrix1'])
+            X2 = mat(self.resource_pool['xmatrix2'])
+            P_ho = X1[row_inds] * self.W * X2.T[:, col_inds]
+        else:
+            P_ho = self.K1[row_inds] * self.A * self.K2.T[:, col_inds]
         
-        P_ho = self.K1.T[row_inds] * self.A * self.K2[:, col_inds]
-        
-        newevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
+        newevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         
         rowcount = len(row_inds)
         colcount = len(col_inds)
@@ -158,11 +170,18 @@ class KronRLS(AbstractLearner):
     
     
     def nested_imputationLOO(self, outer_row_coord, outer_col_coord):
-        P = self.K1.T * self.A * self.K2
+        if not hasattr(self, "P"):
+            if not hasattr(self, "K1"):
+                X1 = mat(self.resource_pool['xmatrix1'])
+                X2 = mat(self.resource_pool['xmatrix2'])
+                self.P = X1 * self.W * X2.T
+            else:
+                self.P = self.K1 * self.A * self.K2.T
+        P = self.P
         P_out = P[outer_row_coord, outer_col_coord]
         Y_out = self.Y[outer_row_coord, outer_col_coord]
         
-        newevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
+        newevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         Vsqr = multiply(self.V, self.V)
         Usqr = multiply(self.U, self.U)
         d = (Vsqr[outer_row_coord] * newevals.T * Usqr[outer_col_coord].T)[0, 0]
@@ -215,7 +234,7 @@ class KronRLS(AbstractLearner):
         P_out = P[outer_row_coord, outer_col_coord]
         Y_out = self.Y[outer_row_coord, outer_col_coord]
         
-        newevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
+        newevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         Vsqr = multiply(self.V, self.V)
         Usqr = multiply(self.U, self.U)
         d = (Vsqr[outer_row_coord] * newevals.T * Usqr[outer_col_coord].T)[0, 0]
@@ -264,7 +283,7 @@ class KronRLS(AbstractLearner):
         if not hasattr(self, "Vsqr"):
             self.Vsqr = multiply(self.V, self.V)
             self.Usqr = multiply(self.U, self.U)
-        self.newlooevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
+        self.newlooevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         self.P = self.K1.T * self.A * self.K2
         self.newlooevalsUsqr = self.newlooevals.T * self.Usqr.T
         self.Vsqrnewlooevals = self.Vsqr * self.newlooevals.T
