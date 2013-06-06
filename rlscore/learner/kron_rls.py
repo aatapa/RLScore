@@ -90,14 +90,12 @@ class KronRLS(AbstractLearner):
     
     
     def imputationLOO(self):
-        if not hasattr(self, "P"):
-            if not hasattr(self, "K1"):
-                X1 = mat(self.resource_pool['xmatrix1'])
-                X2 = mat(self.resource_pool['xmatrix2'])
-                self.P = X1 * self.W * X2.T
-            else:
-                self.P = self.K1 * self.A * self.K2.T
-        P = self.P
+        if not hasattr(self, "K1"):
+            X1 = mat(self.resource_pool['xmatrix1'])
+            X2 = mat(self.resource_pool['xmatrix2'])
+            P = X1 * self.W * X2.T
+        else:
+            P = self.K1 * self.A * self.K2.T
         
         newevals = multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         Vsqr = multiply(self.V, self.V)
@@ -169,15 +167,13 @@ class KronRLS(AbstractLearner):
         return hopred.reshape(rowcount, colcount)
     
     
-    def nested_imputationLOO(self, outer_row_coord, outer_col_coord):
-        if not hasattr(self, "P"):
-            if not hasattr(self, "K1"):
-                X1 = mat(self.resource_pool['xmatrix1'])
-                X2 = mat(self.resource_pool['xmatrix2'])
-                self.P = X1 * self.W * X2.T
-            else:
-                self.P = self.K1 * self.A * self.K2.T
-        P = self.P
+    def nested_imputationLOO(self, outer_row_coord, outer_col_coord,):
+        if not hasattr(self, "K1"):
+            X1 = mat(self.resource_pool['xmatrix1'])
+            X2 = mat(self.resource_pool['xmatrix2'])
+            P = X1 * self.W * X2.T
+        else:
+            P = self.K1 * self.A * self.K2.T
         P_out = P[outer_row_coord, outer_col_coord]
         Y_out = self.Y[outer_row_coord, outer_col_coord]
         
