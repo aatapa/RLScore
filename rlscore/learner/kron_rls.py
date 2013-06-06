@@ -17,22 +17,25 @@ class KronRLS(AbstractLearner):
 
     def loadResources(self):
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.K1 = mat(self.resource_pool['kmatrix1'])
-        self.K2 = mat(self.resource_pool['kmatrix2'])
         Y = array_tools.as_labelmatrix(Y)
-        assert Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
         self.Y = Y
         self.trained = False
     
     
     def train(self):
         regparam = self.resource_pool['regparam']
-        self.solve(regparam)
+        if self.resource_pool.has_key('kmatrix1'):
+            self.solve_kernel(regparam)
+        else:
+            self.solve_linear(regparam)
     
-    def solve(self, regparam):
+    
+    def solve_kernel(self, regparam):
         self.regparam = regparam
-        K1 = self.K1
-        K2 = self.K2
+        K1 = mat(self.resource_pool['kmatrix1'])
+        K2 = mat(self.resource_pool['kmatrix2'])
+        Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
+        #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
         
         if not self.trained:
             self.trained = True
@@ -53,13 +56,14 @@ class KronRLS(AbstractLearner):
         
         self.A = multiply(self.VTYU, newevals)
         self.A = self.V * self.A * self.U.T
+        self.model = KernelPairwiseModel(self.A)
     
     
-    def solve_linear_hack(self, regparam):
+    def solve_linear(self, regparam):
         self.regparam = regparam
         X1 = mat(self.resource_pool['xmatrix1'])
         X2 = mat(self.resource_pool['xmatrix2'])
-        
+        Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
         if not self.trained:
             self.trained = True
             L, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
@@ -72,17 +76,20 @@ class KronRLS(AbstractLearner):
             self.U = U
             self.rsvecs2 = mat(rsvecs2)
             
-            self.VTYU = V.T * self.Y * U
+            self.VTYU = V.T * Y * U
         
         kronsvals = self.L * self.S.T
         
         newevals = divide(kronsvals, multiply(kronsvals, kronsvals) + regparam)
         self.W = multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
+        self.model = LinearPairwiseModel(self.W)
     
     
     def imputationLOO(self):
-        P = self.K1.T * self.A * self.K2
+        K1 = mat(self.resource_pool['kmatrix1'])
+        K2 = mat(self.resource_pool['kmatrix2'])
+        P = K1 * self.A * K2.T
         
         newevals = multiply(self.S * self.L.T, 1. / (self.S * self.L.T + self.regparam))
         Vsqr = multiply(self.V, self.V)
@@ -368,11 +375,10 @@ class KronRLS(AbstractLearner):
     
     
     def getModel(self):
-        model = PairwiseModel(self.A)
-        return model
+        return self.model
 
     
-class PairwiseModel(object):
+class KernelPairwiseModel(object):
     
     def __init__(self, A, kernel = None):
         """Initializes the dual model
@@ -383,11 +389,25 @@ class PairwiseModel(object):
     
     
     def predictWithKernelMatrices(self, K1pred, K2pred):
-        P = K1pred.T * self.A * K2pred
+        """Computes predictions for test examples.
+
+        Parameters
+        ----------
+        K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
+            the first part of the test data matrix
+        K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
+            the second part of the test data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples1, n_samples2]
+            predictions
+        """
+        P = K1pred * self.A * K2pred.T
         return P
 
 
-class PairwiseModelLinearHack(object):
+class LinearPairwiseModel(object):
     
     def __init__(self, W):
         """Initializes the linear model
@@ -397,6 +417,20 @@ class PairwiseModelLinearHack(object):
     
     
     def predictWithDataMatrices(self, X1pred, X2pred):
+        """Computes predictions for test examples.
+
+        Parameters
+        ----------
+        X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
+            the first part of the test data matrix
+        X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
+            the second part of the test data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples1, n_samples2]
+            predictions
+        """
         P = X1pred * self.W * X2pred.T
         return P
 

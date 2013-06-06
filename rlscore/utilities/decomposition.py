@@ -29,11 +29,13 @@ def decomposeDataMatrix(X):
     return svals, evecs, U
 
 
-def decomposeKernelMatrix(K):
+def decomposeKernelMatrix(K, trunc = None):
     """"Returns the reduced eigen decomposition of the kernel matrix K so that only the eigenvectors corresponding to the nonzero eigenvalues are returned.
     
     @param K: a positive semi-definite kernel matrix whose rows and columns are indexed by the datumns.
     @type K: numpy matrix of floats
+    @param trunc: return only the 'trunc' largest eigenvalues and the corresponding eigenvectors
+    @type trunc: int
     @return: the square roots of the nonzero eigenvalues and the corresponding eigenvectors of K. The square roots of the eigenvectors are contained in a r*1-matrix, where r is the number of nonzero eigenvalues. 
     @rtype: a tuple of two numpy matrices"""
     evals, evecs = la.eigh(K)
@@ -43,6 +45,7 @@ def decomposeKernelMatrix(K):
     for l in range(maxnz):
         if evals[0, l] > SMALLEST_EVAL:
             nz += 1
+    if trunc != None: nz = min(nz, trunc)
     rang = range(maxnz - nz, maxnz)
     evecs = evecs[:, rang]
     evals = evals[:, rang]

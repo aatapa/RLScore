@@ -9,7 +9,7 @@ from scipy import sparse
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
-from rlscore.learner.abstract_learner import AbstractLearner
+from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore import data_sources
 from rlscore import model
 from rlscore.utilities import array_tools
@@ -28,17 +28,42 @@ def c_gets_axb(x, A, B, label_row_inds, label_col_inds):
     #if False:
         #print 'foo'
         temp = mat(zeros((cc_a, cc_b)))
-        sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, array(label_row_inds, dtype=int32), array(label_col_inds, dtype=int32), nzc_x, cc_b)
+        sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, label_row_inds, label_col_inds, nzc_x, cc_b)
         temp = A * temp
         return temp.reshape((len_c,), order='F')
     else:
         #print 'bar'
         temp = mat(zeros((rc_a, rc_b)))
-        sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, x, A, array(label_row_inds, dtype=int32), array(label_col_inds, dtype=int32), nzc_x, rc_a)
+        sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, x, A, label_row_inds, label_col_inds, nzc_x, rc_a)
         temp = temp * B
         return temp.reshape((len_c,), order='F')
 
-class CGKronRLS(AbstractLearner):
+
+def u_gets_axb(xx, A, B, label_row_inds, label_col_inds):
+    rc_a, cc_a = A.shape
+    rc_b, cc_b = B.shape
+    nzc_u = len(label_row_inds)
+    len_c = rc_a * cc_b
+    
+    x_after = zeros(nzc_u)
+    
+    if rc_a * cc_a * cc_b + cc_b * nzc_u < rc_b * cc_a * cc_b + cc_a * nzc_u:
+    #if False:
+    #if True:
+        temp = xx.reshape((cc_a, rc_b), order='F')
+        temp = A * temp
+        #temp = mat(zeros((cc_a, cc_b)))
+        #sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, label_row_inds, label_col_inds, nzc_x, cc_b)
+        sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, temp, B, label_row_inds, label_col_inds, nzc_u, rc_b)
+        return x_after
+    else:
+        temp = xx.reshape((cc_a, rc_b), order='F')
+        temp = temp * B
+        sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, A, temp, label_row_inds, label_col_inds, nzc_u, cc_a)
+        return x_after
+
+
+class CGKronRLS(AbstractIterativeLearner):
     
     '''def __init__(self, train_labels, label_row_inds, label_col_inds, regparam=1.0):
         self.Y = array_tools.as_labelmatrix(train_labels)
@@ -50,14 +75,15 @@ class CGKronRLS(AbstractLearner):
     
     def loadResources(self):
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        #self.K1 = mat(self.resource_pool['kmatrix1'])
-        #self.K2 = mat(self.resource_pool['kmatrix2'])
-        self.label_row_inds = self.resource_pool["label_row_inds"]
-        self.label_col_inds = self.resource_pool["label_col_inds"]
+        self.label_row_inds = array(self.resource_pool["label_row_inds"], dtype=int32)
+        self.label_col_inds = array(self.resource_pool["label_col_inds"], dtype=int32)
         Y = array_tools.as_labelmatrix(Y)
-        #assert Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
         self.Y = Y
         self.trained = False
+        if self.resource_pool.has_key(data_sources.CALLBACK_FUNCTION):
+            self.callbackfun = self.resource_pool[data_sources.CALLBACK_FUNCTION]
+        else:
+            self.callbackfun = None
     
     
     def train(self):
@@ -74,20 +100,23 @@ class CGKronRLS(AbstractLearner):
         K2 = mat(self.resource_pool['kmatrix2'])
         lsize = len(self.label_row_inds) #n
         
-        #Y = self.Y
+        if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
+        else: maxiter = None
         
+        label_row_inds = self.label_row_inds
+        label_col_inds = self.label_col_inds
+        
+        temp = zeros((K1.shape[1], K2.shape[0]))
+        v_after = zeros((len(self.label_row_inds),))
+        #Y = self.Y
+        #self.itercount = 0
         def mv(v):
             assert v.shape[0] == len(self.label_row_inds)
-            temp = mat(zeros((K1.shape[1], K2.shape[0])))
-            sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, v, K2, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, K2.shape[0])
-            #for ind in range(len(self.label_row_inds)):
-            #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-            #    temp[i] = temp[i] + v[ind] * K2.T[j]
+            temp = zeros((K1.shape[1], K2.shape[0]))
+            sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, v, K2, label_row_inds, label_col_inds, lsize, K2.shape[0])
             v_after = zeros(v.shape[0])
-            sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(v_after, K1, temp, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, K1.shape[0])
-            #for ind in range(len(self.label_row_inds)):
-            #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-            #    v_after[ind] = K1[i] * temp[:, j] + regparam * v[ind]
+            #print K1.shape, temp.shape
+            sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(v_after, K1, temp, label_row_inds, label_col_inds, lsize, K1.shape[0])
             return v_after + regparam * v
         
         def mvr(v):
@@ -96,7 +125,7 @@ class CGKronRLS(AbstractLearner):
             return None
         
         G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec=mv, rmatvec=mvr, dtype=float64)
-        self.A = bicgstab(G, self.Y)[0]
+        self.A = bicgstab(G, self.Y, maxiter = maxiter)[0]
         self.model = KernelPairwiseModel(self.A, self.label_row_inds, self.label_col_inds)
     
     
@@ -105,83 +134,45 @@ class CGKronRLS(AbstractLearner):
         X1 = mat(self.resource_pool['xmatrix1'])
         X2 = mat(self.resource_pool['xmatrix2'])
         
+        if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
+        else: maxiter = None
+        
         x1tsize, x1fsize = X1.shape #m, d
         x2tsize, x2fsize = X2.shape #q, r
         lsize = len(self.label_row_inds) #n
         
         kronfcount = x1fsize * x2fsize
         
-        if x1tsize * x1fsize * x2fsize + x2fsize * lsize < x2tsize * x1fsize * x2fsize + x1fsize * lsize:
-            def u_gets_bxv(v):
-                temp = v.reshape((x1fsize, x2fsize), order='F')
-                temp = X1 * temp
-                v_after = zeros(lsize)
-                sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(v_after, temp, X2.T, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, x2fsize)
-                #for ind in range(lsize):
-                #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-                #    v_after[ind] = temp[i] * X2.T[:, j]
-                return v_after
-            
-            def v_gets_xbu(u):
-                temp = mat(zeros((x1tsize, x2fsize)))
-                sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, u, X2, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, x2fsize)
-                #for ind in range(lsize):
-                #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-                #    temp[i] = temp[i] + u[ind] * X2[j]
-                temp = X1.T * temp
-                return temp.reshape((kronfcount,),order='F')
-        else:
-            def u_gets_bxv(v):
-                temp = v.reshape((x1fsize, x2fsize), order='F')
-                temp = temp * X2.T
-                v_after = zeros(lsize)
-                sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(v_after, X1, temp, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, x1fsize)
-                #for ind in range(lsize):
-                #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-                #    v_after[ind] = X1[i] * temp[:, j]
-                return v_after
-            
-            def v_gets_xbu(u):
-                temp = mat(zeros((x1fsize, x2tsize)))
-                sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, u, X1.T, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, x1fsize)
-                #for ind in range(lsize):
-                #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-                #    temp[:, j] = temp[:, j] + X1.T[:, i] * u[ind]
-                temp = temp * X2
-                return temp.reshape((kronfcount,), order='F')
+        label_row_inds = array(self.label_row_inds, dtype=int32)
+        label_col_inds = array(self.label_col_inds, dtype=int32)
         
         def mv(v):
-            '''temp = mat(zeros((x1tsize, x2fsize)))
-            sparse_kronecker_multiplication_tools.kron_slice_multiply(temp, v, X2, array(self.label_row_inds, dtype=int32), array(self.label_col_inds, dtype=int32), lsize, x2fsize)
-            #for ind in range(lsize):
-            #    i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-            #    temp[i] = temp[i] + v[ind] * X2[j]
-            temp = (X1.T * temp) * X2.T
-            v_after = zeros(v.shape[0])
-            for ind in range(lsize):
-                i, j = self.label_col_inds[ind], self.label_row_inds[ind]
-                v_after[ind] = X1[i] * temp[:, j] + regparam * v[ind]'''
-            v_after = u_gets_bxv(v)
-            #v_after = c_gets_axb(v, X1.T, X2, self.label_row_inds, self.label_col_inds)
-            #v_after = v_gets_xbu(v_after) + regparam * v
-            v_after = c_gets_axb(v_after, X1.T, X2, self.label_row_inds, self.label_col_inds) + regparam * v
+            v_after = u_gets_axb(v, X1, X2.T, label_row_inds, label_col_inds)
+            v_after = c_gets_axb(v_after, X1.T, X2, label_row_inds, label_col_inds) + regparam * v
             return v_after
         
         def mvr(v):
             raise Exception('You should not be here!')
             return None
         
+        def cgcb(v):
+            self.W = mat(v).T.reshape((x1fsize, x2fsize),order='F')
+            self.callback()
+            
         G = LinearOperator((kronfcount, kronfcount), matvec=mv, rmatvec=mvr, dtype=float64)
         
         v_init = array(self.Y).reshape(self.Y.shape[0])
-        v_init = v_gets_xbu(v_init)
+        v_init = c_gets_axb(v_init, X1.T, X2, label_row_inds, label_col_inds)
         v_init = array(v_init).reshape(kronfcount)
-        self.W = mat(bicgstab(G, v_init)[0]).T.reshape((x1fsize, x2fsize),order='F')
-        #self.A = self.A.reshape((K1.shape[1],K2.shape[0]),order='F')
+        self.W = mat(bicgstab(G, v_init, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize),order='F')
         self.model = LinearPairwiseModel(self.W)
+        self.finished()
+    
     
     
     def getModel(self):
+        if not hasattr(self, "model"):
+            self.model = LinearPairwiseModel(self.W)
         return self.model
 
     
@@ -197,7 +188,20 @@ class KernelPairwiseModel(object):
     
     
     def predictWithKernelMatrices(self, K1pred, K2pred):
-        #P = K1pred.T * self.A * K2pred
+        """Computes predictions for test examples.
+
+        Parameters
+        ----------
+        K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
+            the first part of the test data matrix
+        K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
+            the second part of the test data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples1, n_samples2]
+            predictions
+        """
         P = c_gets_axb(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
         P = mat(P).reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
         return P
@@ -213,6 +217,20 @@ class LinearPairwiseModel(object):
     
     
     def predictWithDataMatrices(self, X1pred, X2pred):
+        """Computes predictions for test examples.
+
+        Parameters
+        ----------
+        X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
+            the first part of the test data matrix
+        X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
+            the second part of the test data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples1, n_samples2]
+            predictions
+        """
         P = X1pred * self.W * X2pred.T
         return P
 
