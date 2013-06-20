@@ -46,18 +46,17 @@ def u_gets_axb(xx, A, B, label_row_inds, label_col_inds):
     len_c = rc_a * cc_b
     
     x_after = zeros(nzc_u)
+    temp = xx.reshape((cc_a, rc_b), order='F')
     
     if rc_a * cc_a * cc_b + cc_b * nzc_u < rc_b * cc_a * cc_b + cc_a * nzc_u:
     #if False:
     #if True:
-        temp = xx.reshape((cc_a, rc_b), order='F')
         temp = A * temp
         #temp = mat(zeros((cc_a, cc_b)))
         #sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, label_row_inds, label_col_inds, nzc_x, cc_b)
         sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, temp, B, label_row_inds, label_col_inds, nzc_u, rc_b)
         return x_after
     else:
-        temp = xx.reshape((cc_a, rc_b), order='F')
         temp = temp * B
         sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, A, temp, label_row_inds, label_col_inds, nzc_u, cc_a)
         return x_after
@@ -133,6 +132,7 @@ class CGKronRLS(AbstractIterativeLearner):
         self.regparam = regparam
         X1 = mat(self.resource_pool['xmatrix1'])
         X2 = mat(self.resource_pool['xmatrix2'])
+        self.X1, self.X2 = X1, X2
         
         if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
         else: maxiter = None
@@ -165,14 +165,14 @@ class CGKronRLS(AbstractIterativeLearner):
         v_init = c_gets_axb(v_init, X1.T, X2, label_row_inds, label_col_inds)
         v_init = array(v_init).reshape(kronfcount)
         self.W = mat(bicgstab(G, v_init, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize),order='F')
-        self.model = LinearPairwiseModel(self.W)
+        self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
         self.finished()
     
     
     
     def getModel(self):
         if not hasattr(self, "model"):
-            self.model = LinearPairwiseModel(self.W)
+            self.model = LinearPairwiseModel(self.W, self.X1.shape[1], self.X2.shape[1])
         return self.model
 
     
@@ -209,16 +209,17 @@ class KernelPairwiseModel(object):
 
 class LinearPairwiseModel(object):
     
-    def __init__(self, W):
+    def __init__(self, W, dim1, dim2):
         """Initializes the linear model
         @param W: primal coefficient matrix
         @type W: numpy matrix"""
         self.W = W
+        self.dim1, self.dim2 = dim1, dim2
     
     
     def predictWithDataMatrices(self, X1pred, X2pred):
         """Computes predictions for test examples.
-
+        
         Parameters
         ----------
         X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
@@ -232,6 +233,16 @@ class LinearPairwiseModel(object):
             predictions
         """
         P = X1pred * self.W * X2pred.T
+        return P
+    
+    
+    def predictWithDataMatricesAlt(self, X1pred, X2pred, row_inds = None, col_inds = None):
+        if row_inds == None:
+            P = X1pred * self.W * X2pred.T
+            P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
+        else:
+            P = u_gets_axb(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, array(row_inds, dtype=int32), array(col_inds, dtype=int32))
+            #P = X1pred * self.W * X2pred.T
         return P
 
 

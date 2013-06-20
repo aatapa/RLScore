@@ -73,7 +73,10 @@ class KronRLS(AbstractLearner):
             self.V = V
             self.rsvecs1 = mat(rsvecs1)
             
-            svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
+            if X1.shape == X2.shape and (X1 == X2).all():
+                svals2, U, rsvecs2 = svals1, V, rsvecs1
+            else:
+                svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
             self.svals2 = svals2.T
             self.evals2 = multiply(self.svals2, self.svals2)
             self.U = U

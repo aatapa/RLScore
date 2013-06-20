@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         linear_kron_learner = CGKronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
-        linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2)
+        linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
         
         #Train kernel Kronecker RLS
         params = {}
