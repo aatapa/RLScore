@@ -1,6 +1,8 @@
 
 import pyximport; pyximport.install()
 
+import math
+
 from numpy import *
 import numpy.linalg as la
 
@@ -83,6 +85,39 @@ class KronRLS(AbstractLearner):
             self.rsvecs2 = mat(rsvecs2)
             
             self.VTYU = V.T * Y * U
+        
+        kronsvals = self.svals1 * self.svals2.T
+        
+        newevals = divide(kronsvals, multiply(kronsvals, kronsvals) + regparam)
+        self.W = multiply(self.VTYU, newevals)
+        self.W = self.rsvecs1.T * self.W * self.rsvecs2
+        self.model = LinearPairwiseModel(self.W)
+    
+    
+    def solve_linear_conditional_ranking(self, regparam):
+        self.regparam = regparam
+        X1 = mat(self.resource_pool['xmatrix1'])
+        X2 = mat(self.resource_pool['xmatrix2'])
+        Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
+        if not self.trained:
+            self.trained = True
+            svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
+            self.svals1 = svals1.T
+            self.evals1 = multiply(self.svals1, self.svals1)
+            self.V = V
+            self.rsvecs1 = mat(rsvecs1)
+            
+            qlen = X2.shape[0]
+            onevec = (1./math.sqrt(qlen))*mat(ones((qlen,1)))
+            C = mat(eye(qlen))-onevec*onevec.T
+            
+            svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T * C)
+            self.svals2 = svals2.T
+            self.evals2 = multiply(self.svals2, self.svals2)
+            self.U = U
+            self.rsvecs2 = mat(rsvecs2)
+            
+            self.VTYU = V.T * Y * C * U
         
         kronsvals = self.svals1 * self.svals2.T
         
