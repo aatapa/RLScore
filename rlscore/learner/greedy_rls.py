@@ -7,6 +7,9 @@ from abstract_learner import AbstractIterativeLearner
 from rlscore import data_sources
 from rlscore import model
 
+import pyximport; pyximport.install()
+import cython_greedy_rls
+
 class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     """Linear time greedy forward selection for RLS.
     
@@ -48,8 +51,8 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.Y = self.resource_pool[data_sources.TRAIN_LABELS]
         #Number of training examples
         self.size = self.Y.shape[0]
-        if not self.Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
+        #if not self.Y.shape[1] == 1:
+        #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
         if self.resource_pool.has_key('bias'):
             self.bias = float(self.resource_pool['bias'])
         else:
@@ -73,9 +76,163 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         #The current version works only with the squared error measure
         self.measure = None
         
-        #self.solve_new(regparam, float32)
-        self.solve_new(regparam, float64)
-        #self.solve_bu(regparam)
+        if True:#self.Y.shape[1] > 1:
+            #self.solve_bu(regparam)
+            self.solve_cython(regparam)
+        else:
+            #self.solve_new(regparam, float32)
+            self.solve_new(regparam, float64)
+            #self.solve_bu(regparam)
+    
+    
+    def solve_cython(self, regparam):
+        self.regparam = regparam
+        X = self.X
+        Y = self.Y
+        
+        if not hasattr(self, "bias"):
+            self.bias = 0.
+        bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
+        
+        su = sum(X, axis = 1)
+        cc = 0
+        indsmap = {}
+        allinds = []
+        for ci in range(X.shape[0]):
+            if su[ci] == 0:
+                pass
+            else:
+                allinds.append(ci)
+                indsmap[ci] = cc
+                cc += 1
+        #print len(allinds)
+        
+        X = X[allinds]
+        
+        tsize = self.size
+        fsize = X.shape[0]
+        assert X.shape[1] == tsize
+        #self.A = mat(zeros((fsize,1)))
+        self.A = mat(zeros((fsize, Y.shape[1])))
+        
+        rp = regparam
+        rpinv = 1. / rp
+        
+        
+        if not self.resource_pool.has_key('subsetsize'):
+            raise Exception("Parameter 'subsetsize' must be given.")
+        desiredfcount = int(self.resource_pool['subsetsize'])
+        if not fsize >= desiredfcount:
+            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
+        
+        
+        #Biaz
+        cv = sqrt(self.bias)*mat(ones((1, tsize)))
+        ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
+        
+        
+        self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
+        
+        XT = X.T
+        GXT = rpinv * XT - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * ((cv * rpinv) * XT)
+        diagG = []
+        for i in range(tsize):
+            diagGi = rpinv - cv.T[i, 0] * ca[0, i]
+            diagG.append(diagGi)
+        diagG = array(diagG)
+        
+        listX = []
+        for ci in range(fsize):
+            listX.append(X[ci])
+        
+        self.selected = []
+        
+        currentfcount = 0
+        self.performances = []
+        selectedvec = zeros(fsize, dtype = int16)
+        tempvec1, tempvec2, tempvec3 = zeros(tsize), zeros(Y.shape[1]), zeros((tsize, Y.shape[1]))
+        while currentfcount < desiredfcount:
+            
+            if not self.measure == None:
+                bestlooperf = None
+            else:
+                bestlooperf = 9999999999.
+            
+            #for ci in range(fsize):
+            #print Y.dtype, X.dtype, GXT.dtype, diagG.dtype, self.dualvec.dtype
+            self.looperf = ones(fsize) * float('Inf')
+            #'''
+            bestcind = cython_greedy_rls.find_optimal_feature(Y,
+                                                              X,
+                                                              GXT,
+                                                              diagG,
+                                                              self.dualvec,
+                                                              self.looperf,
+                                                              fsize,
+                                                              tsize,
+                                                              Y.shape[1],
+                                                              selectedvec,
+                                                              tempvec1,
+                                                              tempvec2,
+                                                              tempvec3)
+            #foo
+            '''
+            diagG = mat(diagG).T
+            for ci in allinds:
+                ci_mapped = indsmap[ci]
+                if ci in self.selected: continue
+                cv = listX[ci_mapped]
+                GXT_ci = GXT[:, ci_mapped]
+                ca = GXT_ci * (1. / (1. + cv * GXT_ci))
+                updA = self.dualvec - ca * (cv * self.dualvec)
+                invupddiagG = 1. / (diagG - multiply(ca, GXT_ci))
+                
+                if not self.measure == None:
+                    loopred = Y - multiply(invupddiagG, updA)
+                    looperf_i = self.measure.multiOutputPerformance(Y, loopred)
+                    if bestlooperf == None:
+                        bestlooperf = looperf_i
+                        bestcind = ci
+                    if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
+                        bestcind = ci
+                        bestlooperf = looperf_i
+                else:
+                    #This default squared performance is a bit faster to compute than the one loaded separately.
+                    loodiff = multiply(invupddiagG, updA)
+                    print loodiff
+                    foo
+                    looperf_i = mean(multiply(loodiff, loodiff))
+                    if looperf_i < bestlooperf:
+                        bestcind = ci
+                        bestlooperf = looperf_i
+                self.looperf[ci] = looperf_i
+            '''
+            #'''
+            self.bestlooperf = self.looperf[bestcind]#bestlooperf
+            self.looperf = mat(self.looperf)
+            self.performances.append(bestlooperf)
+            ci_mapped = indsmap[bestcind]
+            cv = listX[ci_mapped]
+            GXT_bci = GXT[:, ci_mapped]
+            ca = GXT_bci * (1. / (1. + cv * GXT_bci))
+            self.dualvec = self.dualvec - ca * (cv * self.dualvec)
+            diagG = diagG - array(multiply(ca, GXT_bci)).reshape((self.size))
+            GXT = GXT - ca * (cv * GXT)
+            self.selected.append(bestcind)
+            #print self.selected
+            #print bestlooperf
+            currentfcount += 1
+            
+            #Linear model with bias
+            self.A[self.selected] = X[self.selected] * self.dualvec
+            self.b = bias_slice * self.dualvec# * sqrt(self.bias)
+            
+            self.callback()
+        self.finished()
+        self.A[self.selected] = X[self.selected] * self.dualvec
+        self.b = bias_slice * self.dualvec# * sqrt(self.bias)
+        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
+        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
     
     
     def solve_new(self, regparam, floattype):
@@ -235,7 +392,8 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = mat(zeros((fsize,1)))
+        #self.A = mat(zeros((fsize,1)))
+        self.A = mat(zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
@@ -301,7 +459,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
                 else:
                     #This default squared performance is a bit faster to compute than the one loaded separately.
                     loodiff = multiply(invupddiagG, updA)
-                    looperf_i = (loodiff.T * loodiff)[0, 0]
+                    looperf_i = mean(multiply(loodiff, loodiff))
                     if looperf_i < bestlooperf:
                         bestcind = ci
                         bestlooperf = looperf_i
