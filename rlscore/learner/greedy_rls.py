@@ -77,6 +77,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.measure = None
         
         if True:#self.Y.shape[1] > 1:
+        #if False:#self.Y.shape[1] > 1:
             #self.solve_bu(regparam)
             self.solve_cython(regparam)
         else:
@@ -94,7 +95,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.bias = 0.
         bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
         
-        su = sum(X, axis = 1)
+        '''su = sum(X, axis = 1)
         cc = 0
         indsmap = {}
         allinds = []
@@ -107,7 +108,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
                 cc += 1
         #print len(allinds)
         
-        X = X[allinds]
+        X = X[allinds]'''
         
         tsize = self.size
         fsize = X.shape[0]
@@ -211,7 +212,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.bestlooperf = self.looperf[bestcind]#bestlooperf
             self.looperf = mat(self.looperf)
             self.performances.append(bestlooperf)
-            ci_mapped = indsmap[bestcind]
+            ci_mapped = bestcind#indsmap[bestcind]
             cv = listX[ci_mapped]
             GXT_bci = GXT[:, ci_mapped]
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
