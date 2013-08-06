@@ -7,7 +7,7 @@ from abstract_learner import AbstractIterativeLearner
 from rlscore import data_sources
 from rlscore import model
 
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 import cython_greedy_rls
 
 class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):

@@ -1,5 +1,5 @@
 
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 
 import cython_mmc
 
@@ -129,7 +129,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
         self.classFitnessRowVec = array(self.classFitnessList)
         
         converged = False
-        print self.classcounts.T
+        #print self.classcounts.T
         self.callback()
         '''while True:
             
@@ -150,7 +150,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             #converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
             converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
             #converged = self.findSteepestDirRotateClasses(1000)
-            print self.classcounts.T
+            #print self.classcounts.T
             self.callback()
             if converged: break
         
@@ -233,7 +233,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             #self.focusset = self.findNewFocusSet(j)
             #self.focusset = pyrandom.sample(range(self.size),50)
             #takenum = 2*((len(self.focusset) / self.labelcount) - (len(self.focusset) / self.size) * self.classcounts[j] + int(howmany))
-            print takenum
+            #print takenum
             #self.focusset = pyrandom.sample(range(self.size),takenum[0,0])
             #self.focusset = self.findNewFocusSet(j, maxtake)
             #self.focusset = set(range(self.size))
