@@ -1,7 +1,7 @@
 
 from numpy import *
 from scipy import sparse as sp
-
+import numpy as np
 from abstract_learner import AbstractSupervisedLearner
 from abstract_learner import AbstractIterativeLearner
 from rlscore import data_sources
@@ -163,11 +163,11 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             #print Y.dtype, X.dtype, GXT.dtype, diagG.dtype, self.dualvec.dtype
             self.looperf = ones(fsize) * float('Inf')
             #'''
-            bestcind = cython_greedy_rls.find_optimal_feature(Y,
-                                                              X,
-                                                              GXT,
+            bestcind = cython_greedy_rls.find_optimal_feature(np.array(Y),
+                                                              np.array(X),
+                                                              np.array(GXT),
                                                               diagG,
-                                                              self.dualvec,
+                                                              np.array(self.dualvec),
                                                               self.looperf,
                                                               fsize,
                                                               tsize,
