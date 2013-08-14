@@ -115,7 +115,8 @@ class AbstractSvdSupervisedLearner(AbstractSupervisedLearner,AbstractSvdLearner)
         to get the trained model
         """
         #regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
-        self.solve()
+        regparam = self.regparam
+        self.solve(regparam)
         
     
     def solve(self, regparam):
