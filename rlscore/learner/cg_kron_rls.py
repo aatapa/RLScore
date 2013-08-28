@@ -164,7 +164,11 @@ class CGKronRLS(AbstractIterativeLearner):
         v_init = array(self.Y).reshape(self.Y.shape[0])
         v_init = c_gets_axb(v_init, X1.T, X2, label_row_inds, label_col_inds)
         v_init = array(v_init).reshape(kronfcount)
-        self.W = mat(bicgstab(G, v_init, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize),order='F')
+        if self.resource_pool.has_key('warm_start'):
+            x0 = array(self.resource_pool['warm_start']).reshape(kronfcount, order='F')
+        else:
+            x0 = None
+        self.W = mat(bicgstab(G, v_init, x0=x0, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize), order='F')
         self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
         self.finished()
     
