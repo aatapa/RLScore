@@ -2,6 +2,9 @@ from distutils.core import setup
 from distutils.extension import Extension
 from distutils.command import build_ext
 import numpy as np
+import sys
+
+sys.argv[1:] = ['build_ext', '--inplace']
 
 ext_modules = [Extension(
     name="rlscore.utilities.swapped",
