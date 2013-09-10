@@ -1,8 +1,6 @@
 
 
 import cython
-import numpy as np
-cimport numpy as np
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -23,7 +21,6 @@ def findSteepestDirRotateClasses(double [:, :] Y,
                                  double [:, :] sqrtR,
                                  int rank_R):
     cdef int h, i, j
-    bar_numpy = np.zeros((size))
     cdef double [:] bar_mv, dirscc
     cdef double [:, :] dirsnegdiff
     cdef int takenum, oldclazz, steepestdir

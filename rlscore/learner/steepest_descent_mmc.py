@@ -216,7 +216,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
                     self.classFitnessRowVec[i] = fitness_i[0, 0]
                 
                 self.updateA()
-            self.callback()
+            #self.callback()
         return False
     
     
