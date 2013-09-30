@@ -7,7 +7,6 @@ from rlscore.measure import sqmprank
 from rlscore.measure import sqerror
 from rlscore.kernel import GaussianKernel
 from rlscore.kernel import LinearKernel
-from rlscore.learner.conditional_ranking import ConditionalRanking
 from rlscore.learner.kron_rls import KronRLS
 from rlscore.learner.rls import RLS
 from rlscore.learner.label_rankrls import LabelRankRLS
