@@ -52,24 +52,24 @@ def decomposeKernelMatrix(K, trunc = None):
     svals = np.sqrt(evals)
     return svals, evecs
 
-def decomposeSubsetKM(K_r, bvectors):
+def decomposeSubsetKM(K_r, basis_vectors):
     """decomposes r*m kernel matrix, where r is the number of basis vectors and m the
     number of training examples
     
     @param K_r: r*m kernel matrix, where only the lines corresponding to basis vectors are present
     @type K_r: numpy matrix
-    @param bvectors: the indices of the basis vectors
-    @type bvectors: list of integers
+    @param basis_vectors: the indices of the basis vectors
+    @type basis_vectors: list of integers
     @return svals, evecs, U, C_T_inv
     @rtype tuple of numpy matrices"""
-    K_rr = K_r[:, bvectors]
+    K_rr = K_r[:, basis_vectors]
     try:
         C = cholesky(K_rr)
     except LinAlgError:
         #print "Warning: chosen basis vectors not linearly independent"
         #print "Shifting the diagonal of kernel matrix"
-        __shiftKmatrix(K_r, bvectors)
-        K_rr = K_r[:, bvectors]
+        __shiftKmatrix(K_r, basis_vectors)
+        K_rr = K_r[:, basis_vectors]
         C = cholesky(K_rr)
     C_T_inv = inv(C.T)
     #H = (K_r).T * C_T_inv
@@ -77,18 +77,18 @@ def decomposeSubsetKM(K_r, bvectors):
     svals, evecs, U = decomposeDataMatrix(H.T)
     return svals, evecs, U, C_T_inv
 
-def __shiftKmatrix(K_r, bvectors, shift=0.000000001):
+def __shiftKmatrix(K_r, basis_vectors, shift=0.000000001):
     """Diagonal shift for the basis vector kernel evaluations
     
     @param K_r: r*m kernel matrix, where only the lines corresponding to basis vectors are present
     @type K_r: numpy matrix
-    @param bvectors: indices of the basis vectors
-    @type bvectors: list of integers
+    @param basis_vectors: indices of the basis vectors
+    @type basis_vectors: list of integers
     @param shift: magnitude of the shift (default 0.000000001)
     @type shift: float
     """
     #If the chosen subset is not linearly independent, we
     #enforce this with shifting the kernel matrix
-    for i, j in enumerate(bvectors):
+    for i, j in enumerate(basis_vectors):
         K_r[i, j] += shift    
 

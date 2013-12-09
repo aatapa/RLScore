@@ -35,9 +35,9 @@ class SvdAdapter(object):
         adapter.U = U
         adapter.Z = Z
         if data_sources.BASIS_VECTORS in kwargs:
-            adapter.bvectors = kwargs[data_sources.BASIS_VECTORS]
+            adapter.basis_vectors = kwargs[data_sources.BASIS_VECTORS]
         else:
-            adapter.bvectors = None
+            adapter.basis_vectors = None
         return adapter
     createAdapter = classmethod(createAdapter)
     
@@ -57,9 +57,9 @@ class SvdAdapter(object):
         train_X = rpool[data_sources.TRAIN_FEATURES]
         kernel = rpool[data_sources.KERNEL_OBJ]
         if rpool.has_key(data_sources.BASIS_VECTORS):
-            bvectors = rpool[data_sources.BASIS_VECTORS]
+            basis_vectors = rpool[data_sources.BASIS_VECTORS]
             K = kernel.getKM(train_X).T
-            svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, bvectors)
+            svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, basis_vectors)
         else:
             K = kernel.getKM(train_X).T
             svals, evecs = decomposition.decomposeKernelMatrix(K)
@@ -70,12 +70,12 @@ class SvdAdapter(object):
     def reducedSetTransformation(self, A):
         if self.Z != None:
             AA = mat(zeros(A.shape, dtype = A.dtype))
-            #Maybe we could somehow guarantee that Z is always coupled with bvectors?
+            #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
             #if not svdlearner.resource_pool.has_key(data_sources.BASIS_VECTORS):
             #    raise Exception("Provided decomposition of the reduced set approximation of kernel matrix, but not the indices of the basis vectors")
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
             #bvecs = svdlearner.resource_pool[data_sources.BASIS_VECTORS]
-            #AA[self.bvectors, :] = A_red
+            #AA[self.basis_vectors, :] = A_red
             #return csr_matrix(AA)
             return A_red
         else: return csr_matrix(A)
@@ -97,18 +97,18 @@ class LinearSvdAdapter(SvdAdapter):
         kernel = rpool[data_sources.KERNEL_OBJ]
         self.X = rpool[data_sources.TRAIN_FEATURES]
         if rpool.has_key(data_sources.BASIS_VECTORS):
-            bvectors = rpool[data_sources.BASIS_VECTORS]
+            basis_vectors = rpool[data_sources.BASIS_VECTORS]
         else:
-            bvectors = None
+            basis_vectors = None
         if "bias" in rpool:
             self.bias = float(rpool["bias"])
         else:
             self.bias = 0.
-        if bvectors != None or self.X.shape[1] > self.X.shape[0]:
+        if basis_vectors != None or self.X.shape[1] > self.X.shape[0]:
             K = kernel.getKM(self.X).T
             #First possibility: subset of regressors has been invoked
-            if bvectors != None:
-                svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, bvectors)
+            if basis_vectors != None:
+                svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, basis_vectors)
             #Second possibility: dual mode if more attributes than examples
             else:
                 svals, evecs = decomposition.decomposeKernelMatrix(K)
@@ -127,8 +127,8 @@ class LinearSvdAdapter(SvdAdapter):
         A = self.reducedSetTransformation(A)
         #fs = svdlearner.resource_pool[data_sources.TRAIN_FEATURES]
         fs = self.X
-        if self.bvectors != None:
-            fs = self.X[self.bvectors]
+        if self.basis_vectors != None:
+            fs = self.X[self.basis_vectors]
         bias = self.bias
         #if "bias" in svdlearner.resource_pool:
         #    bias = float(svdlearner.resource_pool["bias"])

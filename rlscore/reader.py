@@ -51,18 +51,18 @@ def read_bvectors(fname):
         
     Returns
     -------
-    bvectors: list of integers
+    basis_vectors: list of integers
     """
     f = open(fname)
-    bvectors = f.readline().strip().split()
-    bvectors = [int(x) for x in bvectors]
-    for x in bvectors:
+    basis_vectors = f.readline().strip().split()
+    basis_vectors = [int(x) for x in basis_vectors]
+    for x in basis_vectors:
         if x < 0:
             raise Exception("Error when reading in basis vector file: Indexing for basis vectors should start from 0, %d found" % (x))
-    if len(set(bvectors)) != len(bvectors):
+    if len(set(basis_vectors)) != len(basis_vectors):
         raise Exception("Error when reading in basis vector file: The same basis vector index was supplied multiple times")
     f.close()
-    return bvectors
+    return basis_vectors
 
 
 def read_dense(fname):
