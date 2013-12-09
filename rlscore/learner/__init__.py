@@ -7,13 +7,23 @@ from cg_rls import CGRLS
 #from dual_cg_rankrls import DualCGRankRLS
 #from dual_rankrls import DualRankRLS
 #from floating_rls import FloatingRLS
-from kron_rls import KronRLS
+try:
+    from kron_rls import KronRLS
+except ImportError, e:
+    print e
+
 #from greedy_label_rankrls import GreedyLabelRankRLS
-from greedy_rls import GreedyRLS
+try:
+    from greedy_rls import GreedyRLS
+except ImportError, e:
+    print e
 #from kernel_dependency import KernelDependency
 from label_rankrls import LabelRankRLS
 #from learner_interface import LearnerInterface
-from mmc import MMC
+try:
+    from mmc import MMC
+except ImportError, e:
+    print e
 #from multi_task_greedy_rls import MultiTaskGreedyRLS
 from rls import RLS
 #from space_efficient_greedy_rls import SpaceEfficientGreedyRLS
