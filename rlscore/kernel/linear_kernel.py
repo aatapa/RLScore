@@ -17,14 +17,14 @@ class LinearKernel(AbstractKernel):
         Data matrix
     bias : float, optional (default 0.)
         Constant added to each kernel evaluation
-    bvectors : array of integers, shape = [n_bvectors] or None, optional (default None)
+    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
         Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default bvectors = range(n_samples).
+        by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, train_features, bias=0.0, bvectors=None):
-        if bvectors != None:
-            train_features = train_features[bvectors]
+    def __init__(self, train_features, bias=0.0, basis_vectors=None):
+        if basis_vectors != None:
+            train_features = train_features[basis_vectors]
         X = train_features
         self.train_X = X
         self.bias = bias
@@ -33,7 +33,7 @@ class LinearKernel(AbstractKernel):
         """Initializes a kernel object from the arguments."""
         new_kwargs = {}
         if kwargs.has_key(data_sources.BASIS_VECTORS):
-            new_kwargs['bvectors'] = kwargs[data_sources.BASIS_VECTORS]
+            new_kwargs['basis_vectors'] = kwargs[data_sources.BASIS_VECTORS]
         new_kwargs["train_features"] = kwargs["train_features"]
         if "bias" in kwargs:
             new_kwargs["bias"] = float(kwargs["bias"])

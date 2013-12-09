@@ -22,16 +22,16 @@ class GaussianKernel(AbstractKernel):
         Kernel width
     bias : float, optional (default 0.)
         Constant added to each kernel evaluation
-    bvectors : array of integers, shape = [n_bvectors] or None, optional (default None)
+    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
         Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default bvectors = range(n_samples).
+        by default basis_vectors = range(n_samples).
     """
       
-    def __init__(self, train_features, gamma=1.0, bias=0.0, bvectors=None):
+    def __init__(self, train_features, gamma=1.0, bias=0.0, basis_vectors=None):
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
-        if bvectors != None:
-            train_features = train_features[bvectors]
+        if basis_vectors != None:
+            train_features = train_features[basis_vectors]
         X = train_features
         self.train_X = X
         if sp.issparse(X):
@@ -46,7 +46,7 @@ class GaussianKernel(AbstractKernel):
         new_kwargs = {}
         new_kwargs["train_features"] = kwargs["train_features"]
         if kwargs.has_key(data_sources.BASIS_VECTORS):
-            new_kwargs['bvectors'] = kwargs[data_sources.BASIS_VECTORS]
+            new_kwargs[data_sources.BASIS_VECTORS] = kwargs[data_sources.BASIS_VECTORS]
         if "gamma" in kwargs:
             new_kwargs["gamma"] = float(kwargs["gamma"])
         if "bias" in kwargs:
@@ -86,7 +86,8 @@ class GaussianKernel(AbstractKernel):
         m = self.train_X.shape[0]
         n = test_X.shape[0]
         #The Gaussian kernel matrix is constructed from a linear kernel matrix
-        linkm = self.train_X * test_X.T
+        #linkm = self.train_X * test_X.T
+        linkm = np.dot(self.train_X, test_X.T)
         linkm = array_tools.as_dense_matrix(linkm)
         if sp.issparse(test_X):
             test_norms = ((test_X.T.multiply(test_X.T)).sum(axis=0)).T

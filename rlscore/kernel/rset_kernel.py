@@ -32,7 +32,7 @@ class RsetKernel(AbstractKernel):
     
     
     
-    def buildPredictionCache(self, train_X, bvectors = None):
+    def buildPredictionCache(self, train_X, basis_vectors = None):
         Krr = self.base_kernel.getKM(self.basis_features)
         K_r = self.base_kernel.getKM(train_X)
         invKrr = la.inv(Krr)

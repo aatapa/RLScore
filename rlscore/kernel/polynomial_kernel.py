@@ -24,14 +24,14 @@ class PolynomialKernel(AbstractKernel):
         Kernel parameter
     bias : float, optional (default 0.)
         Constant added to each kernel evaluation
-    bvectors : array of integers, shape = [n_bvectors] or None, optional (default None)
+    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
         Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default bvectors = range(n_samples).
+        by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, train_features, degree=2, gamma=1.0, coef0=0, bias=0.0, bvectors=None):
-        if bvectors != None:
-            train_features = train_features[bvectors]
+    def __init__(self, train_features, degree=2, gamma=1.0, coef0=0, bias=0.0, basis_vectors=None):
+        if basis_vectors != None:
+            train_features = train_features[basis_vectors]
         X = train_features
         self.train_X = X
         self.degree = degree
@@ -43,7 +43,7 @@ class PolynomialKernel(AbstractKernel):
         """Initializes a kernel object from the arguments."""
         new_kwargs = {}
         if kwargs.has_key(data_sources.BASIS_VECTORS):
-            new_kwargs['bvectors'] = kwargs[data_sources.BASIS_VECTORS]
+            new_kwargs['basis_vectors'] = kwargs[data_sources.BASIS_VECTORS]
         new_kwargs["train_features"] = kwargs["train_features"]
         if 'degree' in kwargs:
             new_kwargs['degree'] = int(kwargs['degree'])
