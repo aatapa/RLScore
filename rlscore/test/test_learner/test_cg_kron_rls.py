@@ -100,6 +100,14 @@ class Test(unittest.TestCase):
         #Y_train_nonzeros = B * Y_train.reshape(rowstimescols, 1)
         
         #Train linear Kronecker RLS
+        class TestCallback():
+            def __init__(self):
+                self.round = 0
+            def callback(self, learner):
+                self.round = self.round + 1
+                print self.round
+            def finished(self, learner):
+                print 'finished'
         params = {}
         params["regparam"] = regparam
         params["xmatrix1"] = X_train1
@@ -107,6 +115,14 @@ class Test(unittest.TestCase):
         params["train_labels"] = Y_train_nonzeros
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
+        tcb = TestCallback()
+        params['callback_obj'] = tcb
+        linear_kron_learner = CGKronRLS.createLearner(**params)
+        linear_kron_learner.train()
+        linear_kron_model = linear_kron_learner.getModel()
+        linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
+        
+        params["warm_start"] = linear_kron_learner.W
         linear_kron_learner = CGKronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()

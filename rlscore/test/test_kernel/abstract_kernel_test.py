@@ -17,7 +17,7 @@ class AbstractKernelTest(unittest.TestCase):
         self.X = random.random((10,50))
         #some basis vectors
         self.trainsets = [self.X, self.X.T]
-        self.bvectors = [0,3,7,8]
+        self.basis_vectors = [0,3,7,8]
         self.setParams()
         #self.paramsets = [{"bias":0.}, {"bias":3.}]
         #set kernel
@@ -39,16 +39,16 @@ class AbstractKernelTest(unittest.TestCase):
         #First data matrix has more features than examples,
         for X in self.trainsets:
             #Reduced set approximation is also tested
-            for bvectors in [None, self.bvectors]:
-                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:bvectors}
+            for basis_vectors in [None, self.basis_vectors]:
+                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:basis_vectors}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
                     k = self.kernel.createKernel(**p)
                     K = k.getKM(X).T
-                    if bvectors != None:
-                        x_indices = bvectors
+                    if basis_vectors != None:
+                        x_indices = basis_vectors
                     else:
                         x_indices = range(X.shape[0])
                     for i, x_ind in enumerate(x_indices):
@@ -66,16 +66,16 @@ class AbstractKernelTest(unittest.TestCase):
         for X in self.trainsets:
             X_test = random.random((22,X.shape[1]))
             #Reduced set approximation is also tested
-            for bvectors in [None, self.bvectors]:
-                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:bvectors}
+            for basis_vectors in [None, self.basis_vectors]:
+                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:basis_vectors}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
                     k = self.kernel.createKernel(**p)
                     K = k.getKM(X_test).T
-                    if bvectors != None:
-                        x_indices = bvectors
+                    if basis_vectors != None:
+                        x_indices = basis_vectors
                     else:
                         x_indices = range(X.shape[0])
                     for i, x_ind in enumerate(x_indices):
@@ -95,11 +95,11 @@ class AbstractKernelTest(unittest.TestCase):
         trainsets = [X, X_mat, X_sp]
         testsets = [Xt, Xt_mat, Xt_sp]
         params = self.paramsets[0]
-        for bvectors in [None, self.bvectors]:
+        for basis_vectors in [None, self.basis_vectors]:
             K_c = None
             for X in trainsets:
                 p = {data_sources.TRAIN_FEATURES : X,
-                         data_sources.BASIS_VECTORS:bvectors}
+                         data_sources.BASIS_VECTORS:basis_vectors}
                 p.update(params)
                 k = self.kernel.createKernel(**p)
                 for Xt in testsets:

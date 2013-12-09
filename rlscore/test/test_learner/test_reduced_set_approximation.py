@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         self.X_zeros = zeros((10,100))
         self.testm = [self.X, self.X.T, self.X_zeros]
         #some basis vectors
-        self.bvectors = [0,3,7,8]
+        self.basis_vectors = [0,3,7,8]
         
     def testRLS(self):
         
@@ -53,8 +53,8 @@ class Test(unittest.TestCase):
         
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
-        bk = GaussianKernel.createKernel(**{data_sources.TRAIN_FEATURES:Xtrain[:,self.bvectors].T, 'gamma':'0.001'})
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.bvectors].T, data_sources.TRAIN_FEATURES:Xtrain.T})
+        bk = GaussianKernel.createKernel(**{data_sources.TRAIN_FEATURES:Xtrain[:,self.basis_vectors].T, 'gamma':'0.001'})
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, data_sources.TRAIN_FEATURES:Xtrain.T})
         
         rpool = {}
         rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
@@ -70,14 +70,14 @@ class Test(unittest.TestCase):
         
         rpool = {}
         rpool['train_labels'] = Y
-        rpool[data_sources.KMATRIX] = K[self.bvectors]
-        rpool[data_sources.BASIS_VECTORS] = self.bvectors
+        rpool[data_sources.KMATRIX] = K[self.basis_vectors]
+        rpool[data_sources.BASIS_VECTORS] = self.basis_vectors
         dualrls = RLS.createLearner(**rpool)
         
         rpool = {}
         rpool['train_labels'] = Y
         rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
-        rpool[data_sources.BASIS_VECTORS] = self.bvectors
+        rpool[data_sources.BASIS_VECTORS] = self.basis_vectors
         #svals, evecs, U = Decompositions.decomposeDataMatrix(Xtrain)
         #primalrls = RLS()
         #primalrls.setDecomposition(svals, evecs, U)
@@ -92,7 +92,7 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool[data_sources.TRAIN_LABELS] = Yho
         rpool[data_sources.TRAIN_FEATURES] = Xhocompl.T
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.bvectors].T, data_sources.TRAIN_FEATURES:Xhocompl.T})
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, data_sources.TRAIN_FEATURES:Xhocompl.T})
         rpool[data_sources.KERNEL_OBJ] = rk
         #rpool[data_sources.KMATRIX] = Kho
         #dualrls_naive = RLS.createLearner(train_labels = Yho, kmatrix = Kho)
@@ -112,7 +112,7 @@ class Test(unittest.TestCase):
         #primalrls_naive.setDecomposition(svals,evecs,U)
         #primalrls_naive.setLabels(Yho)
         
-        rsaK = K[:, self.bvectors] * la.inv(K[ix_(self.bvectors, self.bvectors)]) * K[self.bvectors]
+        rsaK = K[:, self.basis_vectors] * la.inv(K[ix_(self.basis_vectors, self.basis_vectors)]) * K[self.basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]
         rsa_testkm = rsaK[ix_(hocompl, hoindices)]
         loglambdas = range(-5, 5)

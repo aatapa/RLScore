@@ -45,25 +45,18 @@ class Test(unittest.TestCase):
         floattype = float64
         
         m, n = 100, 400
-        Xtrain = mat(random.rand(n, m))
-        K = Xtrain.T * Xtrain
+        Xtrain = mat(random.rand(m, n))
+        K = Xtrain * Xtrain.T
         ylen = 1
         Y = mat(zeros((m, ylen), dtype=floattype))
-        Y[:, 0] = sum(Xtrain, 0).T
+        Y[:, 0] = sum(Xtrain, 1)
         
-        
-        
-        def complement(indices, m):
-            compl = range(m)
-            for ind in indices:
-                compl.remove(ind)
-            return compl
         
         objcount = 20
         labelcount = 5
         
         hoindices = range(labelcount)
-        hocompl = complement(hoindices, m)
+        hocompl = list(set(range(m)) - set(hoindices))
         
         size = m
         
@@ -99,14 +92,11 @@ class Test(unittest.TestCase):
         Ktest = K[ix_(hoindices, hocompl)]
         Lcv = L[ix_(hocompl, hocompl)]
         
-        Xcv = Xtrain[:, hocompl]
+        Xcv = Xtrain[hocompl]
         #Pcv = P[hocompl]#KLUDGE!!!!!
         Pcv = P[ix_(hocompl, range(1, P.shape[1]))]#KLUDGE!!!!!
-        Xtest = Xtrain[:, hoindices]
+        Xtest = Xtrain[hoindices]
         Yho = Y[hocompl]
-        
-        
-        #svals, evecs, U = decomposition.decomposeDataMatrix(Xtrain)
         
         rpool = {}
         rpool["train_features"] = Xtrain.T

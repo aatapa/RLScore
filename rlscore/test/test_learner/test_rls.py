@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         self.X_zeros = zeros((10,100))
         self.testm = [self.X, self.X.T, self.X_zeros]
         #some basis vectors
-        self.bvectors = [0,3,7,8]
+        self.basis_vectors = [0,3,7,8]
         
     def testRLS(self):
         
@@ -31,59 +31,41 @@ class Test(unittest.TestCase):
         floattype = float64
         
         m, n = 400, 100
-        Xtrain = mat(random.rand(n, m))
-        K = Xtrain.T * Xtrain
+        Xtrain = mat(random.rand(m, n))
+        K = Xtrain * Xtrain.T
         ylen = 2
         Y = mat(zeros((m, ylen), dtype=floattype))
         Y = mat(random.rand(m, ylen))
         
-        
-        def complement(indices, m):
-            compl = range(m)
-            for ind in indices:
-                compl.remove(ind)
-            return compl
-        
         #hoindices = [45, 50, 55]
         hoindices = [45]
-        hocompl = complement(hoindices, m)
+        hocompl = list(set(range(m)) - set(hoindices))
         
         Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
-        rpool = {}
-        rpool['train_labels'] = Y
-        rpool[data_sources.KMATRIX] = K
-        dualrls = RLS.createLearner(**rpool)
+        kwargs = {}
+        kwargs['train_labels'] = Y
+        kwargs[data_sources.KMATRIX] = K
+        dualrls = RLS.createLearner(**kwargs)
         
-        rpool = {}
-        rpool["train_features"] = Xtrain.T
-        rpool["train_labels"] = Y
-        primalrls = RLS.createLearner(**rpool)
-        #primalrls.setDecomposition(svals, evecs, U)
-        #primalrls.svecs = evecs
-        #primalrls.svals = svals
-        #primalrls.setLabels(Y)
+        kwargs = {}
+        kwargs["train_features"] = Xtrain
+        kwargs["train_labels"] = Y
+        primalrls = RLS.createLearner(**kwargs)
         
-        rpool = {}
-        rpool['train_labels'] = Yho
-        rpool[data_sources.KMATRIX] = Kho
-        #rpool['parameters'] = params
-        dualrls_naive = RLS.createLearner(**rpool)
+        kwargs = {}
+        kwargs['train_labels'] = Yho
+        kwargs[data_sources.KMATRIX] = Kho
+        dualrls_naive = RLS.createLearner(**kwargs)
         
         testkm = K[ix_(hocompl, hoindices)]
-        trainX = Xtrain[:, hocompl]
-        testX = Xtrain[:, hoindices]
-        rpool = {}
-        rpool['train_labels'] = Yho
-        rpool[data_sources.TRAIN_FEATURES] = trainX.T
-        #rpool['parameters'] = params
-        #dualrls_naive = RLS.createLearner(train_labels = Yho, kmatrix = Kho, parameters = params)
-        primalrls_naive = RLS.createLearner(**rpool)
-        #svals, evecs, U = Decompositions.decomposeDataMatrix(trainX)
-        #primalrls_naive = RLS()
-        #primalrls_naive.setDecomposition(svals,evecs,U)
-        #primalrls_naive.setLabels(Yho)
+        trainX = Xtrain[hocompl]
+        testX = Xtrain[hoindices]
+        kwargs = {}
+        kwargs['train_labels'] = Yho
+        kwargs[data_sources.TRAIN_FEATURES] = trainX
+        primalrls_naive = RLS.createLearner(**kwargs)
         
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):
@@ -91,14 +73,13 @@ class Test(unittest.TestCase):
             print
             print "Regparam 2^%1d" % loglambdas[j]
             
-            #print (testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho), 'Dumb HO (dual)'
             dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
             print dumbho, 'Dumb HO (dual)'
             
             dualrls_naive.solve(regparam)
-            rpool = {}
-            rpool[data_sources.PREDICTION_FEATURES] = testkm.T
-            predho1 = dualrls_naive.getModel().predictFromPool(rpool)
+            kwargs = {}
+            kwargs[data_sources.PREDICTION_FEATURES] = testkm.T
+            predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
             print predho1, 'Naive HO (dual)'
             
             dualrls.solve(regparam)
@@ -110,7 +91,7 @@ class Test(unittest.TestCase):
             print predho, 'Fast LOO (dual)'
             
             primalrls_naive.solve(regparam)
-            predho3 = primalrls_naive.getModel().predict(testX.T)
+            predho3 = primalrls_naive.getModel().predict(testX)
             print predho3, 'Naive HO (primal)'
             
             primalrls.solve(regparam)
@@ -126,26 +107,22 @@ class Test(unittest.TestCase):
             print predho, 'Fast LOO (primal)'
         print
         hoindices = range(100, 300)
-        hocompl = complement(hoindices, m)
+        hocompl = list(set(range(m)) - set(hoindices))
         
         Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         testkm = K[ix_(hocompl, hoindices)]
         
-        #print (testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho), 'Dumb HO (dual)'
         dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
-        #print dumbho, 'Dumb HO (dual)'
         
-        rpool = {}
-        rpool['train_labels'] = Yho
-        rpool[data_sources.KMATRIX] = Kho
-        #rpool['parameters'] = params
-        #dualrls_naive = RLS.createLearner(train_labels = Yho, kmatrix = Kho, parameters = params)
-        dualrls_naive = RLS.createLearner(**rpool)
+        kwargs = {}
+        kwargs['train_labels'] = Yho
+        kwargs[data_sources.KMATRIX] = Kho
+        dualrls_naive = RLS.createLearner(**kwargs)
         dualrls_naive.solve(regparam)
-        rpool = {}
-        rpool[data_sources.PREDICTION_FEATURES] = testkm.T
-        predho1 = dualrls_naive.getModel().predictFromPool(rpool)
+        kwargs = {}
+        kwargs[data_sources.PREDICTION_FEATURES] = testkm.T
+        predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
         print sum(abs(predho1-dumbho)), 'Naive HO (dual)'
         
         dualrls.solve(regparam)
