@@ -3,7 +3,6 @@ import pyximport; pyximport.install()
 
 import cython_mmc
 
-
 from random import *
 import random as pyrandom
 pyrandom.seed(200)
@@ -23,8 +22,10 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         
         self.constraint = 0
         if not self.resource_pool.has_key('number_of_clusters'):
-            raise Exception("Parameter 'number_of_clusters' must be given.")
-        self.labelcount = int(self.resource_pool['number_of_clusters'])
+            self.labelcount = 2
+            #raise Exception("Parameter 'number_of_clusters' must be given.")
+        else:
+            self.labelcount = int(self.resource_pool['number_of_clusters'])
         
         if self.labelcount == 2:
             self.oneclass = True
@@ -58,10 +59,10 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
             self.Y = RandomLabelSource(size, ysize).readLabels()
         '''
         if not self.resource_pool.has_key(data_sources.TRAIN_LABELS):
-            raise Exception
-        
-        self.classvec = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.size = self.classvec.shape[0]
+            self.classvec = np.zeros(self.size)
+        else:
+            self.classvec = self.resource_pool[data_sources.TRAIN_LABELS]
+        #self.size = self.classvec.shape[0]
         self.Y = -np.ones((self.size, self.labelcount))
         self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
         for i in range(self.size):
@@ -72,9 +73,9 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         
         #self.labelcount = self.Y.shape[1]
         
-        self.svecs_list = []
-        for i in range(self.size):
-            self.svecs_list.append(self.svecs[i].T)
+        #self.svecs_list = []
+        #for i in range(self.size):
+        #    self.svecs_list.append(self.svecs[i].T)
         
         self.fixedindices = []
         if self.resource_pool.has_key('fixed_indices'):
@@ -98,7 +99,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         #self.D = -newevalslamtilde
         
         self.VTY = self.svecs.T * self.Y
-        DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
+        self.DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
         
         self.sqrtR = np.multiply(np.sqrt(newevalslamtilde), self.svecs)
         
@@ -120,13 +121,13 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         #Using lists in order to avoid unnecessary matrix slicings
         #self.DVTY_list = []
         #self.YTVDDVTY_list = []
-        self.YTRY_list = []
+        #self.YTRY_list = []
         self.classFitnessList = []
         for i in range(self.labelcount):
             #DVTY_i = DVTY[:,i]
             #self.DVTY_list.append(DVTY_i)
             YTRY_i = self.Y[:,i].T * self.RY[:,i]
-            self.YTRY_list.append(YTRY_i)
+            #self.YTRY_list.append(YTRY_i)
             fitness_i = self.size - YTRY_i
             self.classFitnessList.append(fitness_i[0, 0])
         self.classFitnessRowVec = np.array(self.classFitnessList)
@@ -177,15 +178,23 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
     
     def new_working_set(self, working_set):
         self.working_set = working_set
-        self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
-        self.Y_Schur_RY = np.multiply(self.Y, self.RY)
+        
+        #self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
+        #self.Y_Schur_RY = np.multiply(self.Y, self.RY)
+        #self.Y_Schur_RY_ws = self.Y_Schur_RY[working_set]
+        self.RY = None
+        self.Y_Schur_RY = None
+        self.Y_Schur_RY_ws = None
         
         self.Y_ws = self.Y[working_set]
         #self.R_ws = self.R[np.ix_(working_set, working_set)]
-        self.R_ws = self.sqrtR[working_set] * self.sqrtR[working_set].T
-        self.RY_ws = self.RY[working_set]
-        self.Y_Schur_RY_ws = self.Y_Schur_RY[working_set]
-        self.minus_diagRx2_ws = self.minus_diagRx2[working_set]
+        #self.R_ws = self.sqrtR[working_set] * self.sqrtR[working_set].T
+        self.R_ws = None
+        self.sqrtRx2_ws = 2 * self.sqrtR[working_set]
+        #self.RY_ws = self.RY[working_set]
+        self.RY_ws = None
+        #self.minus_diagRx2_ws = self.minus_diagRx2[working_set]
+        self.minus_diagRx2_ws = None
         self.classvec_ws = self.classvec[working_set]
         self.size_ws = len(working_set)
         
@@ -195,12 +204,31 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
     
     
     def claim_all_points_in_working_set(self, newclazz):
-        working_set = self.working_set
+        #'''
+        cython_mmc.claim_all_points(self.Y_ws,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     self.size_ws,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     newclazz)
+        #Update global books DOES NOT WORK FOR RY or Y_Schur_RY!!!
+        self.Y[self.working_set] = self.Y_ws
+        #print np.sum(np.abs(np.multiply(self.D.T, self.svecs.T * self.Y) - self.DVTY))
+        #self.RY[working_set] = self.RY_ws
+        #self.Y_Schur_RY[working_set] = self.Y_Schur_RY_ws
+        self.classvec[self.working_set] = self.classvec_ws
+        for i in range(self.labelcount):
+            self.classcounts[i] = self.size - np.count_nonzero(self.classvec - i)
+        
+        '''
         try:
             for i in range(len(working_set)):
                 self.claim_a_point(newclazz)
         except Exception as e:
             print e
+        #'''
         '''
         steepestdir, oldclazz = cython_mmc.claim_all_points_in_working_set(self.Y_ws,
                                  self.R_ws,
@@ -214,6 +242,28 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
                                  self.sqrtR.shape[1],
                                  newclazz)
         '''
+    
+    
+    def cyclic_descent_in_working_set(self):
+        fitvec = np.zeros(self.labelcount)
+        changecount = cython_mmc.cyclic_desccent(self.Y_ws,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     fitvec,
+                     self.size_ws,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     self.labelcount)
+        #Update global books DOES NOT WORK FOR RY or Y_Schur_RY!!!
+        self.Y[self.working_set] = self.Y_ws
+        #print np.sum(np.abs(np.multiply(self.D.T, self.svecs.T * self.Y) - self.DVTY))
+        #self.RY[working_set] = self.RY_ws
+        #self.Y_Schur_RY[working_set] = self.Y_Schur_RY_ws
+        self.classvec[self.working_set] = self.classvec_ws
+        for i in range(self.labelcount):
+            self.classcounts[i] = self.size - np.count_nonzero(self.classvec - i)
+        return changecount
     
     
     def claim_a_point(self, newclazz):
@@ -231,6 +281,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
 #         size = len(working_set)
         #print self.classcounts_ws, self.classvec_ws
         use_full_caches = 0
+        tempvec = np.zeros((self.Y.shape[1]))
         steepestdir, oldclazz = cython_mmc.claim_a_point(self.Y_ws,
                                  self.R_ws,
                                  self.RY_ws,
@@ -240,19 +291,67 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
                                  self.classvec_ws,
                                  self.size_ws,
                                  use_full_caches,
-                                 self.sqrtR,
+                                 self.DVTY,
+                                 self.sqrtRx2_ws,
                                  self.sqrtR.shape[1],
-                                 newclazz)
-        #Update global books
+                                 newclazz,
+                                 tempvec,
+                                 self.Y.shape[1])
+        #Update global books DOES NOT WORK FOR RY or Y_Schur_RY!!!
         self.Y[working_set] = self.Y_ws
-        self.RY[working_set] = self.RY_ws
-        self.Y_Schur_RY[working_set] = self.Y_Schur_RY_ws
+        #print np.sum(np.abs(np.multiply(self.D.T, self.svecs.T * self.Y) - self.DVTY))
+        #print steepestdir, oldclazz
+        #self.RY[working_set] = self.RY_ws
+        #self.Y_Schur_RY[working_set] = self.Y_Schur_RY_ws
         self.classvec[working_set] = self.classvec_ws
         self.classcounts[oldclazz] -= 1
         self.classcounts[newclazz] += 1
         
         global_steepestdir = working_set[steepestdir]
         return global_steepestdir
+    
+    
+    def claim_n_points(self, nnn, newclazz):
+        working_set = self.working_set
+        if self.classcounts_ws[newclazz] == self.size_ws:
+            raise Exception('The whole working set already belongs to class '+str(newclazz))
+        gradient_vec = np.zeros((self.size_ws))
+        tempvec = np.zeros((self.Y.shape[1]))
+        cython_mmc.compute_gradient(self.Y_ws,
+                     gradient_vec,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     self.size_ws,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     newclazz,
+                     tempvec,
+                     self.Y.shape[1])
+        
+        claiminds = np.argsort(gradient_vec)
+        
+        clazzcountchanges = np.zeros((self.labelcount), dtype = np.int32)
+        cython_mmc.claim_n_points(self.Y_ws,
+                     gradient_vec,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     claiminds,
+                     nnn,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     newclazz,
+                     clazzcountchanges)
+        
+        self.Y[working_set] = self.Y_ws
+        self.classvec[working_set] = self.classvec_ws
+        #self.classcounts[oldclazz] -= nnn
+        self.classcounts[newclazz] += nnn
+        for i in range(self.labelcount):
+            self.classcounts[i] += clazzcountchanges[i]
+        #global_steepestdir = working_set[steepestdir]
+        #return global_steepestdir
     
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):

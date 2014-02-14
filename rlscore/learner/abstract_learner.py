@@ -63,7 +63,7 @@ class AbstractSvdLearner(AbstractLearner):
     """Base class for singular value decomposition based learners"""
     
     def loadResources(self):
-        #THE GREAT MONOLITH!!!
+        #THE GREAT SVD MONOLITH!!!
         if self.resource_pool.has_key(data_sources.KMATRIX):
             self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**self.resource_pool)
         else:
@@ -79,6 +79,7 @@ class AbstractSvdLearner(AbstractLearner):
         self.svecs = self.svdad.rsvecs
         if not self.resource_pool.has_key(data_sources.TIKHONOV_REGULARIZATION_PARAMETER):
             self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = 1.
+        self.size = self.svecs.shape[0]
     
     
     def getModel(self):

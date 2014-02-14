@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         random.seed(100)
         floattype = float64
         
-        m, n = 100, 400
+        m, n = 100, 400 #data, features
         Xtrain = mat(random.rand(m, n))
         K = Xtrain * Xtrain.T
         ylen = 1
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         Yho = Y[hocompl]
         
         rpool = {}
-        rpool["train_features"] = Xtrain.T
+        rpool["train_features"] = Xtrain
         rpool["train_labels"] = Y
         rpool["train_qids"] = mapQids(qidlist)
         primalrls = LabelRankRLS.createLearner(**rpool)        
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
         
         
         rpool = {}
-        rpool[data_sources.TRAIN_FEATURES] = Xcv.T
+        rpool[data_sources.TRAIN_FEATURES] = Xcv
         rpool[data_sources.TRAIN_LABELS] = Yho
         rpool[data_sources.KERNEL_OBJ] = LinearKernel.createKernel(**rpool)
         rpool[data_sources.TRAIN_QIDS] = mapQids(qidlist_cv)
@@ -139,7 +139,7 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool[data_sources.KMATRIX] = Kcv
         rpool[data_sources.TRAIN_LABELS] = Yho
-        rpool[data_sources.TRAIN_FEATURES] = Xcv.T
+        rpool[data_sources.TRAIN_FEATURES] = Xcv
         rpool[data_sources.KERNEL_OBJ] = LinearKernel.createKernel(**rpool)
         rpool[data_sources.TRAIN_QIDS] = mapQids(qidlist_cv)
         params = {}
@@ -162,7 +162,7 @@ class Test(unittest.TestCase):
             predhos = []
             primalrls_naive.solve(regparam)
             predpool = {}
-            predpool[data_sources.PREDICTION_FEATURES]=Xtest.T
+            predpool[data_sources.PREDICTION_FEATURES]=Xtest
             predho = primalrls_naive.getModel().predictFromPool(predpool)
             print predho.T, 'Naive HO (primal)'
             predhos.append(predho)
