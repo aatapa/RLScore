@@ -244,16 +244,17 @@ def cyclic_desccent(double [:, :] Y,
                      int [:] classvec,
                      double [:] fitvec,
                      int size,
+                     int globalsize,
                      double [:, :] DVTY,
                      double [:, :] sqrtRx2,
                      int rank_R,
                      int labelcount):
     
     cdef int oldclazz, newclazz, i, j, changed, changecount
-    cdef double temp_fitness_oc, temp_fitness_nc
+    cdef double temp_fitness_oc, temp_fitness_nc, temp_double
     
     for newclazz in range(labelcount):
-        fitvec[newclazz] = 1.
+        fitvec[newclazz] = globalsize
         for j in range(rank_R):
             fitvec[newclazz] -= DVTY[j, newclazz] * DVTY[j, newclazz]
     
@@ -266,13 +267,15 @@ def cyclic_desccent(double [:, :] Y,
             
             for newclazz in range(labelcount):
                 if oldclazz == newclazz: continue
-                temp_fitness_oc = 1.
-                temp_fitness_nc = 1.
+                temp_fitness_oc = globalsize
+                temp_fitness_nc = globalsize
                 for j in range(rank_R):
-                    temp_fitness_oc -= (DVTY[j, newclazz] - sqrtRx2[i, j]) * (DVTY[j, newclazz] - sqrtRx2[i, j])
-                    temp_fitness_nc -= (DVTY[j, newclazz] + sqrtRx2[i, j]) * (DVTY[j, newclazz] + sqrtRx2[i, j])
+                    temp_double = DVTY[j, oldclazz] - sqrtRx2[i, j]
+                    temp_fitness_oc -= temp_double * temp_double
+                    temp_double = DVTY[j, newclazz] + sqrtRx2[i, j]
+                    temp_fitness_nc -= temp_double * temp_double
                 if temp_fitness_oc + temp_fitness_nc < fitvec[oldclazz] + fitvec[newclazz]:
-                    print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[newclazz]
+                    #print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[newclazz]
                     Y[i, oldclazz] = -1.
                     Y[i, newclazz] = 1.
                     classvec[i] = newclazz
@@ -296,6 +299,7 @@ def compute_gradient(double [:, :] Y,
                      int [:] classcounts,
                      int [:] classvec,
                      int size,
+                     int globalsize,
                      double [:, :] DVTY,
                      double [:, :] sqrtRx2,
                      int rank_R,
@@ -304,22 +308,20 @@ def compute_gradient(double [:, :] Y,
                      int tempveclen):
     
     cdef int oldclazz, i, j
-    cdef double YTRY_oldclazz, YTRY_newclazz, dirsnegdiff_base, dirsnegdiff_i, R_is_x2, inf, foo, steepness
+    cdef double inf, foo, steepness
     
     inf = float('Inf')
-    steepness = inf
-    steepestdir = 0
-    dirsnegdiff_base = 0.
-    for clazzind in range(tempveclen):
-        for j in range(rank_R):
-            tempvec[clazzind] += DVTY[j, newclazz] * DVTY[j, newclazz] + DVTY[j, clazzind] * DVTY[j, clazzind]
+    #steepness = inf
+    #for clazzind in range(tempveclen):
+        #tempvec[clazzind] = 2 * globalsize
+        #for j in range(rank_R):
+        #    tempvec[clazzind] += DVTY[j, newclazz] * DVTY[j, newclazz] + DVTY[j, clazzind] * DVTY[j, clazzind]
     for i in range(size):
         oldclazz = classvec[i]
         if oldclazz == newclazz:
             gradient_vec[i] = inf
             continue
-        #dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
-        steepness = tempvec[oldclazz]
+        steepness = 2 * globalsize#tempvec[oldclazz]
         for j in range(rank_R):
             foo = DVTY[j, newclazz] + sqrtRx2[i, j]
             steepness -= foo * foo
@@ -341,8 +343,8 @@ def claim_n_points(double [:, :] Y,
                      int newclazz,
                      int [:] clazzcountchanges):
     
-    cdef int oldclazz, i, j
-    cdef double YTRY_oldclazz, YTRY_newclazz, dirsnegdiff_base, dirsnegdiff_i, R_is_x2, inf, foo, steepness
+    cdef int oldclazz, i, j, ind
+    cdef double inf
     
     inf = float('Inf')
     

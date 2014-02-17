@@ -201,6 +201,44 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         self.classcounts_ws = np.zeros((self.labelcount), dtype = np.int32)
         for i in range(self.labelcount):
             self.classcounts_ws[i] = self.size_ws - np.count_nonzero(self.classvec_ws - i)
+        #self.compute_steepness_vector()
+        
+
+    def compute_steepness_vector(self):        
+        gradient_vec0 = np.zeros((self.size_ws))
+        tempvec = np.zeros((self.Y.shape[1]))
+        cython_mmc.compute_gradient(self.Y_ws,
+                     gradient_vec0,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     self.size_ws,
+                     self.size,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     0,
+                     tempvec,
+                     self.Y.shape[1])
+        gradient_vec1 = np.zeros((self.size_ws))
+        tempvec = np.zeros((self.Y.shape[1]))
+        cython_mmc.compute_gradient(self.Y_ws,
+                     gradient_vec1,
+                     self.classcounts_ws,
+                     self.classvec_ws,
+                     self.size_ws,
+                     self.size,
+                     self.DVTY,
+                     self.sqrtRx2_ws,
+                     self.sqrtR.shape[1],
+                     1,
+                     tempvec,
+                     self.Y.shape[1])
+        
+        steepness_vector = np.zeros((self.size_ws))
+        steepness_vector[0:self.classcounts_ws[1]] = np.sort(gradient_vec0)[0:self.classcounts_ws[1]][::-1]
+        steepness_vector[self.classcounts_ws[1]:] = np.sort(gradient_vec1)[0:self.classcounts_ws[0]]
+        print steepness_vector
+        return steepness_vector
     
     
     def claim_all_points_in_working_set(self, newclazz):
@@ -222,26 +260,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         for i in range(self.labelcount):
             self.classcounts[i] = self.size - np.count_nonzero(self.classvec - i)
         
-        '''
-        try:
-            for i in range(len(working_set)):
-                self.claim_a_point(newclazz)
-        except Exception as e:
-            print e
-        #'''
-        '''
-        steepestdir, oldclazz = cython_mmc.claim_all_points_in_working_set(self.Y_ws,
-                                 self.R_ws,
-                                 self.RY_ws,
-                                 self.Y_Schur_RY_ws,
-                                 self.minus_diagRx2_ws,
-                                 self.classcounts_ws,
-                                 self.classvec_ws,
-                                 self.size_ws,
-                                 self.sqrtR,
-                                 self.sqrtR.shape[1],
-                                 newclazz)
-        '''
+        #self.compute_steepness_vector()
     
     
     def cyclic_descent_in_working_set(self):
@@ -251,6 +270,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
                      self.classvec_ws,
                      fitvec,
                      self.size_ws,
+                     self.size,
                      self.DVTY,
                      self.sqrtRx2_ws,
                      self.sqrtR.shape[1],
@@ -322,6 +342,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
                      self.classcounts_ws,
                      self.classvec_ws,
                      self.size_ws,
+                     self.size,
                      self.DVTY,
                      self.sqrtRx2_ws,
                      self.sqrtR.shape[1],
@@ -350,6 +371,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         self.classcounts[newclazz] += nnn
         for i in range(self.labelcount):
             self.classcounts[i] += clazzcountchanges[i]
+        #self.compute_steepness_vector()
         #global_steepestdir = working_set[steepestdir]
         #return global_steepestdir
     
