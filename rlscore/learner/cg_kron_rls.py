@@ -2,7 +2,8 @@
 
 import pyximport; pyximport.install()
 
-from numpy import *
+# from numpy import *
+import numpy as np
 import numpy.linalg as la
 
 from scipy import sparse
@@ -26,17 +27,18 @@ def c_gets_axb(x, A, B, label_row_inds, label_col_inds):
     
     if rc_a * cc_a * cc_b + cc_b * nzc_x < rc_b * cc_a * cc_b + cc_a * nzc_x:
     #if False:
+    #if True:
         #print 'foo'
-        temp = mat(zeros((cc_a, cc_b)))
+        temp = np.mat(np.zeros((cc_a, cc_b)))
         sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, x, B, label_row_inds, label_col_inds, nzc_x, cc_b)
         temp = A * temp
-        return temp.reshape((len_c,), order='F')
+        return temp.reshape((len_c,), order = 'F')
     else:
         #print 'bar'
-        temp = mat(zeros((rc_a, rc_b)))
+        temp = np.mat(np.zeros((rc_a, rc_b)))
         sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, x, A, label_row_inds, label_col_inds, nzc_x, rc_a)
         temp = temp * B
-        return temp.reshape((len_c,), order='F')
+        return temp.reshape((len_c,), order = 'F')
 
 
 def u_gets_axb(xx, A, B, label_row_inds, label_col_inds):
@@ -45,8 +47,8 @@ def u_gets_axb(xx, A, B, label_row_inds, label_col_inds):
     nzc_u = len(label_row_inds)
     len_c = rc_a * cc_b
     
-    x_after = zeros(nzc_u)
-    temp = xx.reshape((cc_a, rc_b), order='F')
+    x_after = np.zeros(nzc_u)
+    temp = xx.reshape((cc_a, rc_b), order = 'F')
     
     if rc_a * cc_a * cc_b + cc_b * nzc_u < rc_b * cc_a * cc_b + cc_a * nzc_u:
     #if False:
@@ -74,8 +76,8 @@ class CGKronRLS(AbstractIterativeLearner):
     
     def loadResources(self):
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.label_row_inds = array(self.resource_pool["label_row_inds"], dtype=int32)
-        self.label_col_inds = array(self.resource_pool["label_col_inds"], dtype=int32)
+        self.label_row_inds = np.array(self.resource_pool["label_row_inds"], dtype = np.int32)
+        self.label_col_inds = np.array(self.resource_pool["label_col_inds"], dtype = np.int32)
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         self.trained = False
@@ -95,8 +97,8 @@ class CGKronRLS(AbstractIterativeLearner):
     
     def solve_kernel(self, regparam):
         self.regparam = regparam
-        K1 = mat(self.resource_pool['kmatrix1'])
-        K2 = mat(self.resource_pool['kmatrix2'])
+        K1 = np.mat(self.resource_pool['kmatrix1'])
+        K2 = np.mat(self.resource_pool['kmatrix2'])
         lsize = len(self.label_row_inds) #n
         
         if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
@@ -105,15 +107,15 @@ class CGKronRLS(AbstractIterativeLearner):
         label_row_inds = self.label_row_inds
         label_col_inds = self.label_col_inds
         
-        temp = zeros((K1.shape[1], K2.shape[0]))
-        v_after = zeros((len(self.label_row_inds),))
+        temp = np.zeros((K1.shape[1], K2.shape[0]))
+        v_after = np.zeros((len(self.label_row_inds),))
         #Y = self.Y
         #self.itercount = 0
         def mv(v):
             assert v.shape[0] == len(self.label_row_inds)
-            temp = zeros((K1.shape[1], K2.shape[0]))
+            temp = np.zeros((K1.shape[1], K2.shape[0]))
             sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, v, K2, label_row_inds, label_col_inds, lsize, K2.shape[0])
-            v_after = zeros(v.shape[0])
+            v_after = np.zeros(v.shape[0])
             #print K1.shape, temp.shape
             sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(v_after, K1, temp, label_row_inds, label_col_inds, lsize, K1.shape[0])
             return v_after + regparam * v
@@ -123,15 +125,15 @@ class CGKronRLS(AbstractIterativeLearner):
             raise Exception('You should not be here!')
             return None
         
-        G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec=mv, rmatvec=mvr, dtype=float64)
+        G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
         self.A = bicgstab(G, self.Y, maxiter = maxiter)[0]
         self.model = KernelPairwiseModel(self.A, self.label_row_inds, self.label_col_inds)
     
     
     def solve_linear(self, regparam):
         self.regparam = regparam
-        X1 = mat(self.resource_pool['xmatrix1'])
-        X2 = mat(self.resource_pool['xmatrix2'])
+        X1 = np.mat(self.resource_pool['xmatrix1'])
+        X2 = np.mat(self.resource_pool['xmatrix2'])
         self.X1, self.X2 = X1, X2
         
         if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
@@ -143,8 +145,8 @@ class CGKronRLS(AbstractIterativeLearner):
         
         kronfcount = x1fsize * x2fsize
         
-        label_row_inds = array(self.label_row_inds, dtype=int32)
-        label_col_inds = array(self.label_col_inds, dtype=int32)
+        label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
+        label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
         
         def mv(v):
             v_after = u_gets_axb(v, X1, X2.T, label_row_inds, label_col_inds)
@@ -156,19 +158,19 @@ class CGKronRLS(AbstractIterativeLearner):
             return None
         
         def cgcb(v):
-            self.W = mat(v).T.reshape((x1fsize, x2fsize),order='F')
+            self.W = np.mat(v).T.reshape((x1fsize, x2fsize), order = 'F')
             self.callback()
             
-        G = LinearOperator((kronfcount, kronfcount), matvec=mv, rmatvec=mvr, dtype=float64)
+        G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
         
-        v_init = array(self.Y).reshape(self.Y.shape[0])
+        v_init = np.array(self.Y).reshape(self.Y.shape[0])
         v_init = c_gets_axb(v_init, X1.T, X2, label_row_inds, label_col_inds)
-        v_init = array(v_init).reshape(kronfcount)
+        v_init = np.array(v_init).reshape(kronfcount)
         if self.resource_pool.has_key('warm_start'):
-            x0 = array(self.resource_pool['warm_start']).reshape(kronfcount, order='F')
+            x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
         else:
             x0 = None
-        self.W = mat(bicgstab(G, v_init, x0=x0, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize), order='F')
+        self.W = np.mat(bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0]).T.reshape((x1fsize, x2fsize), order='F')
         self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
         self.finished()
     
@@ -207,7 +209,7 @@ class KernelPairwiseModel(object):
             predictions
         """
         P = c_gets_axb(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
-        P = mat(P).reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
+        P = np.mat(P).reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
         return P
 
 
