@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from rlscore.kernel import GaussianKernel
 from rlscore.kernel import LinearKernel
-from rlscore.learner.cg_kron_rls import CGKronRLS
+from rlscore.learner.cg_kron_rls import CGKronRLS, KernelPairwiseModel
 from rlscore.learner.rls import RLS
 
 
@@ -31,10 +31,10 @@ class Test(unittest.TestCase):
     
     def generate_xortask(self):
         np.random.seed(55)
-        trainpos1 = 5
-        trainneg1 = 5
-        trainpos2 = 6
-        trainneg2 = 7
+        trainpos1 = 50
+        trainneg1 = 50
+        trainpos2 = 60
+        trainneg2 = 70
         X_train1, Y_train1 = self.generate_data(trainpos1, trainneg1, 5, 0, 1)
         X_train2, Y_train2 = self.generate_data(trainpos2, trainneg2, 5, 4, 6)
         
@@ -83,9 +83,10 @@ class Test(unittest.TestCase):
         rowstimescols = rows * columns
         indmatrix = np.mat(range(rowstimescols)).T.reshape(rows, columns)
         
-        label_row_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1,1,2,2,2,2,3,4,5,6,6,7,9]
-        label_col_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1,0,1,1,2,2,2,3,4,4,4,5,5,12]
-        
+        #label_row_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1,1,2,2,2,2,3,4,5,6,6,7,9]
+        #label_col_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1,0,1,1,2,2,2,3,4,4,4,5,5,12]
+        pointrange = np.arange(rows, columns)
+        label_row_inds, label_col_inds = np.unravel_index(pointrange, (rows, columns)) 
         Y_train_nonzeros = []
         Y_alt = []
         B = np.mat(np.zeros((len(label_row_inds), rowstimescols)))
@@ -98,6 +99,18 @@ class Test(unittest.TestCase):
         #print B
         Y_train_nonzeros = np.mat(Y_train_nonzeros).T
         #Y_train_nonzeros = B * Y_train.reshape(rowstimescols, 1)
+        
+        #Train an ordinary RLS regressor for reference
+        K_Kron_train_x = np.kron(K_train2, K_train1)
+        params = {}
+        params["kmatrix"] = B * K_Kron_train_x * B.T
+        params["train_labels"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
+        ordrls_learner = RLS.createLearner(**params)
+        ordrls_learner.solve(regparam)
+        ordrls_model = ordrls_learner.getModel()
+        K_Kron_test_x = np.kron(K_test2, K_test1) * B.T
+        ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
+        ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1], order = 'F')
         
         #Train linear Kronecker RLS
         class TestCallback():
@@ -120,13 +133,13 @@ class Test(unittest.TestCase):
         linear_kron_learner = CGKronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
-        linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
+        linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
         
-        params["warm_start"] = linear_kron_learner.W
-        linear_kron_learner = CGKronRLS.createLearner(**params)
-        linear_kron_learner.train()
-        linear_kron_model = linear_kron_learner.getModel()
-        linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
+        #params["warm_start"] = linear_kron_learner.W
+        #linear_kron_learner = CGKronRLS.createLearner(**params)
+        #linear_kron_learner.train()
+        #linear_kron_model = linear_kron_learner.getModel()
+        #linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
         
         #Train kernel Kronecker RLS
         params = {}
@@ -136,22 +149,21 @@ class Test(unittest.TestCase):
         params["train_labels"] = Y_train_nonzeros
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
+        class KernelCallback():
+            def __init__(self):
+                self.round = 0
+            def callback(self, learner):
+                self.round = self.round + 1
+                tp = KernelPairwiseModel(learner.A, learner.label_row_inds, learner.label_col_inds).predictWithKernelMatrices(K_test1, K_test2)
+                print self.round, np.mean(np.abs(tp - ordrls_testpred))
+            def finished(self, learner):
+                print 'finished'
+        tcb = KernelCallback()
+        params['callback_obj'] = tcb
         kernel_kron_learner = CGKronRLS.createLearner(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2)
-        
-        #Train an ordinary RLS regressor for reference
-        K_Kron_train_x = np.kron(K_train2, K_train1)
-        params = {}
-        params["kmatrix"] = B * K_Kron_train_x * B.T
-        params["train_labels"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
-        ordrls_learner = RLS.createLearner(**params)
-        ordrls_learner.solve(regparam)
-        ordrls_model = ordrls_learner.getModel()
-        K_Kron_test_x = np.kron(K_test2, K_test1) * B.T
-        ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
-        ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1], order = 'F')
         
         print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], ordrls_testpred[0, 0]
         print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], ordrls_testpred[0, 1]

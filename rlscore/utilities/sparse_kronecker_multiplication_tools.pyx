@@ -8,41 +8,41 @@ import cython
 @cython.boundscheck(False)
 @cython.wraparound(False)
 
-def sparse_mat_from_left(double [:, :] dst, double [:] v, double [:, :] X2, int [:] label_row_inds, int [:] label_col_inds, int couplecount, int X2_width):
+def sparse_mat_from_left(double [:, :] dst, double [:] sparse_matrix, double [:, :] dense_matrix, int [:] row_inds, int [:] col_inds, int entry_count, int dense_width):
     
     cdef int i, j
-    cdef double tempd
+    cdef double entry
     
-    for outerind in range(couplecount):
-        i, j = label_row_inds[outerind], label_col_inds[outerind]
-        tempd = v[outerind]
-        for innerind in range(X2_width):
-            dst[i, innerind] += tempd * X2[j, innerind]
+    for outerind in range(entry_count):
+        i, j = row_inds[outerind], col_inds[outerind]
+        entry = sparse_matrix[outerind]
+        for innerind in range(dense_width):
+            dst[i, innerind] += entry * dense_matrix[j, innerind]
 
 
-def sparse_mat_from_right(double [:, :] dst, double [:] u, double [:, :] X1T, int [:] label_row_inds, int [:] label_col_inds, int couplecount, int X1T_height):
-    
-    cdef int i, j
-    cdef double tempd
-    
-    for outerind in range(couplecount):
-        i, j = label_row_inds[outerind], label_col_inds[outerind]
-        tempd = u[outerind]
-        for innerind in range(X1T_height):
-            dst[innerind, j] = dst[innerind, j] + X1T[innerind, i] * tempd
-
-
-def compute_subset_of_matprod_entries(double [:] dst, double [:, :] ML, double [:, :] MR, int [:] label_row_inds, int [:] label_col_inds, int subsetlen, int veclen):
+def sparse_mat_from_right(double [:, :] dst, double [:, :] dense_matrix, double [:] sparse_matrix, int [:] row_inds, int [:] col_inds, int entry_count, int dense_height):
     
     cdef int i, j
-    cdef double tempd
+    cdef double entry
+    
+    for outerind in range(entry_count):
+        i, j = row_inds[outerind], col_inds[outerind]
+        entry = sparse_matrix[outerind]
+        for innerind in range(dense_height):
+            dst[innerind, j] += dense_matrix[innerind, i] * entry
+
+
+def compute_subset_of_matprod_entries(double [:] dst, double [:, :] matrix_left, double [:, :] matrix_right, int [:] row_inds, int [:] col_inds, int subsetlen, int veclen):
+    
+    cdef int i, j
+    cdef double entry
     
     for outerind in range(subsetlen):
-        i, j = label_row_inds[outerind], label_col_inds[outerind]
-        tempd = 0.
+        i, j = row_inds[outerind], col_inds[outerind]
+        entry = 0.
         for innerind in range(veclen):
-            tempd += ML[i, innerind] * MR[innerind, j]
-        dst[outerind] = tempd
+            entry += matrix_left[i, innerind] * matrix_right[innerind, j]
+        dst[outerind] = entry
 
 
 def cpy_reorder(dst,src, rowcount, colcount):
