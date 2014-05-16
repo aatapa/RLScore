@@ -6,6 +6,7 @@ from abstract_learner import AbstractSupervisedLearner
 from abstract_learner import AbstractIterativeLearner
 from rlscore import data_sources
 from rlscore import model
+from rlscore.utilities import array_tools
 
 #import pyximport; pyximport.install()
 import cython_greedy_rls
@@ -49,6 +50,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.X = X
         self.X = self.X.T
         self.Y = self.resource_pool[data_sources.TRAIN_LABELS]
+        self.Y = array_tools.as_labelmatrix(self.Y)
         #Number of training examples
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
