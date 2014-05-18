@@ -29,25 +29,35 @@ class CGKronRLS(AbstractIterativeLearner):
         self.results = {}'''
     
     
-    def loadResources(self):
-        Y = self.resource_pool[TRAIN_LABELS]
-        self.label_row_inds = np.array(self.resource_pool["label_row_inds"], dtype = np.int32)
-        self.label_col_inds = np.array(self.resource_pool["label_col_inds"], dtype = np.int32)
+    def __init__(self, **kwargs):
+        self.resource_pool = kwargs
+        Y = kwargs[TRAIN_LABELS]
+        self.label_row_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
+        self.label_col_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         self.trained = False
-        if self.resource_pool.has_key(CALLBACK_FUNCTION):
-            self.callbackfun = self.resource_pool[CALLBACK_FUNCTION]
+        if kwargs.has_key("regparam"):
+            self.regparam = kwargs["regparam"]
+        else:
+            self.regparam = 0.
+        if kwargs.has_key(CALLBACK_FUNCTION):
+            self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
     
     
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
+    
+    
     def train(self):
-        regparam = self.resource_pool['regparam']
         if self.resource_pool.has_key('kmatrix1'):
-            self.solve_kernel(regparam)
+            self.solve_kernel(self.regparam)
         else:
-            self.solve_linear(regparam)
+            self.solve_linear(self.regparam)
     
     
     def solve_kernel(self, regparam):

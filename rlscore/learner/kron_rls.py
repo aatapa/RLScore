@@ -1,5 +1,5 @@
 
-#import pyximport; pyximport.install()
+import pyximport; pyximport.install()
 
 import math
 
@@ -7,7 +7,6 @@ from numpy import *
 import numpy.linalg as la
 
 from rlscore.learner.abstract_learner import AbstractLearner
-from rlscore import data_sources
 from rlscore import model
 from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
@@ -15,13 +14,21 @@ from rlscore.utilities import decomposition
 from rlscore.utilities import sparse_kronecker_multiplication_tools
 
 
-class KronRLS(AbstractLearner):
-
-    def loadResources(self):
-        Y = self.resource_pool[data_sources.TRAIN_LABELS]
+class KronRLS(object):
+    
+    
+    def __init__(self, **kwargs):
+        Y = kwargs["train_labels"]
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         self.trained = False
+        self.resource_pool = kwargs
+    
+    
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     
     def train(self):

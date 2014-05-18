@@ -6,7 +6,6 @@ import scipy.sparse.linalg as sla
 
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore import model
-from rlscore import data_sources
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 
@@ -66,22 +65,27 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
 
     """
     
-    def __init__(self, svdad, train_labels, regparam=1.0):
-        self.svdad = svdad
-        self.Y = array_tools.as_labelmatrix(train_labels)
+    #def __init__(self, svdad, train_labels, regparam=1.0):
+    def __init__(self, **kwargs):
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
+        if kwargs.has_key("regparam"):
+            self.regparam = kwargs["regparam"]
+        else:
+            self.regparam = 1.
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
-        self.regparam = regparam
-        self.svals = svdad.svals
-        self.svecs = svdad.rsvecs
         self.results = {}
 
     def createLearner(cls, **kwargs):
-        new_kwargs = {}
-        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        new_kwargs["train_labels"] = kwargs["train_labels"]
-        if kwargs.has_key("regparam"):
-            new_kwargs['regparam'] = kwargs["regparam"]
-        learner = cls(**new_kwargs)
+        #new_kwargs = {}
+        #new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        #new_kwargs["train_labels"] = kwargs["train_labels"]
+        #if kwargs.has_key("regparam"):
+        #    new_kwargs['regparam'] = kwargs["regparam"]
+        #learner = cls(**new_kwargs)
+        learner = cls(**kwargs)
         return learner
     createLearner = classmethod(createLearner)
     

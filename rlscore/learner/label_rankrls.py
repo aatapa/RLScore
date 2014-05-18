@@ -4,7 +4,6 @@ from numpy import arange, float64, identity, multiply, mat, ones, zeros
 import numpy.linalg as la
 import scipy.sparse
 
-from rlscore import data_sources
 from rlscore.utilities import decomposition
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore.utilities import array_tools
@@ -68,7 +67,8 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         self.svecs = svdad.rsvecs
         self.setQids(train_qids)
         self.results = {}
-
+    
+    
     def createLearner(cls, **kwargs):
         new_kwargs = {}
         new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
@@ -79,17 +79,6 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         learner = cls(**new_kwargs)
         return learner
     createLearner = classmethod(createLearner)
-    
-    
-    
-    #def loadResources(self):
-    #    AbstractSvdSupervisedLearner.loadResources(self)
-    #    qids = self.resource_pool[data_sources.TRAIN_QIDS]
-    #    #qids = qsource.readQids()
-    #    #qids = qsource.readFolds()
-    #    if not self.resource_pool.has_key(data_sources.CVFOLDS):
-    #        self.resource_pool[data_sources.CVFOLDS] = qids
-    #    self.setQids(qids)
     
     
     def setQids(self, qids):
@@ -118,6 +107,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
                 sameqids.append(i)
             else:
                 self.qidmap[qid] = [i]  
+    
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -184,7 +174,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             #Primal RLS
             #self.A = self.U.T * (self.LRevecs * multiply(self.neweigvals.T, self.multipleright))
             #self.A = self.U.T * multiply(self.svals.T,  self.svecs.T * self.A)
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['model'] = self.getModel()
     
     
     def computeHO(self, indices):
@@ -228,5 +218,5 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         I = mat(identity(indlen))
         return la.inv(I - RQRTLho) * RQY
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
-    
-    
+
+

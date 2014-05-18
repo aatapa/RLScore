@@ -9,7 +9,6 @@ import random as pyrandom
 pyrandom.seed(200)
 from numpy import *
 
-from rlscore import data_sources
 from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
 
@@ -30,8 +29,8 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
         else:
             self.oneclass = False
         
-        if self.resource_pool.has_key(data_sources.TRAIN_LABELS):
-            Y_orig = self.resource_pool[data_sources.TRAIN_LABELS]
+        if self.resource_pool.has_key("train_labels"):
+            Y_orig = self.resource_pool["train_labels"]
             if Y_orig.shape[1] == 1:
                 self.Y = mat(zeros((Y_orig.shape[0], 2)))
                 self.Y[:, 0] = Y_orig
@@ -81,7 +80,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
              
     
     def train(self):
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = float(self.resource_pool['regparam'])
         self.solve(regparam)
        
     
@@ -156,7 +155,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
         
         if self.oneclass:
             self.Y = self.Y[:, 0]
-        self.resource_pool[data_sources.PREDICTED_CLUSTERS_FOR_TRAINING_DATA] = self.Y
+        self.resource_pool['predicted_clusters_for_training_data'] = self.Y
     
     
     def computeGlobalFitness(self):

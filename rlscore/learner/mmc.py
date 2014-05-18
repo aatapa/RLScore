@@ -3,7 +3,6 @@ from random import *
 
 from numpy import *
 
-from rlscore import data_sources
 from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore.utilities import array_tools
@@ -143,8 +142,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         else:
             self.oneclass = False
         
-        if self.resource_pool.has_key(data_sources.TRAIN_LABELS):
-            Y_orig = self.resource_pool[data_sources.TRAIN_LABELS]
+        if self.resource_pool.has_key("train_labels"):
+            Y_orig = self.resource_pool["train_labels"]
             if Y_orig.shape[1] == 1:
                 self.Y = mat(zeros((Y_orig.shape[0], 2)))
                 self.Y[:, 0] = Y_orig
@@ -195,7 +194,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     def train(self):
         """Trains the learning algorithm.
         """
-        #regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        #regparam = float(self.resource_pool["regparam"])
         self.solve(self.regparam)
        
     
@@ -272,8 +271,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         #    self.giveAndTakeALT(1000/ (ii+1))
         if self.oneclass:
             self.Y = self.Y[:, 0]
-        self.results[data_sources.PREDICTED_CLUSTERS_FOR_TRAINING_DATA] = self.Y
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['predicted_clusters_for_training_data'] = self.Y
+        self.results['model'] = self.getModel()
     
     
     def computeGlobalFitness(self):
