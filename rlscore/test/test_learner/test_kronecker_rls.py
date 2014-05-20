@@ -129,9 +129,56 @@ class Test(unittest.TestCase):
         print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
     
     
+    def test_conditional_ranking(self):
+        
+        regparam = 0.001
+        
+        K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
+        rows, columns = Y_train.shape
+        trainlabelcount = rows * columns
+        indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
+        
+        K_Kron_train_x = np.kron(K_train1, K_train2)
+        K_test_x = np.kron(K_test1, K_test2)
+        
+        
+        #Train linear Conditional Ranking Kronecker RLS
+        params = {}
+        params["xmatrix1"] = X_train1
+        params["xmatrix2"] = X_train2
+        params["train_labels"] = Y_train
+        linear_kron_condrank_learner = KronRLS.createLearner(**params)
+        linear_kron_condrank_learner.solve_linear_conditional_ranking(regparam)
+        condrank_model = linear_kron_condrank_learner.getModel()
+        
+        params = {}
+        params["kmatrix"] = K_Kron_train_x
+        params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
+        params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        rankrls_learner = LabelRankRLS.createLearner(**params)
+        
+        rankrls_learner.solve(regparam)
+        rankrls_model = rankrls_learner.getModel()
+        K_test_x = np.kron(K_test1, K_test2)
+        ordrankrls_testpred = rankrls_model.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
+        #condrank_testpred = condrank_model.predictWithKernelMatrices(K_test1, K_test2)
+        condrank_testpred = condrank_model.predictWithDataMatrices(X_test1, X_test2)
+        print
+        #print 'TEST rank', np.mean(np.abs(condrank_testpred - ordrankrls_testpred))
+        #print 'TEST rank', sqmprank(condrank_testpred, Y_test), sqmprank(ordrankrls_testpred, Y_test)
+        #print Y_test
+        #print ordrankrls_testpred
+        #print condrank_testpred
+        #print kron_testpred
+        print condrank_testpred.ravel().shape, Y_test.ravel().shape, ordrankrls_testpred.ravel().shape, Y_test.ravel().shape
+        #print 'TEST rank', auc(condrank_testpred.ravel().T, Y_test.ravel()), disagreement(ordrankrls_testpred.ravel().T, Y_test.ravel())
+        
+        print 'TEST cond vs rankrls', np.mean(np.abs(condrank_testpred - ordrankrls_testpred))
+    
+    
     
     '''
-    def testRLS_old(self):
+    def testRLS_old_and_broken(self):
         
         regparam = 0.001
         
@@ -143,6 +190,7 @@ class Test(unittest.TestCase):
         
         #Train kernel Kronecker RLS with pre-computed kernel matrices
         params = {}
+        params["regparam"] = regparam
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
         params["train_labels"] = Y_train
@@ -214,7 +262,6 @@ class Test(unittest.TestCase):
         condrank_learner = ConditionalRanking.createLearner(**params)
         condrank_learner.solve(regparam)
         condrank_model = condrank_learner.getModel()
-        
         
         #Train linear Conditional Ranking Kronecker RLS
         params = {}
