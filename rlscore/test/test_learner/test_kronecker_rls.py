@@ -151,27 +151,19 @@ class Test(unittest.TestCase):
         linear_kron_condrank_learner.solve_linear_conditional_ranking(regparam)
         condrank_model = linear_kron_condrank_learner.getModel()
         
+        #Train an ordinary RankRLS for reference
         params = {}
         params["kmatrix"] = K_Kron_train_x
         params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
         params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         rankrls_learner = LabelRankRLS.createLearner(**params)
-        
         rankrls_learner.solve(regparam)
         rankrls_model = rankrls_learner.getModel()
         K_test_x = np.kron(K_test1, K_test2)
         ordrankrls_testpred = rankrls_model.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
-        #condrank_testpred = condrank_model.predictWithKernelMatrices(K_test1, K_test2)
         condrank_testpred = condrank_model.predictWithDataMatrices(X_test1, X_test2)
         print
-        #print 'TEST rank', np.mean(np.abs(condrank_testpred - ordrankrls_testpred))
-        #print 'TEST rank', sqmprank(condrank_testpred, Y_test), sqmprank(ordrankrls_testpred, Y_test)
-        #print Y_test
-        #print ordrankrls_testpred
-        #print condrank_testpred
-        #print kron_testpred
-        print condrank_testpred.ravel().shape, Y_test.ravel().shape, ordrankrls_testpred.ravel().shape, Y_test.ravel().shape
-        #print 'TEST rank', auc(condrank_testpred.ravel().T, Y_test.ravel()), disagreement(ordrankrls_testpred.ravel().T, Y_test.ravel())
+        #print condrank_testpred.ravel().shape, Y_test.ravel().shape, ordrankrls_testpred.ravel().shape, Y_test.ravel().shape
         
         print 'TEST cond vs rankrls', np.mean(np.abs(condrank_testpred - ordrankrls_testpred))
     
@@ -246,7 +238,6 @@ class Test(unittest.TestCase):
             ordrls_lpopred[i, 0] = ordrls_learner.computeHO([i, outer_entry_ind])[0, 0]
         #ordrls_lpopred =  ordrls_learner.computeHO([indmatrix[inner_row_coord, inner_col_coord], indmatrix[outer_row_coord, outer_col_coord]])
         print 'LPO aka nested LOO in setting 1: ', np.sum(np.abs(ordrls_lpopred - kron_lpopred.ravel().T))#np.sum(np.abs(ordrls_lpopred[0, 0] - kron_lpopred[inner_row_coord, inner_col_coord]))
-        #urp
         #return
         K_test_x = np.kron(K_test1, K_test2)
         print ordrls_model.predictFromPool({'prediction_features':K_test_x.T}).shape, Y_test.shape
