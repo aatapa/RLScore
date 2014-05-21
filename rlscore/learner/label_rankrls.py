@@ -75,7 +75,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         new_kwargs["train_labels"] = kwargs["train_labels"]
         new_kwargs["train_qids"] = kwargs["train_qids"]
         if kwargs.has_key("regparam"):
-            new_kwargs['regparam'] = kwargs["regparam"]
+            new_kwargs['regparam'] = float(kwargs["regparam"])
         learner = cls(**new_kwargs)
         return learner
     createLearner = classmethod(createLearner)
