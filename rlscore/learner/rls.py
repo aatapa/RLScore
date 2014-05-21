@@ -67,7 +67,7 @@ class RLS(AbstractSvdSupervisedLearner):
         self.svdad = creators.createSVDAdapter(**kwargs)
         self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
         if kwargs.has_key("regparam"):
-            self.regparam = kwargs["regparam"]
+            self.regparam = float(kwargs["regparam"])
         else:
             self.regparam = 1.
         self.svals = self.svdad.svals
