@@ -123,7 +123,10 @@ def trainModel(**kwargs):
         kwargs.update(mselector.resource_pool)
     else:
         learner.train()
-        #kwargs.update(learner.resource_pool)
+        if hasattr(learner, 'resource_pool'):
+            kwargs.update(learner.resource_pool)
+        if hasattr(learner, 'results'):
+            kwargs.update(learner.results)
         model = learner.getModel()
     kwargs.update(learner.results)
     kwargs[data_sources.MODEL] = model
