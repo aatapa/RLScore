@@ -86,8 +86,7 @@ class GaussianKernel(AbstractKernel):
         m = self.train_X.shape[0]
         n = test_X.shape[0]
         #The Gaussian kernel matrix is constructed from a linear kernel matrix
-        #linkm = self.train_X * test_X.T
-        linkm = np.dot(self.train_X, test_X.T)
+        linkm = self.train_X * test_X.T
         linkm = array_tools.as_dense_matrix(linkm)
         if sp.issparse(test_X):
             test_norms = ((test_X.T.multiply(test_X.T)).sum(axis=0)).T
