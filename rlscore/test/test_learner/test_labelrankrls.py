@@ -104,26 +104,11 @@ class Test(unittest.TestCase):
         rpool["train_qids"] = mapQids(qidlist)
         primalrls = LabelRankRLS.createLearner(**rpool)        
         
-        #primalrls = LabelRankRLS()
-        #primalrls.setDecomposition(svals, evecs, U)
-        #primalrls.svecs = evecs
-        #primalrls.svals = svals
-        #primalrls.setLabels(Y)
-        #primalrls.setQids(mapQids(qidlist))
-        #primalrls = LabelRankRLS(Y, qidlist, svals, evecs, U=U)
-        
-        #svals, evecs = decomposition.decomposeKernelMatrix(K)
         rpool = {}
         rpool["kmatrix"] = K
         rpool["train_labels"] = Y
         rpool["train_qids"] = mapQids(qidlist)        
         dualrls = LabelRankRLS.createLearner(**rpool)
-        #dualrls.setDecomposition(svals,evecs)
-        #dualrls.svecs = evecs
-        #dualrls.svals = svals        
-        #dualrls.setLabels(Y)
-        #dualrls.setQids(mapQids(qidlist))
-        #dualrls = LabelRankRLS(Y, qidlist, svals, evecs)
         
         
         rpool = {}

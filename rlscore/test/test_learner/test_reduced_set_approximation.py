@@ -61,10 +61,6 @@ class Test(unittest.TestCase):
         bk2 = GaussianKernel.createKernel(**{data_sources.TRAIN_FEATURES:Xtrain.T, 'gamma':'0.001'})
         K = np.mat(bk2.getKM(Xtrain.T))
         
-        #svals, evecs = Decompositions.decomposeKernelMatrix(K)
-        #dualrls = RLS()
-        #dualrls.setDecomposition(svals, evecs)
-        #dualrls.setLabels(Y)
         Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
@@ -78,12 +74,7 @@ class Test(unittest.TestCase):
         rpool['train_labels'] = Y
         rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
         rpool[data_sources.BASIS_VECTORS] = self.basis_vectors
-        #svals, evecs, U = Decompositions.decomposeDataMatrix(Xtrain)
-        #primalrls = RLS()
-        #primalrls.setDecomposition(svals, evecs, U)
-        #primalrls.setLabels(Y)
         primalrls = RLS.createLearner(**rpool)
-        #svals, evecs = Decompositions.decomposeKernelMatrix(Kho)
         
         testkm = K[ix_(hocompl, hoindices)]
         Xhocompl = Xtrain[:, hocompl]
@@ -94,23 +85,12 @@ class Test(unittest.TestCase):
         rpool[data_sources.TRAIN_FEATURES] = Xhocompl.T
         rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, data_sources.TRAIN_FEATURES:Xhocompl.T})
         rpool[data_sources.KERNEL_OBJ] = rk
-        #rpool[data_sources.KMATRIX] = Kho
-        #dualrls_naive = RLS.createLearner(train_labels = Yho, kmatrix = Kho)
-        #print rpool
         dualrls_naive = RLS.createLearner(**rpool)
-        #dualrls_naive = RLS()
-        #dualrls_naive.setDecomposition(svals, evecs)
-        #dualrls_naive.setLabels(Yho)
         
         rpool = {}
         rpool['train_labels'] = Yho
         rpool[data_sources.TRAIN_FEATURES] = Xhocompl.T
-        #dualrls_naive = RLS.createLearner(train_labels = Yho, kmatrix = Kho)
         primalrls_naive = RLS.createLearner(**rpool)
-        #svals, evecs, U = Decompositions.decomposeDataMatrix(Xhocompl)
-        #primalrls_naive = RLS()
-        #primalrls_naive.setDecomposition(svals,evecs,U)
-        #primalrls_naive.setLabels(Yho)
         
         rsaK = K[:, self.basis_vectors] * la.inv(K[ix_(self.basis_vectors, self.basis_vectors)]) * K[self.basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]
