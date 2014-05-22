@@ -88,8 +88,6 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     def loadResources(self):
         AbstractIterativeLearner.loadResources(self)
         AbstractSupervisedLearner.loadResources(self)
-        #Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        #self.setLabels(Y)
         X = self.resource_pool[data_sources.TRAIN_FEATURES]
         self.X = csc_matrix(X.T)
         if self.resource_pool.has_key('bias'):
