@@ -50,10 +50,6 @@ class AbstractSupervisedLearner(AbstractLearner):
     
     def loadResources(self):
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.setLabels(Y)
-    
-    
-    def setLabels(self, Y):
         self.Y = array_tools.as_labelmatrix(Y)
         self.size = self.Y.shape[0]
         self.ysize = self.Y.shape[1]
