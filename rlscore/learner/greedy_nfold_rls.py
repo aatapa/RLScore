@@ -17,8 +17,14 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
         AbstractIterativeLearner.loadResources(self)
+        
         Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.setLabels(Y)
+        self.Y = Y
+        #Number of training examples
+        self.size = Y.shape[0]
+        if not Y.shape[1] == 1:
+            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
+        
         X = self.resource_pool[data_sources.TRAIN_FEATURES]
         self.setDataMatrix(X.T)
         if self.resource_pool.has_key('bias'):
@@ -66,23 +72,6 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.indslist = []
         for qid in self.qidmap.keys():
             self.indslist.append(self.qidmap[qid])
-    
-    
-    def setLabels(self, Y):
-        """
-        Sets the label data for RLS.
-        
-        @param Y: Labels of the training examples. Can be either a single-column matrix (single output) or a multi-column matrix (multiple output).
-        @type Y: numpy.matrix
-        """
-        
-        self.Y = Y
-        
-        #Number of training examples
-        self.size = Y.shape[0]
-        
-        if not Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
     
     
     def setDataMatrix(self, X):

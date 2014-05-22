@@ -19,6 +19,13 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
         """
         AbstractIterativeLearner.loadResources(self)
         AbstractSupervisedLearner.loadResources(self)
+        
+        self.Y = Y
+        #Number of training examples
+        self.size = Y.shape[0]
+        if not Y.shape[1] == 1:
+            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
+        
         X = self.resource_pool[data_sources.TRAIN_FEATURES]
         if isinstance(X, scipy.sparse.base.spmatrix):
             self.X = X.todense()
@@ -28,23 +35,6 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
         #    self.bias = float(self.resource_pool['bias'])
         #else:
         #    self.bias = 0.
-    
-    
-    def setLabels(self, Y):
-        """
-        Sets the label data for RLS.
-        
-        @param Y: Labels of the training examples. Can be either a single-column matrix (single output) or a multi-column matrix (multiple output).
-        @type Y: numpy.matrix
-        """
-        
-        self.Y = Y
-        
-        #Number of training examples
-        self.size = Y.shape[0]
-        
-        if not Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
     
     
     def train(self):
