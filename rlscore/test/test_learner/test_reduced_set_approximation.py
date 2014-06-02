@@ -5,7 +5,6 @@ from numpy import *
 import numpy.linalg as la
 import numpy as np
 
-from rlscore import data_sources
 from rlscore.learner import RLS
 from rlscore.kernel import GaussianKernel
 from rlscore.kernel import RsetKernel
@@ -53,12 +52,12 @@ class Test(unittest.TestCase):
         
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
-        bk = GaussianKernel.createKernel(**{data_sources.TRAIN_FEATURES:Xtrain[:,self.basis_vectors].T, 'gamma':'0.001'})
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, data_sources.TRAIN_FEATURES:Xtrain.T})
+        bk = GaussianKernel.createKernel(**{'train_features':Xtrain[:,self.basis_vectors].T, 'gamma':'0.001'})
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, 'train_features':Xtrain.T})
         
         rpool = {}
-        rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
-        bk2 = GaussianKernel.createKernel(**{data_sources.TRAIN_FEATURES:Xtrain.T, 'gamma':'0.001'})
+        rpool['train_features'] = Xtrain.T
+        bk2 = GaussianKernel.createKernel(**{'train_features':Xtrain.T, 'gamma':'0.001'})
         K = np.mat(bk2.getKM(Xtrain.T))
         
         Kho = K[ix_(hocompl, hocompl)]
@@ -66,14 +65,14 @@ class Test(unittest.TestCase):
         
         rpool = {}
         rpool['train_labels'] = Y
-        rpool[data_sources.KMATRIX] = K[self.basis_vectors]
-        rpool[data_sources.BASIS_VECTORS] = self.basis_vectors
+        rpool['kernel_matrix'] = K[self.basis_vectors]
+        rpool['basis_vectors'] = self.basis_vectors
         dualrls = RLS.createLearner(**rpool)
         
         rpool = {}
         rpool['train_labels'] = Y
-        rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
-        rpool[data_sources.BASIS_VECTORS] = self.basis_vectors
+        rpool['train_features'] = Xtrain.T
+        rpool['basis_vectors'] = self.basis_vectors
         primalrls = RLS.createLearner(**rpool)
         
         testkm = K[ix_(hocompl, hoindices)]
@@ -81,15 +80,15 @@ class Test(unittest.TestCase):
         testX = Xtrain[:, hoindices]
         
         rpool = {}
-        rpool[data_sources.TRAIN_LABELS] = Yho
-        rpool[data_sources.TRAIN_FEATURES] = Xhocompl.T
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, data_sources.TRAIN_FEATURES:Xhocompl.T})
-        rpool[data_sources.KERNEL_OBJ] = rk
+        rpool['train_labels'] = Yho
+        rpool['train_features'] = Xhocompl.T
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, 'train_features':Xhocompl.T})
+        rpool['kernel_obj'] = rk
         dualrls_naive = RLS.createLearner(**rpool)
         
         rpool = {}
         rpool['train_labels'] = Yho
-        rpool[data_sources.TRAIN_FEATURES] = Xhocompl.T
+        rpool['train_features'] = Xhocompl.T
         primalrls_naive = RLS.createLearner(**rpool)
         
         rsaK = K[:, self.basis_vectors] * la.inv(K[ix_(self.basis_vectors, self.basis_vectors)]) * K[self.basis_vectors]

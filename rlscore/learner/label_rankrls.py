@@ -29,7 +29,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
     2. kernel_obj: supply the kernel object that has been initialized
     using the training data.
     
-    3. kmatrix: supply user created kernel matrix, in this setting RLS
+    3. kernel_matrix: supply user created kernel matrix, in this setting RLS
     is unable to return the model, but you may compute cross-validation
     estimates or access the learned parameters from the variable self.A
 
@@ -45,7 +45,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         Data matrix
     kernel_obj: kernel object, optional
         kernel object, initialized with the training set
-    kmatrix: : {array-like}, shape = [n_samples, n_samples], optional
+    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
         kernel matrix of the training set
         
     References

@@ -1,6 +1,5 @@
 import numpy as np
 
-from rlscore import data_sources
 from rlscore.utilities import creators
 from rlscore.kernel import LinearKernel
 from rlscore.utilities.adapter import SvdAdapter
@@ -12,17 +11,14 @@ from rlscore.utilities import array_tools
 class AbstractLearner(object):
     '''Base class for learning algorithms'''
     
+    def __init__(self, **kwargs):
+        super(AbstractLearner, self).__init__()
+    
     
     def createLearner(cls, **kwargs):
-        learner = cls()
-        learner.resource_pool = kwargs
-        learner.loadResources()
+        learner = cls(**kwargs)
         return learner
     createLearner = classmethod(createLearner)
-    
-    
-    def loadResources(self):
-        pass
     
     
     def train(self):
@@ -44,12 +40,13 @@ class AbstractLearner(object):
         """
         raise Exception("AbstractLearner does not have an implemented getModel function.")
 
+
 class AbstractSupervisedLearner(AbstractLearner):
     '''Base class for supervised learning algorithms'''
     
-    
-    def loadResources(self):
-        Y = self.resource_pool[data_sources.TRAIN_LABELS]
+    def __init__(self, **kwargs):
+        super(AbstractSupervisedLearner, self).__init__(**kwargs)
+        Y = kwargs['train_labels']
         self.Y = array_tools.as_labelmatrix(Y)
         self.size = self.Y.shape[0]
         self.ysize = self.Y.shape[1]
@@ -58,23 +55,24 @@ class AbstractSupervisedLearner(AbstractLearner):
 class AbstractSvdLearner(AbstractLearner):
     """Base class for singular value decomposition based learners"""
     
-    def loadResources(self):
+    def __init__(self, **kwargs):
+        super(AbstractSvdLearner, self).__init__(**kwargs)
         #THE GREAT SVD MONOLITH!!!
-        if self.resource_pool.has_key(data_sources.KMATRIX):
-            self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**self.resource_pool)
+        if kwargs.has_key('kernel_matrix'):
+            self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)
         else:
-            if not self.resource_pool.has_key(data_sources.KERNEL_OBJ):
-                if not self.resource_pool.has_key("kernel"):
-                    self.resource_pool["kernel"] = "LinearKernel"
-                self.resource_pool[data_sources.KERNEL_OBJ] = creators.createKernelByModuleName(**self.resource_pool)
-            if isinstance(self.resource_pool[data_sources.KERNEL_OBJ], LinearKernel):
-                self.svdad = LinearSvdAdapter.createAdapter(**self.resource_pool)
+            if not kwargs.has_key('kernel_obj'):
+                if not kwargs.has_key("kernel"):
+                    kwargs["kernel"] = "LinearKernel"
+                kwargs['kernel_obj'] = creators.createKernelByModuleName(**kwargs)
+            if isinstance(kwargs['kernel_obj'], LinearKernel):
+                self.svdad = LinearSvdAdapter.createAdapter(**kwargs)
             else:
-                self.svdad = SvdAdapter.createAdapter(**self.resource_pool)
+                self.svdad = SvdAdapter.createAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
-        if not self.resource_pool.has_key(data_sources.TIKHONOV_REGULARIZATION_PARAMETER):
-            self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = 1.
+        #if not kwargs.has_key('regparam'):
+        #    kwargs['regparam'] = 1.
         self.size = self.svecs.shape[0]
     
     
@@ -93,8 +91,8 @@ class AbstractSvdLearner(AbstractLearner):
 class AbstractSvdSupervisedLearner(AbstractSupervisedLearner,AbstractSvdLearner):
     """Base class for supervised singular value decomposition based learners"""
     
-    
-    def loadResources(self):
+    def __init__(self, **kwargs):
+        super(AbstractSvdSupervisedLearner, self).__init__(**kwargs)
         
         AbstractSupervisedLearner.loadResources(self)
         AbstractSvdLearner.loadResources(self)
@@ -111,7 +109,6 @@ class AbstractSvdSupervisedLearner(AbstractSupervisedLearner,AbstractSvdLearner)
         After the learner is trained, one can call the method getModel
         to get the trained model
         """
-        #regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
         regparam = self.regparam
         self.solve(regparam)
         
@@ -140,13 +137,12 @@ class CallbackFunction(object):
 class AbstractIterativeLearner(AbstractLearner):
     """Base class for iterative learners"""
     
-    
-    def loadResources(self):
-        if self.resource_pool.has_key(data_sources.CALLBACK_FUNCTION):
-            self.callbackfun = self.resource_pool[data_sources.CALLBACK_FUNCTION]
+    def __init__(self, **kwargs):
+        super(AbstractIterativeLearner, self).__init__(**kwargs)
+        if kwargs.has_key('callback'):
+            self.callbackfun = kwargs['callback']
         else:
             self.callbackfun = None
-
     
     
     def callback(self):

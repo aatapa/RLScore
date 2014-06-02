@@ -1,4 +1,3 @@
-from rlscore import data_sources
 from rlscore.kernel import LinearKernel
 from rlscore.utilities.adapter import SvdAdapter
 from rlscore.utilities.adapter import LinearSvdAdapter
@@ -17,15 +16,15 @@ def createKernelByModuleName(**kwargs):
 def createSVDAdapter(**kwargs):
     if kwargs.has_key(KERNEL_NAME):
         kernel = createKernelByModuleName(**kwargs)
-        kwargs[data_sources.KERNEL_OBJ] = kernel
-    if kwargs.has_key(data_sources.KMATRIX):
+        kwargs['kernel_obj'] = kernel
+    if kwargs.has_key('kernel_matrix'):
         svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)
     else:
-        if not kwargs.has_key(data_sources.KERNEL_OBJ):
+        if not kwargs.has_key('kernel_obj'):
             if not kwargs.has_key("kernel"):
                 kwargs["kernel"] = "LinearKernel"
-            kwargs[data_sources.KERNEL_OBJ] = createKernelByModuleName(**kwargs)
-        if isinstance(kwargs[data_sources.KERNEL_OBJ], LinearKernel):
+            kwargs['kernel_obj'] = createKernelByModuleName(**kwargs)
+        if isinstance(kwargs['kernel_obj'], LinearKernel):
             svdad = LinearSvdAdapter.createAdapter(**kwargs)
         else:
             svdad = SvdAdapter.createAdapter(**kwargs)   

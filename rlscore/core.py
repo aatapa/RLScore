@@ -67,7 +67,7 @@ def loadCore(modules, parameters, input_file, output_file, input_reader = {}, ou
         measurefun = eval("measure."+modules[MEASURE_NAME])
     else:
         measurefun = None
-    rpool[data_sources.PERFORMANCE_MEASURE] = measurefun
+    rpool['measure'] = measurefun
     
     if CALLBACK_NAME in modules:
         exec "import utilities." + modules[CALLBACK_NAME]
@@ -79,19 +79,19 @@ def loadCore(modules, parameters, input_file, output_file, input_reader = {}, ou
         rpool.update(kwargs)
     
     #Make predictions, if model and test examples available
-    if rpool.has_key(data_sources.MODEL) and rpool.has_key(data_sources.PREDICTION_FEATURES):
+    if rpool.has_key('model') and rpool.has_key('prediction_features'):
         print "Making predictions on test data"
-        model = rpool[data_sources.MODEL]
+        model = rpool['model']
         predictions = model.predictFromPool(rpool)
-        rpool[data_sources.PREDICTED_LABELS] = predictions
+        rpool['predicted_labels'] = predictions
     
     #Measure performance, if predictions, true labels and performance measure available
-    if measurefun != None and rpool.has_key(data_sources.PREDICTED_LABELS) and rpool.has_key(data_sources.TEST_LABELS):
-        correct = rpool[data_sources.TEST_LABELS]
-        predicted = rpool[data_sources.PREDICTED_LABELS]
-        if rpool.has_key(data_sources.PREDICTION_QIDS):
+    if measurefun != None and rpool.has_key('predicted_labels') and rpool.has_key('test_labels'):
+        correct = rpool['test_labels']
+        predicted = rpool['predicted_labels']
+        if rpool.has_key('test_qids'):
             print "calculating performance as averages over queries"
-            q_partition = rpool[data_sources.PREDICTION_QIDS]
+            q_partition = rpool['test_qids']
             perfs = []
             for query in q_partition:
                 try:
@@ -104,7 +104,7 @@ def loadCore(modules, parameters, input_file, output_file, input_reader = {}, ou
             performance = measurefun(correct, predicted)
         measure_name = str(measurefun).split()[1]
         print 'Performance: %f %s' % (performance, measurefun.__name__)
-        rpool[data_sources.TEST_PERFORMANCE] = performance
+        rpool['test_performance'] = performance
     
     for varname, fname in output_file.iteritems():
         vartype = data_sources.VARIABLE_TYPES[varname]
@@ -129,14 +129,14 @@ def trainModel(**kwargs):
             kwargs.update(learner.results)
         model = learner.getModel()
     kwargs.update(learner.results)
-    kwargs[data_sources.MODEL] = model
+    kwargs['model'] = model
     return kwargs
 
 
 def createLearner(**kwargs):
     #if kwargs.has_key(KERNEL_NAME):
     #    kernel = creators.createKernelByModuleName(**kwargs)
-    #    kwargs[data_sources.KERNEL_OBJ] = kernel
+    #    kwargs['kernel_obj'] = kernel
     learner = createLearnerByModuleName(**kwargs)
     return learner
 

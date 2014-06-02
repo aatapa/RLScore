@@ -1,9 +1,9 @@
 import numpy as np
 import cPickle
 
-from rlscore import data_sources
+INT_LIST_TYPE = 'int_list_variable_type'
+FLOAT_LIST_TYPE = 'float_list_variable_type'
 
-    
 def write_dense(fname, data):
     """Writes an array of floats as a dense text file.
     
@@ -83,12 +83,12 @@ def write_pickle(fname, data):
         data to be written
     """
     f = open(fname,'wb')
-    cPickle.dump(data, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    cPickle.dump(data, f, protocol = cPickle.HIGHEST_PROTOCOL)
     f.close()
     
 DEFAULT_WRITERS = {
                    'matrix': write_dense,
                    'model': write_pickle,
-                   data_sources.INT_LIST_TYPE: write_ints,
-                   data_sources.FLOAT_LIST_TYPE: write_dense
+                   INT_LIST_TYPE: write_ints,
+                   FLOAT_LIST_TYPE: write_dense
                    }

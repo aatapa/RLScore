@@ -15,52 +15,25 @@ from rlscore.learner.abstract_learner import AbstractIterativeLearner
 class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
     
     
-    def loadResources(self):
-        AbstractSvdLearner.loadResources(self)
-        AbstractIterativeLearner.loadResources(self)
-        
+    def __init__(self, **kwargs):
+        super(InteractiveRlsClassifier, self).__init__(**kwargs)
+        self.regparam = float(kwargs["regparam"])
         self.constraint = 0
-        if not self.resource_pool.has_key('number_of_clusters'):
-            self.labelcount = 2
+        if not kwargs.has_key('number_of_clusters'):
             #raise Exception("Parameter 'number_of_clusters' must be given.")
+            self.labelcount = 2
         else:
-            self.labelcount = int(self.resource_pool['number_of_clusters'])
+            self.labelcount = int(kwargs['number_of_clusters'])
+         
+        #if self.labelcount == 2:
+        #    self.oneclass = True
+        #else:
+        #    self.oneclass = False
         
-        if self.labelcount == 2:
-            self.oneclass = True
-        else:
-            self.oneclass = False
-        
-        '''
-        if self.resource_pool.has_key("train_labels"):
-            Y_orig = self.resource_pool["train_labels"]
-            if Y_orig.shape[1] == 1:
-                self.Y = mat(zeros((Y_orig.shape[0], 2)))
-                self.Y[:, 0] = Y_orig
-                self.Y[:, 1] = - Y_orig
-                self.oneclass = True
-            else:
-                self.Y = Y_orig.copy()
-                self.oneclass = False
-            for i in range(self.Y.shape[0]):
-                largestind = 0
-                largestval = self.Y[i, 0]
-                for j in range(self.Y.shape[1]):
-                    if self.Y[i, j] > largestval:
-                        largestind = j
-                        largestval = self.Y[i, j]
-                    self.Y[i, j] = -1.
-                self.Y[i, largestind] = 1.
-        else:
-            size = self.svecs.shape[0]
-            ysize = self.labelcount
-            if self.labelcount == None: self.labelcount = 2
-            self.Y = RandomLabelSource(size, ysize).readLabels()
-        '''
-        if not self.resource_pool.has_key("train_labels"):
+        if not kwargs.has_key("train_labels"):
             self.classvec = np.zeros(self.size)
         else:
-            self.classvec = self.resource_pool["train_labels"]
+            self.classvec = kwargs["train_labels"]
         #self.size = self.classvec.shape[0]
         self.Y = -np.ones((self.size, self.labelcount))
         self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
@@ -69,26 +42,12 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
             self.Y[i, clazzind] = 1
             self.classcounts[clazzind] = self.classcounts[clazzind] + 1
         
-        
-        #self.labelcount = self.Y.shape[1]
-        
-        #self.svecs_list = []
-        #for i in range(self.size):
-        #    self.svecs_list.append(self.svecs[i].T)
-        
         self.fixedindices = []
-        if self.resource_pool.has_key('fixed_indices'):
-            self.fixedindices = self.resource_pool['fixed_indices']
-             
+        if kwargs.has_key('fixed_indices'):
+            self.fixedindices = kwargs['fixed_indices']
+    
     
     def train(self):
-        regparam = float(self.resource_pool["regparam"])
-        self.solve(regparam)
-       
-    
-    
-    def solve(self, regparam):
-        self.regparam = regparam
         
         #Cached results
         self.evals = np.multiply(self.svals, self.svals)
@@ -117,10 +76,6 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
         self.Y_Schur_RY = np.multiply(self.Y, self.RY)
         
-        #Using lists in order to avoid unnecessary matrix slicings
-        #self.DVTY_list = []
-        #self.YTVDDVTY_list = []
-        #self.YTRY_list = []
         self.classFitnessList = []
         for i in range(self.labelcount):
             #DVTY_i = DVTY[:,i]
@@ -131,37 +86,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
             self.classFitnessList.append(fitness_i[0, 0])
         self.classFitnessRowVec = np.array(self.classFitnessList)
         
-        converged = False
-        #print self.classcounts.T
         self.callback()
-        '''while True:
-            
-            converged = self.findSteepestDir()
-            print self.classcounts.T
-            self.callback()
-            if converged: break
-        
-        '''
-        
-        '''
-        cons = self.size / self.labelcount
-        #self.focusset = self.findNewFocusSet()
-        for i in range(20):
-            #self.focusset = self.findNewFocusSet()
-            #self.focusset = pyrandom.sample(range(self.size),50)
-            #print self.focusset
-            #cons = len(self.focusset) / self.labelcount
-            #converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
-            converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
-            #converged = self.findSteepestDirRotateClasses(1000)
-            #print self.classcounts.T
-            self.callback()
-            if converged: break
-        
-        if self.oneclass:
-            self.Y = self.Y[:, 0]
-        self.resource_pool['predicted_clusters_for_training_data'] = self.Y
-        '''
     
     
     def computeGlobalFitness(self):
@@ -236,7 +161,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         steepness_vector = np.zeros((self.size_ws))
         steepness_vector[0:self.classcounts_ws[1]] = np.sort(gradient_vec0)[0:self.classcounts_ws[1]][::-1]
         steepness_vector[self.classcounts_ws[1]:] = np.sort(gradient_vec1)[0:self.classcounts_ws[0]]
-        print steepness_vector
+        #print steepness_vector
         return steepness_vector
     
     

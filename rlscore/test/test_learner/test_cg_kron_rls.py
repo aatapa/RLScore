@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
         tcb = TestCallback()
-        params['callback_obj'] = tcb
+        params['callback'] = tcb
         linear_kron_learner = CGKronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
             def finished(self, learner):
                 print 'finished'
         tcb = KernelCallback()
-        params['callback_obj'] = tcb
+        params['callback'] = tcb
         kernel_kron_learner = CGKronRLS.createLearner(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()

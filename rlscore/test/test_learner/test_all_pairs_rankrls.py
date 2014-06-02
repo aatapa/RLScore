@@ -4,7 +4,6 @@ import unittest
 from numpy import *
 import numpy.linalg as la
 
-from rlscore import data_sources
 from rlscore.learner import AllPairsRankRLS
 from rlscore.kernel import LinearKernel
 
@@ -67,7 +66,7 @@ class Test(unittest.TestCase):
             naivedualrls.solve(regparam)
             hopreds = []
             rpool = {}
-            rpool[data_sources.PREDICTION_FEATURES] = Xtest.T
+            rpool['prediction_features'] = Xtest.T
             hopred = naivedualrls.getModel().predictFromPool(rpool)
             print hopred[0, oind], hopred[1, oind], 'Naive'
             hopreds.append((hopred[0, oind], hopred[1, oind]))

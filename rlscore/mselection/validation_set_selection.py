@@ -1,7 +1,6 @@
 import numpy as np
 
 from rlscore.mselection.abstract_selection import AbstractSelection
-from rlscore import data_sources
 from rlscore import model
 from rlscore.measure import measure_utilities
 
@@ -15,14 +14,14 @@ class ValidationSetSelection(AbstractSelection):
         split tenfold.
         """
         AbstractSelection.loadResources(self)
-        if not self.resource_pool.has_key(data_sources.VALIDATION_FEATURES):
+        if not self.resource_pool.has_key('validation_features'):
             raise Exception("ValidationSetSelection cannot be initialized without validation set features provided")
-        self.validation_X = self.resource_pool[data_sources.VALIDATION_FEATURES]
-        if not self.resource_pool.has_key(data_sources.VALIDATION_LABELS):
+        self.validation_X = self.resource_pool['validation_features']
+        if not self.resource_pool.has_key('validation_labels'):
             raise Exception("ValidationSetSelection cannot be initialized without validation set labels provided")
-        self.validation_Y = self.resource_pool[data_sources.VALIDATION_LABELS]
-        if self.resource_pool.has_key(data_sources.VALIDATION_QIDS):
-            self.validation_qids = self.resource_pool[data_sources.VALIDATION_QIDS]
+        self.validation_Y = self.resource_pool['validation_labels']
+        if self.resource_pool.has_key('validation_qids'):
+            self.validation_qids = self.resource_pool['validation_qids']
         else:
             self.validation_qids =  None
         self.K = None

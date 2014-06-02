@@ -39,6 +39,7 @@ def testLearners():
     #for test in [lranktest]:
     #for test in [mtgrlstest]:
     #for test in [omptest]:
+    #for test in [cgtest]:
     #for test in [cgtest, cgranktest, rlstest, apranktest, lranktest, grlstest, rsatest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)

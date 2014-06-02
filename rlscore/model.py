@@ -3,7 +3,6 @@ from scipy import sparse as sp
 import numpy as np
 
 from rlscore.utilities import array_tools
-from rlscore import data_sources
 
 
 class DualModel(object):
@@ -30,14 +29,14 @@ class DualModel(object):
         #if len(newbasis) != A.shape[0]:
         #    self.A = A.todense()[newbasis]
         #    newpool = rpool.copy()
-        #    newpool[data_sources.BASIS_VECTORS] = newbasis
+        #    newpool['basis_vectors'] = newbasis
         #    self.kernel = kernel.__class__.createKernel(**newpool)
         self.A = array_tools.as_array(self.A)
 
     
     def predictFromPool(self, rpool):
         """Makes real-valued predictions for new examples"""
-        K = self.kernel.getKM(rpool[data_sources.PREDICTION_FEATURES])
+        K = self.kernel.getKM(rpool['prediction_features'])
         P = np.dot(K, self.A)
         P = array_tools.as_array(P)
         return P
@@ -88,7 +87,7 @@ class LinearModel(object):
     
     def predictFromPool(self, rpool):
         """Makes real-valued predictions for new examples"""
-        X = rpool[data_sources.PREDICTION_FEATURES]
+        X = rpool['prediction_features']
         return self.predict(X)
     
     

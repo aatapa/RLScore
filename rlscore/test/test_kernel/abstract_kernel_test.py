@@ -7,8 +7,6 @@ from numpy import dot
 from scipy import sparse as sp
 import numpy as np
 
-from rlscore import data_sources
-
 
 class AbstractKernelTest(unittest.TestCase):
     
@@ -40,7 +38,7 @@ class AbstractKernelTest(unittest.TestCase):
         for X in self.trainsets:
             #Reduced set approximation is also tested
             for basis_vectors in [None, self.basis_vectors]:
-                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:basis_vectors}
+                rpool = {'train_features' : X, 'basis_vectors':basis_vectors}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
@@ -67,7 +65,7 @@ class AbstractKernelTest(unittest.TestCase):
             X_test = random.random((22,X.shape[1]))
             #Reduced set approximation is also tested
             for basis_vectors in [None, self.basis_vectors]:
-                rpool = {data_sources.TRAIN_FEATURES : X, data_sources.BASIS_VECTORS:basis_vectors}
+                rpool = {'train_features' : X, 'basis_vectors':basis_vectors}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
@@ -98,8 +96,8 @@ class AbstractKernelTest(unittest.TestCase):
         for basis_vectors in [None, self.basis_vectors]:
             K_c = None
             for X in trainsets:
-                p = {data_sources.TRAIN_FEATURES : X,
-                         data_sources.BASIS_VECTORS:basis_vectors}
+                p = {'train_features' : X,
+                         'basis_vectors':basis_vectors}
                 p.update(params)
                 k = self.kernel.createKernel(**p)
                 for Xt in testsets:
