@@ -7,7 +7,6 @@ VALIDATION_LABELS = 'validation_labels'
 VALIDATION_QIDS = 'validation_qids'
 VALIDATION_PREFERENCES = 'validation_preferences'
 BASIS_VECTORS = 'basis_vectors'
-SVD_ADAPTER = 'svd_adapter'
 CVFOLDS = 'cross-validation_folds'
 MODEL = 'model'
 PREDICTION_FEATURES = 'prediction_features'
@@ -19,16 +18,14 @@ PREDICTED_CLUSTERS_FOR_TRAINING_DATA = 'predicted_clusters_for_training_data'
 SELECTED_FEATURES = 'selected_features'
 GREEDYRLS_LOO_PERFORMANCES = 'GreedyRLS_LOO_performances'
 GREEDYRLS_TEST_PERFORMANCES = 'GreedyRLS_test_performances'
-PARAMETERS = 'parameters'
-KMATRIX = 'kmatrix'
+KMATRIX = 'kernel_matrix'
 REGGRID_RESULTS = 'mselection_performances'
 TEST_PERFORMANCE = 'test_performance'
-FIXED_INDICES = 'fixed_indices'
 TRAIN_SET = 'train_set'
 TEST_SET = 'test_set'
 VALIDATION_SET = 'validation_set'
 KERNEL_OBJ = 'kernel_obj'
-CALLBACK_FUNCTION = 'callback_obj'
+CALLBACK_FUNCTION = 'callback'
 PERFORMANCE_MEASURE = 'measure'
 TIKHONOV_REGULARIZATION_PARAMETER = 'regparam'
 BASIS_VECTORS_TYPE = 'basis_vectors_variable_type'
@@ -57,7 +54,6 @@ VARIABLE_TYPES = {
                   SELECTED_FEATURES: INT_LIST_TYPE,
                   GREEDYRLS_LOO_PERFORMANCES: FLOAT_LIST_TYPE,
                   GREEDYRLS_TEST_PERFORMANCES: FLOAT_LIST_TYPE,
-                  PARAMETERS: dict,
                   PERFORMANCE_MEASURE: "measure",
                   KMATRIX: "matrix",
                   TRAIN_SET: "data_set",

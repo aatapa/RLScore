@@ -10,7 +10,6 @@ import scipy.sparse as sp
 
 from rlscore.learner.abstract_learner import AbstractSupervisedLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore import model
 from rlscore.utilities import array_tools
 from rlscore.measure import measure_utilities
@@ -78,37 +77,44 @@ class CGRankRLS(AbstractIterativeLearner):
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
 
-    def loadResources(self):
-        AbstractIterativeLearner.loadResources(self)
-        if data_sources.TRAIN_LABELS in self.resource_pool:
-            Y = self.resource_pool[data_sources.TRAIN_LABELS]
+    def __init__(self, **kwargs):
+        super(CGRankRLS, self).__init__(**kwargs)
+        if kwargs.has_key("regparam"):
+            self.regparam = float(kwargs["regparam"])
+        else:
+            self.regparam = 0.
+        if 'train_labels' in kwargs:
+            Y = kwargs['train_labels']
             self.Y = array_tools.as_labelmatrix(Y)
             #Number of training examples
             self.size = Y.shape[0]
             if Y.shape[1] > 1:
                 raise Exception('CGRankRLS does not currently work in multi-label mode')
             self.learn_from_labels = True
-            if (data_sources.VALIDATION_FEATURES in self.resource_pool) and (data_sources.VALIDATION_LABELS in self.resource_pool):
-                validation_X = self.resource_pool[data_sources.VALIDATION_FEATURES]
-                validation_Y = self.resource_pool[data_sources.VALIDATION_LABELS]
-                if data_sources.VALIDATION_QIDS in self.resource_pool:
-                    validation_qids = self.resource_pool[data_sources.VALIDATION_QIDS]
+            if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
+                validation_X = kwargs['validation_features']
+                validation_Y = kwargs['validation_labels']
+                if 'validation_qids' in kwargs:
+                    validation_qids = kwargs['validation_qids']
                 else:
                     validation_qids = None
                 self.callbackfun = EarlyStopCB(validation_X, validation_Y, validation_qids)
-        elif data_sources.TRAIN_PREFERENCES in self.resource_pool:
-            self.pairs = self.resource_pool[data_sources.TRAIN_PREFERENCES]
+        elif 'train_preferences' in kwargs:
+            self.pairs = kwargs['train_preferences']
             self.learn_from_labels = False
         else:
             raise Exception('Neither labels nor preference information found')
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
+        X = kwargs['train_features']
         self.X = csc_matrix(X.T)
         self.bias = 0.
-        if data_sources.TRAIN_QIDS in self.resource_pool:
-            qids = self.resource_pool[data_sources.TRAIN_QIDS]
+        if 'train_qids' in kwargs:
+            qids = kwargs['train_qids']
             self.setQids(qids)
+        else:
+            self.qidmap = None
         self.results = {}
-            
+    
+    
     def setQids(self, qids):
         """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
         
@@ -151,7 +157,7 @@ class CGRankRLS(AbstractIterativeLearner):
         regparam: float (regparam > 0)
             regularization parameter
         """
-        self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
+        self.regparam = regparam
         self.train()
     
     
@@ -168,9 +174,9 @@ class CGRankRLS(AbstractIterativeLearner):
     
     
     def trainWithLabels(self):
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = self.regparam
         #regparam = 0.
-        if data_sources.TRAIN_QIDS in self.resource_pool:
+        if self.qidmap != None:
             P = sp.lil_matrix((self.size, len(self.qidmap.keys())))
             for qidind in range(len(self.indslist)):
                 inds = self.indslist[qidind]
@@ -202,11 +208,11 @@ class CGRankRLS(AbstractIterativeLearner):
         except Finished, e:
             pass
         self.b = np.mat(np.zeros((1,1)))
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['model'] = self.getModel()
     
     
     def trainWithPreferences(self):
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = self.regparam
         X = self.X.tocsc()
         X_csr = X.tocsr()
         vals = np.concatenate([np.ones((self.pairs.shape[0]), dtype=np.float64), -np.ones((self.pairs.shape[0]), dtype=np.float64)])
@@ -232,7 +238,7 @@ class CGRankRLS(AbstractIterativeLearner):
         XLY = X_csr * (pairs_csc.T * M)
         self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
         self.b = np.mat(np.zeros((1,self.A.shape[1])))
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['model'] = self.getModel()
     
     
     def getModel(self):

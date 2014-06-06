@@ -3,7 +3,6 @@ from numpy import float64, mat
 import numpy as np
 import cPickle
 
-from rlscore import data_sources
 
 
 def composite_to_rpool(rpool, fname, reader, varnames):
@@ -431,7 +430,7 @@ DEFAULT_READERS = {
                    "preferences": read_preferences,
                    "index_partition":read_folds, 
                    'model': read_pickle,
-                   data_sources.BASIS_VECTORS_TYPE: read_bvectors,
+                   'basis_vectors_variable_type': read_bvectors,
                    'data_set': read_svmlight,
                    }
 

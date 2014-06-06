@@ -16,7 +16,7 @@ from rlscore.utilities import sparse_kronecker_multiplication_tools_python
 
 
 TRAIN_LABELS = 'train_labels'
-CALLBACK_FUNCTION = 'callback_obj'
+CALLBACK_FUNCTION = 'callback'
 
 
 class CGKronRLS(AbstractIterativeLearner):

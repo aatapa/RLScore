@@ -22,7 +22,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     2. kernel_obj: supply the kernel object that has been initialized
     using the training data.
     
-    3. kmatrix: supply user created kernel matrix.
+    3. kernel_matrix: supply user created kernel matrix.
 
     Parameters
     ----------
@@ -36,7 +36,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         Data matrix
     kernel_obj: kernel object, optional
         kernel object, initialized with the training set
-    kmatrix: : {array-like}, shape = [n_samples, n_samples], optional
+    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
         kernel matrix of the training set
         
     References
@@ -50,25 +50,35 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     361-368, ACM, 2009.
     """
     
-    def __init__(self, svdad, number_of_clusters=2, regparam=1.0, train_labels = None, fixed_indices=None, callback_obj=None):
-        self.labelcount = number_of_clusters
-        self.svdad = svdad
-        self.regparam = regparam
-        self.svals = svdad.svals
-        self.svecs = svdad.rsvecs
+    #def __init__(self, svdad, number_of_clusters=2, regparam=1.0, train_labels = None, fixed_indices=None, callback=None):
+    def __init__(self, **kwargs):
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
+        self.regparam = float(kwargs["regparam"])
         self.constraint = 0
+        #if not kwargs.has_key('number_of_clusters'):
+        #    raise Exception("Parameter 'number_of_clusters' must be given.")
+        if kwargs.has_key("number_of_clusters"):
+            self.labelcount = int(kwargs["number_of_clusters"])
+        else:
+            self.labelcount = 2
         if self.labelcount == 2:
             self.oneclass = True
         else:
             self.oneclass = False
-        #if not self.resource_pool.has_key('number_of_clusters'):
-        #    raise Exception("Parameter 'number_of_clusters' must be given.")
-        self.labelcount = number_of_clusters
-        self.callbackfun = callback_obj
+        if kwargs.has_key("callback"):
+            self.callbackfun = kwargs["callback"]
+        else:
+            self.callbackfun = None
+        if kwargs.has_key("train_labels"):
+            train_labels = kwargs["train_labels"]
+        else:
+            train_labels = None
         if train_labels != None:
             Y_orig = array_tools.as_labelmatrix(train_labels)
             if Y_orig.shape[1] == 1:
-                self.Y = mat(zeros((Y_orig.shape[0], 2)))
+                self.Y = zeros((Y_orig.shape[0], 2))
                 self.Y[:, 0] = Y_orig
                 self.Y[:, 1] = - Y_orig
                 self.oneclass = True
@@ -91,8 +101,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             self.Y = RandomLabelSource(size, ysize).readLabels()
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
-        self.classvec = - mat(ones((self.size, 1), dtype = int32))
-        self.classcounts = mat(zeros((self.labelcount, 1), dtype = int32))
+        self.classvec = - ones((self.size), dtype = int32)
+        self.classcounts = zeros((self.labelcount), dtype = int32)
         for i in range(self.size):
             clazzind = 0
             largestlabel = self.Y[i, 0]
@@ -107,96 +117,23 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
         self.fixedindices = []
-        if fixed_indices != None:
-            self.fixedindices = fixed_indices
-        self.results = {}
-
-    def createLearner(cls, **kwargs):
-        new_kwargs = {}
-        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        if kwargs.has_key("regparam"):
-            new_kwargs['regparam'] = float(kwargs["regparam"])
-        if kwargs.has_key("train_labels"):
-            new_kwargs["train_labels"] = kwargs["train_labels"]
-        if kwargs.has_key("number_of_clusters"):
-            new_kwargs['number_of_clusters'] = int(kwargs["number_of_clusters"])
         if kwargs.has_key("fixed_indices"):
-            new_kwargs["fixed_indices"] = kwargs["fixed_indices"]
-        if kwargs.has_key("callback_obj"):
-            new_kwargs["callback_obj"] = kwargs["callback_obj"]
-        learner = cls(**new_kwargs)
+            self.fixedindices = kwargs["fixed_indices"]
+        else:
+            self.fixedindices = []
+        self.results = {}
+    
+    
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
         return learner
     createLearner = classmethod(createLearner)
     
-    def loadResources(self):
-        AbstractSvdLearner.loadResources(self)
-        AbstractIterativeLearner.loadResources(self)
-        
-        self.constraint = 0
-        if not self.resource_pool.has_key('number_of_clusters'):
-            raise Exception("Parameter 'number_of_clusters' must be given.")
-        self.labelcount = int(self.resource_pool['number_of_clusters'])
-        
-        if self.labelcount == 2:
-            self.oneclass = True
-        else:
-            self.oneclass = False
-        
-        if self.resource_pool.has_key("train_labels"):
-            Y_orig = self.resource_pool["train_labels"]
-            if Y_orig.shape[1] == 1:
-                self.Y = mat(zeros((Y_orig.shape[0], 2)))
-                self.Y[:, 0] = Y_orig
-                self.Y[:, 1] = - Y_orig
-                self.oneclass = True
-            else:
-                self.Y = Y_orig.copy()
-                self.oneclass = False
-            for i in range(self.Y.shape[0]):
-                largestind = 0
-                largestval = self.Y[i, 0]
-                for j in range(self.Y.shape[1]):
-                    if self.Y[i, j] > largestval:
-                        largestind = j
-                        largestval = self.Y[i, j]
-                    self.Y[i, j] = -1.
-                self.Y[i, largestind] = 1.
-        else:
-            size = self.svecs.shape[0]
-            ysize = self.labelcount
-            if self.labelcount == None: self.labelcount = 2
-            self.Y = RandomLabelSource(size, ysize).readLabels()
-        
-        
-        self.size = self.Y.shape[0]
-        self.labelcount = self.Y.shape[1]
-        self.classvec = - mat(ones((self.size, 1), dtype = int32))
-        self.classcounts = mat(zeros((self.labelcount, 1), dtype = int32))
-        for i in range(self.size):
-            clazzind = 0
-            largestlabel = self.Y[i, 0]
-            for j in range(self.labelcount):
-                if self.Y[i, j] > largestlabel:
-                    largestlabel = self.Y[i, j]
-                    clazzind = j
-            self.classvec[i] = clazzind
-            self.classcounts[clazzind] = self.classcounts[clazzind] + 1
-        
-        self.svecs_list = []
-        for i in range(self.size):
-            self.svecs_list.append(self.svecs[i].T)
-        
-        self.fixedindices = []
-        if self.resource_pool.has_key('fixed_indices'):
-            self.fixedindices = self.resource_pool['fixed_indices']
-             
     
     def train(self):
         """Trains the learning algorithm.
         """
-        #regparam = float(self.resource_pool["regparam"])
         self.solve(self.regparam)
-       
     
     
     def solve(self, regparam):
@@ -284,7 +221,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     def computeFlipFitnessForSingleClass(self, flipindex, classind):
         
-        currentclassind = self.classvec[flipindex, 0]
+        currentclassind = self.classvec[flipindex]
         coef = -2
         if currentclassind != classind:
             coef = 2
@@ -309,12 +246,12 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
 
     
     def flipClass(self, flipindex, newclassind, DVTY_new_currentclass=None, DVTY_new_newclass=None):
-        currentclassind = self.classvec[flipindex, 0]
+        currentclassind = self.classvec[flipindex]
         self.Y[flipindex, currentclassind] = -1.
         self.Y[flipindex, newclassind] = 1.
-        self.classcounts[currentclassind,0] -= 1
-        self.classcounts[newclassind,0] += 1
-        self.classvec[flipindex, 0] = newclassind
+        self.classcounts[currentclassind] -= 1
+        self.classcounts[newclassind] += 1
+        self.classvec[flipindex] = newclassind
         
         if DVTY_new_currentclass == None:
             DVTY_new_currentclass = self.DVTY_list[currentclassind] - 2 * self.Dsvecs_list[flipindex]
@@ -330,7 +267,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         flipindex:    the index of the label to be flipped.
         returns:      True, if the label is flipped and False otherwise."""
         y = self.Y[flipindex, 0]
-        currentclassind = self.classvec[flipindex, 0]
+        currentclassind = self.classvec[flipindex]
         
         DVTY_old_currentclass = self.DVTY_list[currentclassind]
         fitness_old_currentclass = self.classFitnessList[currentclassind]
@@ -366,13 +303,13 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         #print 'BFD', bestfitnessdiff
         
         if bestclassind != None:
-            if self.classcounts[currentclassind,0] > self.constraint:
+            if self.classcounts[currentclassind] > self.constraint:
                 
                 self.Y[flipindex, currentclassind] = -1.
                 self.Y[flipindex, bestclassind] = 1.
-                self.classcounts[currentclassind,0] -= 1
-                self.classcounts[bestclassind,0] += 1
-                self.classvec[flipindex, 0] = bestclassind
+                self.classcounts[currentclassind] -= 1
+                self.classcounts[bestclassind] += 1
+                self.classvec[flipindex] = bestclassind
                 
                 self.DVTY_list[currentclassind] = DVTY_new_currentclass
                 self.DVTY_list[bestclassind] = DVTY_new_bestclass
@@ -389,7 +326,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         flipindex:    the index of the label to be flipped.
         returns:      True, if the label is flipped and False otherwise."""
         y = self.Y[flipindex, 0]
-        currentclassind = self.classvec[flipindex, 0]
+        currentclassind = self.classvec[flipindex]
         
         DVTY_old_currentclass = self.DVTY_list[currentclassind]
         #fitness_old_currentclass = self.classFitnessList[currentclassind]
@@ -436,13 +373,13 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
                 #fitness_new_bestclass = fitness_new_newclass
         
         if bestclassind != None:
-            if self.classcounts[currentclassind,0] > self.constraint:
+            if self.classcounts[currentclassind] > self.constraint:
                 
                 self.Y[flipindex, currentclassind] = -1.
                 self.Y[flipindex, bestclassind] = 1.
-                self.classcounts[currentclassind,0] -= 1
-                self.classcounts[bestclassind,0] += 1
-                self.classvec[flipindex, 0] = bestclassind
+                self.classcounts[currentclassind] -= 1
+                self.classcounts[bestclassind] += 1
+                self.classvec[flipindex] = bestclassind
                 
                 self.DVTY_list[currentclassind] = DVTY_new_currentclass
                 self.DVTY_list[bestclassind] = DVTY_new_bestclass
@@ -502,7 +439,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         for clazz in range(self.labelcount):
             givelist = []
             for flipindex in allinds:
-                if self.classvec[flipindex,0] != clazz:
+                if self.classvec[flipindex] != clazz:
                     continue
                 else:
                     bestfit = None
@@ -525,8 +462,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         
             takelist = []
             for flipindex in allinds:
-                if self.classvec[flipindex,0] != clazz:
-                    ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex,0])
+                if self.classvec[flipindex] != clazz:
+                    ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex])
                     ffit2 = self.computeFlipFitnessForSingleClass(flipindex, clazz)
                     flipfit = ffit1 + ffit2
                     #fflipfit = self.computeFlipFitness(flipindex, clazz)
@@ -537,7 +474,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             takecount = 0
             while True:
                 fit, flipindex = takelist[takeind]
-                oldclazz = self.classvec[flipindex,0]
+                oldclazz = self.classvec[flipindex]
                 if self.classcounts[oldclazz] > self.constraint: 
                     self.flipClass(flipindex, clazz)
                     takecount += 1
@@ -562,7 +499,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         for clazz in range(self.labelcount):
             givelist = []
             for flipindex in allinds:
-                if self.classvec[flipindex,0] != clazz:
+                if self.classvec[flipindex] != clazz:
                     continue
                 else:
                     ffit1 = self.computeFlipFitnessForSingleClass(flipindex, clazz)
@@ -585,8 +522,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         
             takelist = []
             for flipindex in allinds:
-                if self.classvec[flipindex,0] != clazz:
-                    #ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex,0])
+                if self.classvec[flipindex] != clazz:
+                    #ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex])
                     ffit2 = self.computeFlipFitnessForSingleClass(flipindex, clazz)
                     #flipfit = ffit1 + ffit2
                     #fflipfit = self.computeFlipFitness(flipindex, clazz)
@@ -597,7 +534,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             takecount = 0
             while True:
                 fit, flipindex = takelist[takeind]
-                oldclazz = self.classvec[flipindex,0]
+                oldclazz = self.classvec[flipindex]
                 if self.classcounts[oldclazz] > self.constraint: 
                     self.flipClass(flipindex, clazz)
                     takecount += 1
@@ -617,21 +554,21 @@ class RandomLabelSource(object):
     def __init__(self, size, labelcount):
         self.rand = Random()
         self.rand.seed(100)
-        self.Y = - mat(ones((size, labelcount), dtype = float64))
-        self.classvec = - mat(ones((size, 1), dtype = int32))
+        self.Y = - ones((size, labelcount), dtype = float64)
+        self.classvec = - ones((size), dtype = int32)
         allinds = set(range(size))
-        self.classcounts = mat(zeros((labelcount, 1), dtype = int32))
+        self.classcounts = zeros((labelcount), dtype = int32)
         for i in range(labelcount-1):
             inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
             allinds = allinds - set(inds)
             for ind in inds:
                 self.Y[ind, i] = 1.
-                self.classvec[ind, 0] = i
-                self.classcounts[i, 0] += 1
+                self.classvec[ind] = i
+                self.classcounts[i] += 1
         for ind in allinds:
             self.Y[ind, labelcount - 1] = 1.
-            self.classvec[ind, 0] = labelcount - 1
-            self.classcounts[labelcount - 1, 0] += 1
+            self.classvec[ind] = labelcount - 1
+            self.classcounts[labelcount - 1] += 1
     
     def readLabels(self):
         return self.Y

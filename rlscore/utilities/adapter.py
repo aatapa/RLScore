@@ -13,7 +13,6 @@ from math import sqrt
 from scipy import sparse as sp
 import numpy as np
 
-from rlscore import data_sources
 from rlscore.utilities import decomposition
 from rlscore import model
 from rlscore.utilities import array_tools
@@ -28,14 +27,14 @@ class SvdAdapter(object):
     def createAdapter(cls, **kwargs):
         adapter = cls()
         svals, rsvecs, U, Z = adapter.decompositionFromPool(kwargs)
-        if data_sources.KERNEL_OBJ in kwargs:
-            adapter.kernel = kwargs[data_sources.KERNEL_OBJ]
+        if 'kernel_obj' in kwargs:
+            adapter.kernel = kwargs['kernel_obj']
         adapter.svals = svals
         adapter.rsvecs = rsvecs
         adapter.U = U
         adapter.Z = Z
-        if data_sources.BASIS_VECTORS in kwargs:
-            adapter.basis_vectors = kwargs[data_sources.BASIS_VECTORS]
+        if 'basis_vectors' in kwargs:
+            adapter.basis_vectors = kwargs['basis_vectors']
         else:
             adapter.basis_vectors = None
         return adapter
@@ -54,10 +53,10 @@ class SvdAdapter(object):
         @return: svals, evecs, U, Z
         @rtype: tuple of numpy matrices
         """
-        train_X = rpool[data_sources.TRAIN_FEATURES]
-        kernel = rpool[data_sources.KERNEL_OBJ]
-        if rpool.has_key(data_sources.BASIS_VECTORS):
-            basis_vectors = rpool[data_sources.BASIS_VECTORS]
+        train_X = rpool['train_features']
+        kernel = rpool['kernel_obj']
+        if rpool.has_key('basis_vectors'):
+            basis_vectors = rpool['basis_vectors']
             K = kernel.getKM(train_X).T
             svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, basis_vectors)
         else:
@@ -71,12 +70,7 @@ class SvdAdapter(object):
         if self.Z != None:
             AA = mat(zeros(A.shape, dtype = A.dtype))
             #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
-            #if not svdlearner.resource_pool.has_key(data_sources.BASIS_VECTORS):
-            #    raise Exception("Provided decomposition of the reduced set approximation of kernel matrix, but not the indices of the basis vectors")
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
-            #bvecs = svdlearner.resource_pool[data_sources.BASIS_VECTORS]
-            #AA[self.basis_vectors, :] = A_red
-            #return csr_matrix(AA)
             return A_red
         else: return csr_matrix(A)
     
@@ -94,10 +88,10 @@ class LinearSvdAdapter(SvdAdapter):
     
     
     def decompositionFromPool(self, rpool):
-        kernel = rpool[data_sources.KERNEL_OBJ]
-        self.X = rpool[data_sources.TRAIN_FEATURES]
-        if rpool.has_key(data_sources.BASIS_VECTORS):
-            basis_vectors = rpool[data_sources.BASIS_VECTORS]
+        kernel = rpool['kernel_obj']
+        self.X = rpool['train_features']
+        if rpool.has_key('basis_vectors'):
+            basis_vectors = rpool['basis_vectors']
         else:
             basis_vectors = None
         if "bias" in rpool:
@@ -125,15 +119,10 @@ class LinearSvdAdapter(SvdAdapter):
     def createModel(self, svdlearner):
         A = svdlearner.A
         A = self.reducedSetTransformation(A)
-        #fs = svdlearner.resource_pool[data_sources.TRAIN_FEATURES]
         fs = self.X
         if self.basis_vectors != None:
             fs = self.X[self.basis_vectors]
         bias = self.bias
-        #if "bias" in svdlearner.resource_pool:
-        #    bias = float(svdlearner.resource_pool["bias"])
-        #else:
-        #    bias = 0.
         X = getPrimalDataMatrix(fs, bias)
         #The hyperplane is a linear combination of the feature vectors of the basis examples
         W = X.T * A
@@ -175,9 +164,9 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     
     
     def decompositionFromPool(self, rpool):
-        K_train = rpool[data_sources.KMATRIX]
-        if rpool.has_key(data_sources.BASIS_VECTORS):
-            svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train, rpool[data_sources.BASIS_VECTORS])
+        K_train = rpool['kernel_matrix']
+        if rpool.has_key('basis_vectors'):
+            svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train, rpool['basis_vectors'])
         else:
             svals, rsvecs = decomposition.decomposeKernelMatrix(K_train)
             U, Z = None, None

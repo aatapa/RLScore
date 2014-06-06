@@ -4,12 +4,15 @@ from scipy import sparse as sp
 import numpy as np
 from abstract_learner import AbstractSupervisedLearner
 from abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore import model
 from rlscore.utilities import array_tools
 
 #import pyximport; pyximport.install()
 import cython_greedy_rls
+
+SELECTED_FEATURES = 'selected_features'
+GREEDYRLS_LOO_PERFORMANCES = 'GreedyRLS_LOO_performances'
+GREEDYRLS_TEST_PERFORMANCES = 'GreedyRLS_test_performances'
 
 class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     """Linear time greedy forward selection for RLS.
@@ -41,28 +44,37 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     325-330, IEEE Computer Society, 2010.
     """
     
-    def loadResources(self):
-        AbstractIterativeLearner.loadResources(self)
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
+    def __init__(self, **kwargs):
+        super(GreedyRLS, self).__init__(**kwargs)
+        self.regparam = float(kwargs['regparam'])
+        X = kwargs['train_features']
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = self.resource_pool[data_sources.TRAIN_LABELS]
+        self.Y = kwargs['train_labels']
         self.Y = array_tools.as_labelmatrix(self.Y)
         #Number of training examples
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
         #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
-        if self.resource_pool.has_key('bias'):
-            self.bias = float(self.resource_pool['bias'])
+        if kwargs.has_key('bias'):
+            self.bias = float(kwargs['bias'])
         else:
             self.bias = 0.
-        if self.resource_pool.has_key(data_sources.PERFORMANCE_MEASURE):
-            self.measure = self.resource_pool[data_sources.PERFORMANCE_MEASURE]
+        if kwargs.has_key('measure'):
+            self.measure = kwargs['measure']
         else:
             self.measure = None
+        
+        tsize = self.size
+        fsize = X.shape[1]
+        if not kwargs.has_key('subsetsize'):
+            raise Exception("Parameter 'subsetsize' must be given.")
+        self.desiredfcount = int(kwargs['subsetsize'])
+        if not fsize >= self.desiredfcount:
+            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(self.desiredfcount) + ' of features to be selected.')
         self.results = {}
     
     
@@ -72,8 +84,6 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         After the learner is trained, one can call the method getModel
         to get the trained model
         """
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
-        self.regparam = regparam
         
         #The current version works only with the squared error measure
         self.measure = None
@@ -81,10 +91,10 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         if True:#self.Y.shape[1] > 1:
         #if False:#self.Y.shape[1] > 1:
             #self.solve_bu(regparam)
-            self.solve_cython(regparam)
+            self.solve_cython(self.regparam)
         else:
             #self.solve_new(regparam, float32)
-            self.solve_new(regparam, float64)
+            self.solve_new(self.regparam, float64)
             #self.solve_bu(regparam)
     
     
@@ -122,12 +132,6 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         rpinv = 1. / rp
         
         
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
-        if not fsize >= desiredfcount:
-            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
-        
         
         #Biaz
         cv = sqrt(self.bias)*mat(ones((1, tsize)))
@@ -154,7 +158,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.performances = []
         selectedvec = zeros(fsize, dtype = int16)
         tempvec1, tempvec2, tempvec3 = zeros(tsize), zeros(Y.shape[1]), zeros((tsize, Y.shape[1]))
-        while currentfcount < desiredfcount:
+        while currentfcount < self.desiredfcount:
             
             if not self.measure == None:
                 bestlooperf = None
@@ -234,8 +238,8 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * sqrt(self.bias)
-        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
-        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results[SELECTED_FEATURES] = self.selected
+        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
     
     
     def solve_new(self, regparam, floattype):
@@ -255,12 +259,6 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         
         rp = regparam
         rpinv = 1. / rp
-        
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
-        if not fsize >= desiredfcount:
-            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         
         #Biaz
@@ -288,7 +286,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         
         temp2 = mat(zeros(tempmatrix.shape, dtype=floattype))
         
-        while currentfcount < desiredfcount:
+        while currentfcount < self.desiredfcount:
             
             multiply(X.T, GXT, tempmatrix)
             XGXTdiag = sum(tempmatrix, axis = 0)
@@ -352,9 +350,9 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * sqrt(self.bias)
-        self.results[data_sources.SELECTED_FEATURES] = self.selected
-        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results[SELECTED_FEATURES] = self.selected
+        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results['model'] = self.getModel()
     
     
     def getModel(self):
@@ -401,14 +399,6 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         rp = regparam
         rpinv = 1. / rp
         
-        
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
-        if not fsize >= desiredfcount:
-            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
-        
-        
         #Biaz
         cv = sqrt(self.bias)*mat(ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
@@ -432,7 +422,7 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         
         currentfcount = 0
         self.performances = []
-        while currentfcount < desiredfcount:
+        while currentfcount < self.desiredfcount:
             
             if not self.measure == None:
                 bestlooperf = None
@@ -490,13 +480,13 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * sqrt(self.bias)
-        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
-        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results[SELECTED_FEATURES] = self.selected
+        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
 #            self.callback()
 #        self.finished()
 #        bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
 #        X_biased = vstack([X,bias_slice])
 #        selected_plus_bias = self.selected+[fsize]
 #        #self.A = mat(eye(fsize+1))[:,selected_plus_bias]*(X_biased[selected_plus_bias]*self.dualvec)
-#        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
-#        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+#        self.results[SELECTED_FEATURES] = self.selected
+#        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances

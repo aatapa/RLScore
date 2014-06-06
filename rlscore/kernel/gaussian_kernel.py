@@ -6,7 +6,6 @@ from scipy.sparse import csc_matrix
 
 from rlscore.kernel.abstract_kernel import AbstractKernel
 from rlscore.utilities import array_tools
-from rlscore import data_sources
 
 
 class GaussianKernel(AbstractKernel):
@@ -45,8 +44,8 @@ class GaussianKernel(AbstractKernel):
         """Initializes a kernel object from the arguments."""
         new_kwargs = {}
         new_kwargs["train_features"] = kwargs["train_features"]
-        if kwargs.has_key(data_sources.BASIS_VECTORS):
-            new_kwargs[data_sources.BASIS_VECTORS] = kwargs[data_sources.BASIS_VECTORS]
+        if kwargs.has_key('basis_vectors'):
+            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
         if "gamma" in kwargs:
             new_kwargs["gamma"] = float(kwargs["gamma"])
         if "bias" in kwargs:
@@ -86,8 +85,7 @@ class GaussianKernel(AbstractKernel):
         m = self.train_X.shape[0]
         n = test_X.shape[0]
         #The Gaussian kernel matrix is constructed from a linear kernel matrix
-        #linkm = self.train_X * test_X.T
-        linkm = np.dot(self.train_X, test_X.T)
+        linkm = self.train_X * test_X.T
         linkm = array_tools.as_dense_matrix(linkm)
         if sp.issparse(test_X):
             test_norms = ((test_X.T.multiply(test_X.T)).sum(axis=0)).T

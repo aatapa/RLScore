@@ -9,7 +9,6 @@ from numpy import ones
 
 from rlscore.learner.abstract_learner import AbstractSupervisedLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore.utilities import array_tools
 from rlscore import model
 from rlscore.measure import sqerror
@@ -52,12 +51,12 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
 
-    def __init__(self, train_features, train_labels, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0):
+    def __init__(self, train_features, train_labels, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0, **kwargs):
         X = train_features
         self.Y = array_tools.as_labelmatrix(train_labels)
         self.X = csc_matrix(X.T)
-        self.bias = bias
-        self.regparam = regparam
+        self.bias = float(bias)
+        self.regparam = float(regparam)
         if self.bias != 0.:
             bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
             self.X = sparse.vstack([self.X,bias_slice]).tocsc()
@@ -69,56 +68,6 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         else:
             self.callbackfun = None
         self.results = {}
-
-    def createLearner(cls, **kwargs):
-        new_kwargs = {}
-        new_kwargs["train_features"] = kwargs["train_features"]
-        new_kwargs["train_labels"] = kwargs["train_labels"]
-        if kwargs.has_key("regparam"):
-            new_kwargs['regparam'] = float(kwargs["regparam"])
-        if kwargs.has_key("bias"):
-            new_kwargs['bias'] = float(kwargs["bias"])
-        if kwargs.has_key(data_sources.VALIDATION_FEATURES) and kwargs.has_key(data_sources.VALIDATION_LABELS):
-            new_kwargs[data_sources.VALIDATION_FEATURES] = kwargs[data_sources.VALIDATION_FEATURES]
-            new_kwargs[data_sources.VALIDATION_LABELS] = kwargs[data_sources.VALIDATION_LABELS]
-        learner = cls(**new_kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-
-    def loadResources(self):
-        AbstractIterativeLearner.loadResources(self)
-        AbstractSupervisedLearner.loadResources(self)
-        #Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        #self.setLabels(Y)
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
-        self.X = csc_matrix(X.T)
-        if self.resource_pool.has_key('bias'):
-            self.bias = float(self.resource_pool['bias'])
-            if self.bias != 0.:
-                bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
-                self.X = sparse.vstack([self.X,bias_slice]).tocsc()
-        else:
-            self.bias = 0.
-        self.X_csr = self.X.tocsr()
-        if (data_sources.VALIDATION_FEATURES in self.resource_pool) and (data_sources.VALIDATION_LABELS in self.resource_pool):
-            validation_X = self.resource_pool[data_sources.VALIDATION_FEATURES]
-            validation_Y = self.resource_pool[data_sources.VALIDATION_LABELS]
-            self.callbackfun = EarlyStopCB(validation_X, validation_Y)
-    
-    
-    def solve(self, regparam):
-        """Trains the learning algorithm, using the given regularization parameter.
-
-        This implementation simply changes the regparam, and then calls the train method.
-               
-        Parameters
-        ----------
-        regparam: float (regparam > 0)
-            regularization parameter
-        """
-        #self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
-        self.regparam = regparam
-        self.train()   
     
     
     def train(self):
@@ -152,8 +101,9 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         else:
             self.b = sqrt(self.bias)*self.A[-1]
             self.A = self.A[:-1]
-        self.results[data_sources.MODEL] = self.getModel()
-
+        self.results['model'] = self.getModel()
+    
+    
     def getModel(self):
         """Returns the trained model, call this only after training.
         
@@ -163,7 +113,7 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             prediction function
         """
         return model.LinearModel(self.A, self.b)
-    
+
 
 class EarlyStopCB(object):
     
@@ -176,6 +126,7 @@ class EarlyStopCB(object):
         self.iter = 0
         self.last_update = 0
         self.maxiter = maxiter
+    
     
     def callback(self, learner):
         A = learner.A
@@ -200,11 +151,11 @@ class EarlyStopCB(object):
         if self.last_update == self.maxiter:
             learner.A = np.mat(self.bestA)
             raise Finished("Done")
-
-        
+    
+    
     def finished(self, learner):
         pass
-        
+
 
 class Finished(Exception):
     """Used to indicate that the optimization is finished and should
@@ -216,7 +167,8 @@ class Finished(Exception):
         @param value: the error message
         @type value: string"""
         self.value = value
-
+    
+    
     def __str__(self):
         return repr(self.value)  
 

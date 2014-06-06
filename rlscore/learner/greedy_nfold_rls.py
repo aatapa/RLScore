@@ -5,7 +5,6 @@ import scipy.sparse as sp
 
 from abstract_learner import AbstractSupervisedLearner
 from abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore.measure.sq_mprank_measure import sqmprank
 
 class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
@@ -17,21 +16,27 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
         AbstractIterativeLearner.loadResources(self)
-        Y = self.resource_pool[data_sources.TRAIN_LABELS]
-        self.setLabels(Y)
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
+        
+        Y = self.resource_pool['train_labels']
+        self.Y = Y
+        #Number of training examples
+        self.size = Y.shape[0]
+        if not Y.shape[1] == 1:
+            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
+        
+        X = self.resource_pool['train_features']
         self.setDataMatrix(X.T)
         if self.resource_pool.has_key('bias'):
             self.bias = float(self.resource_pool['bias'])
         else:
             self.bias = 0.
-        if self.resource_pool.has_key(data_sources.PERFORMANCE_MEASURE):
-            self.measure = self.resource_pool[data_sources.PERFORMANCE_MEASURE]
+        if self.resource_pool.has_key('measure'):
+            self.measure = self.resource_pool['measure']
         else:
             self.measure = None
-        qids = self.resource_pool[data_sources.TRAIN_QIDS]
-        if not self.resource_pool.has_key(data_sources.CVFOLDS):
-            self.resource_pool[data_sources.CVFOLDS] = qids
+        qids = self.resource_pool['train_qids']
+        if not self.resource_pool.has_key('cross-validation_folds'):
+            self.resource_pool['cross-validation_folds'] = qids
         self.setQids(qids)
         self.results = {}
     
@@ -68,23 +73,6 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.indslist.append(self.qidmap[qid])
     
     
-    def setLabels(self, Y):
-        """
-        Sets the label data for RLS.
-        
-        @param Y: Labels of the training examples. Can be either a single-column matrix (single output) or a multi-column matrix (multiple output).
-        @type Y: numpy.matrix
-        """
-        
-        self.Y = Y
-        
-        #Number of training examples
-        self.size = Y.shape[0]
-        
-        if not Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
-    
-    
     def setDataMatrix(self, X):
         """
         Sets the label data for RLS.
@@ -99,7 +87,7 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
     
     
     def train(self):
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = float(self.resource_pool['regparam'])
         self.regparam = regparam
         self.solve_bu(regparam)
     
@@ -140,9 +128,9 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             calculate_test_error = self.resource_pool['calculate_test_error']
             if calculate_test_error == 'True':
                 calculate_test_error = True
-                self.testY = self.resource_pool[data_sources.TEST_LABELS]
-                self.testX = self.resource_pool[data_sources.PREDICTION_FEATURES].todense()
-                self.testQids = self.resource_pool[data_sources.PREDICTION_QIDS].readQids()
+                self.testY = self.resource_pool['test_labels']
+                self.testX = self.resource_pool['prediction_features'].todense()
+                self.testQids = self.resource_pool['test_qids'].readQids()
                 
                 self.testperformances = []
                 
@@ -310,7 +298,7 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         for ci, col in zip(selected_plus_bias, range(currentfcount + 1)):
             cutdiag[ci, col] = 1.
         self.A = cutdiag * (X[selected_plus_bias] * self.A)
-        self.results[data_sources.SELECTED_FEATURES] = self.selected
-        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.results['selected_features'] = self.selected
+        self.results['GreedyRLS_LOO_performances'] = self.performances
         if calculate_test_error:
-            self.results[data_sources.GREEDYRLS_TEST_PERFORMANCES] = self.testperformances
+            self.results['GreedyRLS_test_performances'] = self.testperformances

@@ -6,7 +6,6 @@ import scipy
 
 from rlscore.learner.abstract_learner import AbstractSupervisedLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore import model
 
 class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLearner):
@@ -19,7 +18,14 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
         """
         AbstractIterativeLearner.loadResources(self)
         AbstractSupervisedLearner.loadResources(self)
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
+        
+        self.Y = Y
+        #Number of training examples
+        self.size = Y.shape[0]
+        if not Y.shape[1] == 1:
+            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
+        
+        X = self.resource_pool['train_features']
         if isinstance(X, scipy.sparse.base.spmatrix):
             self.X = X.todense()
         else:
@@ -28,23 +34,6 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
         #    self.bias = float(self.resource_pool['bias'])
         #else:
         #    self.bias = 0.
-    
-    
-    def setLabels(self, Y):
-        """
-        Sets the label data for RLS.
-        
-        @param Y: Labels of the training examples. Can be either a single-column matrix (single output) or a multi-column matrix (multiple output).
-        @type Y: numpy.matrix
-        """
-        
-        self.Y = Y
-        
-        #Number of training examples
-        self.size = Y.shape[0]
-        
-        if not Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
     
     
     def train(self):
@@ -122,8 +111,8 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
             self.callback()
         print la.norm(np.array(Y)[:, 0] - np.dot(X[:, self.selected], self.W) - self.b) ** 2.
         self.finished()
-        self.resource_pool[data_sources.SELECTED_FEATURES] = self.selected
-        self.resource_pool[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.resource_pool['selected_features'] = self.selected
+        self.resource_pool['GreedyRLS_LOO_performances'] = self.performances
     
     
     def getModel(self):

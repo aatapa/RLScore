@@ -7,7 +7,6 @@ Created on May 22, 2011
 import numpy.linalg as la
 import numpy as np
 
-from rlscore import data_sources
 from rlscore.kernel.abstract_kernel import AbstractKernel
 
 
@@ -26,7 +25,7 @@ class RsetKernel(AbstractKernel):
         kernel = cls()
         kernel.base_kernel = kwargs["base_kernel"]
         kernel.basis_features = kwargs["basis_features"]
-        kernel.buildPredictionCache(kwargs[data_sources.TRAIN_FEATURES])
+        kernel.buildPredictionCache(kwargs['train_features'])
         return kernel
     createKernel = classmethod(createKernel)
     

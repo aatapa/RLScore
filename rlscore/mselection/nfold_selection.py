@@ -2,7 +2,6 @@ from random import sample
 import numpy as np
 
 from rlscore.mselection.abstract_selection import AbstractSelection
-from rlscore import data_sources
 from rlscore.measure import measure_utilities
 from rlscore.measure.measure_utilities import UndefinedPerformance
 
@@ -19,12 +18,12 @@ class NfoldSelection(AbstractSelection):
         split tenfold.
         """
         AbstractSelection.loadResources(self)
-        if self.resource_pool.has_key(data_sources.CVFOLDS):
-            #fs = self.resource_pool[data_sources.CVFOLDS]
+        if self.resource_pool.has_key('cross-validation_folds'):
+            #fs = self.resource_pool['cross-validation_folds']
             #self.folds = fs.readFolds()
-            self.folds = self.resource_pool[data_sources.CVFOLDS]
-        elif self.resource_pool.has_key(data_sources.TRAIN_QIDS):
-            self.folds = self.resource_pool[data_sources.TRAIN_QIDS]
+            self.folds = self.resource_pool['cross-validation_folds']
+        elif self.resource_pool.has_key('train_qids'):
+            self.folds = self.resource_pool['train_qids']
             #self.folds = qsource.readFolds()
 
     def setFolds(self, folds):

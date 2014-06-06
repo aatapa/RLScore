@@ -5,7 +5,7 @@ from scipy import sparse as sp
 
 from rlscore.kernel.abstract_kernel import AbstractKernel
 from rlscore.utilities import array_tools
-from rlscore import data_sources
+
 
 class PolynomialKernel(AbstractKernel):
     """Polynomial kernel.
@@ -42,8 +42,8 @@ class PolynomialKernel(AbstractKernel):
     def createKernel(cls, **kwargs):
         """Initializes a kernel object from the arguments."""
         new_kwargs = {}
-        if kwargs.has_key(data_sources.BASIS_VECTORS):
-            new_kwargs['basis_vectors'] = kwargs[data_sources.BASIS_VECTORS]
+        if kwargs.has_key('basis_vectors'):
+            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
         new_kwargs["train_features"] = kwargs["train_features"]
         if 'degree' in kwargs:
             new_kwargs['degree'] = int(kwargs['degree'])

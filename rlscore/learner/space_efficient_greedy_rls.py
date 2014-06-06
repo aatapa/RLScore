@@ -7,7 +7,6 @@ import scipy.sparse as sp
 
 from rlscore.learner.abstract_learner import AbstractSupervisedLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
-from rlscore import data_sources
 from rlscore import model
 
 class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
@@ -19,29 +18,29 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
         AbstractIterativeLearner.loadResources(self)
-        X = self.resource_pool[data_sources.TRAIN_FEATURES]
+        X = self.resource_pool['train_features']
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = self.resource_pool[data_sources.TRAIN_LABELS]
+        self.Y = self.resource_pool['train_labels']
         #Number of training examples
         self.size = self.Y.shape[0]
         if self.resource_pool.has_key('bias'):
             self.bias = float(self.resource_pool['bias'])
         else:
             self.bias = 0.
-        if self.resource_pool.has_key(data_sources.PERFORMANCE_MEASURE):
+        if self.resource_pool.has_key('measure'):
             self.measure = None
-        #    self.measure = self.resource_pool[data_sources.PERFORMANCE_MEASURE]
+        #    self.measure = self.resource_pool['measure']
         else:
             self.measure = None
         self.results = {}
     
     
     def train(self):
-        regparam = float(self.resource_pool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER])
+        regparam = float(self.resource_pool['regparam'])
         self.regparam = regparam
         
         ##The current version works only with the squared error measure
@@ -178,9 +177,9 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
-        self.results[data_sources.SELECTED_FEATURES] = self.selected
-        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['selected_features'] = self.selected
+        self.results['GreedyRLS_LOO_performances'] = self.performances
+        self.results['model'] = self.getModel()
     
     
     def solve_tradeoff(self, regparam):
@@ -345,9 +344,9 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
-        self.results[data_sources.SELECTED_FEATURES] = self.selected
-        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['selected_features'] = self.selected
+        self.results['GreedyRLS_LOO_performances'] = self.performances
+        self.results['model'] = self.getModel()
     
     
     def solve_weak(self, regparam):
@@ -475,8 +474,8 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         self.finished()
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
-        self.results[data_sources.SELECTED_FEATURES] = self.selected
-        self.results[data_sources.GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results[data_sources.MODEL] = self.getModel()
+        self.results['selected_features'] = self.selected
+        self.results['GreedyRLS_LOO_performances'] = self.performances
+        self.results['model'] = self.getModel()
 
 

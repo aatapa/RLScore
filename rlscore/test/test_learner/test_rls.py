@@ -3,7 +3,6 @@ import unittest
 from numpy import *
 import numpy.linalg as la
 
-from rlscore import data_sources
 from rlscore.utilities import decomposition
 from rlscore.utilities import adapter
 from rlscore.learner import RLS
@@ -46,7 +45,7 @@ class Test(unittest.TestCase):
         
         kwargs = {}
         kwargs['train_labels'] = Y
-        kwargs[data_sources.KMATRIX] = K
+        kwargs['kernel_matrix'] = K
         dualrls = RLS.createLearner(**kwargs)
         
         kwargs = {}
@@ -56,7 +55,7 @@ class Test(unittest.TestCase):
         
         kwargs = {}
         kwargs['train_labels'] = Yho
-        kwargs[data_sources.KMATRIX] = Kho
+        kwargs['kernel_matrix'] = Kho
         dualrls_naive = RLS.createLearner(**kwargs)
         
         testkm = K[ix_(hocompl, hoindices)]
@@ -64,7 +63,7 @@ class Test(unittest.TestCase):
         testX = Xtrain[hoindices]
         kwargs = {}
         kwargs['train_labels'] = Yho
-        kwargs[data_sources.TRAIN_FEATURES] = trainX
+        kwargs['train_features'] = trainX
         primalrls_naive = RLS.createLearner(**kwargs)
         
         loglambdas = range(-5, 5)
@@ -78,7 +77,7 @@ class Test(unittest.TestCase):
             
             dualrls_naive.solve(regparam)
             kwargs = {}
-            kwargs[data_sources.PREDICTION_FEATURES] = testkm.T
+            kwargs['prediction_features'] = testkm.T
             predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
             print predho1, 'Naive HO (dual)'
             
@@ -117,11 +116,11 @@ class Test(unittest.TestCase):
         
         kwargs = {}
         kwargs['train_labels'] = Yho
-        kwargs[data_sources.KMATRIX] = Kho
+        kwargs['kernel_matrix'] = Kho
         dualrls_naive = RLS.createLearner(**kwargs)
         dualrls_naive.solve(regparam)
         kwargs = {}
-        kwargs[data_sources.PREDICTION_FEATURES] = testkm.T
+        kwargs['prediction_features'] = testkm.T
         predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
         print sum(abs(predho1-dumbho)), 'Naive HO (dual)'
         

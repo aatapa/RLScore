@@ -5,7 +5,6 @@ import numpy.linalg as la
 import unittest
 
 from rlscore.learner.greedy_nfold_rls import GreedyNFoldRLS
-from rlscore import data_sources
 
 class Test(unittest.TestCase):
     

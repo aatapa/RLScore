@@ -15,22 +15,21 @@ from rlscore.learner.abstract_learner import AbstractIterativeLearner
 class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     
-    def loadResources(self):
-        AbstractSvdLearner.loadResources(self)
-        AbstractIterativeLearner.loadResources(self)
-        
+    def __init__(self, **kwargs):
+        super(SteepestDescentMMC, self).__init__(**kwargs)
+        self.regparam = float(kwargs["regparam"])
         self.constraint = 0
-        if not self.resource_pool.has_key('number_of_clusters'):
+        if not kwargs.has_key('number_of_clusters'):
             raise Exception("Parameter 'number_of_clusters' must be given.")
-        self.labelcount = int(self.resource_pool['number_of_clusters'])
-        
+        self.labelcount = int(kwargs['number_of_clusters'])
+         
         if self.labelcount == 2:
             self.oneclass = True
         else:
             self.oneclass = False
-        
-        if self.resource_pool.has_key("train_labels"):
-            Y_orig = self.resource_pool["train_labels"]
+         
+        if kwargs.has_key("train_labels"):
+            Y_orig = kwargs["train_labels"]
             if Y_orig.shape[1] == 1:
                 self.Y = mat(zeros((Y_orig.shape[0], 2)))
                 self.Y[:, 0] = Y_orig
@@ -53,8 +52,8 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             ysize = self.labelcount
             if self.labelcount == None: self.labelcount = 2
             self.Y = RandomLabelSource(size, ysize).readLabels()
-        
-        
+         
+         
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
         #self.classvec = - mat(ones((self.size, 1), dtype = int32))
@@ -69,19 +68,24 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
                     clazzind = j
             self.classvec[i] = clazzind
             self.classcounts[clazzind] = self.classcounts[clazzind] + 1
-        
+         
         self.svecs_list = []
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
-        
+         
         self.fixedindices = []
-        if self.resource_pool.has_key('fixed_indices'):
-            self.fixedindices = self.resource_pool['fixed_indices']
-             
+        if kwargs.has_key('fixed_indices'):
+            self.fixedindices = kwargs['fixed_indices']
+    
+    
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
+    
     
     def train(self):
-        regparam = float(self.resource_pool['regparam'])
-        self.solve(regparam)
+        self.solve(self.regparam)
        
     
     
@@ -155,7 +159,8 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
         
         if self.oneclass:
             self.Y = self.Y[:, 0]
-        self.resource_pool['predicted_clusters_for_training_data'] = self.Y
+        self.results = {}
+        self.results['predicted_clusters_for_training_data'] = self.Y
     
     
     def computeGlobalFitness(self):
@@ -170,6 +175,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):
+        #print self.Y.shape,self.R.shape, self.RY.shape, self.Y_Schur_RY.shape, self.classFitnessRowVec.shape, self.mdiagRx2.shape, self.classcounts.shape, self.classvec.shape
         cython_mmc.findSteepestDirRotateClasses(self.Y,
                                                 self.R,
                                                 self.RY,

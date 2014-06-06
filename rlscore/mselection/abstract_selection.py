@@ -1,7 +1,5 @@
 import numpy as np
 
-from rlscore import data_sources
-
 
 class AbstractSelection(object):
     """Abstract base class for creating new model selection strategies, such as those based on
@@ -31,9 +29,9 @@ class AbstractSelection(object):
         """
         Loads the resources from the previously set resource pool.
         """
-        if not self.resource_pool.has_key(data_sources.TRAIN_LABELS):
+        if not self.resource_pool.has_key('train_labels'):
             raise Exception("ModelSelection cannot be initialized without labels in resource pool")
-        Y = self.resource_pool[data_sources.TRAIN_LABELS]
+        Y = self.resource_pool['train_labels']
         self.Y = Y
     
     
@@ -116,7 +114,7 @@ class AbstractSelection(object):
                 print "Best performance %f %s with regularization parameter %f" % (self.best_performance, measure_name, self.best_regparam)
             else:
                 print "Performance undefined for all tried values"
-        self.resource_pool[data_sources.REGGRID_RESULTS] = np.array([self.reggrid, self.performances]).T
+        self.resource_pool['mselection_performances'] = np.array([self.reggrid, self.performances]).T
         #some model selection strategies support this
         self.resource_pool['mselection_predictions'] = self.predictions
     

@@ -3,7 +3,6 @@ import sys
 from numpy import *
 import numpy.linalg as la
 
-from rlscore import data_sources
 from rlscore.utilities import decomposition
 import unittest
 from rlscore.learner import LabelRankRLS
@@ -104,46 +103,27 @@ class Test(unittest.TestCase):
         rpool["train_qids"] = mapQids(qidlist)
         primalrls = LabelRankRLS.createLearner(**rpool)        
         
-        #primalrls = LabelRankRLS()
-        #primalrls.setDecomposition(svals, evecs, U)
-        #primalrls.svecs = evecs
-        #primalrls.svals = svals
-        #primalrls.setLabels(Y)
-        #primalrls.setQids(mapQids(qidlist))
-        #primalrls = LabelRankRLS(Y, qidlist, svals, evecs, U=U)
-        
-        #svals, evecs = decomposition.decomposeKernelMatrix(K)
         rpool = {}
-        rpool["kmatrix"] = K
+        rpool["kernel_matrix"] = K
         rpool["train_labels"] = Y
         rpool["train_qids"] = mapQids(qidlist)        
         dualrls = LabelRankRLS.createLearner(**rpool)
-        #dualrls.setDecomposition(svals,evecs)
-        #dualrls.svecs = evecs
-        #dualrls.svals = svals        
-        #dualrls.setLabels(Y)
-        #dualrls.setQids(mapQids(qidlist))
-        #dualrls = LabelRankRLS(Y, qidlist, svals, evecs)
         
         
         rpool = {}
-        rpool[data_sources.TRAIN_FEATURES] = Xcv
-        rpool[data_sources.TRAIN_LABELS] = Yho
-        rpool[data_sources.KERNEL_OBJ] = LinearKernel.createKernel(**rpool)
-        rpool[data_sources.TRAIN_QIDS] = mapQids(qidlist_cv)
-        params = {}
-        rpool[data_sources.PARAMETERS] = params
+        rpool['train_features'] = Xcv
+        rpool['train_labels'] = Yho
+        rpool['kernel_obj'] = LinearKernel.createKernel(**rpool)
+        rpool['train_qids'] = mapQids(qidlist_cv)
         primalrls_naive = LabelRankRLS.createLearner(**rpool)
 
         
         rpool = {}
-        rpool[data_sources.KMATRIX] = Kcv
-        rpool[data_sources.TRAIN_LABELS] = Yho
-        rpool[data_sources.TRAIN_FEATURES] = Xcv
-        rpool[data_sources.KERNEL_OBJ] = LinearKernel.createKernel(**rpool)
-        rpool[data_sources.TRAIN_QIDS] = mapQids(qidlist_cv)
-        params = {}
-        rpool[data_sources.PARAMETERS] = params
+        rpool['kernel_matrix'] = Kcv
+        rpool['train_labels'] = Yho
+        rpool['train_features'] = Xcv
+        rpool['kernel_obj'] = LinearKernel.createKernel(**rpool)
+        rpool['train_qids'] = mapQids(qidlist_cv)
         dualrls_naive = LabelRankRLS.createLearner(**rpool)
         
         
@@ -162,14 +142,14 @@ class Test(unittest.TestCase):
             predhos = []
             primalrls_naive.solve(regparam)
             predpool = {}
-            predpool[data_sources.PREDICTION_FEATURES]=Xtest
+            predpool['prediction_features']=Xtest
             predho = primalrls_naive.getModel().predictFromPool(predpool)
             print predho.T, 'Naive HO (primal)'
             predhos.append(predho)
             
             dualrls_naive.solve(regparam)
             predpool = {}
-            predpool[data_sources.PREDICTION_FEATURES]=testkm.T
+            predpool['prediction_features']=testkm.T
             predho = dualrls_naive.getModel().predictFromPool(predpool)
             print predho.T, 'Naive HO (dual)'
             predhos.append(predho)

@@ -27,7 +27,7 @@ class RLS(AbstractSvdSupervisedLearner):
     2. kernel_obj: supply the kernel object that has been initialized
     using the training data.
     
-    3. kmatrix: supply user created kernel matrix, in this setting RLS
+    3. kernel_matrix: supply user created kernel matrix, in this setting RLS
     is unable to return the model, but you may compute cross-validation
     estimates or access the learned parameters from the variable self.A
 
@@ -41,7 +41,7 @@ class RLS(AbstractSvdSupervisedLearner):
         Data matrix
     kernel_obj: kernel object, optional
         kernel object, initialized with the training set
-    kmatrix: : {array-like}, shape = [n_samples, n_samples], optional
+    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
         kernel matrix of the training set
     
     References
@@ -62,18 +62,19 @@ class RLS(AbstractSvdSupervisedLearner):
 
     """
     
-    #def __init__(self, train_labels, train_features = None, kmatrix = None, kernel_obj = None, regparam=1.0):
+    #def __init__(self, train_labels, train_features = None, kernel_matrix = None, kernel_obj = None, regparam=1.0):
     def __init__(self, **kwargs):
         self.svdad = creators.createSVDAdapter(**kwargs)
         self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
         if kwargs.has_key("regparam"):
-            self.regparam = kwargs["regparam"]
+            self.regparam = float(kwargs["regparam"])
         else:
             self.regparam = 1.
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.results = {}
-
+    
+    
     def createLearner(cls, **kwargs):
         #new_kwargs = {}
         #new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)

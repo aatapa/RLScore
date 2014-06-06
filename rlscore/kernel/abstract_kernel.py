@@ -1,6 +1,5 @@
 import numpy as np
 
-from rlscore import data_sources
 
 class AbstractKernel(object):
     """The abstract base class from which all kernel implementations

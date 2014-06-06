@@ -5,7 +5,6 @@ import numpy as np
 from scipy.sparse import coo_matrix
 
 from rlscore.learner import CGRankRLS
-from rlscore import data_sources
 from rlscore.kernel import LinearKernel
 
 
@@ -24,12 +23,12 @@ class Test(unittest.TestCase):
             Xtrain = np.mat(np.random.rand(n, m))
             Y = np.mat(np.random.rand(m, 1))
             rpool = {}
-            rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
-            rpool[data_sources.TRAIN_LABELS] = Y
-            rpool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
+            rpool['train_features'] = Xtrain.T
+            rpool['train_labels'] = Y
+            rpool['regparam'] = regparam
             rpool["bias"] = 1.0
             k = LinearKernel.createKernel(**rpool)
-            rpool[data_sources.KERNEL_OBJ] = k
+            rpool['kernel_obj'] = k
             rls = CGRankRLS.createLearner(**rpool)
             rls.train()
             model = rls.getModel()   
@@ -60,13 +59,13 @@ class Test(unittest.TestCase):
                     pairs.append((b, a))
             pairs = np.array(pairs)
             rpool = {}
-            rpool[data_sources.TRAIN_FEATURES] = Xtrain.T
-            #rpool[data_sources.TRAIN_LABELS] = Y
+            rpool['train_features'] = Xtrain.T
+            #rpool['train_labels'] = Y
             rpool['train_preferences'] = pairs
-            rpool[data_sources.TIKHONOV_REGULARIZATION_PARAMETER] = regparam
+            rpool['regparam'] = regparam
             rpool["bias"] = 1.0
             k = LinearKernel.createKernel(**rpool)
-            rpool[data_sources.KERNEL_OBJ] = k
+            rpool['kernel_obj'] = k
             rls = CGRankRLS.createLearner(**rpool)
             rls.train()
             model = rls.getModel()   
