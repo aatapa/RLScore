@@ -1,5 +1,7 @@
 import numpy as np
 
+from rlscore.utilities import array_tools
+
 
 class AbstractSelection(object):
     """Abstract base class for creating new model selection strategies, such as those based on
@@ -32,7 +34,7 @@ class AbstractSelection(object):
         if not self.resource_pool.has_key('train_labels'):
             raise Exception("ModelSelection cannot be initialized without labels in resource pool")
         Y = self.resource_pool['train_labels']
-        self.Y = Y
+        self.Y = array_tools.as_labelmatrix(Y)
     
     
     def estimatePerformance(self, model):

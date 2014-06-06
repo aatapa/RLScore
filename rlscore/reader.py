@@ -1,7 +1,7 @@
 from scipy import sparse
-from numpy import float64, mat
+from numpy import float64, mat, loadtxt
 import numpy as np
-import cPickle
+from cPickle import load as cPickleload
 
 
 
@@ -29,64 +29,6 @@ def composite_to_rpool(rpool, fname, reader, varnames):
     for k, d in zip(varnames, data):
         if d != None:
             rpool[k] = d
-
-
-def read_bvectors(fname):
-    """Loads a basis-vectors file consisting of a single line of integer-valued indices
-    separated by whitespace.
-    
-    Let n_samples be the number of instances. Then the indices of the basis vectors should
-    be a subset of {0...n_samples-1}. For example, let n_samples=10, then a file consisting
-    of the line
-    
-    0 2 5 7
-    
-    would be a valid basis-vectors file.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    basis_vectors: list of integers
-    """
-    f = open(fname)
-    basis_vectors = f.readline().strip().split()
-    basis_vectors = [int(x) for x in basis_vectors]
-    for x in basis_vectors:
-        if x < 0:
-            raise Exception("Error when reading in basis vector file: Indexing for basis vectors should start from 0, %d found" % (x))
-    if len(set(basis_vectors)) != len(basis_vectors):
-        raise Exception("Error when reading in basis vector file: The same basis vector index was supplied multiple times")
-    f.close()
-    return basis_vectors
-
-
-def read_dense(fname):
-    """Reads in a text file of floating point numbers
-    with m rows and n columns, returns m x n array.
-    Differs from np.loadtxt in being able to distinguish
-    between n x 1 and 1 x n shape.
-
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data: ndarray of floats
-    """
-    f = open(fname)
-    values = []
-    for line in f:
-        values.append([float(x) for x in line.split()])
-    data = np.array(values)
-    f.close()
-    return data
 
 
 def read_folds(fname):
@@ -138,24 +80,6 @@ def read_folds(fname):
         folds.append(fold)
     f.close()
     return folds
-
-
-def read_numpy(fname):
-    """Reads in a text file in numpy dense matrix format.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data: array
-    """
-    f = open(fname)
-    data = numpy.load(f)
-    f.close()
-    return data
 
 
 def read_sparse(fname):
@@ -328,42 +252,6 @@ def read_svmlight(fname):
     return X, Y, Q
 
 
-def read_pickle(fname):
-    """ Loads a pickled python object.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data : python object
-    """
-    f = open(fname, 'rb')
-    data = cPickle.load(f)
-    f.close()
-    return data
-
-
-def read_preferences(fname):
-    """Reads a pairwise preferences file, used typically with ranking
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data : n x 2 -dimensional numpy array containing pairwise preferences one pair per row, i.e. the data point corresponding to the first index is preferred over the data point corresponding to the second index. 
-    """
-    data = np.loadtxt(fname)
-    if data.shape[1] != 2:
-        raise Exception("Error in the pairwise preferences file: the text file is supposed to contain pairwise preferences one pair per row, i.e. the data point corresponding to the first index is preferred over the data point corresponding to the second index.\n")
-    return data
-
-
 def read_qids(fname):
     """Reads the query id file, used typically with ranking
     
@@ -423,14 +311,17 @@ def mapQids(qids):
     return q_partition
 
 
+def loadtxtint(fname):
+    return loadtxt(fname, dtype=int)
+
 DEFAULT_READERS = {
                    "spmatrix": read_sparse,
-                   "matrix": read_dense,
+                   "matrix": loadtxt,#read_dense,dtype=<type 'float'>
                    "qids": read_qids,
-                   "preferences": read_preferences,
+                   "preferences": loadtxt,#read_preferences,
                    "index_partition":read_folds, 
-                   'model': read_pickle,
-                   'basis_vectors_variable_type': read_bvectors,
+                   'model': cPickleload,#read_pickle,
+                   'basis_vectors_variable_type': loadtxtint,#read_bvectors,
                    'data_set': read_svmlight,
                    }
 
