@@ -261,7 +261,7 @@ def read_svmlight(fname):
         line = line.split('#')
         line = line[0].split()
         labels = line.pop(0)
-        if line[0].startswith("qid:"):
+        if len(line)>0 and line[0].startswith("qid:"):
             qid = line.pop(0)[4:]
             if qids == None:
                 if linecounter > 1:
