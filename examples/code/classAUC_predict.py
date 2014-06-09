@@ -4,7 +4,7 @@ from rlscore import writer
 
 kwargs = {}
 prediction_features = reader.read_sparse('./examples/data/class_test.features')
-model = reader.load('./examples/models/classAUC.model')
+model = reader.read_pickle('./examples/models/classAUC.model')
 mselector = None
 print 'Making predictions on test data'
 predicted_labels = model.predict(prediction_features)
