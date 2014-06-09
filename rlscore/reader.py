@@ -1,7 +1,7 @@
 from scipy import sparse
-from numpy import float64
+from numpy import float64, loadtxt
 import numpy as np
-import cPickle
+from cPickle import load as cPickleload
 
 
 
@@ -260,7 +260,7 @@ def read_svmlight(fname):
         line = line.split('#')
         line = line[0].split()
         labels = line.pop(0)
-        if len(line)>0 and line[0].startswith("qid:"):
+        if line[0].startswith("qid:"):
             qid = line.pop(0)[4:]
             if qids == None:
                 if linecounter > 1:
@@ -423,14 +423,17 @@ def mapQids(qids):
     return q_partition
 
 
+def loadtxtint(fname):
+    return loadtxt(fname, dtype=int)
+
 DEFAULT_READERS = {
                    "spmatrix": read_sparse,
-                   "matrix": read_dense,
+                   "matrix": loadtxt,#read_dense,dtype=<type 'float'>
                    "qids": read_qids,
-                   "preferences": read_preferences,
+                   "preferences": loadtxt,#read_preferences,
                    "index_partition":read_folds, 
-                   'model': read_pickle,
-                   'basis_vectors_variable_type': read_bvectors,
+                   'model': cPickleload,#read_pickle,
+                   'basis_vectors_variable_type': loadtxtint,#read_bvectors,
                    'data_set': read_svmlight,
                    }
 

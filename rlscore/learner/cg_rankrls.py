@@ -88,7 +88,7 @@ class CGRankRLS(AbstractIterativeLearner):
             self.Y = array_tools.as_labelmatrix(Y)
             #Number of training examples
             self.size = Y.shape[0]
-            if Y.shape[1] > 1:
+            if self.Y.shape[1] > 1:
                 raise Exception('CGRankRLS does not currently work in multi-label mode')
             self.learn_from_labels = True
             if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
