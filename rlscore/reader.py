@@ -1,5 +1,5 @@
 from scipy import sparse
-from numpy import float64, mat
+from numpy import float64
 import numpy as np
 import cPickle
 
