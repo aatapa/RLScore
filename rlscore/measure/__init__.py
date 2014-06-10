@@ -6,3 +6,7 @@ from fscore_measure import fscore
 from multi_accuracy_measure import ova_accuracy
 from sq_mprank_measure import sqmprank
 from sqerror_measure import sqerror
+try:
+    from cindex_measure import cindex
+except Exception:
+    pass

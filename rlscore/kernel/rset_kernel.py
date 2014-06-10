@@ -7,10 +7,7 @@ Created on May 22, 2011
 import numpy.linalg as la
 import numpy as np
 
-from rlscore.kernel.abstract_kernel import AbstractKernel
-
-
-class RsetKernel(AbstractKernel):
+class RsetKernel(object):
     '''
     This class is for testing reduced set approximation.
     '''

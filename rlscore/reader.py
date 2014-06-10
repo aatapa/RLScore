@@ -3,92 +3,6 @@ from numpy import float64, loadtxt
 import numpy as np
 from cPickle import load as cPickleload
 
-
-
-def composite_to_rpool(rpool, fname, reader, varnames):
-    """Loads composite data from input file to resource pool.
-    
-    Parameters
-    ----------
-    
-    rpool : dictionary
-        resource pool where result is stored
-    
-    fname : string
-        input file name
-    
-    reader : function
-        a function that takes as argument fname and
-        returns the content of the file as a dictionary
-        of key:object - pairs.
-        
-    varnames : iterable
-        names for the variables to be added
-    """
-    data = reader(fname)
-    for k, d in zip(varnames, data):
-        if d != None:
-            rpool[k] = d
-
-
-def read_bvectors(fname):
-    """Loads a basis-vectors file consisting of a single line of integer-valued indices
-    separated by whitespace.
-    
-    Let n_samples be the number of instances. Then the indices of the basis vectors should
-    be a subset of {0...n_samples-1}. For example, let n_samples=10, then a file consisting
-    of the line
-    
-    0 2 5 7
-    
-    would be a valid basis-vectors file.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    basis_vectors: list of integers
-    """
-    f = open(fname)
-    basis_vectors = f.readline().strip().split()
-    basis_vectors = [int(x) for x in basis_vectors]
-    for x in basis_vectors:
-        if x < 0:
-            raise Exception("Error when reading in basis vector file: Indexing for basis vectors should start from 0, %d found" % (x))
-    if len(set(basis_vectors)) != len(basis_vectors):
-        raise Exception("Error when reading in basis vector file: The same basis vector index was supplied multiple times")
-    f.close()
-    return basis_vectors
-
-
-def read_dense(fname):
-    """Reads in a text file of floating point numbers
-    with m rows and n columns, returns m x n array.
-    Differs from np.loadtxt in being able to distinguish
-    between n x 1 and 1 x n shape.
-
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data: ndarray of floats
-    """
-    f = open(fname)
-    values = []
-    for line in f:
-        values.append([float(x) for x in line.split()])
-    data = np.array(values)
-    f.close()
-    return data
-
-
 def read_folds(fname):
     """ Reads a list of fold index lists.
     
@@ -139,23 +53,6 @@ def read_folds(fname):
     f.close()
     return folds
 
-
-def read_numpy(fname):
-    """Reads in a text file in numpy dense matrix format.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data: array
-    """
-    f = open(fname)
-    data = numpy.load(f)
-    f.close()
-    return data
 
 
 def read_sparse(fname):
@@ -328,24 +225,6 @@ def read_svmlight(fname):
     return X, Y, Q
 
 
-def read_pickle(fname):
-    """ Loads a pickled python object.
-    
-    Parameters
-    ----------
-    fname : string
-        input file name
-        
-    Returns
-    -------
-    data : python object
-    """
-    f = open(fname, 'rb')
-    data = cPickle.load(f)
-    f.close()
-    return data
-
-
 def read_preferences(fname):
     """Reads a pairwise preferences file, used typically with ranking
     
@@ -387,26 +266,6 @@ def read_qids(fname):
     f.close()
     Q = mapQids(qids)
     return Q
-
-
-#def mapQids(qids):
-#    """Maps qids to running numbering starting from zero, and partitions
-#    the training data indices so that each partition corresponds to one
-#    query"""
-#    #Used in FileReader, rls_predict
-#    qid_dict = {}
-#    folds = {}
-#    counter = 0
-#    for index, qid in enumerate(qids):
-#        if not qid in qid_dict:
-#            qid_dict[qid] = counter
-#            folds[qid] = []
-#            counter += 1
-#        folds[qid].append(index)
-#    final_folds = []
-#    for f in folds.values():
-#        final_folds.append(f)
-#    return final_folds
 
 def mapQids(qids):
     q_partition = []

@@ -12,23 +12,23 @@ def testKernels():
         
 def testLearners():
     
-    #from rlscore.test.test_learner.test_cg_rls import Test as cgtest
-    #from rlscore.test.test_learner.test_cg_rankrls import Test as cgranktest
-    #from rlscore.test.test_learner.test_rls import Test as rlstest
-    #from rlscore.test.test_learner.test_all_pairs_rankrls import Test as apranktest
-    #from rlscore.test.test_learner.test_labelrankrls import Test as lranktest
+    from rlscore.test.test_learner.test_cg_rls import Test as cgtest
+    from rlscore.test.test_learner.test_cg_rankrls import Test as cgranktest
+    from rlscore.test.test_learner.test_rls import Test as rlstest
+    from rlscore.test.test_learner.test_all_pairs_rankrls import Test as apranktest
+    from rlscore.test.test_learner.test_labelrankrls import Test as lranktest
     #from rlscore.test.test_learner.test_greedy_labelrankrls import Test as glrrlstest
     #from rlscore.test.test_learner.test_greedy_nfold_rls import Test as gnfrlstest
-    #from rlscore.test.test_learner.test_reduced_set_approximation import Test as rsatest
+    from rlscore.test.test_learner.test_reduced_set_approximation import Test as rsatest
     #from rlscore.test.test_learner.test_greedy_rls import Test as grlstest
     #from rlscore.test.test_learner.test_multi_task_greedy_rls import Test as mtgrlstest
-    from rlscore.test.test_learner.test_kronecker_rls import Test as krontest
+    #from rlscore.test.test_learner.test_kronecker_rls import Test as krontest
     #from rlscore.test.test_learner.test_cg_kron_rls import Test as cgkrontest
     #from rlscore.test.test_learner.test_mmc import Test as mmctest
     #from rlscore.test.test_learner.test_interactive_rls_classifier import Test as irlsctest
     #from rlscore.test.test_learner.test_orthogonal_matching_pursuit import Test as omptest
     #for test in [cgkrontest]:
-    for test in [krontest]:
+    #for test in [krontest]:
     #for test in [mmctest]:
     #for test in [irlsctest]:
     #for test in [glrrlstest]:
@@ -40,7 +40,7 @@ def testLearners():
     #for test in [mtgrlstest]:
     #for test in [omptest]:
     #for test in [cgtest]:
-    #for test in [cgtest, cgranktest, rlstest, apranktest, lranktest, grlstest, rsatest]:
+    for test in [cgtest, cgranktest, rlstest, apranktest, lranktest, rsatest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
     

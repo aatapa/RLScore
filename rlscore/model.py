@@ -23,7 +23,6 @@ class DualModel(object):
     
     def __init__(self, A, kernel):
         self.kernel = kernel
-        nonz = A.nonzero()
         #newbasis = list(set(nonz[0].tolist()))
         self.A = A
         #if len(newbasis) != A.shape[0]:

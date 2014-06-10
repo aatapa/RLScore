@@ -1,5 +1,3 @@
-import math
-
 from numpy import arange, float64, identity, multiply, mat, ones, zeros
 import numpy.linalg as la
 import scipy.sparse
@@ -8,6 +6,8 @@ from rlscore.utilities import decomposition
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
+from rlscore.measure.measure_utilities import UndefinedPerformance
+import numpy as np
 
 class LabelRankRLS(AbstractSvdSupervisedLearner):
     """RankRLS algorithm for learning to rank
@@ -106,7 +106,8 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
                 sameqids = self.qidmap[qid]
                 sameqids.append(i)
             else:
-                self.qidmap[qid] = [i]  
+                self.qidmap[qid] = [i]
+        self.qids = qids
     
     
     def solve(self, regparam=1.0):
@@ -219,4 +220,29 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         return la.inv(I - RQRTLho) * RQY
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
+class LQOCV(object):
+    
+    def __init__(self, learner, measure):
+        self.rls = learner
+        self.measure = measure
 
+    def cv(self, regparam):
+        rls = self.rls
+        measure = self.measure
+        rls.solve(regparam)
+        Y = rls.Y
+        performances = []
+        folds = rls.qids
+        for fold in folds:
+            P = rls.computeHO(fold)
+            try:
+                performance = measure(Y[fold], P)
+                performances.append(performance)
+            except UndefinedPerformance, e:
+                pass
+            #performance = measure_utilities.aggregate(performances)
+        if len(performances) > 0:
+            performance = np.mean(performances)
+        else:
+            raise UndefinedPerformance("Performance undefined for all folds")
+        return performance
