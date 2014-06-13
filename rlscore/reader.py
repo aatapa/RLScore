@@ -2,7 +2,7 @@ from scipy import sparse
 from numpy import float64, mat, loadtxt
 import numpy as np
 from cPickle import load as cPickleload
-
+import cPickle
 
 
 def composite_to_rpool(rpool, fname, reader, varnames):
@@ -252,6 +252,24 @@ def read_svmlight(fname):
     return X, Y, Q
 
 
+def read_pickle(fname):
+    """ Loads a pickled python object.
+    
+    Parameters
+    ----------
+    fname : string
+        input file name
+        
+    Returns
+    -------
+    data : python object
+    """
+    f = open(fname, 'rb')
+    data = cPickle.load(f)
+    f.close()
+    return data
+
+
 def read_qids(fname):
     """Reads the query id file, used typically with ranking
     
@@ -320,7 +338,7 @@ DEFAULT_READERS = {
                    "qids": read_qids,
                    "preferences": loadtxt,#read_preferences,
                    "index_partition":read_folds, 
-                   'model': cPickleload,#read_pickle,
+                   'model': read_pickle,
                    'basis_vectors_variable_type': loadtxtint,#read_bvectors,
                    'data_set': read_svmlight,
                    }
