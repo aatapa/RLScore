@@ -1,10 +1,12 @@
 
-from numpy import float64, identity, multiply, mat, zeros, sum
+from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
+from rlscore.measure.measure_utilities import UndefinedPerformance
+import numpy as np
 
 class RLS(AbstractSvdSupervisedLearner):
     """Regularized least-squares regression/classification.
@@ -180,6 +182,45 @@ class RLS(AbstractSvdSupervisedLearner):
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO = multiply(LOO_ek, self.svecs * (svecsm.T * self.Y)) - multiply(LOO_ek, multiply(RQR, self.Y))
         return LOO
-    
 
+class LOOCV(object):
+    
+    def __init__(self, learner, measure):
+        self.rls = learner
+        self.measure = measure
+        
+    def cv(self, regparam):
+        self.rls.solve(regparam)
+        Y = self.rls.Y
+        P = self.rls.computeLOO()
+        perf = self.measure(Y, P)
+        return perf
+
+class NfoldCV(object):
+    
+    def __init__(self, learner, measure, folds):
+        self.rls = learner
+        self.measure = measure
+        self.folds = folds
+        
+    def cv(self, regparam):
+        rls = self.rls
+        folds = self.folds
+        measure = self.measure
+        rls.solve(regparam)
+        Y = rls.Y
+        performances = []
+        for fold in folds:
+            P = rls.computeHO(fold)
+            try:
+                performance = measure(Y[fold], P)
+                performances.append(performance)
+            except UndefinedPerformance, e:
+                pass
+            #performance = measure_utilities.aggregate(performances)
+        if len(performances) > 0:
+            performance = np.mean(performances)
+        else:
+            raise UndefinedPerformance("Performance undefined for all folds")
+        return performance
 

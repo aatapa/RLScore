@@ -1,13 +1,8 @@
-from numpy import mat
-from numpy import array
-from scipy.sparse import csc_matrix
 from scipy import sparse as sp
-
-from rlscore.kernel.abstract_kernel import AbstractKernel
 from rlscore.utilities import array_tools
 
 
-class PolynomialKernel(AbstractKernel):
+class PolynomialKernel(object):
     """Polynomial kernel.
     
     k(xi,xj) = (gamma * <xi, xj> + coef0)**degree + bias

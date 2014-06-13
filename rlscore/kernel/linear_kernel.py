@@ -1,11 +1,8 @@
-from numpy import mat
-from scipy.sparse import csc_matrix
 from scipy import sparse as sp
 
-from rlscore.kernel.abstract_kernel import AbstractKernel
 from rlscore.utilities import array_tools
 
-class LinearKernel(AbstractKernel):
+class LinearKernel(object):
     """Linear kernel.
     
     k(xi,xj) = <xi , xj> + bias

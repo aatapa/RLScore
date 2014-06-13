@@ -1,7 +1,5 @@
-import operator
 from numpy import array
 import numpy as np
-import sys
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.utilities import array_tools
 from rlscore.utilities import swapped
@@ -46,6 +44,8 @@ def cindex(Y, P):
     perfs = cindex_multitask(Y,P)
     perfs = np.array(perfs)
     perfs = perfs[np.invert(np.isnan(perfs))]
+    if len(perfs) == 0:
+        raise UndefinedPerformance("No pairs, all the instances have the same output")
     return np.mean(perfs)
 cindex.iserror = False
 

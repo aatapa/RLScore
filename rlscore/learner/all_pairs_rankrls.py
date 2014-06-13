@@ -1,4 +1,4 @@
-
+import numpy as np
 from numpy import array, eye, float64, multiply, mat, ones, sqrt, sum, zeros
 import numpy.linalg as la
 from scipy import sparse
@@ -8,6 +8,7 @@ from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore import model
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 class AllPairsRankRLS(AbstractSvdSupervisedLearner):
     """RankRLS algorithm for learning to rank
@@ -418,4 +419,88 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
             results.append(F)
         return results
 
+class NfoldCV(object):
+    
+    def __init__(self, learner, measure, folds):
+        self.rls = learner
+        self.measure = measure
+        self.folds = folds
+        
+    def cv(self, regparam):
+        rls = self.rls
+        folds = self.folds
+        measure = self.measure
+        rls.solve(regparam)
+        Y = rls.Y
+        performances = []
+        for fold in folds:
+            P = rls.computeHO(fold)
+            try:
+                performance = measure(Y[fold], P)
+                performances.append(performance)
+            except UndefinedPerformance, e:
+                pass
+            #performance = measure_utilities.aggregate(performances)
+        if len(performances) > 0:
+            performance = np.mean(performances)
+        else:
+            raise UndefinedPerformance("Performance undefined for all folds")
+        return performance
+
+class LPOCV(object):
+    
+    
+    def __init__(self, learner, measure):
+        self.rls = learner
+        self.measure = measure
+
+    def cv(self, regparam):
+        rls = self.rls
+        rls.solve(regparam)
+        Y = rls.Y
+        perfs = []
+        #special handling for concordance index / auc
+        if self.measure.func_name in ["cindex", "auc"]:
+            for index in range(Y.shape[1]):
+                pairs = []
+                for i in range(Y.shape[0] - 1):
+                    for j in range(i + 1, Y.shape[0]):
+                        if Y[i, index] > Y[j, index]:
+                            pairs.append((i, j))
+                        elif Y[i, index] < Y[j, index]:
+                            pairs.append((j, i))
+                if len(pairs) > 0:
+                    pred = rls.computePairwiseCV(pairs, index)
+                    auc = 0.
+                    for pair in pred:
+                        if pair[0] > pair[1]:
+                            auc += 1.
+                        elif pair[0] == pair[1]:
+                            auc += 0.5
+                    auc /= len(pred)
+                    perfs.append(auc)
+            if len(perfs) > 0:
+                performance = np.mean(perfs)
+            else:
+                raise UndefinedPerformance("Performance undefined for all folds")
+            return performance
+        else:
+            #Horribly inefficient, but maybe OK for small data sets
+            pairs = []
+            for i in range(Y.shape[0]):
+                for j in range(Y.shape[0]):
+                    pairs.append((i,j))
+            for index in range(Y.shape[1]):
+                preds = rls.computePairwiseCV(pairs, index)
+                for i in range(len(pairs)):
+                    pair = pairs[i]
+                    pred = preds[i]
+                    perfs.append(self.measure(np.array([Y[pair[0],index],Y[pair[1],index]]), np.array(pred)))
+            perf = np.mean(perfs)
+            return perf
+
+                
+        
+        
+    
 

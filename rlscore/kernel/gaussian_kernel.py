@@ -2,13 +2,10 @@ import numpy as np
 from numpy import mat
 from numpy import float64
 from scipy import sparse as sp
-from scipy.sparse import csc_matrix
-
-from rlscore.kernel.abstract_kernel import AbstractKernel
 from rlscore.utilities import array_tools
 
 
-class GaussianKernel(AbstractKernel):
+class GaussianKernel(object):
     """Gaussian (RBF) kernel.
     
     k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) + bias

@@ -1,35 +1,7 @@
 from scipy import sparse
-from numpy import float64, mat, loadtxt
+from numpy import float64, loadtxt
 import numpy as np
 from cPickle import load as cPickleload
-import cPickle
-
-
-def composite_to_rpool(rpool, fname, reader, varnames):
-    """Loads composite data from input file to resource pool.
-    
-    Parameters
-    ----------
-    
-    rpool : dictionary
-        resource pool where result is stored
-    
-    fname : string
-        input file name
-    
-    reader : function
-        a function that takes as argument fname and
-        returns the content of the file as a dictionary
-        of key:object - pairs.
-        
-    varnames : iterable
-        names for the variables to be added
-    """
-    data = reader(fname)
-    for k, d in zip(varnames, data):
-        if d != None:
-            rpool[k] = d
-
 
 def read_folds(fname):
     """ Reads a list of fold index lists.
@@ -80,6 +52,7 @@ def read_folds(fname):
         folds.append(fold)
     f.close()
     return folds
+
 
 
 def read_sparse(fname):
@@ -252,8 +225,8 @@ def read_svmlight(fname):
     return X, Y, Q
 
 
-def read_pickle(fname):
-    """ Loads a pickled python object.
+def read_preferences(fname):
+    """Reads a pairwise preferences file, used typically with ranking
     
     Parameters
     ----------
@@ -262,11 +235,11 @@ def read_pickle(fname):
         
     Returns
     -------
-    data : python object
+    data : n x 2 -dimensional numpy array containing pairwise preferences one pair per row, i.e. the data point corresponding to the first index is preferred over the data point corresponding to the second index. 
     """
-    f = open(fname, 'rb')
-    data = cPickle.load(f)
-    f.close()
+    data = np.loadtxt(fname)
+    if data.shape[1] != 2:
+        raise Exception("Error in the pairwise preferences file: the text file is supposed to contain pairwise preferences one pair per row, i.e. the data point corresponding to the first index is preferred over the data point corresponding to the second index.\n")
     return data
 
 
@@ -294,26 +267,6 @@ def read_qids(fname):
     Q = mapQids(qids)
     return Q
 
-
-#def mapQids(qids):
-#    """Maps qids to running numbering starting from zero, and partitions
-#    the training data indices so that each partition corresponds to one
-#    query"""
-#    #Used in FileReader, rls_predict
-#    qid_dict = {}
-#    folds = {}
-#    counter = 0
-#    for index, qid in enumerate(qids):
-#        if not qid in qid_dict:
-#            qid_dict[qid] = counter
-#            folds[qid] = []
-#            counter += 1
-#        folds[qid].append(index)
-#    final_folds = []
-#    for f in folds.values():
-#        final_folds.append(f)
-#    return final_folds
-
 def mapQids(qids):
     q_partition = []
     prev = qids[0]
@@ -338,7 +291,7 @@ DEFAULT_READERS = {
                    "qids": read_qids,
                    "preferences": loadtxt,#read_preferences,
                    "index_partition":read_folds, 
-                   'model': read_pickle,
+                   'model': cPickleload,#read_pickle,
                    'basis_vectors_variable_type': loadtxtint,#read_bvectors,
                    'data_set': read_svmlight,
                    }
