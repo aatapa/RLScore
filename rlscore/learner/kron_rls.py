@@ -4,6 +4,7 @@ import pyximport; pyximport.install()
 import math
 
 from numpy import *
+import numpy as np
 import numpy.linalg as la
 
 from rlscore.learner.abstract_learner import AbstractLearner
@@ -463,7 +464,7 @@ class KernelPairwiseModel(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
-        P = K1pred * self.A * K2pred.T
+        P = np.array(K1pred * self.A * K2pred.T)
         return P
 
 
@@ -491,7 +492,7 @@ class LinearPairwiseModel(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
-        P = X1pred * self.W * X2pred.T
+        P = np.array(X1pred * self.W * X2pred.T)
         return P
 
 

@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         #Train an ordinary RLS regressor for reference
         K_Kron_train_x = np.kron(K_train2, K_train1)
         params = {}
-        params["kmatrix"] = B * K_Kron_train_x * B.T
+        params["kernel_matrix"] = B * K_Kron_train_x * B.T
         params["train_labels"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)

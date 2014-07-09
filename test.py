@@ -22,8 +22,8 @@ def testLearners():
     from rlscore.test.test_learner.test_reduced_set_approximation import Test as rsatest
     #from rlscore.test.test_learner.test_greedy_rls import Test as grlstest
     #from rlscore.test.test_learner.test_multi_task_greedy_rls import Test as mtgrlstest
-    #from rlscore.test.test_learner.test_kronecker_rls import Test as krontest
-    #from rlscore.test.test_learner.test_cg_kron_rls import Test as cgkrontest
+    from rlscore.test.test_learner.test_kronecker_rls import Test as krontest
+    from rlscore.test.test_learner.test_cg_kron_rls import Test as cgkrontest
     #from rlscore.test.test_learner.test_mmc import Test as mmctest
     #from rlscore.test.test_learner.test_interactive_rls_classifier import Test as irlsctest
     #from rlscore.test.test_learner.test_orthogonal_matching_pursuit import Test as omptest
@@ -40,10 +40,13 @@ def testLearners():
     #for test in [mtgrlstest]:
     #for test in [omptest]:
     #for test in [cgtest]:
+    #for test in [cgranktest]:
+    #for test in [rsatest]:
     for test in [cgtest, cgranktest, rlstest, apranktest, lranktest, rsatest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
-    
+
+
 def testMeasures():
     #from rlscore.test.test_measure.test_accuracy import Test as atest
     #from rlscore.test.test_measure.test_sqerror import Test as btest
@@ -57,7 +60,16 @@ def testMeasures():
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
+
+def testModels():
+    from rlscore.test.test_model import Test as mtest
+    for test in [mtest]:
+        suite = unittest.TestLoader().loadTestsFromTestCase(test)
+        unittest.TextTestRunner(verbosity=2).run(suite)
+    
+
 if __name__=="__main__":
+    #testModels()
     #testKernels()
     #cProfile.run('testLearners()')
     testLearners()

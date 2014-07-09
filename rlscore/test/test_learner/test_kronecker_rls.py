@@ -112,7 +112,7 @@ class Test(unittest.TestCase):
         #Train an ordinary RLS regressor for reference
         K_Kron_train_x = np.kron(K_train1, K_train2)
         params = {}
-        params["kmatrix"] = K_Kron_train_x
+        params["kernel_matrix"] = K_Kron_train_x
         params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)
@@ -122,6 +122,7 @@ class Test(unittest.TestCase):
         ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1])
         
         print
+        print type(linear_kron_testpred), type(kernel_kron_testpred), type(ordrls_testpred)
         print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], ordrls_testpred[0, 0]
         print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], ordrls_testpred[0, 1]
         print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], ordrls_testpred[1, 0]
@@ -153,7 +154,7 @@ class Test(unittest.TestCase):
         
         #Train an ordinary RankRLS for reference
         params = {}
-        params["kmatrix"] = K_Kron_train_x
+        params["kernel_matrix"] = K_Kron_train_x
         params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
         params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         rankrls_learner = LabelRankRLS.createLearner(**params)
@@ -208,7 +209,7 @@ class Test(unittest.TestCase):
         #Train an ordinary RLS regressor for reference
         K_Kron_train_x = np.kron(K_train1, K_train2)
         params = {}
-        params["kmatrix"] = K_Kron_train_x
+        params["kernel_matrix"] = K_Kron_train_x
         params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)
@@ -240,9 +241,9 @@ class Test(unittest.TestCase):
         print 'LPO aka nested LOO in setting 1: ', np.sum(np.abs(ordrls_lpopred - kron_lpopred.ravel().T))#np.sum(np.abs(ordrls_lpopred[0, 0] - kron_lpopred[inner_row_coord, inner_col_coord]))
         #return
         K_test_x = np.kron(K_test1, K_test2)
-        print ordrls_model.predictFromPool({'prediction_features':K_test_x.T}).shape, Y_test.shape
+        print ordrls_model.predict(K_test_x.T).shape, Y_test.shape
         ordrls_testpred = ordrls_model.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
-        #ordrls_testpred = ordrls_model.predictFromPool({'prediction_features':K_test_x.T}).reshape(Y_test.shape[0], Y_test.shape[1])
+        #ordrls_testpred = ordrls_model.predict(K_test_x.T).reshape(Y_test.shape[0], Y_test.shape[1])
         kron_testpred = kron_model.predictWithKernelMatrices(K_test1, K_test2)
         print 'TEST', np.mean(np.abs(kron_testpred - ordrls_testpred))
         

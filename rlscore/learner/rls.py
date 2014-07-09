@@ -129,7 +129,7 @@ class RLS(AbstractSvdSupervisedLearner):
 
         Returns
         -------
-        F : matrix, shape = [n_hsamples, n_labels]
+        F : array, shape = [n_hsamples, n_labels]
             holdout predictions
         """
         
@@ -150,7 +150,7 @@ class RLS(AbstractSvdSupervisedLearner):
         else:
             I = mat(identity(A.shape[1]))
             result = RQY - A * (la.inv(B * A - I) * (B * RQY))
-        return result
+        return np.array(result)
     
     
     def computeLOO(self):
@@ -158,7 +158,7 @@ class RLS(AbstractSvdSupervisedLearner):
         
         Returns
         -------
-        F : matrix, shape = [n_samples, n_labels]
+        F : array, shape = [n_samples, n_labels]
             leave-one-out predictions
         """
         bevals = multiply(self.evals, self.newevals)
@@ -181,7 +181,7 @@ class RLS(AbstractSvdSupervisedLearner):
         #LOO = multiply(LOO_ek, RQY)
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO = multiply(LOO_ek, self.svecs * (svecsm.T * self.Y)) - multiply(LOO_ek, multiply(RQR, self.Y))
-        return LOO
+        return np.array(LOO)
 
 class LOOCV(object):
     

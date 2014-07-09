@@ -37,10 +37,11 @@ class Test(unittest.TestCase):
             Im = np.mat(np.identity(m))
             L = np.mat(Im-(1./m)*np.ones((m,m), dtype=np.float64))
             G = Xtrain*L*Xtrain.T+regparam*In
-            W2 = np.linalg.inv(G)*Xtrain*L*Y
+            W2 = np.squeeze(np.array(G.I*Xtrain*L*Y))
             for i in range(W.shape[0]):
-                for j in range(W.shape[1]):
-                    self.assertAlmostEqual(W[i,j],W2[i,j], places=5)
+                #for j in range(W.shape[1]):
+                #    self.assertAlmostEqual(W[i,j],W2[i,j], places=5)
+                    self.assertAlmostEqual(W[i], W2[i], places = 5)
     
     
     def testPairwisePreferences(self):
@@ -78,10 +79,11 @@ class Test(unittest.TestCase):
             coo = coo_matrix((vals, (row, col)), shape=(pairs.shape[0], Xtrain.T.shape[0]))
             L = (coo.T*coo).todense()
             G = Xtrain*L*Xtrain.T+regparam*In
-            W2 = np.linalg.inv(G)*Xtrain*coo.T*np.mat(np.ones((pairs.shape[0],1)))
+            W2 = np.squeeze(np.array(G.I*Xtrain*coo.T*np.mat(np.ones((pairs.shape[0],1)))))
             for i in range(W.shape[0]):
-                for j in range(W.shape[1]):
-                    self.assertAlmostEqual(W[i,j],W2[i,j], places=4)
+                #for j in range(W.shape[1]):
+                #    self.assertAlmostEqual(W[i,j],W2[i,j], places=4)
+                    self.assertAlmostEqual(W[i], W2[i], places=4)
                     
     def testQueryData(self):
         """ToBeImplemented"""

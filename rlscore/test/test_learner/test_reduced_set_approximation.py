@@ -12,15 +12,7 @@ from rlscore.kernel import RsetKernel
 
 class Test(unittest.TestCase):
     
-    def setUp(self):
-        random.seed(100)
-        self.X = random.random((10,100))
-        #data matrix full of zeros
-        self.X_zeros = zeros((10,100))
-        self.testm = [self.X, self.X.T, self.X_zeros]
-        #some basis vectors
-        self.basis_vectors = [0,3,7,8]
-        
+    
     def testRLS(self):
         
         print
@@ -33,12 +25,11 @@ class Test(unittest.TestCase):
         floattype = float64
         
         m, n = 100, 300
-        Xtrain = mat(random.rand(n, m))
-        #K = Xtrain.T * Xtrain
+        Xtrain = random.rand(m, n)
         ylen = 1
         Y = mat(zeros((m, ylen), dtype=floattype))
         Y = mat(random.rand(m, 1))
-        
+        basis_vectors = [0,3,7,8]
         
         def complement(indices, m):
             compl = range(m)
@@ -52,46 +43,46 @@ class Test(unittest.TestCase):
         
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
-        bk = GaussianKernel.createKernel(**{'train_features':Xtrain[:,self.basis_vectors].T, 'gamma':'0.001'})
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, 'train_features':Xtrain.T})
+        bk = GaussianKernel.createKernel(**{'train_features':Xtrain[basis_vectors], 'gamma':'0.001'})
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xtrain})
         
         rpool = {}
-        rpool['train_features'] = Xtrain.T
-        bk2 = GaussianKernel.createKernel(**{'train_features':Xtrain.T, 'gamma':'0.001'})
-        K = np.mat(bk2.getKM(Xtrain.T))
+        rpool['train_features'] = Xtrain
+        bk2 = GaussianKernel.createKernel(**{'train_features':Xtrain, 'gamma':'0.001'})
+        K = np.mat(bk2.getKM(Xtrain))
         
         Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
         rpool = {}
         rpool['train_labels'] = Y
-        rpool['kernel_matrix'] = K[self.basis_vectors]
-        rpool['basis_vectors'] = self.basis_vectors
+        rpool['kernel_matrix'] = K[basis_vectors]
+        rpool['basis_vectors'] = basis_vectors
         dualrls = RLS.createLearner(**rpool)
         
         rpool = {}
         rpool['train_labels'] = Y
-        rpool['train_features'] = Xtrain.T
-        rpool['basis_vectors'] = self.basis_vectors
+        rpool['train_features'] = Xtrain
+        rpool['basis_vectors'] = basis_vectors
         primalrls = RLS.createLearner(**rpool)
         
         testkm = K[ix_(hocompl, hoindices)]
-        Xhocompl = Xtrain[:, hocompl]
-        testX = Xtrain[:, hoindices]
+        Xhocompl = Xtrain[hocompl]
+        testX = Xtrain[hoindices]
         
         rpool = {}
         rpool['train_labels'] = Yho
-        rpool['train_features'] = Xhocompl.T
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[:,self.basis_vectors].T, 'train_features':Xhocompl.T})
+        rpool['train_features'] = Xhocompl
+        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xhocompl})
         rpool['kernel_obj'] = rk
         dualrls_naive = RLS.createLearner(**rpool)
         
         rpool = {}
         rpool['train_labels'] = Yho
-        rpool['train_features'] = Xhocompl.T
+        rpool['train_features'] = Xhocompl
         primalrls_naive = RLS.createLearner(**rpool)
         
-        rsaK = K[:, self.basis_vectors] * la.inv(K[ix_(self.basis_vectors, self.basis_vectors)]) * K[self.basis_vectors]
+        rsaK = K[:, basis_vectors] * la.inv(K[ix_(basis_vectors, basis_vectors)]) * K[basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]
         rsa_testkm = rsaK[ix_(hocompl, hoindices)]
         loglambdas = range(-5, 5)
@@ -101,24 +92,19 @@ class Test(unittest.TestCase):
             print "Regparam 2^%1d" % loglambdas[j]
             
             print (rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho).T, 'Dumb HO (dual)'
-            dumbho = rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho
+            dumbho = np.squeeze(np.array(rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho))
             
             dualrls_naive.solve(regparam)
-            predho1 = dualrls_naive.getModel().predict(testX.T)
+            predho1 = np.squeeze(dualrls_naive.getModel().predict(testX))
             print predho1.T, 'Naive HO (dual)'
             
             dualrls.solve(regparam)
-            predho2 = dualrls.computeHO(hoindices)
+            predho2 = np.squeeze(dualrls.computeHO(hoindices))
             print predho2.T, 'Fast HO (dual)'
             
-            #primalrls.solve(regparam)
-            #predho4 = primalrls.computeHO(hoindices)
-            #print predho4.T, 'Fast HO (primal)'
             for predho in [dumbho, predho1, predho2]:
                 self.assertEqual(dumbho.shape, predho.shape)
                 for row in range(predho.shape[0]):
-                    for col in range(predho.shape[1]):
-                        self.assertAlmostEqual(dumbho[row,col],predho[row,col])
-            #primalrls.solve(regparam)
-            #predho = primalrls.computeLOO()[hoindices[0]]
-            #print predho.T, 'Fast LOO (primal)'
+                    #for col in range(predho.shape[1]):
+                    #    self.assertAlmostEqual(dumbho[row,col],predho[row,col])
+                        self.assertAlmostEqual(dumbho[row],predho[row])

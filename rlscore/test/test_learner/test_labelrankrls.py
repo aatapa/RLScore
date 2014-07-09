@@ -1,6 +1,6 @@
 import sys
 
-from numpy import *
+import numpy as np
 import numpy.linalg as la
 
 from rlscore.utilities import decomposition
@@ -40,15 +40,15 @@ class Test(unittest.TestCase):
         print
         print
         
-        random.seed(100)
-        floattype = float64
+        np.random.seed(100)
+        floattype = np.float64
         
         m, n = 100, 400 #data, features
-        Xtrain = mat(random.rand(m, n))
+        Xtrain = np.mat(np.random.rand(m, n))
         K = Xtrain * Xtrain.T
         ylen = 1
-        Y = mat(zeros((m, ylen), dtype=floattype))
-        Y[:, 0] = sum(Xtrain, 1)
+        Y = np.mat(np.zeros((m, ylen), dtype=floattype))
+        Y[:, 0] = np.sum(Xtrain, 1)
         
         
         objcount = 20
@@ -59,8 +59,8 @@ class Test(unittest.TestCase):
         
         size = m
         
-        P = mat(zeros((m, objcount), dtype=float64))
-        Q = mat(zeros((objcount, m), dtype=float64))
+        P = np.mat(np.zeros((m, objcount), dtype=np.float64))
+        Q = np.mat(np.zeros((objcount, m), dtype=np.float64))
         qidlist = [0 for i in range(100)]
         for h in range(5, 12):
             qidlist[h] = 1
@@ -75,25 +75,25 @@ class Test(unittest.TestCase):
         qidlist_cv = qidlist[5: len(qidlist)]
         
         objcount = max(qidlist) + 1
-        P = mat(zeros((m, objcount), dtype=float64))
+        P = np.mat(np.zeros((m, objcount), dtype=np.float64))
         for i in range(m):
             qid = qidlist[i]
             P[i, qid] = 1.
-        labelcounts = sum(P, axis=0)
-        D = mat(zeros((1, m), dtype=float64))
+        labelcounts = np.sum(P, axis=0)
+        D = np.mat(np.zeros((1, m), dtype=np.float64))
         for i in range(m):
             qid = qidlist[i]
             D[0, i] = labelcounts[0, qid]
-        L = multiply(eye(m), D) - P * P.T
+        L = np.multiply(np.eye(m), D) - P * P.T
         
-        Kcv = K[ix_(hocompl, hocompl)]
+        Kcv = K[np.ix_(hocompl, hocompl)]
         Ycv = Y[hocompl]
-        Ktest = K[ix_(hoindices, hocompl)]
-        Lcv = L[ix_(hocompl, hocompl)]
+        Ktest = K[np.ix_(hoindices, hocompl)]
+        Lcv = L[np.ix_(hocompl, hocompl)]
         
         Xcv = Xtrain[hocompl]
         #Pcv = P[hocompl]#KLUDGE!!!!!
-        Pcv = P[ix_(hocompl, range(1, P.shape[1]))]#KLUDGE!!!!!
+        Pcv = P[np.ix_(hocompl, range(1, P.shape[1]))]#KLUDGE!!!!!
         Xtest = Xtrain[hoindices]
         Yho = Y[hocompl]
         
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
         
         
         
-        testkm = K[ix_(hocompl, hoindices)]
+        testkm = K[np.ix_(hocompl, hoindices)]
         
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):
@@ -137,30 +137,26 @@ class Test(unittest.TestCase):
             print "Regparam 2^%1d" % loglambdas[j]
             
             
-            print (testkm.T * la.inv(Lcv * Kcv + regparam * eye(Lcv.shape[0])) * Lcv * Yho).T, 'Dumb HO'
+            print np.squeeze(np.array((testkm.T * la.inv(Lcv * Kcv + regparam * np.eye(Lcv.shape[0])) * Lcv * Yho).T)), 'Dumb HO'
             
             predhos = []
             primalrls_naive.solve(regparam)
-            predpool = {}
-            predpool['prediction_features']=Xtest
-            predho = primalrls_naive.getModel().predictFromPool(predpool)
+            predho = primalrls_naive.getModel().predict(Xtest)
             print predho.T, 'Naive HO (primal)'
             predhos.append(predho)
             
             dualrls_naive.solve(regparam)
-            predpool = {}
-            predpool['prediction_features']=testkm.T
-            predho = dualrls_naive.getModel().predictFromPool(predpool)
+            predho = dualrls_naive.getModel().predict(testkm.T)
             print predho.T, 'Naive HO (dual)'
             predhos.append(predho)
             
             primalrls.solve(regparam)
-            predho = primalrls.computeHO(hoindices)
+            predho = np.squeeze(primalrls.computeHO(hoindices))
             print predho.T, 'Fast HO (primal)'
             predhos.append(predho)
             
             dualrls.solve(regparam)
-            predho = dualrls.computeHO(hoindices)
+            predho = np.squeeze(dualrls.computeHO(hoindices))
             print predho.T, 'Fast HO (dual)'
             predhos.append(predho)
             
@@ -168,5 +164,6 @@ class Test(unittest.TestCase):
             for predho in predhos:
                 self.assertEqual(predho0.shape, predho.shape)
                 for row in range(predho.shape[0]):
-                    for col in range(predho.shape[1]):
-                        self.assertAlmostEqual(predho0[row,col],predho[row,col], places=5)
+                    #for col in range(predho.shape[1]):
+                    #    self.assertAlmostEqual(predho0[row,col],predho[row,col], places=5)
+                        self.assertAlmostEqual(predho0[row],predho[row], places=5)

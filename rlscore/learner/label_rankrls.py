@@ -1,4 +1,5 @@
-from numpy import arange, float64, identity, multiply, mat, ones, zeros
+
+import numpy as np
 import numpy.linalg as la
 import scipy.sparse
 
@@ -7,7 +8,6 @@ from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
-import numpy as np
 
 class LabelRankRLS(AbstractSvdSupervisedLearner):
     """RankRLS algorithm for learning to rank
@@ -122,12 +122,12 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             qidlist = self.qidlist
             objcount = max(qidlist) + 1
             
-            labelcounts = mat(zeros((1, objcount)))
-            Pvals = ones(self.size)
+            labelcounts = np.mat(np.zeros((1, objcount)))
+            Pvals = np.ones(self.size)
             for i in range(self.size):
                 qid = qidlist[i]
                 labelcounts[0, qid] = labelcounts[0, qid] + 1
-            D = mat(ones((1, self.size), dtype=float64))
+            D = np.mat(np.ones((1, self.size), dtype=np.float64))
             
             #The centering matrix way (HO computations should be modified accordingly too)
             #for i in range(self.size):
@@ -139,22 +139,22 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
                 qid = qidlist[i]
                 D[0, i] = labelcounts[0, qid]
             
-            P = scipy.sparse.coo_matrix((Pvals, (arange(0, self.size), qidlist)), shape=(self.size,objcount))
+            P = scipy.sparse.coo_matrix((Pvals, (np.arange(0, self.size), qidlist)), shape=(self.size,objcount))
             P_csc = P.tocsc()
             P_csr = P.tocsr()
             
             
             #Eigenvalues of the kernel matrix
-            evals = multiply(self.svals, self.svals)
+            evals = np.multiply(self.svals, self.svals)
             
             #Temporary variables
-            ssvecs = multiply(self.svecs, self.svals)
+            ssvecs = np.multiply(self.svecs, self.svals)
             
             #These are cached for later use in solve and computeHO functions
-            ssvecsTLssvecs = (multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
+            ssvecsTLssvecs = (np.multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
             LRsvals, LRevecs = decomposition.decomposeKernelMatrix(ssvecsTLssvecs)
-            LRevals = multiply(LRsvals, LRsvals)
-            LY = multiply(D.T, self.Y) - P_csr * (P_csc.T * self.Y)
+            LRevals = np.multiply(LRsvals, LRsvals)
+            LY = np.multiply(D.T, self.Y) - P_csr * (P_csc.T * self.Y)
             self.multipleright = LRevecs.T * (ssvecs.T * LY)
             self.multipleleft = ssvecs * LRevecs
             self.LRevals = LRevals
@@ -166,15 +166,15 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         
         #Compute the eigenvalues determined by the given regularization parameter
         self.neweigvals = 1. / (self.LRevals + regparam)
-        self.A = self.svecs * multiply(1. / self.svals.T, (self.LRevecs * multiply(self.neweigvals.T, self.multipleright)))
+        self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
         #if self.U == None:
             #Dual RLS
         #    pass
-            #self.A = self.svecs * multiply(1. / self.svals.T, (self.LRevecs * multiply(self.neweigvals.T, self.multipleright)))
+            #self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
         #else:
             #Primal RLS
-            #self.A = self.U.T * (self.LRevecs * multiply(self.neweigvals.T, self.multipleright))
-            #self.A = self.U.T * multiply(self.svals.T,  self.svecs.T * self.A)
+            #self.A = self.U.T * (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright))
+            #self.A = self.U.T * np.multiply(self.svals.T,  self.svecs.T * self.A)
         self.results['model'] = self.getModel()
     
     
@@ -189,7 +189,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
 
         Returns
         -------
-        F : matrix, shape = [n_hsamples, n_labels]
+        F : array, shape = [n_hsamples, n_labels]
             holdout query predictions
         """
         
@@ -209,15 +209,15 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         
         indlen = len(indices)
         Qleft = self.multipleleft[indices]
-        Qho = Qleft * multiply(self.neweigvals.T, Qleft.T)
-        Pho = mat(ones((len(indices),1)))
+        Qho = Qleft * np.multiply(self.neweigvals.T, Qleft.T)
+        Pho = np.mat(np.ones((len(indices),1)))
         Yho = self.Y[indices]
         Dho = self.D[:, indices]
-        LhoYho = multiply(Dho.T, Yho) - Pho * (Pho.T * Yho)
-        RQY = Qleft * multiply(self.neweigvals.T, self.multipleright) - Qho * LhoYho
-        RQRTLho = multiply(Qho, Dho) - (Qho * Pho) * Pho.T
-        I = mat(identity(indlen))
-        return la.inv(I - RQRTLho) * RQY
+        LhoYho = np.multiply(Dho.T, Yho) - Pho * (Pho.T * Yho)
+        RQY = Qleft * np.multiply(self.neweigvals.T, self.multipleright) - Qho * LhoYho
+        RQRTLho = np.multiply(Qho, Dho) - (Qho * Pho) * Pho.T
+        I = np.mat(np.identity(indlen))
+        return np.array((I - RQRTLho).I * RQY)
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
 class LQOCV(object):

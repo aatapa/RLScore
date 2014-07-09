@@ -76,8 +76,10 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         else:
             train_labels = None
         if train_labels != None:
-            Y_orig = array_tools.as_labelmatrix(train_labels)
-            if Y_orig.shape[1] == 1:
+            #Y_orig = array_tools.as_labelmatrix(train_labels)
+            Y_orig = array_tools.as_array(train_labels)
+            #if Y_orig.shape[1] == 1:
+            if len(Y_orig.shape) == 1:
                 self.Y = zeros((Y_orig.shape[0], 2))
                 self.Y[:, 0] = Y_orig
                 self.Y[:, 1] = - Y_orig

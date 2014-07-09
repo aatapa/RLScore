@@ -76,9 +76,7 @@ class Test(unittest.TestCase):
             print dumbho, 'Dumb HO (dual)'
             
             dualrls_naive.solve(regparam)
-            kwargs = {}
-            kwargs['prediction_features'] = testkm.T
-            predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
+            predho1 = dualrls_naive.getModel().predict(testkm.T)
             print predho1, 'Naive HO (dual)'
             
             dualrls.solve(regparam)
@@ -119,9 +117,7 @@ class Test(unittest.TestCase):
         kwargs['kernel_matrix'] = Kho
         dualrls_naive = RLS.createLearner(**kwargs)
         dualrls_naive.solve(regparam)
-        kwargs = {}
-        kwargs['prediction_features'] = testkm.T
-        predho1 = dualrls_naive.getModel().predictFromPool(kwargs)
+        predho1 = dualrls_naive.getModel().predict(testkm.T)
         print sum(abs(predho1-dumbho)), 'Naive HO (dual)'
         
         dualrls.solve(regparam)

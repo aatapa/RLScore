@@ -68,7 +68,6 @@ class SvdAdapter(object):
     
     def reducedSetTransformation(self, A):
         if self.Z != None:
-            AA = mat(zeros(A.shape, dtype = A.dtype))
             #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
             return A_red
@@ -153,7 +152,7 @@ def getPrimalDataMatrix(X, bias):
     #    X = X.todense()
     X = array_tools.as_dense_matrix(X)
     if bias!=0:
-        bias_slice = sqrt(bias)*mat(ones((X.shape[0],1),dtype=float64))
+        bias_slice = sqrt(bias)*ones((X.shape[0],1),dtype=float64)
         X = np.hstack([X,bias_slice])
     return X
 
