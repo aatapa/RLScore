@@ -4,6 +4,7 @@ from scipy import sparse as sp
 import numpy as np
 from abstract_learner import AbstractSupervisedLearner
 from abstract_learner import AbstractIterativeLearner
+from rlscore.learner.abstract_learner import CallbackFunction as CF
 from rlscore import model
 from rlscore.utilities import array_tools
 
@@ -76,6 +77,8 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         if not fsize >= self.desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(self.desiredfcount) + ' of features to be selected.')
         self.results = {}
+        if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
+            self.callbackfun = DefaultCallback(**kwargs)
     
     
     def train(self):
@@ -490,3 +493,38 @@ class GreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
 #        #self.A = mat(eye(fsize+1))[:,selected_plus_bias]*(X_biased[selected_plus_bias]*self.dualvec)
 #        self.results[SELECTED_FEATURES] = self.selected
 #        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
+
+
+
+class DefaultCallback(CF):
+    
+    
+    def __init__(self, **kwargs):
+        if 'test_features' in kwargs and 'test_labels' in kwargs:
+            self.test_features = kwargs['test_features']
+            self.test_labels = kwargs['test_labels']
+            if 'test_measure' in kwargs:
+                self.test_measure = kwargs['test_measure']
+                if isinstance(self.test_measure, str):
+                    exec "from rlscore.measure import " + self.test_measure
+                    exec "self.test_measure = " + self.test_measure
+            else:
+                self.test_measure = None
+        else:
+            self.test_features = None
+    
+    
+    def callback(self, learner):
+        print
+        print 'LOOCV mean squared error', learner.bestlooperf
+        print 'The indices of selected features', learner.selected
+        if not self.test_features == None:
+            mod = learner.getModel()
+            tpreds = mod.predict(self.test_features)
+            if not self.test_measure == None:
+                test_perf = self.test_measure(self.test_labels, tpreds)
+            else:
+                testdiff = self.test_labels - tpreds
+                test_perf = mean(multiply(testdiff, testdiff))
+            print 'Test performance', test_perf
+

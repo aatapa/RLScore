@@ -20,7 +20,7 @@ def testLearners():
     #from rlscore.test.test_learner.test_greedy_labelrankrls import Test as glrrlstest
     #from rlscore.test.test_learner.test_greedy_nfold_rls import Test as gnfrlstest
     from rlscore.test.test_learner.test_reduced_set_approximation import Test as rsatest
-    #from rlscore.test.test_learner.test_greedy_rls import Test as grlstest
+    from rlscore.test.test_learner.test_greedy_rls import Test as grlstest
     #from rlscore.test.test_learner.test_multi_task_greedy_rls import Test as mtgrlstest
     from rlscore.test.test_learner.test_kronecker_rls import Test as krontest
     from rlscore.test.test_learner.test_cg_kron_rls import Test as cgkrontest
@@ -31,6 +31,7 @@ def testLearners():
     #for test in [krontest]:
     #for test in [mmctest]:
     #for test in [irlsctest]:
+    #for test in [grlstest]:
     #for test in [glrrlstest]:
     #for test in [gnfrlstest]:
     #for test in [rlstest]:
@@ -42,7 +43,7 @@ def testLearners():
     #for test in [cgtest]:
     #for test in [cgranktest]:
     #for test in [rsatest]:
-    for test in [cgtest, cgranktest, rlstest, apranktest, lranktest, rsatest]:
+    for test in [cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
