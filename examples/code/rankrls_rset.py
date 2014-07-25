@@ -7,13 +7,13 @@ from rlscore.learner.all_pairs_rankrls import LPOCV
 from rlscore.utilities.grid_search import grid_search
 train_labels = np.loadtxt("./examples/data/rank_train.labels")
 test_labels = np.loadtxt("./examples/data/rank_test.labels")
-bvectors = np.loadtxt("./examples/data/bvectors.indices")
+bvectors = np.loadtxt("./examples/data/bvectors.indices", dtype=int)
 train_features = read_sparse("./examples/data/rank_train.features")
 test_features = read_sparse("./examples/data/rank_test.features")
 kwargs = {}
 kwargs["train_labels"] = train_labels
-kwargs["bvectors"] = bvectors
-kwargs["train_features"] = train_features
+kwargs["basis_vectors"] = bvectors
+kwargs["train_features"] = train_features[bvectors]
 kwargs["regparam"] = 1
 kwargs["coef0"] = 1
 kwargs["degree"] = 3

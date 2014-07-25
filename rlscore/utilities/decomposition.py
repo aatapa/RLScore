@@ -1,8 +1,6 @@
 import numpy as np
 import numpy.linalg as la
-from numpy.linalg import cholesky
-from numpy.linalg import inv
-from numpy.linalg.linalg import LinAlgError
+#from numpy.linalg.linalg import LinAlgError
 
 SMALLEST_EVAL = 0.0000000001
 
@@ -52,7 +50,9 @@ def decomposeKernelMatrix(K, trunc = None):
     svals = np.sqrt(evals)
     return svals, evecs
 
-def decomposeSubsetKM(K_r, basis_vectors):
+
+#def decomposeSubsetKM(K_r, basis_vectors):
+def decomposeSubsetKM(K_r, K_rr):
     """decomposes r*m kernel matrix, where r is the number of basis vectors and m the
     number of training examples
     
@@ -62,17 +62,17 @@ def decomposeSubsetKM(K_r, basis_vectors):
     @type basis_vectors: list of integers
     @return svals, evecs, U, C_T_inv
     @rtype tuple of numpy matrices"""
-    K_rr = K_r[:, basis_vectors]
-    try:
-        C = cholesky(K_rr)
-    except LinAlgError:
-        #print "Warning: chosen basis vectors not linearly independent"
-        #print "Shifting the diagonal of kernel matrix"
-        __shiftKmatrix(K_r, basis_vectors)
-        K_rr = K_r[:, basis_vectors]
-        C = cholesky(K_rr)
-    C_T_inv = inv(C.T)
-    #H = (K_r).T * C_T_inv
+    #K_rr = K_r[:, basis_vectors]
+    C = la.cholesky(K_rr)
+    #try:
+    #    C = la.cholesky(K_rr)
+    #except LinAlgError:
+    #    print "Warning: chosen basis vectors not linearly independent"
+    #    print "Shifting the diagonal of kernel matrix"
+    #    __shiftKmatrix(K_r, basis_vectors)
+    #    K_rr = K_r[:, basis_vectors]
+    #    C = la.cholesky(K_rr)
+    C_T_inv = la.inv(C.T)
     H = np.dot(K_r.T, C_T_inv)
     svals, evecs, U = decomposeDataMatrix(H.T)
     return svals, evecs, U, C_T_inv

@@ -26,9 +26,9 @@ class PolynomialKernel(object):
 
     def __init__(self, train_features, degree=2, gamma=1.0, coef0=0, bias=0.0, basis_vectors=None):
         if basis_vectors != None:
-            train_features = train_features[basis_vectors]
-        X = train_features
-        self.train_X = X
+            self.train_X = basis_vectors
+        else:
+            self.train_X = train_features
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0

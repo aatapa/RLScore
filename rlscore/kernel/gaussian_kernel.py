@@ -27,13 +27,13 @@ class GaussianKernel(object):
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
         if basis_vectors != None:
-            train_features = train_features[basis_vectors]
-        X = train_features
-        self.train_X = X
-        if sp.issparse(X):
-            self.train_norms = ((X.T.multiply(X.T)).sum(axis=0)).T
+            self.train_X = basis_vectors
         else:
-            self.train_norms = np.mat((np.multiply(X.T, X.T).sum(axis=0))).T  
+            self.train_X = train_features
+        if sp.issparse(self.train_X):
+            self.train_norms = ((self.train_X.T.multiply(self.train_X.T)).sum(axis=0)).T
+        else:
+            self.train_norms = np.mat((np.multiply(self.train_X.T, self.train_X.T).sum(axis=0))).T  
         self.gamma = gamma
         self.bias = bias
         

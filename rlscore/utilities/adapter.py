@@ -57,8 +57,9 @@ class SvdAdapter(object):
         kernel = rpool['kernel_obj']
         if rpool.has_key('basis_vectors'):
             basis_vectors = rpool['basis_vectors']
-            K = kernel.getKM(train_X).T
-            svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, basis_vectors)
+            K_r = kernel.getKM(train_X).T
+            Krr = kernel.getKM(basis_vectors)
+            svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
         else:
             K = kernel.getKM(train_X).T
             svals, evecs = decomposition.decomposeKernelMatrix(K)
@@ -98,12 +99,14 @@ class LinearSvdAdapter(SvdAdapter):
         else:
             self.bias = 0.
         if basis_vectors != None or self.X.shape[1] > self.X.shape[0]:
-            K = kernel.getKM(self.X).T
             #First possibility: subset of regressors has been invoked
             if basis_vectors != None:
-                svals, evecs, U, Z = decomposition.decomposeSubsetKM(K, basis_vectors)
+                K_r = kernel.getKM(self.X).T
+                Krr = kernel.getKM(basis_vectors)
+                svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
             #Second possibility: dual mode if more attributes than examples
             else:
+                K = kernel.getKM(self.X).T
                 svals, evecs = decomposition.decomposeKernelMatrix(K)
                 U, Z = None, None
         #Third possibility, primal decomposition

@@ -20,9 +20,9 @@ class LinearKernel(object):
 
     def __init__(self, train_features, bias=0.0, basis_vectors=None, **kwargs):
         if basis_vectors != None:
-            train_features = train_features[basis_vectors]
-        X = train_features
-        self.train_X = X
+            self.train_X = basis_vectors
+        else:
+            self.train_X = train_features
         self.bias = bias
 
     def createKernel(cls, **kwargs):
