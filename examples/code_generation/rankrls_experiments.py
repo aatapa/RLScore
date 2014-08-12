@@ -38,9 +38,9 @@ experiments = {"rankrls_defparams":{
                 "measure":"cindex",
                 "selector":"LPOCV",
                 "sparams":{"measure":"cindex"},
-                "lfparams": dict(defparams.items()+[("bvectors","bvectors")]),
+                "lfparams": dict(defparams.items()+[("basis_vectors","basis_vectors")]),
                 "lparams": {"regparam":1, "kernel":"PolynomialKernel", "gamma":2, "coef0":1, "degree":3},
-                "files": dict(rfiles.items()+[("bvectors",'./examples/data/bvectors.indices')])},
+                "files": dict(rfiles.items()+[("basis_vectors",'./examples/data/bvectors.indices')])},
                
                "rankrls_qids":{
                 "learner":"LabelRankRLS",
