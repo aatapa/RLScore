@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.linalg as la
-#from numpy.linalg.linalg import LinAlgError
+from numpy.linalg.linalg import LinAlgError
 
 SMALLEST_EVAL = 0.0000000001
 
@@ -63,15 +63,16 @@ def decomposeSubsetKM(K_r, K_rr):
     @return svals, evecs, U, C_T_inv
     @rtype tuple of numpy matrices"""
     #K_rr = K_r[:, basis_vectors]
-    C = la.cholesky(K_rr)
-    #try:
-    #    C = la.cholesky(K_rr)
-    #except LinAlgError:
-    #    print "Warning: chosen basis vectors not linearly independent"
-    #    print "Shifting the diagonal of kernel matrix"
-    #    __shiftKmatrix(K_r, basis_vectors)
-    #    K_rr = K_r[:, basis_vectors]
-    #    C = la.cholesky(K_rr)
+    #C = la.cholesky(K_rr)
+    try:
+        C = la.cholesky(K_rr)
+    except LinAlgError:
+        print "Warning: chosen basis vectors not linearly independent"
+        print "Shifting the diagonal of kernel matrix"
+        #__shiftKmatrix(K_r, basis_vectors)
+        #K_rr = K_r[:, basis_vectors]
+        #C = la.cholesky(K_rr)
+        C = la.cholesky(K_rr+0.000000001 * np.eye(K_rr.shape[0]))
     C_T_inv = la.inv(C.T)
     H = np.dot(K_r.T, C_T_inv)
     svals, evecs, U = decomposeDataMatrix(H.T)
