@@ -7,12 +7,12 @@ from rlscore.learner.rls import LOOCV
 from rlscore.utilities.grid_search import grid_search
 train_labels = np.loadtxt("./examples/data/class_train.labels")
 test_labels = np.loadtxt("./examples/data/class_test.labels")
-bvectors = np.loadtxt("./examples/data/bvectors.indices", dtype=int)
+basis_vectors = np.loadtxt("./examples/data/bvectors.indices")
 train_features = read_sparse("./examples/data/class_train.features")
 test_features = read_sparse("./examples/data/class_test.features")
 kwargs = {}
 kwargs["train_labels"] = train_labels
-kwargs["basis_vectors"] = train_features[bvectors]
+kwargs["basis_vectors"] = train_features[basis_vectors]
 kwargs["train_features"] = train_features
 kwargs["regparam"] = 1
 kwargs["gamma"] = 0.01

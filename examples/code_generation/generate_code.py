@@ -24,7 +24,10 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
             code.append('%s = np.loadtxt("%s")' %(key, files[key])) 
     code.append("kwargs = {}")
     for key in lfparams:
-        code.append('kwargs["%s"] = '%key +str(lfparams[key]))
+        if key == "basis_vectors":
+            code.append('kwargs["%s"] = '%key +"train_features["+str(lfparams[key])+"]")
+        else:
+            code.append('kwargs["%s"] = '%key +str(lfparams[key]))
     for key in lparams:
         if isinstance(lparams[key], str):
             code.append('kwargs["%s"] = "%s"' %(key, lparams[key]))
