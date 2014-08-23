@@ -153,10 +153,10 @@ Requirements:
 - class labels should be either 1 (positive) or -1 (negative)
 
 
-Python code (rls_classification) `relative link`_.
+Python code (`rls_classification.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-.. _relative link: examples/code/rls_classification.py
+.. _rls_classification.py: examples/code/rls_classification.py
 
 Ranking with RankRLS, minimize pairwise mis-orderings
 -----------------------------------------------------
