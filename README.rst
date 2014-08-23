@@ -156,8 +156,7 @@ Requirements:
 Python code (rls_classification)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rls_classification.py
-   :literal:
+`examples/code/rls_classification.py`_
 
 Ranking with RankRLS, minimize pairwise mis-orderings
 -----------------------------------------------------
@@ -286,9 +285,6 @@ cross-validation or multiple output learning does not increase this complexity
 due to computational shortcuts. In practice kernels can be used with several
 thousands of training data points. For large scale learning with kernels, see
 reduced set approximation
-
-Currently grid searching for kernel parameters is not supported, the
-way to accomplish this is to write a wrapper script around rls_core.
 
 In the following example we traing a RLS classifier using Gaussian kernel,
 the other learners can be used with kernels in an analogous way. The only
