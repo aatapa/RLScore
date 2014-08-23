@@ -185,7 +185,7 @@ CGRankRLS, which is optimized for such a data
 
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences, see
-`Python code (rankrls_cg_preferences)`_
+`Learning linear models from large sparse data sets`_
 
 
 Python code for query ranking (`rankrls_lqo.py`_)
@@ -288,7 +288,7 @@ reduced set approximation
 In the following example we traing a RLS classifier using Gaussian kernel,
 the other learners can be used with kernels in an analogous way. The only
 change needed to the earlier examples is to define 'kernel=GaussianKernel'
-and supply the kernel parameters under [Parameters].
+and supply the kernel parameters, such as gamma determining the width of the Gaussian.
 
 
 Python code (`rls_gaussian.py`_)
@@ -357,21 +357,16 @@ Reduced set approximation
 Once training data set size exceeds several thousand examples, training the
 learning methods with (non-linear) kernels becomes infeasible.
 For this case RLScore implements the reduced set approximation algorithm, where
-only a pre-specified subset of training examples are used to represent the dual
-solution learned. 
+only a pre-specified set of inputs (so-called 'basis 'vectors') are used to
+represent the dual solution learned. 
 
-To use the reduced set approximation, one should supply the indices of those
-training examples which are used to represent the learned solution
-(so-called 'basis 'vectors') in a file. The file should contain one line,
-where the indices are separated with whitespaces.
+To use the reduced set approximation, one should supply the basis vectors in
+the same format as the training inputs.
 
 The best way for selecting the basis vectors is an open research question,
 uniform random subsampling of training set indices provides usually decent
-results.
-
-While cross-validation can be performed with the reduced set approximation,
-the results are only approximative. For small regularization parameter
-values pessimistic bias has been observed in the cross-validation estimates.
+results, but one can also provide a set of centroids obtained, for example,
+with a clustering algorithm.
 
 
 Python code (`rls_reduced.py`_)
