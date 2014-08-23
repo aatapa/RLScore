@@ -11,7 +11,7 @@ for regression, classification, ranking, clustering, and feature selection.
                   `Antti Airola <http://tucs.fi/education/phd/alumni/student.php?student=120>`_
 :Email:           firstname.lastname@utu.fi
 :Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore/ <http://staff.cs.utu.fi/~aatapa/software/RLScore/>`_
-:Version:         0.5
+:Version:         0.5.1
 :License:         `The MIT License <LICENCE.TXT>`_
 :Date:            2012.06.19
 
@@ -104,177 +104,21 @@ Software dependencies
 =====================
 
 RLScore is written in Python and thus requires a working
-installation of Python 2.6.x. The package is also dependent on
+installation of Python 2.8.x. The package is also dependent on
 the `NumPy 1.3.x <http://numpy.scipy.org/>`_ package for matrix
-operations, and `SciPy 0.7.x <http://www.scipy.org/>`_ package for sparse
-matrix implementations. The
-`psyco <http://psyco.sourceforge.net/>`_ package is automatically
-used if installed.
+operations, and `SciPy 0.13.x <http://www.scipy.org/>`_ package for sparse
+matrix implementations.
 
 Usage
 =====
-RLScore is designed to be used by supplying a configuration file defining
-the learning task to the rls_core program. 
+RLScore is designed to be used as a software library, called directly from Python code.
 
-The easiest way to use RLScore is by modifying one of the example configuration
-files delivered with the distribution, to match your task. The software supports
-a wide variety of different learning tasks, ranging from supervised learning to
-clustering and feature selection. 
-
-To run RLScore using a configuration defined in a file example.cfg,
-simply write::
-
-    python rls_core.py example.cfg
-
-The structure of the configuration file is described in detail next.
-
-There is also a programming interface to RLScore. There is not yet a documentation
-of the API available, but for each configuration file we provide also example Python
-code for executing the same run.
-
-Configuration file
-------------------
-
-The configuration file consists of [Sections], which contain
-attribute=value pairs. The configuration file is case sensitive,
-the ordering within sections does not matter. Use # to start
-comment. None of the attributes are mandatory. However, setting
-certain attributes also requires some other attributes to be set.
-The sections in the configuration are `[Modules]`_,
-`[Parameters]`_, `[Input]`_, and `[Output]`_ sections.
-
-[Modules]
-~~~~~~~~~
-
-The Modules section defines the main modules used for model
-selection, learning and performance evaluation. The attributes
-in the section are
-    
-:learner:    by defining the learner you inform RLScore that it
-             should train one of the available learning algorithms
-:kernel:     defines the used kernel function. For kernel
-             parameters, see `[Parameters]`_
-:measure:    defines the performance measure used for model
-             selection and/or evaluating
-:mselection: defines the used model selection strategy. The model
-             selection strategies are not compatible with all the
-             learners, and some not with all performance measures.
-
-learner
-.......
-
-RLScore currently has the following four possible values of the learner
-attribute:
-
-- :Value:        RLS
-  :Description:  Regularized least-squares regression, or accuracy maximizing classification.
-  :Modules:      `kernel`_ , `mselection`_ (optional, compatible with LOOSelection, NfoldSelection, ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used), `bias`_ , kernel parameters
-  :Input data:   `train_features`_ , `train_labels`_
-
-- :Value:        AllPairsRankRLS
-  :Description:  Regularized least-squares ranking, or AUC-maximizing classification.
-  :Modules:      `kernel`_, `mselection`_ (optional, compatible with LPOSelection, NfoldSelection, ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used), kernel parameters
-  :Input data:   `train_features`_ , `train_labels`_
-
-- :Value:        LabelRankRLS
-  :Description:  Regularized least-squares ranking with a query-structure.
-  :Modules:      `kernel`_, 'mselection'_ (optional, compatible with NfoldSelection, ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used), kernel parameters
-  :Input data:   `train_features`_ , `train_labels`_ , `train_qids`_
-  
-- :Value:        CGRLS
-  :Description:  Regularized least-squares regression, or accuracy maximizing classification. Large scale algoritm for large and high-dimensional but sparse data sets, and linear kernel. Gives equivalent results as RLS.
-  :Modules:      `mselection`_ (optional, compatible with ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used), `bias`_
-  :Input data:   `train_features`_ , `train_labels`_ . Supplying `validation_features`_ and `validation_labels`_ will automatically lead to using early stopping for faster training, by measuring sqerror on validation data, and terminating after no improvement is seen for 10 iterations.
-
-- :Value:        CGRankRLS
-  :Description:  Regularized least-squares ranking, or AUC-maximizing classification. Also ranking with a query-structure. Large scale algoritm for large and high-dimensional but sparse data sets, and linear kernel. Gives equivalent results as AllPairsRankRLS (or LabelRankRLS, if queries are supplied).
-  :Modules:      `mselection`_ (optional, compatible with ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used),
-  :Input data:   `train_features`_ , `train_labels`_ , `train_qids`_ (optional). Supplying `validation_features`_ , `validation_labels`_ and optionally `validation_qids`_ , will automatically lead to using early stopping for faster training, by measuring sqmprank-error on validation data, and terminating after no improvement is seen for 10 iterations.
-  
-- :Value:        GreedyRLS
-  :Description:  Feature selecting regularized least-squares learner.
-  :Modules:      `kernel`_ , `mselection`_ (compatible with ValidationSetSelection)
-  :Parameters:   `regparam`_ (or `reggrid`_ if 'mselection'_ used), `subsetsize`_ , `bias`_
-  :Input data:   `train_features`_ , `train_labels`_
-
-- :Value:        MMC
-  :Description:  Maximum margin clustering based on evolutionary search and regularized least-squares.
-  :Modules:      `kernel`_
-  :Parameters:   `regparam`_ (or `reggrid`_ if `mselection`_ used), `number_of_clusters`_ , `bias`_ , kernel parameters
-  :Input data:   `train_features`_
-
-Of these, the first six are supervised learners and the last
-is an unsupervised clustering method.
-
-kernel
-......
-
-The kernel attribute defines the used kernel function. This should be supplied to the kernel-based learners,
-default behaviour is to use linear kernel if this is not supplied. Parameters can be supplied for kernel functions in
-the `[Parameters]`_ section. For the kernel atribute, RLScore currently supports the following three values
-
-- :Value:        LinearKernel
-  :Description:  The linear kernel aka the standard inner product <x,z> of feature vectors x and z. This is the default value for the kernel attribute.
-  :Parameters:   None.
-  :Requirements: None.
-- :Value:        GaussianKernel
-  :Description:  The Gaussian radial basis function kernel e^(-gamma*<x-z,x-z>) for feature vectors x and z, where g is the width of the Gaussian kernel.
-  :Parameters:   gamma (default 1)
-  :Requirements: gamma > 0
-- :Value:        PolynomialKernel
-  :Description:  The polynomial kernel k(x,z) = (gamma * <x,z> + coef0)^degree for feature vectors x and z, where d, c, and g are kernel parameters. 
-  :Parameters:   gamma (default 1), coef0 (default 0.), degree (default 2)
-  :Requirements: degree>0, coef0>=0, gamma>0. Moreover, degree must be integer, while c and g may be floats.
+The easiest way to use RLScore is by modifying one of the example python codes delivered
+with the distribution, to match your task. The software supports a wide variety of
+different learning tasks, ranging from supervised learning to clustering and feature
+selection. 
 
 
-measure
-.......
-
-The measure attribute defines the performance measure used for model selection and/or evaluating
-test performance.
-
-- :Value:        sqerror
-  :Description:  Mean squared error, for regression.
-  :Requirements: None
-- :Value:        accuracy
-  :Description:  Accuracy, for binary classification.
-  :Requirements: The correct labels must be +1 or -1.
-- :Value:        auc
-  :Description:  Area under ROC curver, for classification (bipartite ranking).
-  :Requirements: The correct labels must be +1 or -1.
-- :Value:        ova_accuracy
-  :Description:  Multiclass classification accuracy, one-vs-all strategy.
-  :Requirements: The correct labels must be +1 or -1 and there must be one and only one +1 per data point.
-- :Value:        disagreement
-  :Description:  Disagreement error, the number of misordered pairs in pairwise ranking.
-  :Requirements: None
-- :Value:        sqmprank
-  :Description:  Squared magnitude-preserving ranking error. Average value of ((f(x1)-f(x2))-(y1-y2))**2 over all data point pairs.
-  :Requirements: None
-- :Value:        fscore
-  :Description:  F1-score
-  :Requirements: The correct labels must be +1 or -1.
-
-mselection
-..........    
-
-The mselection attribute defines the model selection strategy used for selecting the
-regularization parameter. The model selection strategies are
-not compatible with all the learners, and some not with all performance measures.
-    
-- :Value:        NfoldSelection
-  :Description:  N-fold cross-validation or repeated hold-out for RLS or AllPairsRankRLS. Uses by default randomized 10-fold partition. User supplied hold-out sets can be provided via `cross-validation_folds`_ attribute in the `[Input]`_ section. For LabelRankRLS, each query forms a fold and user supplied hold-out sets are not supported.
-- :Value:        LOOSelection
-  :Description:  Leave-one-out cross-validation. Supported by RLS.
-- :Value:        LPOSelection
-  :Description:  Leave-pair-out cross-validation. Supported by AllPairsRankRLS. Based on disagreement error.
-- :Value:        ValidationSetSelection
-  :Description:  Parameter selection on a separate validation set. Supported by all the supervised learners. Requires in the `[Input]`_ section `validation_features`_ , `validation_labels`_ (also optionally for RankRLS learners, `validation_qids`_ ).
 
 [Parameters]
 ~~~~~~~~~~~~
@@ -651,20 +495,20 @@ supported.
 Examples
 ========
 
-RLScore is designed to be used by supplying a configuration file defining
-the learning task to the rls_core program. 
+RLScore is designed to be used by calling the appropriate learners from a
+python code.
 
-The easiest way to use RLScore is by modifying one of the example configuration
+The easiest way to use RLScore is by modifying one of the example python code
 files presented next, to match your task. The software supports a wide variety
 of different learning tasks, ranging from supervised learning to clustering and
 feature selection. Examples of typical use-cases for each type of task are
 provided below.
 
-The configuration files, and the example data sets used by them can be found
+The example code files, and the example data sets used by them can be found
 in the 'examples' folder of the RLScore distribution. For example, to run the
-configuration 'reg_train.cfg' included in examples/cfgs from the command line,
+example file 'reg_train.py' included in examples/code from the command line,
 go to the folder containing the RLScore distribution, and execute the command
-'python rls_core.py examples/cfgs/reg_train.cfg'
+'python examples/code/reg_train.py'
 
 While the examples use Unix-style paths with '/' separator,
 they work also in Windows with no modifications needed.
@@ -689,12 +533,6 @@ Requirements:
 - class labels should be either 1 (positive) or -1 (negative)
 
 
-Config file (classacc_all)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/classacc_all.cfg
-   :literal:
-
 Python code (classacc_all)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -717,12 +555,6 @@ RankRLS learner which minimizes a pairwise least-squares loss on the
 training set class labels is recommended. Leave-pair-out cross-validation
 is recommended for model selection, unless the data set is very large.
 
-
-Config file (classAUC_all)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/classAUC_all.cfg
-   :literal:
 
 Python code (classAUC_all)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -761,14 +593,8 @@ CGRankRLS, which is optimized for such a data
 
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences, see
-`Config file (cgrank_test_with_preferences)`_ and
 `Python code (cgrank_test_with_preferences)`_
 
-Config file (rankqids_all)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/rankqids_all.cfg
-   :literal:
 
 Python code (rankqids_all)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -784,12 +610,6 @@ Regression
 In regression, the task is to predict real-valued labels. The regularized
 least-squares (RLS) module is suitable for solving this task.
 
-
-Config file (reg_all)
-~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/reg_all.cfg
-   :literal:
 
 Python code (reg_all)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -815,12 +635,6 @@ problem is NP-hard, stochastic hill-climbing together with computational
 shortcuts is used to search for a locally optimal solution. Re-starts
 may be necessary for discovering good clustering.
 
-
-Config file (clustering)
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/clustering.cfg
-   :literal:
 
 Python code (clustering)
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -851,12 +665,6 @@ The LOO performances made by GreedyRLS in each step of the greedy forward
 selection process are written to the file provided
 as the 'GreedyRLS_LOO_performances' parameter.
 
-
-Config file (fselection)
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/fselection.cfg
-   :literal:
 
 Python code (fselection)
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -889,24 +697,12 @@ change needed to the earlier examples is to define 'kernel=GaussianKernel'
 and supply the kernel parameters under [Parameters].
 
 
-Config file (gaussian_kernel)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/gaussian_kernel.cfg
-   :literal:
-
 Python code (gaussian_kernel)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. include:: examples/code/gaussian_kernel.py
    :literal:
 
-
-Config file (polynomial_kernel)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/polynomial_kernel.cfg
-   :literal:
 
 Python code (polynomial_kernel)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -935,24 +731,12 @@ cross-validation.
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences.
 
-Config file (cgrls_test)
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/cgrls_test.cfg
-   :literal:
-
 Python code (cgrls_test)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. include:: examples/code/cgrls_test.py
    :literal:
 
-
-Config file (cgrank_test)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/cgrank_test.cfg
-   :literal:
 
 Python code (cgrank_test)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -961,22 +745,10 @@ Python code (cgrank_test)
    :literal:
 
 
-Config file (cgrank_qids)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/cgrank_qids.cfg
-   :literal:
-
 Python code (cgrank_qids)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. include:: examples/code/cgrank_qids.py
-   :literal:
-
-Config file (cgrank_test_with_preferences)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/cgrank_test_with_preferences.cfg
    :literal:
 
 Python code (cgrank_test_with_preferences)
@@ -1010,12 +782,6 @@ the results are only approximative. For small regularization parameter
 values pessimistic bias has been observed in the cross-validation estimates.
 
 
-Config file (reduced_set)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/cfgs/reduced_set.cfg
-   :literal:
-
 Python code (reduced_set)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1044,6 +810,16 @@ Python code (Kronecker RLS)
 History
 =======
 
+Version 0.5.1 (2014.07.31)
+------------------------
+- This is a work in progress version maintained in a github repository.
+- The command line functionality is dropped and the main focus is shifted towards the library interface.
+- The interface has been considerably simplified to ease the use of the library.
+- Learning with tensor (Kronecker) product kernels considerably extended.
+- Many learners now implemented with cython to improve speed.
+- Support for a new type of interactive classification usable for image segmentation and various other tasks.
+- Numerous internal changes in the software.
+
 Version 0.5 (2012.06.19)
 ------------------------
 - CGRLS and CGRankRLS learners for conjugate gradient -based training of RLS/RankRLS on large and high-dimensional, but sparse data.
@@ -1056,7 +832,7 @@ Version 0.4 (2010.04.14)
 ------------------------
 
 - A linear time greedy forward feature selection with leave-one-out criterion for RLS (greedy RLS) included.
-- Example data and configurations for basic use cases included in the distribution.
+- Example data and codes for basic use cases included in the distribution.
 - Fixed a bug causing problems when reading/writing binary files in Windows.
 - Modifications to the configuration file format.
 - All command line interfaces other than rls_core.py removed.
