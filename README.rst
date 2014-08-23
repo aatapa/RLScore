@@ -153,8 +153,8 @@ Requirements:
 - class labels should be either 1 (positive) or -1 (negative)
 
 
-Python code (rls_classification)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (rls_classification) `relative link`_.
+
 
 .. _relative link: examples/code/rls_classification.py
 
