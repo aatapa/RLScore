@@ -122,23 +122,16 @@ selection.
 Examples
 ========
 
-RLScore is designed to be used by calling the appropriate learners from a
-python code.
-
-The easiest way to use RLScore is by modifying one of the example python code
-files presented next, to match your task. The software supports a wide variety
-of different learning tasks, ranging from supervised learning to clustering and
-feature selection. Examples of typical use-cases for each type of task are
-provided below.
+Examples of typical use-cases for each type of task are provided below.
 
 The example code files, and the example data sets used by them can be found
 in the 'examples' folder of the RLScore distribution. For example, to run the
-example file 'reg_train.py' included in examples/code from the command line,
+example file 'rls_classification.py' included in examples/code from the command line,
 go to the folder containing the RLScore distribution, and execute the command
-'python examples/code/reg_train.py'
+'python examples/code/rls_classification.py'
 
 While the examples use Unix-style paths with '/' separator,
-they work also in Windows with no modifications needed.
+they should also work in Windows with no modifications needed.
 
 
 Binary classification, maximize accuracy
@@ -160,36 +153,11 @@ Requirements:
 - class labels should be either 1 (positive) or -1 (negative)
 
 
-Python code (classacc_all)
+Python code (rls_classification)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/classacc_all.py
+.. include:: examples/code/rls_classification.py
    :literal:
-
-    
-
-Binary classification with RankRLS, maximize area under ROC curve (AUC)
------------------------------------------------------------------------
-
-In binary classification, the data is separated into two classes, which are
-often referred to as the positive, and the negative class. AUC measures
-the probability, that a randomly drawn positive data point receives a higher
-predicted value than a randomly drawn negative one. The measure is especially
-suitable for unbalanced data.
-
-When training a classifier according to the AUC criterion, using the
-RankRLS learner which minimizes a pairwise least-squares loss on the
-training set class labels is recommended. Leave-pair-out cross-validation
-is recommended for model selection, unless the data set is very large.
-
-
-Python code (classAUC_all)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/code/classAUC_all.py
-   :literal:
-
-
 
 Ranking with RankRLS, minimize pairwise mis-orderings
 -----------------------------------------------------
@@ -199,34 +167,38 @@ accurate ranking when ordering new examples according to the predicted
 values. That is, more relevant examples should receive higher predicted
 scores than less relevant.
 
+When training a ranker, using the RankRLS learner which minimizes a pairwise
+least-squares loss on the training set class labels is recommended.
+
 Using qids means that instead of a total order over all examples, each
 query has it's own ordering, and examples from different queries should
 not be compared. For example in information retrieval, each query
 might consist of the ordering of a set of documents according to
 a query posed by a user.
 
-When training a ranker, using the RankRLS learner which minimizes a pairwise
-least-squares loss on the training set class labels is recommended.
-Leave-query-out cross-validation is recommended for parameter selection.
+There are two variants of the RankRLS module, the LabelRankRLS that should
+be used when using queries, and the AllPairsRankRLS that should be used
+otherwise.
 
-In case you have a total order over all examples, instead of query structrue,
-proceed as follows:
-- do not supply qid files
-- replace LabelRankRLS with AllPairsRankRLS in the Modules section
-
-If the data is both high dimensional and sparse, one should use the module
+Additionally, if the data is both high dimensional and sparse, one should use the module
 CGRankRLS, which is optimized for such a data
 (see `Learning linear models from large sparse data sets`_).
 
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences, see
-`Python code (cgrank_test_with_preferences)`_
+`Python code (rankrls_cg_preferences)`_
 
 
-Python code (rankqids_all)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code for query ranking (rankrls_lqo.py)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rankqids_all.py
+.. include:: examples/code/rankrls_lqo.py.py
+   :literal:
+   
+Python code for global ranking (rankrls_lpo.py)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. include:: examples/code/rankrls_lpo.py.py
    :literal:
 
 
@@ -238,10 +210,10 @@ In regression, the task is to predict real-valued labels. The regularized
 least-squares (RLS) module is suitable for solving this task.
 
 
-Python code (reg_all)
+Python code (rls_regression)
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/reg_all.py
+.. include:: examples/code/rls_regression.py
    :literal:
 
 
@@ -263,10 +235,10 @@ shortcuts is used to search for a locally optimal solution. Re-starts
 may be necessary for discovering good clustering.
 
 
-Python code (clustering)
+Python code (mmc_defparams)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/clustering.py
+.. include:: examples/code/mmc_defparams.py
    :literal:
 
 
@@ -293,10 +265,10 @@ selection process are written to the file provided
 as the 'GreedyRLS_LOO_performances' parameter.
 
 
-Python code (fselection)
+Python code (greedyrls)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/fselection.py
+.. include:: examples/code/greedyrls.py
    :literal:
 
 
@@ -324,17 +296,17 @@ change needed to the earlier examples is to define 'kernel=GaussianKernel'
 and supply the kernel parameters under [Parameters].
 
 
-Python code (gaussian_kernel)
+Python code (rls_gaussian)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/gaussian_kernel.py
+.. include:: examples/code/rls_gaussian.py
    :literal:
 
 
-Python code (polynomial_kernel)
+Python code (rls_polynomial)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/polynomial_kernel.py
+.. include:: examples/code/rls_polynomial.py
    :literal:
 
 Learning linear models from large sparse data sets
@@ -358,30 +330,30 @@ cross-validation.
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences.
 
-Python code (cgrls_test)
+Python code (cg_rls)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/cgrls_test.py
+.. include:: examples/code/cg_rls.py
    :literal:
 
 
-Python code (cgrank_test)
+Python code (rankrls_cg)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/cgrank_test.py
+.. include:: examples/code/rankrls_cg.py
    :literal:
 
 
-Python code (cgrank_qids)
+Python code (rankrls_cg_qids)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/cgrank_qids.py
+.. include:: examples/code/rankrls_cg_qids.py
    :literal:
 
-Python code (cgrank_test_with_preferences)
+Python code (rankrls_cg_preferences)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/cgrank_test_with_preferences.py
+.. include:: examples/code/rankrls_cg_preferences.py
    :literal:
 
 
@@ -409,28 +381,10 @@ the results are only approximative. For small regularization parameter
 values pessimistic bias has been observed in the cross-validation estimates.
 
 
-Python code (reduced_set)
+Python code (rls_reduced)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/reduced_set.py
-   :literal:
-
-
-
-Regression with Kronecker kernel
---------------------------------
-
-Regularized least-squares regression with Kronecker kernels is a method
-that takes advantage of the computational short-cuts for inverting
-so-called shifted Kronecker product systems. The current implementation
-only works with the library interface and with kernel matrices for
-training and prediction that are constructed in advance.
- 
-
-Python code (Kronecker RLS)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/code/kron_train_and_predict.py
+.. include:: examples/code/rls_reduced.py
    :literal:
 
 
