@@ -156,7 +156,7 @@ Requirements:
 Python code (rls_classification)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`examples/code/rls_classification.py`_
+.. _relative link: examples/code/rls_classification.py
 
 Ranking with RankRLS, minimize pairwise mis-orderings
 -----------------------------------------------------
