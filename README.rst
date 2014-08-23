@@ -188,17 +188,16 @@ supports learning from pairwise preferences, see
 `Python code (rankrls_cg_preferences)`_
 
 
-Python code for query ranking (rankrls_lqo.py)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code for query ranking (`rankrls_lqo.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rankrls_lqo.py.py
-   :literal:
+.. _rankrls_lqo.py: examples/code/rankrls_lqo.py.py
+
    
-Python code for global ranking (rankrls_lpo.py)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code for global ranking (`rankrls_lpo.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rankrls_lpo.py.py
-   :literal:
+.. _rankrls_lpo.py: examples/code/rankrls_lpo.py.py
 
 
 
@@ -209,11 +208,11 @@ In regression, the task is to predict real-valued labels. The regularized
 least-squares (RLS) module is suitable for solving this task.
 
 
-Python code (rls_regression)
-~~~~~~~~~~~~~~~~~~~~~
+Python code (`rls_regression.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rls_regression.py
-   :literal:
+.. _rls_regression.py: examples/code/rls_regression.py
+
 
 
 
@@ -234,11 +233,11 @@ shortcuts is used to search for a locally optimal solution. Re-starts
 may be necessary for discovering good clustering.
 
 
-Python code (mmc_defparams)
-~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`mmc_defparams.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/mmc_defparams.py
-   :literal:
+.. _mmc_defparams.py: examples/code/mmc_defparams.py
+
 
 
 
@@ -264,11 +263,11 @@ selection process are written to the file provided
 as the 'GreedyRLS_LOO_performances' parameter.
 
 
-Python code (greedyrls)
-~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`greedyrls.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/greedyrls.py
-   :literal:
+.. _greedyrls.py: examples/code/greedyrls.py
+
 
 
 
@@ -292,18 +291,18 @@ change needed to the earlier examples is to define 'kernel=GaussianKernel'
 and supply the kernel parameters under [Parameters].
 
 
-Python code (rls_gaussian)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`rls_gaussian.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rls_gaussian.py
-   :literal:
+.. _rls_gaussian.py: examples/code/rls_gaussian.py
 
 
-Python code (rls_polynomial)
+
+Python code (`rls_polynomial.py`_)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rls_polynomial.py
-   :literal:
+.. _rls_polynomial.py: examples/code/rls_polynomial.py
+
 
 Learning linear models from large sparse data sets
 --------------------------------------------------
@@ -326,31 +325,29 @@ cross-validation.
 In addition to learning from utility scores of data points, CGRankRLS also
 supports learning from pairwise preferences.
 
-Python code (cg_rls)
-~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`cg_rls.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/cg_rls.py
-   :literal:
-
-
-Python code (rankrls_cg)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: examples/code/rankrls_cg.py
-   :literal:
+.. _cg_rls.py: examples/code/cg_rls.py
 
 
-Python code (rankrls_cg_qids)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`rankrls_cg.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rankrls_cg_qids.py
-   :literal:
+.. _rankrls_cg.py: examples/code/rankrls_cg.py
 
-Python code (rankrls_cg_preferences)
+
+Python code (`rankrls_cg_qids.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _rankrls_cg_qids.py: examples/code/rankrls_cg_qids.py
+
+
+Python code (`rankrls_cg_preferences.py`_)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rankrls_cg_preferences.py
-   :literal:
+.. _rankrls_cg_preferences.py: examples/code/rankrls_cg_preferences.py
+
 
 
 
@@ -377,11 +374,11 @@ the results are only approximative. For small regularization parameter
 values pessimistic bias has been observed in the cross-validation estimates.
 
 
-Python code (rls_reduced)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Python code (`rls_reduced.py`_)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: examples/code/rls_reduced.py
-   :literal:
+.. _rls_reduced.py: examples/code/rls_reduced.py
+
 
 
 History
