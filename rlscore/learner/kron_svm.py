@@ -12,14 +12,6 @@ CALLBACK_FUNCTION = 'callback'
 
 class KronSVM(object):
     
-    '''def __init__(self, train_labels, label_row_inds, label_col_inds, regparam=1.0):
-        self.Y = array_tools.as_labelmatrix(train_labels)
-        self.regparam = regparam
-        self.label_row_inds = label_row_inds
-        self.label_col_inds = label_col_inds
-        self.results = {}'''
-    
-    
     def __init__(self, **kwargs):
         self.resource_pool = kwargs
         Y = kwargs[TRAIN_LABELS]
@@ -65,16 +57,11 @@ class KronSVM(object):
         colind = self.label_col_inds
         fdim = X1.shape[1]*X2.shape[1]
         def func(v):
-            #REPLACE
-            #P = np.dot(X,v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             return np.dot(z,z)+lamb*np.dot(v,v)
         def gradient(v):
-            #REPLACE
-            #P = np.dot(X,v)
-            #P = vecProd(X1, X2, v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
@@ -82,19 +69,13 @@ class KronSVM(object):
             #map to rows and cols
             rows = rowind[sv]
             cols = colind[sv]
-            #A = -2*np.dot(X[sv].T, Y[sv])
             A = -2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
             A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
-            #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
             v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
             v_after = 2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
             B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
-            #print "FOOOBAAR"
             return A + B + lamb*v
-            #return -2*np.dot(X[sv].T,Y[sv]) + 2 * np.dot(X[sv].T, np.dot(X[sv],v)) + lamb*v
         def hessian(v, p):
-            #P = np.dot(X,v)
-            #P = vecProd(X1, X2, v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
@@ -106,18 +87,13 @@ class KronSVM(object):
             p_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
             p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
             return 2 * p_after + lamb*p    
-            #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
         w = np.zeros(fdim)
-        #np.random.seed(1)
-        #w = np.random.random(fdim)
         def mv(v):
             return hessian(w, v)
         for i in range(self.newton_it):
             g = gradient(w)
             G = LinearOperator((fdim, fdim), matvec=mv, dtype=np.float64)
             w_new = cg(G, g, maxiter=self.cg_it)[0]
-            #print w_new
-            #assert False
             r = G*w_new - g
             e_rel = np.linalg.norm(r)/np.linalg.norm(g)
             w = w - w_new
