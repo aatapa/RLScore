@@ -24,11 +24,11 @@ class Test(unittest.TestCase):
         #with poscount+negcount instances. Data is normally
         #distributed, with mean1 for positive class,
         #mean2 for negative class and unit variance
-        X_pos = np.random.randn(poscount, dim)+mean1
-        X_neg = np.random.randn(negcount, dim)+mean2
+        X_pos = np.random.randn(poscount, dim) + mean1
+        X_neg = np.random.randn(negcount, dim) + mean2
         X = np.vstack((X_pos, X_neg))
-        Y = np.vstack((np.ones((poscount, 1)), -1.*np.ones((negcount,1))))
-        perm = np.random.permutation(range(poscount+negcount))
+        Y = np.vstack((np.ones((poscount, 1)), -1. * np.ones((negcount, 1))))
+        perm = np.random.permutation(range(poscount + negcount))
         X = X[perm]
         Y = Y[perm]
         return X, Y
@@ -148,6 +148,7 @@ class Test(unittest.TestCase):
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
         params["train_labels"] = Y_train
+        params["regparam"] = regparam
         linear_kron_condrank_learner = KronRLS.createLearner(**params)
         linear_kron_condrank_learner.solve_linear_conditional_ranking(regparam)
         condrank_model = linear_kron_condrank_learner.getModel()
