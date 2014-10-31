@@ -130,14 +130,14 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             D = np.mat(np.ones((1, self.size), dtype=np.float64))
             
             #The centering matrix way (HO computations should be modified accordingly too)
-            #for i in range(self.size):
-            #    qid = qidlist[i]
-            #    Pvals[i] = 1. / math.sqrt(labelcounts[0, qid])
-            
-            #The old Laplacian matrix way
             for i in range(self.size):
                 qid = qidlist[i]
-                D[0, i] = labelcounts[0, qid]
+                Pvals[i] = 1. / np.sqrt(labelcounts[0, qid])
+            
+            #The old Laplacian matrix way
+            #for i in range(self.size):
+            #    qid = qidlist[i]
+            #    D[0, i] = labelcounts[0, qid]
             
             P = scipy.sparse.coo_matrix((Pvals, (np.arange(0, self.size), qidlist)), shape=(self.size,objcount))
             P_csc = P.tocsc()
@@ -209,15 +209,25 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         
         indlen = len(indices)
         Qleft = self.multipleleft[indices]
-        Qho = Qleft * np.multiply(self.neweigvals.T, Qleft.T)
-        Pho = np.mat(np.ones((len(indices),1)))
+        sqrtQho = np.multiply(Qleft, np.sqrt(self.neweigvals))
+        Qho = sqrtQho * sqrtQho.T
+        #Qho = Qleft * np.multiply(self.neweigvals.T, Qleft.T)
+        Pho = np.mat(np.ones((len(indices),1))) / np.sqrt(len(indices))
         Yho = self.Y[indices]
         Dho = self.D[:, indices]
         LhoYho = np.multiply(Dho.T, Yho) - Pho * (Pho.T * Yho)
         RQY = Qleft * np.multiply(self.neweigvals.T, self.multipleright) - Qho * LhoYho
-        RQRTLho = np.multiply(Qho, Dho) - (Qho * Pho) * Pho.T
-        I = np.mat(np.identity(indlen))
-        return np.array((I - RQRTLho).I * RQY)
+        #RQRTLho = np.multiply(Qho, Dho) - (Qho * Pho) * Pho.T
+        #print Dho.shape, sqrtQho.shape, Pho.shape
+        sqrtRQRTLho = np.multiply(Dho.T, sqrtQho) - Pho * (Pho.T * sqrtQho)
+        if sqrtQho.shape[0] <= sqrtQho.shape[1]:
+            RQRTLho = sqrtQho * sqrtRQRTLho.T
+            I = np.mat(np.identity(indlen))
+            return np.array((I - RQRTLho).I * RQY)
+        else:
+            RQRTLho = sqrtRQRTLho.T * sqrtQho
+            I = np.mat(np.identity(sqrtQho.shape[1]))
+            return np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY)))
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
 class LQOCV(object):

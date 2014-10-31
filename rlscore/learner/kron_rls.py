@@ -22,8 +22,18 @@ class KronRLS(object):
         Y = kwargs["train_labels"]
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
+        if kwargs.has_key('kmatrix1'):
+            K1 = mat(kwargs['kmatrix1'])
+            K2 = mat(kwargs['kmatrix2'])
+            self.K1, self.K2 = K1, K2
+            self.kernelmode = True
+        else:
+            X1 = mat(kwargs['xmatrix1'])
+            X2 = mat(kwargs['xmatrix2'])
+            self.X1, self.X2 = X1, X2
+            self.kernelmode = False
+        self.regparam = kwargs["regparam"]
         self.trained = False
-        self.resource_pool = kwargs
     
     
     def createLearner(cls, **kwargs):
@@ -33,21 +43,17 @@ class KronRLS(object):
     
     
     def train(self):
-        regparam = self.resource_pool['regparam']
-        if self.resource_pool.has_key('kmatrix1'):
-            self.solve_kernel(regparam)
+        if self.kernelmode:
+            self.solve_kernel(self.regparam)
         else:
-            self.solve_linear(regparam)
+            self.solve_linear(self.regparam)
     
     
     def solve_kernel(self, regparam):
         self.regparam = regparam
-        K1 = mat(self.resource_pool['kmatrix1'])
-        K2 = mat(self.resource_pool['kmatrix2'])
-        self.K1, self.K2 = K1, K2
+        K1, K2 = self.K1, self.K2
         Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
         #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
-        
         if not self.trained:
             self.trained = True
             evals1, V  = la.eigh(K1)
@@ -72,8 +78,7 @@ class KronRLS(object):
     
     def solve_linear(self, regparam):
         self.regparam = regparam
-        X1 = mat(self.resource_pool['xmatrix1'])
-        X2 = mat(self.resource_pool['xmatrix2'])
+        X1, X2 = self.X1, self.X2
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
         if not self.trained:
             self.trained = True
@@ -104,8 +109,7 @@ class KronRLS(object):
     
     def solve_linear_conditional_ranking(self, regparam):
         self.regparam = regparam
-        X1 = mat(self.resource_pool['xmatrix1'])
-        X2 = mat(self.resource_pool['xmatrix2'])
+        X1, X2 = self.X1, self.X2
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
         if not self.trained:
             self.trained = True
@@ -136,9 +140,8 @@ class KronRLS(object):
     
     
     def imputationLOO(self):
-        if not hasattr(self, "K1"):
-            X1 = mat(self.resource_pool['xmatrix1'])
-            X2 = mat(self.resource_pool['xmatrix2'])
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
         else:
             P = self.K1 * self.A * self.K2.T
@@ -160,9 +163,8 @@ class KronRLS(object):
     
     
     def compute_ho(self, row_inds, col_inds):
-        if not hasattr(self, "K1"):
-            X1 = mat(self.resource_pool['xmatrix1'])
-            X2 = mat(self.resource_pool['xmatrix2'])
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
             P_ho = X1[row_inds] * self.W * X2.T[:, col_inds]
         else:
             P_ho = self.K1[row_inds] * self.A * self.K2.T[:, col_inds]
@@ -214,9 +216,8 @@ class KronRLS(object):
     
     
     def nested_imputationLOO(self, outer_row_coord, outer_col_coord,):
-        if not hasattr(self, "K1"):
-            X1 = mat(self.resource_pool['xmatrix1'])
-            X2 = mat(self.resource_pool['xmatrix2'])
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
         else:
             P = self.K1 * self.A * self.K2.T
