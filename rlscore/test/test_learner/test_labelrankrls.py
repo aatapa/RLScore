@@ -80,10 +80,8 @@ class Test(unittest.TestCase):
             qid = qidlist[i]
             P[i, qid] = 1.
         labelcounts = np.sum(P, axis=0)
-        D = np.mat(np.zeros((1, m), dtype=np.float64))
-        for i in range(m):
-            qid = qidlist[i]
-            D[0, i] = labelcounts[0, qid]
+        P = np.divide(P, np.sqrt(labelcounts))
+        D = np.mat(np.ones((1, m), dtype=np.float64))
         L = np.multiply(np.eye(m), D) - P * P.T
         
         Kcv = K[np.ix_(hocompl, hocompl)]
