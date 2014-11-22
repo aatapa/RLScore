@@ -171,3 +171,7 @@ class Test(unittest.TestCase):
         print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
 
 
+if __name__=="__main__":
+    suite = unittest.TestLoader().loadTestsFromTestCase(Test)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+

@@ -94,10 +94,10 @@ if __name__=="__main__":
     def create_ind_vecs(rows, columns, incinds):
         rowstimescols = rows * columns
         indmatrix = np.arange(rowstimescols).T.reshape(rows, columns)
-        print indmatrix
+        #print indmatrix
         row_inds, col_inds = np.unravel_index(indmatrix, (rows, columns))
         row_inds, col_inds = np.array(row_inds.ravel(order = 'F'), dtype = np.int32), np.array(col_inds.ravel(order = 'F'), dtype = np.int32)
-        print row_inds, col_inds
+        #print row_inds, col_inds
         row_inds, col_inds = row_inds[incinds], col_inds[incinds]
         incidencemat = np.zeros((len(row_inds), rowstimescols))
         for ind in range(len(row_inds)):
@@ -113,10 +113,10 @@ if __name__=="__main__":
     v_incinds = [0, 1, 3, 4, 7, 8, 9, 14]
     v_row_inds, v_col_inds, B = create_ind_vecs(v_rows, v_columns, v_incinds)
     #u_incinds = range(u_rows*u_columns)
-    u_incinds = [0, 1, 3, 4, 7, 8, 9, 14]
+    u_incinds = [0, 1, 4, 5, 6, 10, 12]
     u_row_inds, u_col_inds, C = create_ind_vecs(u_rows, u_columns, u_incinds)
-    print B
-    print C
+    #print B
+    #print C
     
     
     Y_sparsified = np.dot(B.T, np.dot(B, Y_train.ravel(order = 'F'))).reshape(v_rows, v_columns, order = 'F')
