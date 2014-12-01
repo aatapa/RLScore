@@ -2,7 +2,11 @@
 
 import pyximport; pyximport.install()
 
+import random as pyrandom
+
 import numpy as np
+
+from scipy.sparse import lil_matrix
 
 from rlscore.utilities import sparse_kronecker_multiplication_tools
 
@@ -85,8 +89,13 @@ def x_gets_subset_of_A_kron_B_times_v(v, A, B, row_inds, col_inds):
 
 if __name__=="__main__":
     np.random.seed(100)
-    v_rows, v_columns = 3, 5
-    u_rows, u_columns = 4, 5
+    #v_rows, v_columns = 3, 5
+    #u_rows, u_columns = 4, 5
+    v_rows, v_columns = 300, 500
+    v_len = v_rows * v_columns / 5
+    u_rows, u_columns = 400, 500
+    u_len = u_rows * u_columns / 5
+    
     M = np.random.rand(u_columns, v_columns)
     N = np.random.rand(u_rows, v_rows)
     Y_train = np.random.rand(v_rows, v_columns)
@@ -99,7 +108,7 @@ if __name__=="__main__":
         row_inds, col_inds = np.array(row_inds.ravel(order = 'F'), dtype = np.int32), np.array(col_inds.ravel(order = 'F'), dtype = np.int32)
         #print row_inds, col_inds
         row_inds, col_inds = row_inds[incinds], col_inds[incinds]
-        incidencemat = np.zeros((len(row_inds), rowstimescols))
+        incidencemat = lil_matrix((len(row_inds), rowstimescols))
         for ind in range(len(row_inds)):
             i, j = row_inds[ind], col_inds[ind]
             #Y_train_nonzeros.append(Y_train[i, j])
@@ -110,20 +119,22 @@ if __name__=="__main__":
         return row_inds, col_inds, incidencemat
     
     #v_incinds = range(v_rows*v_columns)
-    v_incinds = [0, 1, 3, 4, 7, 8, 9, 14]
+    #v_incinds = [0, 1, 3, 4, 7, 8, 9, 14]
+    v_incinds = pyrandom.sample(range(v_rows*v_columns), v_len)
     v_row_inds, v_col_inds, B = create_ind_vecs(v_rows, v_columns, v_incinds)
     #u_incinds = range(u_rows*u_columns)
-    u_incinds = [0, 1, 4, 5, 6, 10, 12]
+    #u_incinds = [0, 1, 4, 5, 6, 10, 12]
+    u_incinds = pyrandom.sample(range(u_rows*u_columns), u_len)
     u_row_inds, u_col_inds, C = create_ind_vecs(u_rows, u_columns, u_incinds)
     #print B
     #print C
     
     
-    Y_sparsified = np.dot(B.T, np.dot(B, Y_train.ravel(order = 'F'))).reshape(v_rows, v_columns, order = 'F')
+    Y_sparsified = B.T * (B * Y_train.ravel(order = 'F'))#.reshape(v_rows, v_columns, order = 'F')
     vec_Y_cut = Y_train[v_row_inds, v_col_inds]
-    Y_sparsified = np.dot(B.T, vec_Y_cut).reshape(v_rows, v_columns, order='F')
-    print
-    print np.dot(C, np.dot(N, np.dot(Y_sparsified, M.T)).ravel(order = 'F'))
+    Y_sparsified = (B.T * vec_Y_cut).reshape(v_rows, v_columns, order='F')
+    print 
+    print (C * (N * np.mat(Y_sparsified * np.mat(M).T)).ravel(order = 'F').T).T
     foo = x_gets_C_times_M_kron_N_times_B_times_v(vec_Y_cut, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
     print foo
 
