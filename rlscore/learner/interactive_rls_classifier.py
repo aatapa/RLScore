@@ -187,8 +187,10 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         #self.compute_steepness_vector()
     
     
-    def cyclic_descent_in_working_set(self):
+    def cyclic_descent_in_working_set(self, maxbalancechange = None):
         fitvec = np.zeros(self.labelcount)
+        if maxbalancechange == None:
+            maxbalancechange = self.size_ws
         changecount = cython_mmc.cyclic_desccent(self.Y_ws,
                      self.classcounts_ws,
                      self.classvec_ws,
@@ -198,7 +200,9 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
                      self.DVTY,
                      self.sqrtRx2_ws,
                      self.sqrtR.shape[1],
-                     self.labelcount)
+                     self.labelcount,
+                     maxbalancechange,
+                     np.zeros((self.labelcount), dtype = np.int32))
         #Update global books DOES NOT WORK FOR RY or Y_Schur_RY!!!
         self.Y[self.working_set] = self.Y_ws
         #print np.sum(np.abs(np.multiply(self.D.T, self.svecs.T * self.Y) - self.DVTY))

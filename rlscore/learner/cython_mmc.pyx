@@ -249,15 +249,17 @@ def cyclic_desccent(double [:, :] Y,
                      double [:, :] DVTY,
                      double [:, :] sqrtRx2,
                      int rank_R,
-                     int labelcount):
+                     int labelcount,
+                     int maxbalancechange,
+                     int [:] classcount_delta):
     
-    cdef int oldclazz, newclazz, i, j, changed, changecount
+    cdef int oldclazz, candclazz, newclazz, i, j, changed, changecount
     cdef double temp_fitness_oc, temp_fitness_nc, temp_double
     
-    for newclazz in range(labelcount):
-        fitvec[newclazz] = globalsize
+    for candclazz in range(labelcount):
+        fitvec[candclazz] = globalsize
         for j in range(rank_R):
-            fitvec[newclazz] -= DVTY[j, newclazz] * DVTY[j, newclazz]
+            fitvec[candclazz] -= DVTY[j, candclazz] * DVTY[j, candclazz]
     
     changed = 1
     changecount = 0
@@ -266,32 +268,43 @@ def cyclic_desccent(double [:, :] Y,
         for i in range(size):
             oldclazz = classvec[i]
             
-            for newclazz in range(labelcount):
-                if oldclazz == newclazz: continue
+            for candclazz in range(labelcount):
+                if oldclazz == candclazz: continue
                 temp_fitness_oc = globalsize
                 temp_fitness_nc = globalsize
                 for j in range(rank_R):
                     temp_double = DVTY[j, oldclazz] - sqrtRx2[i, j]
                     temp_fitness_oc -= temp_double * temp_double
-                    temp_double = DVTY[j, newclazz] + sqrtRx2[i, j]
+                    temp_double = DVTY[j, candclazz] + sqrtRx2[i, j]
                     temp_fitness_nc -= temp_double * temp_double
-                if temp_fitness_oc + temp_fitness_nc < fitvec[oldclazz] + fitvec[newclazz]:
-                    #print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[newclazz]
+                if temp_fitness_oc + temp_fitness_nc < fitvec[oldclazz] + fitvec[candclazz]:
+                    #print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[candclazz]
                     Y[i, oldclazz] = -1.
-                    Y[i, newclazz] = 1.
-                    classvec[i] = newclazz
+                    Y[i, candclazz] = 1.
+                    classvec[i] = candclazz
                     classcounts[oldclazz] -= 1
-                    classcounts[newclazz] += 1
+                    classcounts[candclazz] += 1
                     
                     for j in range(rank_R):
-                        DVTY[j, newclazz] += sqrtRx2[i, j]
+                        DVTY[j, candclazz] += sqrtRx2[i, j]
                         DVTY[j, oldclazz] -= sqrtRx2[i, j]
                     
                     fitvec[oldclazz] = temp_fitness_oc
-                    fitvec[newclazz] = temp_fitness_nc
+                    fitvec[candclazz] = temp_fitness_nc
                     
                     changed = 1
-                    changecount += 1
+                    newclazz = candclazz
+            
+            if changed == 1:
+                changecount += 1
+                classcount_delta[oldclazz] -= 1
+                classcount_delta[newclazz] += 1
+                if classcount_delta[oldclazz] == maxbalancechange \
+                 or classcount_delta[oldclazz] == -maxbalancechange \
+                 or classcount_delta[newclazz] == maxbalancechange \
+                 or classcount_delta[newclazz] == -maxbalancechange:
+                    changed = 0
+                    break
     return changecount
 
 
