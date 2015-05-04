@@ -30,8 +30,8 @@ class TwoStepRLS(object):
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
-            X1 = mat(kwargs['xmatrix1'])
-            X2 = mat(kwargs['xmatrix2'])
+            X1 = np.mat(kwargs['xmatrix1'])
+            X2 = np.mat(kwargs['xmatrix2'])
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
         self.regparam = kwargs["regparam"]
@@ -94,25 +94,27 @@ class TwoStepRLS(object):
             self.trained = True
             svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
             self.svals1 = svals1.T
-            self.evals1 = multiply(self.svals1, self.svals1)
+            self.evals1 = np.multiply(self.svals1, self.svals1)
             self.V = V
-            self.rsvecs1 = mat(rsvecs1)
+            self.rsvecs1 = np.mat(rsvecs1)
             
             if X1.shape == X2.shape and (X1 == X2).all():
                 svals2, U, rsvecs2 = svals1, V, rsvecs1
             else:
                 svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
             self.svals2 = svals2.T
-            self.evals2 = multiply(self.svals2, self.svals2)
+            self.evals2 = np.multiply(self.svals2, self.svals2)
             self.U = U
-            self.rsvecs2 = mat(rsvecs2)
+            self.rsvecs2 = np.mat(rsvecs2)
             
             self.VTYU = V.T * Y * U
         
         kronsvals = self.svals1 * self.svals2.T
         
-        newevals = divide(kronsvals, multiply(kronsvals, kronsvals) + regparam)
-        self.W = multiply(self.VTYU, newevals)
+        newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
+        self.newevals1 = 1. / (self.evals1 + regparam)
+        self.newevals2 = 1. / (self.evals2 + regparam)
+        self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
         self.model = LinearPairwiseModel(self.W)
     
@@ -270,6 +272,7 @@ class LinearPairwiseModel(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
+        print X1pred.shape, self.W.shape, X2pred.T.shape
         P = np.array(X1pred * self.W * X2pred.T)
         return P
 

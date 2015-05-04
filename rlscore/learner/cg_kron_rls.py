@@ -218,7 +218,7 @@ class LinearPairwiseModel(object):
             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
             P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
         else:
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, array(row_inds, dtype=int32), array(col_inds, dtype=int32))
+            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
             #P = X1pred * self.W * X2pred.T
         return P
 

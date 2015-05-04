@@ -104,6 +104,17 @@ class Test(unittest.TestCase):
 #         linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2)
         
         
+        #Train linear two-step RLS with data-matrices
+        params = {}
+        params["regparam"] = regparam
+        params["xmatrix1"] = X_train1
+        params["xmatrix2"] = X_train2
+        params["train_labels"] = Y_train
+        linear_two_step_learner = TwoStepRLS.createLearner(**params)
+        linear_two_step_learner.train()
+        linear_two_step_model = linear_two_step_learner.getModel()
+        linear_two_step_testpred = linear_two_step_model.predictWithDataMatrices(X_test1, X_test2)
+        
         #Train kernel two-step RLS with pre-computed kernel matrices
         params = {}
         params["regparam"] = regparam
@@ -141,7 +152,8 @@ class Test(unittest.TestCase):
         #print linear_kron_testpred[0, 1], kernel_two_step_testpred[0, 1]
         #print linear_kron_testpred[1, 0], kernel_two_step_testpred[1, 0]
         
-        twostepoutofsampleloo = kernel_two_step_learner.computeLOO()
+        linear_twostepoutofsampleloo = linear_two_step_learner.computeLOO()
+        kernel_twostepoutofsampleloo = kernel_two_step_learner.computeLOO()
         
         #Train two-step RLS without out-of-sample rows or columns
         params = {}
@@ -167,9 +179,9 @@ class Test(unittest.TestCase):
         #print K_train1[range(1, K_train1.shape[0]), 0].shape, K_train2[0, range(1, K_train2.shape[0])].shape
         kernel_kron_testpred_24 = kernel_kron_model.predictWithKernelMatrices(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
         
-        print Y_train.shape, secondsteploo.shape, twostepoutofsampleloo.shape
-        print secondsteploo[0, 0], kernel_kron_testpred_00, twostepoutofsampleloo[0, 0]
-        print secondsteploo[2, 4], kernel_kron_testpred_24, twostepoutofsampleloo[2, 4]
+        print Y_train.shape, secondsteploo.shape, kernel_twostepoutofsampleloo.shape
+        print secondsteploo[0, 0], kernel_kron_testpred_00, linear_twostepoutofsampleloo[0, 0], kernel_twostepoutofsampleloo[0, 0]
+        print secondsteploo[2, 4], kernel_kron_testpred_24, linear_twostepoutofsampleloo[2, 4], kernel_twostepoutofsampleloo[2, 4]
         print
         #print 'Two-step RLS LOO', twostepoutofsampleloo[2, 4]
         #print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
