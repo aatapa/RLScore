@@ -1,41 +1,40 @@
 
+# from numpy import *
 import numpy as np
+import numpy.linalg as la
+
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import cg
-from rlscore.utilities import sparse_kronecker_multiplication_tools_python
-from rlscore.utilities import array_tools
 
+from rlscore.learner.abstract_learner import AbstractIterativeLearner
+from rlscore import model
+from rlscore.utilities import array_tools
+from rlscore.utilities import decomposition
+from rlscore.utilities import sparse_kronecker_multiplication_tools_python
+from scipy.optimize import line_search
+from scipy.optimize import check_grad
 
 TRAIN_LABELS = 'train_labels'
 CALLBACK_FUNCTION = 'callback'
 
-
-class KronSVM(object):
+class KronSVM(AbstractIterativeLearner):
+        
     
     def __init__(self, **kwargs):
         self.resource_pool = kwargs
         Y = kwargs[TRAIN_LABELS]
         self.label_row_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
         self.label_col_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
-        Y = array_tools.as_array(Y)
         self.Y = Y
         self.trained = False
         if kwargs.has_key("regparam"):
             self.regparam = kwargs["regparam"]
         else:
             self.regparam = 0.
-        if kwargs.has_key("newton_iterations"):
-            self.newton_it = kwargs["newton_iterations"]
+        if kwargs.has_key(CALLBACK_FUNCTION):
+            self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
-            self.newton_it = 100
-        if kwargs.has_key("cg_iterations"):
-            self.cg_it = kwargs["cg_iterations"]
-        else:
-            self.cg_it = 50
-        if kwargs.has_key("epsilon"):
-            self.epsilon = kwargs["epsilon"]
-        else:
-            self.epsilon = 0.000001            
+            self.callbackfun = None
     
     
     def createLearner(cls, **kwargs):
@@ -49,19 +48,59 @@ class KronSVM(object):
     
     
     def solve_linear(self, regparam):
-        lamb = regparam
+        self.regparam = regparam
         X1 = self.resource_pool['xmatrix1']
         X2 = self.resource_pool['xmatrix2']
+        self.X1, self.X2 = X1, X2
+        
+        if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
+        else: maxiter = 1000
+
+        if 'inneriter' in self.resource_pool: inneriter = int(self.resource_pool['inneriter'])
+        else: inneriter = 50
+        
+        x1tsize, x1fsize = X1.shape #m, d
+        x2tsize, x2fsize = X2.shape #q, r
+        lsize = len(self.label_row_inds) #n
+        
+        kronfcount = x1fsize * x2fsize
+        
+        label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
+        label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
+        
+        
+        #def cgcb(v):
+        #    self.W = v.reshape((x1fsize, x2fsize), order = 'F')
+        #    self.callback()
+
+
+        #OPERAATIOT:
+        #Z = X1 kron X2 
+        #Z * v -> vec-trick: 
+        #Z[sv] * v 
+        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
+        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
+        #Z[sv].T * v
+        #
+
         Y = self.Y
-        rowind = self.label_row_inds
-        colind = self.label_col_inds
+        rowind = label_row_inds
+        colind = label_col_inds
+        lamb = self.regparam
+        rowind = np.array(rowind, dtype = np.int32)
+        colind = np.array(colind, dtype = np.int32)
         fdim = X1.shape[1]*X2.shape[1]
         def func(v):
+            #REPLACE
+            #P = np.dot(X,v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             return np.dot(z,z)+lamb*np.dot(v,v)
         def gradient(v):
+            #REPLACE
+            #P = np.dot(X,v)
+            #P = vecProd(X1, X2, v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
@@ -69,13 +108,19 @@ class KronSVM(object):
             #map to rows and cols
             rows = rowind[sv]
             cols = colind[sv]
+            #A = -2*np.dot(X[sv].T, Y[sv])
             A = -2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
             A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
+            #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
             v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
             v_after = 2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
             B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
+            #print "FOOOBAAR"
             return A + B + lamb*v
+            #return -2*np.dot(X[sv].T,Y[sv]) + 2 * np.dot(X[sv].T, np.dot(X[sv],v)) + lamb*v
         def hessian(v, p):
+            #P = np.dot(X,v)
+            #P = vecProd(X1, X2, v)
             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
@@ -87,26 +132,34 @@ class KronSVM(object):
             p_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
             p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
             return 2 * p_after + lamb*p    
+            #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
         w = np.zeros(fdim)
+        #np.random.seed(1)
+        #w = np.random.random(fdim)
         def mv(v):
             return hessian(w, v)
-        for i in range(self.newton_it):
+        for i in range(maxiter):
             g = gradient(w)
             G = LinearOperator((fdim, fdim), matvec=mv, dtype=np.float64)
-            w_new = cg(G, g, maxiter=self.cg_it)[0]
-            r = G*w_new - g
-            e_rel = np.linalg.norm(r)/np.linalg.norm(g)
+            w_new = cg(G, g, maxiter=inneriter)[0]
+            #r = G*w_new - g
+            #e_rel = np.linalg.norm(r)/np.linalg.norm(g)
+            #print e_rel, alpha
+            #print "function value", func(w)
             w = w - w_new
-            #print w
-            if np.linalg.norm(w_new) == 0 or e_rel < self.epsilon:
-                break
-        print "outer iterations", i
-        self.model = LinearPairwiseModel(w, X1.shape[1], X2.shape[1])
+            self.W = w.reshape((x1fsize, x2fsize), order='C')
+            self.callback()
+            #print i
+        self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
+        self.finished()
+    
     
     def getModel(self):
-        if not hasattr(self, "model"):
-            self.model = LinearPairwiseModel(self.W, self.X1.shape[1], self.X2.shape[1])
+        #if not hasattr(self, "model"):
+        self.model = LinearPairwiseModel(self.W, self.X1.shape[1], self.X2.shape[1])
         return self.model
+
+
 
 
 class LinearPairwiseModel(object):
