@@ -34,7 +34,14 @@ class TwoStepRLS(object):
             X2 = np.mat(kwargs['xmatrix2'])
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
-        self.regparam = kwargs["regparam"]
+        if kwargs.has_key('regparam1'):
+            self.regparam1 = kwargs["regparam1"]
+        else:
+            self.regparam1 = kwargs["regparam"]
+        if kwargs.has_key('regparam2'):
+            self.regparam2 = kwargs["regparam2"]
+        else:
+            self.regparam2 = kwargs["regparam"]
         self.trained = False
     
     
@@ -46,13 +53,14 @@ class TwoStepRLS(object):
     
     def train(self):
         if self.kernelmode:
-            self.solve_kernel(self.regparam)
+            self.solve_kernel(self.regparam1, self.regparam2)
         else:
-            self.solve_linear(self.regparam)
+            self.solve_linear(self.regparam1, self.regparam2)
     
     
-    def solve_kernel(self, regparam):
-        self.regparam = regparam
+    def solve_kernel(self, regparam1, regparam2):
+        self.regparam1 = regparam1
+        self.regparam2 = regparam2
         K1, K2 = self.K1, self.K2
         Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
         #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
@@ -74,20 +82,21 @@ class TwoStepRLS(object):
             self.VTYU = V.T * self.Y * U
         
         #newevals = 1. / (self.evals1 * self.evals2.T + regparam)
-        self.newevals1 = 1. / (self.evals1 + regparam)
-        self.newevals2 = 1. / (self.evals2 + regparam)
+        self.newevals1 = 1. / (self.evals1 + regparam1)
+        self.newevals2 = 1. / (self.evals2 + regparam2)
         newevals = self.newevals1 * self.newevals2.T
         
         self.A = np.multiply(self.VTYU, newevals)
         self.A = self.V * self.A * self.U.T
         self.model = KernelPairwiseModel(self.A)
         
-        self.dsikm1 = la.inv(K1 + regparam * (np.mat(np.eye(K1.shape[0]))))
-        self.dsikm2 = la.inv(K2 + regparam * (np.mat(np.eye(K2.shape[0]))))
+        #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
+        #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
     
     
-    def solve_linear(self, regparam):
-        self.regparam = regparam
+    def solve_linear(self, regparam1, regparam2):
+        self.regparam1 = regparam1
+        self.regparam2 = regparam2
         X1, X2 = self.X1, self.X2
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
         if not self.trained:
@@ -109,11 +118,11 @@ class TwoStepRLS(object):
             
             self.VTYU = V.T * Y * U
         
-        kronsvals = self.svals1 * self.svals2.T
+        self.newevals1 = 1. / (self.evals1 + regparam1)
+        self.newevals2 = 1. / (self.evals2 + regparam2)
+        newevals = self.newevals1 * self.newevals2.T
+        newevals = np.multiply(self.svals1, self.newevals1) * np.multiply(self.svals2, self.newevals2).T
         
-        newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
-        self.newevals1 = 1. / (self.evals1 + regparam)
-        self.newevals2 = 1. / (self.evals2 + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
         self.model = LinearPairwiseModel(self.W)
@@ -159,7 +168,7 @@ class TwoStepRLS(object):
         #multiplyright = self.U.T * self.Y.T
         #I = np.mat(np.identity(2))
         
-        G = np.multiply((self.newevals1.T-(1./self.regparam)), self.V) * self.V.T + (1./self.regparam) * np.mat(np.identity(self.K1.shape[0]))
+        G = np.multiply((self.newevals1.T-(1./self.regparam1)), self.V) * self.V.T + (1./self.regparam1) * np.mat(np.identity(self.K1.shape[0]))
         #G2 = np.multiply((self.newevals2.T-(1./self.regparam)), self.U) * self.U.T + (1./self.regparam) * np.mat(np.identity(self.K2.shape[0]))
         GY = G * self.Y
         #YG2 = self.Y * G2
@@ -272,8 +281,7 @@ class LinearPairwiseModel(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
-        print X1pred.shape, self.W.shape, X2pred.T.shape
-        P = np.array(X1pred * self.W * X2pred.T)
+        P = np.array(np.dot(np.dot(X1pred, self.W), X2pred.T))
         return P
 
 
