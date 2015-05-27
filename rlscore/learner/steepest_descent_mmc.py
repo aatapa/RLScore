@@ -11,6 +11,7 @@ from numpy import *
 
 from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.learner.abstract_learner import AbstractIterativeLearner
+from rlscore.utilities import array_tools
 
 class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
@@ -27,11 +28,17 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             self.oneclass = True
         else:
             self.oneclass = False
-         
+        
         if kwargs.has_key("train_labels"):
-            Y_orig = kwargs["train_labels"]
-            if Y_orig.shape[1] == 1:
-                self.Y = mat(zeros((Y_orig.shape[0], 2)))
+            train_labels = kwargs["train_labels"]
+        else:
+            train_labels = None
+        if train_labels != None:
+            #Y_orig = array_tools.as_labelmatrix(train_labels)
+            Y_orig = array_tools.as_array(train_labels)
+            #if Y_orig.shape[1] == 1:
+            if len(Y_orig.shape) == 1:
+                self.Y = zeros((Y_orig.shape[0], 2))
                 self.Y[:, 0] = Y_orig
                 self.Y[:, 1] = - Y_orig
                 self.oneclass = True
@@ -52,11 +59,8 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             ysize = self.labelcount
             if self.labelcount == None: self.labelcount = 2
             self.Y = RandomLabelSource(size, ysize).readLabels()
-         
-         
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
-        #self.classvec = - mat(ones((self.size, 1), dtype = int32))
         self.classvec = - ones((self.size), dtype = int32)
         self.classcounts = zeros((self.labelcount), dtype = int32)
         for i in range(self.size):
@@ -68,14 +72,16 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
                     clazzind = j
             self.classvec[i] = clazzind
             self.classcounts[clazzind] = self.classcounts[clazzind] + 1
-         
+        
         self.svecs_list = []
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
-         
         self.fixedindices = []
-        if kwargs.has_key('fixed_indices'):
-            self.fixedindices = kwargs['fixed_indices']
+        if kwargs.has_key("fixed_indices"):
+            self.fixedindices = kwargs["fixed_indices"]
+        else:
+            self.fixedindices = []
+        self.results = {}
     
     
     def createLearner(cls, **kwargs):
@@ -130,6 +136,9 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             fitness_i = self.size - YTRY_i
             self.classFitnessList.append(fitness_i[0, 0])
         self.classFitnessRowVec = array(self.classFitnessList)
+        
+        self.updateA()
+        
         
         converged = False
         #print self.classcounts.T
@@ -321,21 +330,21 @@ class RandomLabelSource(object):
     def __init__(self, size, labelcount):
         self.rand = Random()
         self.rand.seed(100)
-        self.Y = - mat(ones((size, labelcount), dtype = float64))
-        self.classvec = - mat(ones((size, 1), dtype = int32))
+        self.Y = - ones((size, labelcount), dtype = float64)
+        self.classvec = - ones((size), dtype = int32)
         allinds = set(range(size))
-        self.classcounts = mat(zeros((labelcount, 1), dtype = int32))
+        self.classcounts = zeros((labelcount), dtype = int32)
         for i in range(labelcount-1):
             inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
             allinds = allinds - set(inds)
             for ind in inds:
                 self.Y[ind, i] = 1.
-                self.classvec[ind, 0] = i
-                self.classcounts[i, 0] += 1
+                self.classvec[ind] = i
+                self.classcounts[i] += 1
         for ind in allinds:
             self.Y[ind, labelcount - 1] = 1.
-            self.classvec[ind, 0] = labelcount - 1
-            self.classcounts[labelcount - 1, 0] += 1
+            self.classvec[ind] = labelcount - 1
+            self.classcounts[labelcount - 1] += 1
     
     def readLabels(self):
         return self.Y

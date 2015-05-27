@@ -423,7 +423,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
                 self.nochangecounter = 0
             else:
                 self.nochangecounter += 1
-            if self.nochangecounter >= self.size:
+            if self.nochangecounter >= len(allinds):
                 converged = True
                 break
         
