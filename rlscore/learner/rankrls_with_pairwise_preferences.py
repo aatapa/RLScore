@@ -9,13 +9,15 @@ from scipy.sparse.linalg import cg
 import scipy.sparse as sp
 
 from rlscore.learner.abstract_learner import AbstractSupervisedLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
+from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore import model
 from rlscore.utilities import array_tools
 from rlscore.measure import measure_utilities
 from rlscore.measure import sqmprank
+from rlscore.utilities import creators
+from rlscore.utilities import decomposition
 
-class PPRankRLS(AbstractIterativeLearner):
+class PPRankRLS(AbstractSvdLearner):
     """Conjugate gradient RankRLS.
     
     Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
@@ -66,7 +68,7 @@ class PPRankRLS(AbstractIterativeLearner):
     ----------
     
     RankRLS algorithm is described in [1]_, using the conjugate gradient optimization
-    together with early stopping was considered in detail in [2]_. 
+    together with early stopping was considered in detail in [2]_.
     
     .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
@@ -85,14 +87,33 @@ class PPRankRLS(AbstractIterativeLearner):
             self.regparam = 0.
         self.pairs = kwargs['train_preferences']
         self.learn_from_labels = False
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        #self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
+        #if kwargs.has_key("regparam"):
+        #    self.regparam = float(kwargs["regparam"])
+        #else:
+        #    self.regparam = 1.
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
+        self.results = {}
         X = kwargs['train_features']
         self.X = csc_matrix(X)
         self.bias = 0.
         self.results = {}
     
     
+    def train(self):
+        """Trains the prediction function.
+        
+        After the learner is trained, one can call the method getModel
+        to get the trained model
+        """
+        regparam = self.regparam
+        self.solve(regparam)
+    
+    
     def solve(self, regparam):
-        """Trains the learning algorithm, using the given regularization parameter.
+        """Trains the prediction function, using the given regularization parameter.
         
         This implementation simply changes the regparam, and then calls the train method.
         
@@ -101,63 +122,37 @@ class PPRankRLS(AbstractIterativeLearner):
         regparam: float (regparam > 0)
             regularization parameter
         """
+        
+        if not hasattr(self, "multipleright"):
+            vals = np.concatenate([np.ones((self.pairs.shape[0]), dtype=np.float64), -np.ones((self.pairs.shape[0]), dtype = np.float64)])
+            row = np.concatenate([np.arange(self.pairs.shape[0]), np.arange(self.pairs.shape[0])])
+            col = np.concatenate([self.pairs[:, 0], self.pairs[:, 1]])
+            coo = coo_matrix((vals, (row, col)), shape = (self.pairs.shape[0], self.size))
+            self.L = (coo.T * coo)#.todense()
+            
+            #Eigenvalues of the kernel matrix
+            evals = np.multiply(self.svals, self.svals)
+            
+            #Temporary variables
+            ssvecs = np.multiply(self.svecs, self.svals)
+            
+            #These are cached for later use in solve and computeHO functions
+            ssvecsTLssvecs = ssvecs.T * self.L * ssvecs
+            LRsvals, LRevecs = decomposition.decomposeKernelMatrix(ssvecsTLssvecs)
+            LRevals = np.multiply(LRsvals, LRsvals)
+            LY = coo.T * np.mat(np.ones((self.pairs.shape[0], 1)))
+            self.multipleright = LRevecs.T * (ssvecs.T * LY)
+            self.multipleleft = ssvecs * LRevecs
+            self.LRevals = LRevals
+            self.LRevecs = LRevecs
+        
+        
         self.regparam = regparam
-        self.train()
-    
-    
-    def train(self):
-        """Trains the learning algorithm.
         
-        After the learner is trained, one can call the method getModel
-        to get the trained model
-        """
-        regparam = self.regparam
-        X = self.X.tocsc()
-        X_csr = X.tocsr()
-        vals = np.concatenate([np.ones((self.pairs.shape[0]), dtype=np.float64), -np.ones((self.pairs.shape[0]), dtype = np.float64)])
-        row = np.concatenate([np.arange(self.pairs.shape[0]), np.arange(self.pairs.shape[0])])
-        col = np.concatenate([self.pairs[:,0], self.pairs[:,1]])
-        coo = coo_matrix((vals, (row, col)), shape = (self.pairs.shape[0], X.shape[0]))
-        #pairs_csr = coo.tocsr()
-        #pairs_csc = coo.tocsc()
-        
-        In = np.mat(np.identity(X.shape[1]))
-        
-        L = (coo.T * coo).todense()
-        C = X.T * L * X + regparam*In
-        
-        W = np.squeeze(np.array(C.I * (X.T * (coo.T * np.mat(np.ones((self.pairs.shape[0], 1)))))))
-        
-        
-        '''
-        def mv(v):
-            vmat = np.mat(v).T
-            ret = np.array(X_csr * (pairs_csc.T * (pairs_csr * (X.T * vmat))))+regparam*vmat
-            return ret
-        G = LinearOperator((X.shape[0], X.shape[0]), matvec=mv, dtype=np.float64)
-        M = np.mat(np.ones((self.pairs.shape[0], 1)))
-        if not self.callbackfun == None:
-            def cb(v):
-                self.A = np.mat(v).T
-                self.b = np.mat(np.zeros((1,1)))
-                self.callback()
-        else:
-            cb = None
-        XLY = X_csr * (pairs_csc.T * M)
-        '''
-        self.A = W
-        self.b = np.mat(np.zeros((1, 1)))
+        #Compute the eigenvalues determined by the given regularization parameter
+        self.neweigvals = 1. / (self.LRevals + regparam)
+        self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
         self.results['model'] = self.getModel()
         
     
-    
-    def getModel(self):
-        """Returns the trained model, call this only after training.
-        
-        Returns
-        -------
-        model : LinearModel
-            prediction function
-        """
-        return model.LinearModel(self.A, self.b)
     
