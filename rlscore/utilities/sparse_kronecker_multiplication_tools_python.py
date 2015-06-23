@@ -88,25 +88,17 @@ def x_gets_subset_of_A_kron_B_times_v(v, A, B, row_inds, col_inds):
 
 
 if __name__=="__main__":
-    np.random.seed(100)
-    #v_rows, v_columns = 3, 5
-    #u_rows, u_columns = 4, 5
-    v_rows, v_columns = 300, 500
-    v_len = v_rows * v_columns / 5
-    u_rows, u_columns = 400, 500
-    u_len = u_rows * u_columns / 5
     
-    M = np.random.rand(u_columns, v_columns)
-    N = np.random.rand(u_rows, v_rows)
-    Y_train = np.random.rand(v_rows, v_columns)
+    # u  <- C * (M x N) * B * v
+    
+    np.random.seed(100)
+    pyrandom.seed(100)
     
     def create_ind_vecs(rows, columns, incinds):
         rowstimescols = rows * columns
         indmatrix = np.arange(rowstimescols).T.reshape(rows, columns)
-        #print indmatrix
         row_inds, col_inds = np.unravel_index(indmatrix, (rows, columns))
         row_inds, col_inds = np.array(row_inds.ravel(order = 'F'), dtype = np.int32), np.array(col_inds.ravel(order = 'F'), dtype = np.int32)
-        #print row_inds, col_inds
         row_inds, col_inds = row_inds[incinds], col_inds[incinds]
         incidencemat = lil_matrix((len(row_inds), rowstimescols))
         for ind in range(len(row_inds)):
@@ -118,23 +110,27 @@ if __name__=="__main__":
             #incidencemat[ind, i * columns + j] = 1.
         return row_inds, col_inds, incidencemat
     
-    #v_incinds = range(v_rows*v_columns)
-    #v_incinds = [0, 1, 3, 4, 7, 8, 9, 14]
-    v_incinds = pyrandom.sample(range(v_rows*v_columns), v_len)
-    v_row_inds, v_col_inds, B = create_ind_vecs(v_rows, v_columns, v_incinds)
-    #u_incinds = range(u_rows*u_columns)
-    #u_incinds = [0, 1, 4, 5, 6, 10, 12]
-    u_incinds = pyrandom.sample(range(u_rows*u_columns), u_len)
-    u_row_inds, u_col_inds, C = create_ind_vecs(u_rows, u_columns, u_incinds)
-    #print B
-    #print C
+    #V is a sparse matrix and v is a vector containing the known entries of V in an arbitrary order
+    V_rows, V_columns = 300, 500
+    v_len = V_rows * V_columns / 5
+    v = np.random.rand(v_len)
+    v_incinds = pyrandom.sample(range(V_rows * V_columns), v_len)
+    v_row_inds, v_col_inds, B = create_ind_vecs(V_rows, V_columns, v_incinds)
+    V = float('nan') * np.zeros((V_rows, V_columns))
+    V[v_row_inds, v_col_inds] = v
     
+    U_rows, U_columns = 400, 600
+    u_len = U_rows * U_columns / 5
+    u_incinds = pyrandom.sample(range(U_rows * U_columns), u_len)
+    u_row_inds, u_col_inds, C = create_ind_vecs(U_rows, U_columns, u_incinds)
     
-    Y_sparsified = B.T * (B * Y_train.ravel(order = 'F'))#.reshape(v_rows, v_columns, order = 'F')
-    vec_Y_cut = Y_train[v_row_inds, v_col_inds]
-    Y_sparsified = (B.T * vec_Y_cut).reshape(v_rows, v_columns, order='F')
+    M = np.random.rand(U_columns, V_columns)
+    N = np.random.rand(U_rows, V_rows)
+    
+    V_replace_nans_with_zeros = (B.T * (B * V.ravel(order = 'F'))).reshape(V_rows, V_columns, order='F')
+    #V_replace_nans_with_zeros = (B.T * v).reshape(V_rows, V_columns, order='F')
     print 
-    print (C * (N * np.mat(Y_sparsified * np.mat(M).T)).ravel(order = 'F').T).T
-    foo = x_gets_C_times_M_kron_N_times_B_times_v(vec_Y_cut, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
+    print (C * (N * np.mat(V_replace_nans_with_zeros * np.mat(M).T)).ravel(order = 'F').T).T
+    foo = x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
     print foo
 
