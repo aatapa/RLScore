@@ -103,11 +103,7 @@ if __name__=="__main__":
         incidencemat = lil_matrix((len(row_inds), rowstimescols))
         for ind in range(len(row_inds)):
             i, j = row_inds[ind], col_inds[ind]
-            #Y_train_nonzeros.append(Y_train[i, j])
-            #Y_alt.append(Y_train[i, j])
-            #B[ind, i * columns + j] = 1.
             incidencemat[ind, j * rows + i] = 1.
-            #incidencemat[ind, i * columns + j] = 1.
         return row_inds, col_inds, incidencemat
     
     #V is a sparse matrix and v is a vector containing the known entries of V in an arbitrary order
@@ -131,6 +127,5 @@ if __name__=="__main__":
     #V_replace_nans_with_zeros = (B.T * v).reshape(V_rows, V_columns, order='F')
     print 
     print (C * (N * np.mat(V_replace_nans_with_zeros * np.mat(M).T)).ravel(order = 'F').T).T
-    foo = x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
-    print foo
+    print x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
 

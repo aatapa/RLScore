@@ -164,7 +164,7 @@ class KernelPairwiseModel(object):
         self.kernel = kernel
     
     
-    def predictWithKernelMatrices(self, K1pred, K2pred):
+    def predictWithKernelMatrices(self, K1pred, K2pred, row_inds = None, col_inds = None):
         """Computes predictions for test examples.
 
         Parameters
@@ -179,8 +179,18 @@ class KernelPairwiseModel(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
-        P = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
-        P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
+        if row_inds == None:
+            P = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
+            P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
+        else:
+            P = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(
+                self.A,
+                K2pred,
+                K1pred,
+                np.array(row_inds, dtype = np.int32),
+                np.array(col_inds, dtype = np.int32),
+                self.label_row_inds,
+                self.label_col_inds)
         return P
 
 
@@ -218,7 +228,10 @@ class LinearPairwiseModel(object):
             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
             P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
         else:
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
+            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(
+                    self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'),
+                    X1pred, X2pred.T, np.array(row_inds, dtype = np.int32),
+                    np.array(col_inds, dtype = np.int32))
             #P = X1pred * self.W * X2pred.T
         return P
 

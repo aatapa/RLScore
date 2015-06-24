@@ -164,10 +164,11 @@ class Test(unittest.TestCase):
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2)
+        kernel_kron_testpred_alt = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2, row_inds = [0, 0, 1], col_inds = [0, 1, 0])
         
-        print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], ordrls_testpred[0, 0]
-        print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], ordrls_testpred[0, 1]
-        print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], ordrls_testpred[1, 0]
+        print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], kernel_kron_testpred_alt[0], ordrls_testpred[0, 0]
+        print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], kernel_kron_testpred_alt[1], ordrls_testpred[0, 1]
+        print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], kernel_kron_testpred_alt[2], ordrls_testpred[1, 0]
         print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
 
 
