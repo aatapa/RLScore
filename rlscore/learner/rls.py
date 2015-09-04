@@ -4,6 +4,8 @@ import numpy.linalg as la
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 
+import cython_pairwise_cv_for_rls
+
 from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
 from rlscore.measure.measure_utilities import UndefinedPerformance
 import numpy as np
@@ -97,25 +99,25 @@ class RLS(AbstractSvdSupervisedLearner):
             regularization parameter
         """
         
-        if not hasattr(self, "multiplyright"):
+        if not hasattr(self, "svecsTY"):
             #print self.svals.shape
-            self.multiplyright = self.svecs.T * self.Y
+            self.svecsTY = self.svecs.T * self.Y
         
             #Eigenvalues of the kernel matrix
             self.evals = multiply(self.svals, self.svals)
         
         self.newevals = 1. / (self.evals + regparam)
         self.regparam = regparam
-        self.A = self.svecs * multiply(self.newevals.T, self.multiplyright)
+        self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
         self.results["model"] = self.getModel()
         #if self.U == None:
         #    pass
             #Dual RLS
-            #self.A = self.svecs * multiply(self.newevals.T, self.multiplyright)
+            #self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
         #else:
             #Primal RLS
             #bevals = multiply(self.svals, self.newevals)
-            #self.A = self.U.T * multiply(bevals.T, self.multiplyright)
+            #self.A = self.U.T * multiply(bevals.T, self.svecsTY)
         #    self.A = self.U.T * multiply(self.svals.T, self.svecs.T * self.A)
     
     
@@ -141,7 +143,7 @@ class RLS(AbstractSvdSupervisedLearner):
         
         bevals = multiply(self.evals, self.newevals)
         A = self.svecs[indices]
-        right = self.multiplyright - A.T * self.Y[indices]
+        right = self.svecsTY - A.T * self.Y[indices]
         RQY = A * multiply(bevals.T, right)
         B = multiply(bevals.T, A.T)
         if len(indices) <= A.shape[1]:
@@ -182,6 +184,51 @@ class RLS(AbstractSvdSupervisedLearner):
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO = multiply(LOO_ek, self.svecs * (svecsm.T * self.Y)) - multiply(LOO_ek, multiply(RQR, self.Y))
         return np.array(LOO)
+    
+    
+    def computePairwiseCV(self, pairs):
+        
+        bevals = multiply(self.evals, self.newevals)
+        
+        print np.array(pairs)[:, 0], np.array(pairs)[:, 1]
+        
+        svecsbevals = multiply(self.svecs, bevals)
+        svecsbevalssvecsT = svecsbevals * self.svecs.T
+        svecsbevalssvecsTY = svecsbevalssvecsT * self.Y
+        IminusAB = mat(identity(self.Y.shape[0])) - svecsbevalssvecsT
+        
+        results_first = np.zeros((len(pairs), self.Y.shape[1]))
+        results_second = np.zeros((len(pairs), self.Y.shape[1]))
+        cython_pairwise_cv_for_rls.computePairwiseCV(len(pairs),
+                                                     np.array(pairs)[:, 0],
+                                                     np.array(pairs)[:, 1],
+                                                     self.Y.shape[1],
+                                                     self.Y,
+                                                     svecsbevalssvecsT,
+                                                     svecsbevalssvecsTY,
+                                                     results_first,
+                                                     results_second)
+        return results_first, results_second
+        
+        '''
+        results = []
+        
+        for i, j in pairs:
+            indices = [i, j]
+            RQY = svecsbevalssvecsTY[indices] - svecsbevalssvecsT[np.ix_(indices, indices)] * self.Y[indices]
+            
+            #Invert a symmetric 2x2 matrix
+            a, b, d = 1. - svecsbevalssvecsT[i, i], - svecsbevalssvecsT[i, j], 1. - svecsbevalssvecsT[j, j]
+            det = 1. / (a * d - b * b)
+            ia, ib, id = det * d, - det * b, det * a
+            
+            lpo_i = ia * RQY[0] + ib * RQY[1]
+            lpo_j = ib * RQY[0] + id * RQY[1]
+            #result = la.solve(I - A * B, RQY)
+            results.append([lpo_i, lpo_j])
+        return np.array(results)'''
+
+
 
 class LOOCV(object):
     
