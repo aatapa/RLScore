@@ -32,7 +32,10 @@ class KronRLS(object):
             X2 = mat(kwargs['xmatrix2'])
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
-        self.regparam = kwargs["regparam"]
+        if kwargs.has_key("regparam"):
+            self.regparam = kwargs["regparam"]
+        else:
+            self.regparam = 1.
         self.trained = False
     
     
