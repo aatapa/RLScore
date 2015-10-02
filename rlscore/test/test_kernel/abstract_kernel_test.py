@@ -1,18 +1,16 @@
 """This module contains the test functions for the kernels"""
 import unittest
 
-from numpy import random
-from numpy import zeros
-from numpy import dot
 from scipy import sparse as sp
 import numpy as np
+import random
 
 
 class AbstractKernelTest(unittest.TestCase):
     
     def setUp(self):
         #randomly generate data matrix
-        self.X = random.random((10,50))
+        self.X = np.random.random((10,50))
         #some basis vectors
         self.trainsets = [self.X, self.X.T]
         #self.basis_vectors = [0,3,7,8]
@@ -44,7 +42,7 @@ class AbstractKernelTest(unittest.TestCase):
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
-                    k = self.kernel.createKernel(**p)
+                    k = self.kernel(**p)
                     K = k.getKM(X).T
                     if bvecinds != None:
                         x_indices = bvecinds
@@ -63,7 +61,7 @@ class AbstractKernelTest(unittest.TestCase):
         #First data matrix has more features than examples, second the other
         #way around, third one is just full of zeros
         for X in self.trainsets:
-            X_test = random.random((22,X.shape[1]))
+            X_test = np.random.random((22,X.shape[1]))
             #Reduced set approximation is also tested
             for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
                 rpool = {'train_features' : X, 'basis_vectors': bvecs}
@@ -71,7 +69,7 @@ class AbstractKernelTest(unittest.TestCase):
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
-                    k = self.kernel.createKernel(**p)
+                    k = self.kernel(**p)
                     K = k.getKM(X_test).T
                     if bvecinds != None:
                         x_indices = bvecinds
@@ -86,7 +84,7 @@ class AbstractKernelTest(unittest.TestCase):
 
     def testDataTypes(self):
         X = self.trainsets[0]
-        Xt = random.random((22,X.shape[1]))
+        Xt = np.random.random((22,X.shape[1]))
         X_mat = np.mat(X)
         Xt_mat = np.mat(Xt)
         X_sp = sp.csr_matrix(X)
@@ -100,7 +98,7 @@ class AbstractKernelTest(unittest.TestCase):
                 p = {'train_features' : X,
                          'basis_vectors': bvecs}
                 p.update(params)
-                k = self.kernel.createKernel(**p)
+                k = self.kernel(**p)
                 for Xt in testsets:
                     K = k.getKM(Xt).T
                     self.assertTrue(type(K)==np.ndarray)

@@ -34,23 +34,23 @@ class PolynomialKernel(object):
         self.coef0 = coef0
         self.bias = bias
         
-    def createKernel(cls, **kwargs):
-        """Initializes a kernel object from the arguments."""
-        new_kwargs = {}
-        if kwargs.has_key('basis_vectors'):
-            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
-        new_kwargs["train_features"] = kwargs["train_features"]
-        if 'degree' in kwargs:
-            new_kwargs['degree'] = int(kwargs['degree'])
-        if "gamma" in kwargs:
-            new_kwargs["gamma"] = float(kwargs["gamma"])
-        if "bias" in kwargs:
-            new_kwargs["bias"] = float(kwargs["bias"])
-        if 'coef0' in kwargs:
-            new_kwargs['coef0'] = float(kwargs['coef0'])
-        kernel = cls(**new_kwargs)
-        return kernel
-    createKernel = classmethod(createKernel)  
+#    def createKernel(cls, **kwargs):
+#        """Initializes a kernel object from the arguments."""
+#        new_kwargs = {}
+#        if kwargs.has_key('basis_vectors'):
+#            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
+#        new_kwargs["train_features"] = kwargs["train_features"]
+#        if 'degree' in kwargs:
+#            new_kwargs['degree'] = int(kwargs['degree'])
+#        if "gamma" in kwargs:
+#            new_kwargs["gamma"] = float(kwargs["gamma"])
+#        if "bias" in kwargs:
+#            new_kwargs["bias"] = float(kwargs["bias"])
+#        if 'coef0' in kwargs:
+#            new_kwargs['coef0'] = float(kwargs['coef0'])
+#        kernel = cls(**new_kwargs)
+#        return kernel
+#    createKernel = classmethod(createKernel)  
 
 #    def kernel(self, x, z):
 #        #Note, current implementation overrides the kernel matrix building methods

@@ -37,19 +37,19 @@ class GaussianKernel(object):
         self.gamma = gamma
         self.bias = bias
         
-    def createKernel(cls, **kwargs):
-        """Initializes a kernel object from the arguments."""
-        new_kwargs = {}
-        new_kwargs["train_features"] = kwargs["train_features"]
-        if kwargs.has_key('basis_vectors'):
-            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
-        if "gamma" in kwargs:
-            new_kwargs["gamma"] = float(kwargs["gamma"])
-        if "bias" in kwargs:
-            new_kwargs["bias"] = float(kwargs["bias"])
-        kernel = cls(**new_kwargs)
-        return kernel
-    createKernel = classmethod(createKernel)   
+#    def createKernel(cls, **kwargs):
+#        """Initializes a kernel object from the arguments."""
+#        new_kwargs = {}
+#        new_kwargs["train_features"] = kwargs["train_features"]
+#        if kwargs.has_key('basis_vectors'):
+#            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
+#        if "gamma" in kwargs:
+#            new_kwargs["gamma"] = float(kwargs["gamma"])
+#        if "bias" in kwargs:
+#            new_kwargs["bias"] = float(kwargs["bias"])
+#        kernel = cls(**new_kwargs)
+#        return kernel
+#    createKernel = classmethod(createKernel)   
         
 #    def kernel(self, x, z):
 #        #Note, current implementation overrides the kernel matrix building methods

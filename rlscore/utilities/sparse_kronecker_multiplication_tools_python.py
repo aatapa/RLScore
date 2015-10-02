@@ -1,6 +1,6 @@
 
 
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 
 import random as pyrandom
 

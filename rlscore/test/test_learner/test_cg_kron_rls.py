@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-from rlscore.kernel import GaussianKernel
 from rlscore.kernel import LinearKernel
 from rlscore.learner.cg_kron_rls import CGKronRLS, KernelPairwiseModel
 from rlscore.learner.rls import RLS
@@ -46,12 +45,12 @@ class Test(unittest.TestCase):
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
         #kernel1 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train1)
-        kernel1 = LinearKernel.createKernel(train_features=X_train1)
+        kernel1 = LinearKernel(train_features=X_train1)
         K_train1 = kernel1.getKM(X_train1)
         K_test1 = kernel1.getKM(X_test1)
         
         #kernel2 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train2)
-        kernel2 = LinearKernel.createKernel(train_features=X_train2)
+        kernel2 = LinearKernel(train_features=X_train2)
         K_train2 = kernel2.getKM(X_train2)
         K_test2 = kernel2.getKM(X_test2)
         

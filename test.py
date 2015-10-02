@@ -30,7 +30,7 @@ def testLearners():
     #from rlscore.test.test_learner.test_orthogonal_matching_pursuit import Test as omptest
     #for test in [cgkrontest]:
     #for test in [krontest]:
-    for test in [twosteptest]:
+    #for test in [twosteptest]:
     #for test in [mmctest]:
     #for test in [irlsctest]:
     #for test in [grlstest]:
@@ -44,7 +44,7 @@ def testLearners():
     #for test in [omptest]:
     #for test in [cgtest]:
     #for test in [cgranktest]:
-    #for test in [rsatest]:
+    for test in [rsatest]:
     #for test in [cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)

@@ -5,12 +5,9 @@ Created on May 19, 2011
 '''
 import math
 
-from numpy import mat, multiply, zeros, float64, ones
+from numpy import multiply, float64, ones
 from scipy.sparse import csr_matrix
-from numpy import matrix
-from scipy.sparse.base import spmatrix
 from math import sqrt
-from scipy import sparse as sp
 import numpy as np
 
 from rlscore.utilities import decomposition

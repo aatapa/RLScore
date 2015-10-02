@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool['train_features'] = Xcv
         rpool['train_labels'] = Yho
-        rpool['kernel_obj'] = LinearKernel.createKernel(**rpool)
+        #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['train_qids'] = mapQids(qidlist_cv)
         primalrls_naive = LabelRankRLS.createLearner(**rpool)
 
@@ -120,7 +120,7 @@ class Test(unittest.TestCase):
         rpool['kernel_matrix'] = Kcv
         rpool['train_labels'] = Yho
         rpool['train_features'] = Xcv
-        rpool['kernel_obj'] = LinearKernel.createKernel(**rpool)
+        #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['train_qids'] = mapQids(qidlist_cv)
         dualrls_naive = LabelRankRLS.createLearner(**rpool)
         

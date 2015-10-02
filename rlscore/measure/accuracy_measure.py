@@ -1,18 +1,17 @@
 import numpy as np
-from numpy import *
 from rlscore.utilities import array_tools
 
 def accuracy_singletask(Y, P):
     assert Y.shape[0] == P.shape[0]
     vlen = float(Y.shape[0])
-    perf = sum(sign(multiply(Y, P)) + 1.) / (2 * vlen)
+    perf = np.sum(np.sign(np.multiply(Y, P)) + 1.) / (2 * vlen)
     return perf
 
 def accuracy_multitask(Y, P):
     Y = np.mat(Y)
     P = np.mat(P)
     vlen = float(Y.shape[0])
-    performances = sum(sign(multiply(Y, P)) + 1., axis = 0) / (2 * vlen)
+    performances = sum(np.sign(np.multiply(Y, P)) + 1., axis = 0) / (2 * vlen)
     performances = np.array(performances)[0]
     return performances
 

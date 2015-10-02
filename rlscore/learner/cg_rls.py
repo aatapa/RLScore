@@ -7,13 +7,11 @@ from scipy.sparse.linalg import cg
 from scipy import sparse
 from numpy import ones
 
-from rlscore.learner.abstract_learner import AbstractSupervisedLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore.utilities import array_tools
 from rlscore import model
 from rlscore.measure import sqerror
 
-class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
+class CGRLS(object):
     """Conjugate gradient RLS.
     
     Trains linear RLS using the conjugate gradient training algorithm. Suitable for
@@ -68,6 +66,11 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         else:
             self.callbackfun = None
         self.results = {}
+
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     
     def train(self):
@@ -87,14 +90,15 @@ class CGRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         if not self.callbackfun == None:
             def cb(v):
                 self.A = np.mat(v).T
-                self.callback()
+                self.callbackfun.callback(self)
         else:
             cb = None
         try:
             self.A = np.mat(cg(G, Y, callback=cb)[0]).T
         except Finished, e:
             pass
-        self.finished()
+        if self.callbackfun != None:
+            self.callbackfun.finished(self)
         self.A = X_csr*self.A
         if self.bias == 0.:
             self.b = np.mat(np.zeros((1,1)))

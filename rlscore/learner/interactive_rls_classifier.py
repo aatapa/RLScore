@@ -3,20 +3,22 @@ import pyximport; pyximport.install()
 
 import cython_mmc
 
-from random import *
 import random as pyrandom
 pyrandom.seed(200)
 #from numpy import *
 import numpy as np
 
 from rlscore.learner.abstract_learner import AbstractSvdLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 
-class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
+class InteractiveRlsClassifier(AbstractSvdLearner):
     
     
     def __init__(self, **kwargs):
         super(InteractiveRlsClassifier, self).__init__(**kwargs)
+        if kwargs.has_key('callback'):
+            self.callbackfun = kwargs['callback']
+        else:
+            self.callbackfun = None
         self.regparam = float(kwargs["regparam"])
         self.constraint = 0
         if not kwargs.has_key('number_of_clusters'):
@@ -86,7 +88,8 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
             self.classFitnessList.append(fitness_i[0, 0])
         self.classFitnessRowVec = np.array(self.classFitnessList)
         
-        self.callback()
+        if not self.callbackfun == None:
+            self.callbackfun.callback(self)
     
     
     def computeGlobalFitness(self):
@@ -308,7 +311,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
         
         working_set = pyrandom.sample(range(self.size), self.size)
         Y = self.Y[working_set]
-        R = self.R[ix_(working_set, working_set)]
+        R = self.R[np.ix_(working_set, working_set)]
         RY = self.RY[working_set]
         Y_Schur_RY = self.Y_Schur_RY[working_set]
         minus_diagRx2 = self.minus_diagRx2[working_set]
@@ -358,14 +361,14 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
             takenum = (self.size / self.labelcount) - self.classcounts[newclazz] + int(howmany)
             
             for h in range(takenum):
-                dirsneg = self.classFitnessRowVec + (2 * self.minus_diagRx2[:, None] + 4 * multiply(self.Y, self.RY))
+                dirsneg = self.classFitnessRowVec + (2 * self.minus_diagRx2[:, None] + 4 * np.multiply(self.Y, self.RY))
                 dirsnegdiff = dirsneg - self.classFitnessRowVec
-                dirscc = dirsnegdiff[arange(self.size), self.classvec].T
+                dirscc = dirsnegdiff[np.arange(self.size), self.classvec].T
                 dirs = dirsnegdiff + dirscc
-                dirs[arange(self.size), self.classvec] = float('Inf')
+                dirs[np.arange(self.size), self.classvec] = float('Inf')
                 dirs = dirs[:, newclazz]
-                steepestdir = argmin(dirs)
-                steepness = amin(dirs)
+                steepestdir = np.argmin(dirs)
+                steepness = np.amin(dirs)
                 oldclazz = self.classvec[steepestdir]
                 self.Y[steepestdir, oldclazz] = -1.
                 self.Y[steepestdir, newclazz] = 1.
@@ -392,7 +395,7 @@ class InteractiveRlsClassifier(AbstractSvdLearner, AbstractIterativeLearner):
 class RandomLabelSource(object):
     
     def __init__(self, size, labelcount):
-        self.rand = Random()
+        self.rand = pyrandom.Random()
         self.rand.seed(100)
         self.Y = - np.ones((size, labelcount), dtype = np.float64)
         self.classvec = - np.ones((size, 1), dtype = np.int32)

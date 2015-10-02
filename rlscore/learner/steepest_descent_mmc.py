@@ -2,22 +2,22 @@
 #import pyximport; pyximport.install()
 
 import cython_mmc
-
-
-from random import *
+import numpy as np
 import random as pyrandom
 pyrandom.seed(200)
-from numpy import *
 
 from rlscore.learner.abstract_learner import AbstractSvdLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore.utilities import array_tools
 
-class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
+class SteepestDescentMMC(AbstractSvdLearner):
     
     
     def __init__(self, **kwargs):
         super(SteepestDescentMMC, self).__init__(**kwargs)
+        if kwargs.has_key('callback'):
+            self.callbackfun = kwargs['callback']
+        else:
+            self.callbackfun = None
         self.regparam = float(kwargs["regparam"])
         self.constraint = 0
         if not kwargs.has_key('number_of_clusters'):
@@ -38,7 +38,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             Y_orig = array_tools.as_array(train_labels)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
-                self.Y = zeros((Y_orig.shape[0], 2))
+                self.Y = np.zeros((Y_orig.shape[0], 2))
                 self.Y[:, 0] = Y_orig
                 self.Y[:, 1] = - Y_orig
                 self.oneclass = True
@@ -61,8 +61,8 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             self.Y = RandomLabelSource(size, ysize).readLabels()
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
-        self.classvec = - ones((self.size), dtype = int32)
-        self.classcounts = zeros((self.labelcount), dtype = int32)
+        self.classvec = - np.ones((self.size), dtype = np.int32)
+        self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
         for i in range(self.size):
             clazzind = 0
             largestlabel = self.Y[i, 0]
@@ -99,29 +99,29 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
         self.regparam = regparam
         
         #Cached results
-        self.evals = multiply(self.svals, self.svals)
+        self.evals = np.multiply(self.svals, self.svals)
         self.newevals = 1. / (self.evals + self.regparam)
-        newevalslamtilde = multiply(self.evals, self.newevals)
-        self.D = sqrt(newevalslamtilde)
+        newevalslamtilde = np.multiply(self.evals, self.newevals)
+        self.D = np.sqrt(newevalslamtilde)
         #self.D = -newevalslamtilde
         
         self.VTY = self.svecs.T * self.Y
-        DVTY = multiply(self.D.T, self.svecs.T * self.Y)
+        #DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
         
-        #self.R = self.svecs * multiply(newevalslamtilde.T, self.svecs.T)
+        #self.R = self.svecs * np.multiply(newevalslamtilde.T, self.svecs.T)
         
-        self.sqrtR = multiply(sqrt(newevalslamtilde), self.svecs)
+        self.sqrtR = np.multiply(np.sqrt(newevalslamtilde), self.svecs)
         self.R = self.sqrtR * self.sqrtR.T
-        self.mdiagRx2 = - 2 * diag(self.R)
+        self.mdiagRx2 = - 2 * np.diag(self.R)
         
         '''
         #Space efficient variation
         self.R = None
-        self.mdiagRx2 = - 2 * array(sum(multiply(self.sqrtR, self.sqrtR), axis = 1)).reshape((self.size))
+        self.mdiagRx2 = - 2 * array(sum(np.multiply(self.sqrtR, self.sqrtR), axis = 1)).reshape((self.size))
         '''
         
         self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
-        self.Y_Schur_RY = multiply(self.Y, self.RY)
+        self.Y_Schur_RY = np.multiply(self.Y, self.RY)
         
         #Using lists in order to avoid unnecessary matrix slicings
         #self.DVTY_list = []
@@ -135,14 +135,15 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             self.YTRY_list.append(YTRY_i)
             fitness_i = self.size - YTRY_i
             self.classFitnessList.append(fitness_i[0, 0])
-        self.classFitnessRowVec = array(self.classFitnessList)
+        self.classFitnessRowVec = np.array(self.classFitnessList)
         
         self.updateA()
         
         
         converged = False
         #print self.classcounts.T
-        self.callback()
+        if not self.callbackfun == None:
+            self.callbackfun.callback(self)
         '''while True:
             
             converged = self.findSteepestDir()
@@ -180,7 +181,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     
     def updateA(self):
-        self.A = self.svecs * multiply(self.newevals.T, self.VTY)
+        self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
     
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):
@@ -207,14 +208,14 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             takenum = (self.size / self.labelcount) - self.classcounts[newclazz] + int(howmany)
             
             for h in range(takenum):
-                dirsneg = self.classFitnessRowVec + (2 * self.mdiagRx2[:, None] + 4 * multiply(self.Y, self.RY))
+                dirsneg = self.classFitnessRowVec + (2 * self.mdiagRx2[:, None] + 4 * np.multiply(self.Y, self.RY))
                 dirsnegdiff = dirsneg - self.classFitnessRowVec
-                dirscc = dirsnegdiff[arange(self.size), self.classvec].T
+                dirscc = dirsnegdiff[np.arange(self.size), self.classvec].T
                 dirs = dirsnegdiff + dirscc
-                dirs[arange(self.size), self.classvec] = float('Inf')
+                dirs[np.arange(self.size), self.classvec] = float('Inf')
                 dirs = dirs[:, newclazz]
-                steepestdir = argmin(dirs)
-                steepness = amin(dirs)
+                steepestdir = np.argmin(dirs)
+                steepness = np.amin(dirs)
                 oldclazz = self.classvec[steepestdir]
                 self.Y[steepestdir, oldclazz] = -1.
                 self.Y[steepestdir, newclazz] = 1.
@@ -236,11 +237,11 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     def findSteepestDirRotateClasses_FOCUSSETSTUFF(self, howmany, LOO = False):
         
-        focusrange = mat(arange(self.size)).T
+        focusrange = np.mat(np.arange(self.size)).T
         
         for j in range(self.labelcount):
-            maxtake = self.size / self.labelcount
-            #maxtake = int(sqrt(self.size))
+            #maxtake = self.size / self.labelcount
+            #maxtake = int(np.sqrt(self.size))
             #!!!!!!!!!!!!!!!
             takenum = (self.size / self.labelcount) - self.classcounts[j] + int(howmany)
             #takenum = min([maxtake, (self.size / self.labelcount) - self.classcounts[j] + int(howmany)])
@@ -253,13 +254,13 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
             #self.focusset = set(range(self.size))
             for h in range(takenum):
                 self.focusset = set(pyrandom.sample(range(self.size),10))
-                dirsnegdiff = 2 * self.mdiagRx2 + 4 * multiply(self.Y, self.RY)
+                dirsnegdiff = 2 * self.mdiagRx2 + 4 * np.multiply(self.Y, self.RY)
                 dirscc = dirsnegdiff[focusrange, self.classvec]
                 dirs = dirsnegdiff + dirscc
                 dirs[focusrange, self.classvec] = float('Inf')
                 dirs[list(set(range(self.size))-self.focusset)] = float('Inf')
                 dirs = dirs[:, j]
-                steepestdir, newclazz = unravel_index(argmin(dirs), dirs.shape)
+                steepestdir, newclazz = np.unravel_index(np.argmin(dirs), dirs.shape)
                 newclazz = j
                 oldclazz = self.classvec[steepestdir, 0]
                 
@@ -275,7 +276,7 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
                 if takecount >= takenum: break
                 for h in range(maxtake):
                     diagR = mat(diag(self.R)).T
-                    dirsnegdiff = - 4 * diagR + 4 * multiply(self.Y, self.RY)
+                    dirsnegdiff = - 4 * diagR + 4 * np.multiply(self.Y, self.RY)
                     dirscc = dirsnegdiff[focusrange, self.classvec]
                     dirs = dirsnegdiff + dirscc
                     dirs[focusrange, self.classvec] = float('Inf')
@@ -303,11 +304,11 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     def findNewFocusSet(self, clazz = 0, focsize = 50):
         
-        diagR = mat(diag(self.R)).T
-        dirsnegdiff = - 4 * diagR + 4 * multiply(self.Y, self.RY)
-        dirscc = dirsnegdiff[mat(arange(self.size)).T, self.classvec]
+        diagR = np.mat(np.diag(self.R)).T
+        dirsnegdiff = - 4 * diagR + 4 * np.multiply(self.Y, self.RY)
+        dirscc = dirsnegdiff[np.mat(np.arange(self.size)).T, self.classvec]
         dirs = dirsnegdiff + dirscc
-        dirs[mat(arange(self.size)).T, self.classvec] = float('Inf')
+        dirs[np.mat(np.arange(self.size)).T, self.classvec] = float('Inf')
         
         dirlist = []
         for i in range(self.size):
@@ -328,12 +329,12 @@ class SteepestDescentMMC(AbstractSvdLearner, AbstractIterativeLearner):
 class RandomLabelSource(object):
     
     def __init__(self, size, labelcount):
-        self.rand = Random()
+        self.rand = pyrandom.Random()
         self.rand.seed(100)
-        self.Y = - ones((size, labelcount), dtype = float64)
-        self.classvec = - ones((size), dtype = int32)
+        self.Y = - np.ones((size, labelcount), dtype = np.float64)
+        self.classvec = - np.ones((size), dtype = np.int32)
         allinds = set(range(size))
-        self.classcounts = zeros((labelcount), dtype = int32)
+        self.classcounts = np.zeros((labelcount), dtype = np.int32)
         for i in range(labelcount-1):
             inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
             allinds = allinds - set(inds)

@@ -8,7 +8,7 @@ import unittest
 
 from rlscore.learner import GreedyRLS
 #from rlscore.learner.space_efficient_greedy_rls import SpaceEfficientGreedyRLS as GreedyRLS
-from rlscore.learner.multi_task_greedy_rls import MultiTaskGreedyRLS as MTGreedyRLS
+#from rlscore.learner.multi_task_greedy_rls import MultiTaskGreedyRLS as MTGreedyRLS
 from rlscore.measure import sqerror
 from rlscore.measure import sqmprank
 from rlscore.learner.abstract_learner import CallbackFunction as CF

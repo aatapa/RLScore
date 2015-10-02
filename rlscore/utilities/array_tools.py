@@ -84,7 +84,7 @@ def spmat_resize(A, fdim):
         A = sp.csc_matrix(A)[:,:fdim]
     elif fdim > A.shape[1]:
         diff = fdim - A.shape[1]
-        A = sp.hstack([A,lil_matrix((self.A.shape[0],diff), dtype=float64)])
+        A = sp.hstack([A,sp.lil_matrix((A.shape[0],diff), dtype=np.float64)])
     A = sp.csr_matrix(A)
     return A
         

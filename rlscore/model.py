@@ -4,7 +4,6 @@ import numpy as np
 
 from rlscore.utilities import array_tools
 
-
 class DualModel(object):
     """Represents a dual model for making predictions.
     
@@ -76,6 +75,8 @@ class LinearModel(object):
         #self.W = array_tools.as_dense_matrix(W)
         #print type(W), W.shape
         self.W = np.squeeze(array_tools.as_array(W))
+        if self.W.ndim == 0:
+            self.W = self.W.reshape(1)
         #print type(self.W), self.W.shape
         self.b = np.squeeze(np.array(b))
     
@@ -111,4 +112,6 @@ class LinearModel(object):
         P = P + self.b
         #P = array_tools.as_array(P)
         return P
+
+
 

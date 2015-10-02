@@ -1,18 +1,12 @@
 
 import pyximport; pyximport.install()
 
-import math
-
-#from numpy import *
 import numpy as np
 import numpy.linalg as la
 
-from rlscore.learner.abstract_learner import AbstractLearner
-from rlscore import model
 from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
 
-from rlscore.utilities import sparse_kronecker_multiplication_tools
 
 import cython_two_step_rls_cv
 
@@ -120,7 +114,6 @@ class TwoStepRLS(object):
         
         self.newevals1 = 1. / (self.evals1 + regparam1)
         self.newevals2 = 1. / (self.evals2 + regparam2)
-        newevals = self.newevals1 * self.newevals2.T
         newevals = np.multiply(self.svals1, self.newevals1) * np.multiply(self.svals2, self.newevals2).T
         
         self.W = np.multiply(self.VTYU, newevals)

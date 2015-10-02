@@ -4,11 +4,9 @@ import numpy as np
 import numpy.linalg as la
 import scipy
 
-from rlscore.learner.abstract_learner import AbstractSupervisedLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore import model
 
-class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLearner):
+class OrthogonalMatchingPursuit(object):
     
     def loadResources(self):
         """
@@ -16,8 +14,6 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
         
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
-        AbstractIterativeLearner.loadResources(self)
-        AbstractSupervisedLearner.loadResources(self)
         
         self.Y = Y
         #Number of training examples
@@ -108,9 +104,11 @@ class OrthogonalMatchingPursuit(AbstractSupervisedLearner, AbstractIterativeLear
             
             self.W = alphavec[1:len(alphavec)]
             self.b = alphavec[0]
-            self.callback()
+            if not self.callbackfun == None:
+                self.callbackfun.callback(self)
+        if not self.callbackfun == None:
+            self.callbackfun.finished(self)
         print la.norm(np.array(Y)[:, 0] - np.dot(X[:, self.selected], self.W) - self.b) ** 2.
-        self.finished()
         self.resource_pool['selected_features'] = self.selected
         self.resource_pool['GreedyRLS_LOO_performances'] = self.performances
     

@@ -43,12 +43,12 @@ class Test(unittest.TestCase):
         
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
-        bk = GaussianKernel.createKernel(**{'train_features':Xtrain[basis_vectors], 'gamma':'0.001'})
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xtrain})
+        bk = GaussianKernel(**{'train_features':Xtrain[basis_vectors], 'gamma':0.001})
+        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xtrain})
         
         rpool = {}
         rpool['train_features'] = Xtrain
-        bk2 = GaussianKernel.createKernel(**{'train_features':Xtrain, 'gamma':'0.001'})
+        bk2 = GaussianKernel(**{'train_features':Xtrain, 'gamma':0.001})
         K = np.mat(bk2.getKM(Xtrain))
         
         Kho = K[ix_(hocompl, hocompl)]
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool['train_labels'] = Yho
         rpool['train_features'] = Xhocompl
-        rk = RsetKernel.createKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xhocompl})
+        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xhocompl})
         rpool['kernel_obj'] = rk
         dualrls_naive = RLS.createLearner(**rpool)
         

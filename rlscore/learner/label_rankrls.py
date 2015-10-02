@@ -1,15 +1,14 @@
 
 import numpy as np
-import numpy.linalg as la
 import scipy.sparse
 
 from rlscore.utilities import decomposition
-from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
+from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
 
-class LabelRankRLS(AbstractSvdSupervisedLearner):
+class LabelRankRLS(AbstractSvdLearner):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from query-structured
@@ -66,7 +65,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
         self.svals = svdad.svals
         self.svecs = svdad.rsvecs
         self.setQids(train_qids)
-        self.results = {}
+        #self.results = {}
     
     
     def createLearner(cls, **kwargs):
@@ -108,7 +107,9 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             else:
                 self.qidmap[qid] = [i]
         self.qids = qids
-    
+
+    def train(self):
+        self.solve()    
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -145,7 +146,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             
             
             #Eigenvalues of the kernel matrix
-            evals = np.multiply(self.svals, self.svals)
+            #evals = np.multiply(self.svals, self.svals)
             
             #Temporary variables
             ssvecs = np.multiply(self.svecs, self.svals)
@@ -175,7 +176,7 @@ class LabelRankRLS(AbstractSvdSupervisedLearner):
             #Primal RLS
             #self.A = self.U.T * (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright))
             #self.A = self.U.T * np.multiply(self.svals.T,  self.svecs.T * self.A)
-        self.results['model'] = self.getModel()
+        #self.results['model'] = self.getModel()
     
     
     def computeHO(self, indices):
@@ -248,7 +249,7 @@ class LQOCV(object):
             try:
                 performance = measure(Y[fold], P)
                 performances.append(performance)
-            except UndefinedPerformance, e:
+            except UndefinedPerformance:
                 pass
             #performance = measure_utilities.aggregate(performances)
         if len(performances) > 0:

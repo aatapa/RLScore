@@ -2,6 +2,7 @@ from rlscore.kernel import LinearKernel
 from rlscore.utilities.adapter import SvdAdapter
 from rlscore.utilities.adapter import LinearSvdAdapter
 from rlscore.utilities.adapter import PreloadedKernelMatrixSvdAdapter
+import inspect
 
 KERNEL_NAME = 'kernel'
 
@@ -10,7 +11,16 @@ def createKernelByModuleName(**kwargs):
     exec "from ..kernel import " + kname
     pcgstr = "kernel."
     kernelclazz = eval(kname)
-    kernel = kernelclazz.createKernel(**kwargs)
+    #get kernel arguments
+    args = inspect.getargspec(kernelclazz.__init__)[0]
+    args = set(kwargs.keys()).intersection(set(args))
+    #filter unnecessary arguments
+    new_kwargs = {}
+    for key in kwargs.keys():
+        if key in args:
+            new_kwargs[key] = kwargs[key]
+    #initialize kernel
+    kernel = kernelclazz(**new_kwargs)
     return kernel
 
 def createSVDAdapter(**kwargs):

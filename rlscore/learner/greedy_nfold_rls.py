@@ -1,13 +1,9 @@
 
-from numpy import *
 import scipy
 import scipy.sparse as sp
+import numpy as np
 
-from abstract_learner import AbstractSupervisedLearner
-from abstract_learner import AbstractIterativeLearner
-from rlscore.measure.sq_mprank_measure import sqmprank
-
-class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
+class GreedyNFoldRLS(object):
     
     def loadResources(self):
         """
@@ -15,7 +11,6 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
-        AbstractIterativeLearner.loadResources(self)
         
         Y = self.resource_pool['train_labels']
         self.Y = Y
@@ -39,6 +34,11 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             self.resource_pool['cross-validation_folds'] = qids
         self.setQids(qids)
         self.results = {}
+
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     
     def setQids(self, qids):
@@ -154,7 +154,7 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
         
         
         #Biaz
-        cv = sqrt(self.bias)*mat(ones((1, tsize)))
+        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
         
@@ -273,26 +273,24 @@ class GreedyNFoldRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
             currentfcount += 1
             
             if calculate_test_error:
-                if self.measure == None:
-                    pm = sqmprank
-                else:
-                    pm = self.measure
-                bias_slice = sqrt(self.bias) * mat(ones((1,X.shape[1]),dtype=float64))
-                X_biased = vstack([X,bias_slice])
+                bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
+                X_biased = np.vstack([X,bias_slice])
                 selected_plus_bias = self.selected+[fsize]
                 cutdiag = sp.lil_matrix((fsize+1, currentfcount + 1))
                 for ci, col in zip(selected_plus_bias, range(currentfcount + 1)):
                     cutdiag[ci, col] = 1.
                 W = cutdiag * (X_biased[selected_plus_bias] * self.A)
-                bias_slice = sqrt(self.bias) * mat(ones((1,self.testX.shape[1]),dtype=float64))
-                testX_biased = vstack([self.testX,bias_slice])
+                bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,self.testX.shape[1]),dtype=np.float64))
+                testX_biased = np.vstack([self.testX,bias_slice])
                 #print testX_biased.T.shape, W.shape
                 self.Y_predicted = testX_biased.T * W
-            self.callback()
-        self.finished()
+            if not self.callbackfun == None:
+                self.callbackfun.callback(self)
+        if not self.callbackfun == None:
+            self.callbackfun.finished(self)
         
-        bias_slice = sqrt(self.bias) * mat(ones((1,X.shape[1]),dtype=float64))
-        X = vstack([X,bias_slice])
+        bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
+        X = np.vstack([X,bias_slice])
         selected_plus_bias = self.selected+[fsize]
         cutdiag = sp.lil_matrix((fsize+1, currentfcount + 1))
         for ci, col in zip(selected_plus_bias, range(currentfcount + 1)):

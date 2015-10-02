@@ -1,16 +1,13 @@
 import numpy as np
 from numpy import array, eye, float64, multiply, mat, ones, sqrt, sum, zeros
 import numpy.linalg as la
-from scipy import sparse
-import scipy.sparse.linalg as sla
 
-from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
-from rlscore import model
+from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
 
-class AllPairsRankRLS(AbstractSvdSupervisedLearner):
+class AllPairsRankRLS(AbstractSvdLearner):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from a single
@@ -77,7 +74,6 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
-        self.results = {}
 
     def createLearner(cls, **kwargs):
         #new_kwargs = {}
@@ -89,7 +85,9 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         learner = cls(**kwargs)
         return learner
     createLearner = classmethod(createLearner)
-    
+
+    def train(self):
+        self.solve()    
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -123,7 +121,6 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         self.A = self.svecs * multiply(1. / self.svals.T, \
             (multiply(neweigvals.T, self.multipleright) \
             - nP * (fastinv * (nP.T * self.multipleright))))
-        self.results["model"] = self.getModel()
     
     
     def computePairwiseCV(self, pairs, oind=0):
@@ -160,8 +157,7 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         GC = sum(G, axis=1)
         
         CTGC = sum(GC)
-        
-        allresults = []
+
         
         CTY = sum(Y, axis=0)[0, oind]
         CTGDY = sum(GDY, axis=0)[0, oind]
@@ -364,7 +360,6 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
     def reference(self, pairs):
         
         evals, evecs = self.evals, self.svecs
-        m = self.size
         Y = self.Y
         m = self.size
         
@@ -388,7 +383,7 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
         CT = C.T
         CTGC = CT * GC
         CTY = CT * Y
-        GCCTY = (G * C) * (C.T * Y)
+        #GCCTY = (G * C) * (C.T * Y)
         CTGDY = CT * GDY
         
         minusI3 = -mat(eye(3))
@@ -400,14 +395,14 @@ class AllPairsRankRLS(AbstractSvdSupervisedLearner):
             R[1, 0] = -1.
             R[0, 1] = sqrt(self.size - 2.)
             R[1, 2] = sqrt(self.size - 2.)
-            RT = R.T
+            #RT = R.T
             
-            GBho = GC[hoinds] + G[ix_(hoinds, hoinds)] * R
+            GBho = GC[hoinds] + G[np.ix_(hoinds, hoinds)] * R
             
             BTGB = CTGC \
                 + R.T * GC[hoinds] \
                 + CTG[:, hoinds] * R \
-                + R.T * G[ix_(hoinds, hoinds)] * R
+                + R.T * G[np.ix_(hoinds, hoinds)] * R
             
             BTY = CTY + R.T * Y[hoinds]
             
@@ -438,7 +433,7 @@ class NfoldCV(object):
             try:
                 performance = measure(Y[fold], P)
                 performances.append(performance)
-            except UndefinedPerformance, e:
+            except UndefinedPerformance:
                 pass
             #performance = measure_utilities.aggregate(performances)
         if len(performances) > 0:

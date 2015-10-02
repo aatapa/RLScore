@@ -34,7 +34,7 @@ def cindex_multitask(Y, P):
     for i in range(Y.shape[1]):
         try:
             perfs.append(cindex_singletask(Y[:,i], P[:,i]))
-        except UndefinedPerformance, e:
+        except UndefinedPerformance:
             perfs.append(np.nan)
     return perfs
 

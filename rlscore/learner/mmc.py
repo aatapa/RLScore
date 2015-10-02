@@ -1,14 +1,11 @@
 
-from random import *
-
-from numpy import *
-
+import random
+import numpy as np
 from rlscore.learner.abstract_learner import AbstractSvdLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 
-class MMC(AbstractSvdLearner, AbstractIterativeLearner):
+class MMC(AbstractSvdLearner):
     """RLS-based maximum-margin clustering.
     
     Performs stochastic search, that aims to find a labeling of the data such
@@ -80,7 +77,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             Y_orig = array_tools.as_array(train_labels)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
-                self.Y = zeros((Y_orig.shape[0], 2))
+                self.Y = np.zeros((Y_orig.shape[0], 2))
                 self.Y[:, 0] = Y_orig
                 self.Y[:, 1] = - Y_orig
                 self.oneclass = True
@@ -103,8 +100,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             self.Y = RandomLabelSource(size, ysize).readLabels()
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
-        self.classvec = - ones((self.size), dtype = int32)
-        self.classcounts = zeros((self.labelcount), dtype = int32)
+        self.classvec = - np.ones((self.size), dtype = np.int32)
+        self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
         for i in range(self.size):
             clazzind = 0
             largestlabel = self.Y[i, 0]
@@ -155,24 +152,24 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         
         '''
         #Cached results
-        self.evals = multiply(self.svals, self.svals)
+        self.evals = np.multiply(self.svals, self.svals)
         self.newevals = 1. / (self.evals + regparam)
-        newevalslamtilde = multiply(self.evals, self.newevals)
-        A1 = multiply(newevalslamtilde, newevalslamtilde)
+        newevalslamtilde = np.multiply(self.evals, self.newevals)
+        A1 = np.multiply(newevalslamtilde, newevalslamtilde)
         A2 = - 2 * newevalslamtilde
-        A3 = self.regparam * multiply(newevalslamtilde, self.newevals)
+        A3 = self.regparam * np.multiply(newevalslamtilde, self.newevals)
         self.D = A1 + A2 + A3
         '''
         
         #Cached results
-        self.evals = multiply(self.svals, self.svals)
+        self.evals = np.multiply(self.svals, self.svals)
         self.newevals = 1. / (self.evals + self.regparam)
-        newevalslamtilde = multiply(self.evals, self.newevals)
-        self.D = sqrt(newevalslamtilde)
+        newevalslamtilde = np.multiply(self.evals, self.newevals)
+        self.D = np.sqrt(newevalslamtilde)
         #self.D = -newevalslamtilde
         
         self.VTY = self.svecs.T * self.Y
-        DVTY = multiply(self.D.T, self.svecs.T * self.Y)
+        DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
         
         #Using lists in order to avoid unnecessary matrix slicings
         self.DVTY_list = []
@@ -189,7 +186,7 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         self.Dsvecs_list = []
         self.svecsDDsvecs_list = []
         for i in range(self.size):
-            Dsvec = multiply(self.D.T, self.svecs[i].T)
+            Dsvec = np.multiply(self.D.T, self.svecs[i].T)
             self.Dsvecs_list.append(Dsvec)
             self.svecsDDsvecs_list.append(Dsvec.T*Dsvec)
         
@@ -198,12 +195,14 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         
         converged = False
         print self.classcounts.T
-        self.callback()
+        if self.callbackfun != None:
+            self.callbackfun.callback(self)
         while True:
             
             converged = self.roundRobin()
             print self.classcounts.T
-            self.callback()
+            if self.callbackfun != None:
+                self.callbackfun.callback(self)
             if converged: break
         
         #for ii in range(5):
@@ -333,15 +332,15 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
         DVTY_old_currentclass = self.DVTY_list[currentclassind]
         #fitness_old_currentclass = self.classFitnessList[currentclassind]
         DVTY_new_currentclass = DVTY_old_currentclass - 2 * self.Dsvecs_list[flipindex]
-        #fitness_new_currentclass = self.size + VTY_new_currentclass.T * multiply(self.D.T, VTY_new_currentclass)
+        #fitness_new_currentclass = self.size + VTY_new_currentclass.T * np.multiply(self.D.T, VTY_new_currentclass)
         #fitnessdiff_currentclass = fitness_new_currentclass - fitness_old_currentclass
             
-        bevals = multiply(self.evals, self.newevals)
+        bevals = np.multiply(self.evals, self.newevals)
         RV = self.Dsvecs_list[flipindex]
         right = DVTY_old_currentclass - RV * (-1.)
         #print RV.shape, bevals.shape, right.shape
-        RQY = RV.T * multiply(bevals.T, right)
-        RQRT = RV.T * multiply(bevals.T, RV)
+        RQY = RV.T * np.multiply(bevals.T, right)
+        RQRT = RV.T * np.multiply(bevals.T, RV)
         result = 1. / (1. - RQRT) * RQY
         fitnessdiff_currentclass = (-1. - result) ** 2 - (1. - result) ** 2
         
@@ -360,8 +359,8 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
             DVTY_new_newclass = DVTY_old_newclass + 2 * self.Dsvecs_list[flipindex]
             
             right = DVTY_old_newclass - RV * (-1.)
-            RQY = RV.T * multiply(bevals.T, right)
-            RQRT = RV.T * multiply(bevals.T, RV)
+            RQY = RV.T * np.multiply(bevals.T, right)
+            RQRT = RV.T * np.multiply(bevals.T, RV)
             result = 1. / (1. - RQRT) * RQY
             
             fitnessdiff_newclass = (1. - result) ** 2 - (-1. - result) ** 2
@@ -394,12 +393,12 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
     
     
     def updateA(self):
-        self.A = self.svecs * multiply(self.newevals.T, self.VTY)
+        self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
         #if self.U == None:
-        #    self.A = self.svecs * multiply(self.newevals.T, self.VTY)
+        #    self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
         #else:
-        #    bevals = multiply(self.svals, self.newevals)
-        #    self.A = self.U.T * multiply(bevals.T, self.VTY)
+        #    bevals = np.multiply(self.svals, self.newevals)
+        #    self.A = self.U.T * np.multiply(bevals.T, self.VTY)
     
     
     def roundRobin(self, LOO = False):
@@ -554,12 +553,12 @@ class MMC(AbstractSvdLearner, AbstractIterativeLearner):
 class RandomLabelSource(object):
     
     def __init__(self, size, labelcount):
-        self.rand = Random()
+        self.rand = random.Random()
         self.rand.seed(100)
-        self.Y = - ones((size, labelcount), dtype = float64)
-        self.classvec = - ones((size), dtype = int32)
+        self.Y = - np.ones((size, labelcount), dtype = np.float64)
+        self.classvec = - np.ones((size), dtype = np.int32)
         allinds = set(range(size))
-        self.classcounts = zeros((labelcount), dtype = int32)
+        self.classcounts = np.zeros((labelcount), dtype = np.int32)
         for i in range(labelcount-1):
             inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
             allinds = allinds - set(inds)

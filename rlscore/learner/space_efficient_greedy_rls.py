@@ -1,15 +1,12 @@
 
 import random as pyrandom
-
-from numpy import *
+import numpy as np
 import numpy.linalg as la
 import scipy.sparse as sp
 
-from rlscore.learner.abstract_learner import AbstractSupervisedLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore import model
 
-class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearner):
+class SpaceEfficientGreedyRLS(object):
     
     def loadResources(self):
         """
@@ -17,7 +14,6 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
-        AbstractIterativeLearner.loadResources(self)
         X = self.resource_pool['train_features']
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
@@ -74,7 +70,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = mat(zeros((fsize, Y.shape[1])))
+        self.A = np.mat(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
@@ -86,7 +82,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         #Biaz
-        bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
+        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         cv = bias_slice
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
@@ -96,14 +92,14 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
-        diagG = mat(diagG).T
+        diagG = np.mat(diagG).T
         
         #listX = []
         #for ci in range(fsize):
         #    listX.append(X[ci])
         
         U, S, VT = la.svd(cv, full_matrices = False)
-        U, S, VT = mat(U), mat(S), mat(VT)
+        U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
         Omega = 1. / (S * S + rp) - rpinv
         
         self.selected = []
@@ -122,13 +118,13 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
                 if ci in self.selected: continue
                 #cv = listX[ci]
                 cv = X[ci]
-                GXT_ci = VT.T * multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
+                GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
                 ca = GXT_ci * (1. / (1. + cv * GXT_ci))
                 updA = self.dualvec - ca * (cv * self.dualvec)
-                invupddiagG = 1. / (diagG - multiply(ca, GXT_ci))
+                invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
                 if not self.measure == None:
-                    loopred = Y - multiply(invupddiagG, updA)
+                    loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
                     if bestlooperf == None:
                         bestlooperf = looperf_i
@@ -138,32 +134,32 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
                         bestlooperf = looperf_i
                 else:
                     #This default squared performance is a bit faster to compute than the one loaded separately.
-                    loodiff = multiply(invupddiagG, updA)
+                    loodiff = np.multiply(invupddiagG, updA)
                     #looperf_i = (loodiff.T * loodiff)[0, 0]
-                    looperf_i = mean(sum(multiply(loodiff, loodiff), axis = 0))
+                    looperf_i = np.mean(sum(np.multiply(loodiff, loodiff), axis = 0))
                     if looperf_i < bestlooperf:
                         bestcind = ci
                         bestlooperf = looperf_i
                 self.looperf.append(looperf_i)
-            self.looperf = mat(self.looperf)
+            self.looperf = np.mat(self.looperf)
             
             self.bestlooperf = bestlooperf
             self.performances.append(bestlooperf)
             #cv = listX[bestcind]
             cv = X[bestcind]
             #GXT_bci = GXT[:, bestcind]
-            GXT_bci = VT.T * multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
+            GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
             self.dualvec = self.dualvec - ca * (cv * self.dualvec)
-            diagG = diagG - multiply(ca, GXT_bci)
+            diagG = diagG - np.multiply(ca, GXT_bci)
             #GXT = GXT - ca * (cv * GXT)
             self.selected.append(bestcind)
             X_sel = X[self.selected]
             if isinstance(X_sel, sp.base.spmatrix):
                 X_sel = X_sel.todense()
-            U, S, VT = la.svd(vstack([X_sel, bias_slice]), full_matrices = False)
-            U, S, VT = mat(U), mat(S), mat(VT)
-            Omega = 1. / (multiply(S, S) + rp) - rpinv
+            U, S, VT = la.svd(np.vstack([X_sel, bias_slice]), full_matrices = False)
+            U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
+            Omega = 1. / (np.multiply(S, S) + rp) - rpinv
             #print self.selected
             #print self.performances
             currentfcount += 1
@@ -174,7 +170,10 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             
             self.callback()
             #print who(locals())
-        self.finished()
+            if not self.callbackfun == None:
+                self.callbackfun.callback(self)
+        if not self.callbackfun == None:
+            self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
@@ -199,7 +198,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = mat(zeros((fsize, Y.shape[1])))
+        self.A = np.mat(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
@@ -211,7 +210,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         #Biaz
-        bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
+        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         cv = bias_slice
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
@@ -221,14 +220,14 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
-        diagG = mat(diagG).T
+        diagG = np.mat(diagG).T
         
         #listX = []
         #for ci in range(fsize):
         #    listX.append(X[ci])
         
         U, S, VT = la.svd(cv, full_matrices = False)
-        U, S, VT = mat(U), mat(S), mat(VT)
+        U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
         Omega = 1. / (S * S + rp) - rpinv
         
         self.selected = []
@@ -259,58 +258,58 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
                 self.bestlooperf = float('inf')
             
             
-            looperf = mat(zeros((1, fsize)))
+            looperf = np.mat(np.zeros((1, fsize)))
             
             for blockind in range(blockcount):
                 
                 block = blocks[blockind]
                 
-                tempmatrix = mat(zeros((tsize, len(block))))
-                temp2 = mat(zeros((tsize, len(block))))
+                tempmatrix = np.mat(np.zeros((tsize, len(block))))
+                temp2 = np.mat(np.zeros((tsize, len(block))))
                 
                 X_block = X[block]
-                GXT_block = VT.T * multiply(Omega.T, (VT * X_block.T)) + rpinv * X_block.T
+                GXT_block = VT.T * np.multiply(Omega.T, (VT * X_block.T)) + rpinv * X_block.T
                 
-                multiply(X_block.T, GXT_block, tempmatrix)
+                np.multiply(X_block.T, GXT_block, tempmatrix)
                 XGXTdiag = sum(tempmatrix, axis = 0)
                 
                 XGXTdiag = 1. / (1. + XGXTdiag)
-                multiply(GXT_block, XGXTdiag, tempmatrix)
+                np.multiply(GXT_block, XGXTdiag, tempmatrix)
                 
-                tempvec1 = multiply((X_block * self.dualvec).T, XGXTdiag)
-                multiply(GXT_block, tempvec1, temp2)
-                subtract(self.dualvec, temp2, temp2)
+                tempvec1 = np.multiply((X_block * self.dualvec).T, XGXTdiag)
+                np.multiply(GXT_block, tempvec1, temp2)
+                np.subtract(self.dualvec, temp2, temp2)
                 
-                multiply(tempmatrix, GXT_block, tempmatrix)
-                subtract(diagG, tempmatrix, tempmatrix)
-                divide(1, tempmatrix, tempmatrix)
-                multiply(tempmatrix, temp2, tempmatrix)
+                np.multiply(tempmatrix, GXT_block, tempmatrix)
+                np.subtract(diagG, tempmatrix, tempmatrix)
+                np.divide(1, tempmatrix, tempmatrix)
+                np.multiply(tempmatrix, temp2, tempmatrix)
                 
                 
                 if not self.measure == None:
-                    subtract(Y, tempmatrix, tempmatrix)
-                    multiply(temp2, 0, temp2)
-                    add(temp2, Y, temp2)
+                    np.subtract(Y, tempmatrix, tempmatrix)
+                    np.multiply(temp2, 0, temp2)
+                    np.add(temp2, Y, temp2)
                     looperf_block = self.measure.multiTaskPerformance(temp2, tempmatrix)
-                    looperf_block = mat(looperf_block)
+                    looperf_block = np.mat(looperf_block)
                 else:
-                    multiply(tempmatrix, tempmatrix, tempmatrix)
+                    np.multiply(tempmatrix, tempmatrix, tempmatrix)
                     looperf_block = sum(tempmatrix, axis = 0)
                 looperf[:, block] = looperf_block
                 
             if not self.measure == None:
                 if self.measure.isErrorMeasure():
                     looperf[0, self.selected] = float('inf')
-                    bestcind = argmin(looperf)
-                    self.bestlooperf = amin(looperf)
+                    bestcind = np.argmin(looperf)
+                    self.bestlooperf = np.amin(looperf)
                 else:
                     looperf[0, self.selected] = - float('inf')
-                    bestcind = argmax(looperf)
-                    self.bestlooperf = amax(looperf)
+                    bestcind = np.argmax(looperf)
+                    self.bestlooperf = np.amax(looperf)
             else:
                 looperf[0, self.selected] = float('inf')
-                bestcind = argmin(looperf)
-                self.bestlooperf = amin(looperf)
+                bestcind = np.argmin(looperf)
+                self.bestlooperf = np.amin(looperf)
                 
             self.looperf = looperf
             
@@ -318,19 +317,19 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             #cv = listX[bestcind]
             cv = X[bestcind]
             #GXT_bci = GXT[:, bestcind]
-            GXT_bci = VT.T * multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
+            GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
             self.dualvec = self.dualvec - ca * (cv * self.dualvec)
-            diagG = diagG - multiply(ca, GXT_bci)
+            diagG = diagG - np.multiply(ca, GXT_bci)
             #GXT = GXT - ca * (cv * GXT)
             self.selected.append(bestcind)
             X_sel = X[self.selected]
             if isinstance(X_sel, sp.base.spmatrix):
                 X_sel = X_sel.todense()
-            U, S, VT = la.svd(vstack([X_sel, bias_slice]), full_matrices = False)
-            U, S, VT = mat(U), mat(S), mat(VT)
+            U, S, VT = la.svd(np.vstack([X_sel, bias_slice]), full_matrices = False)
+            U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
             #print U.shape, S.shape, VT.shape
-            Omega = 1. / (multiply(S, S) + rp) - rpinv
+            Omega = 1. / (np.multiply(S, S) + rp) - rpinv
             #print self.selected
             #print self.performances
             currentfcount += 1
@@ -361,7 +360,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = mat(zeros((fsize, Y.shape[1])))
+        self.A = np.mat(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
@@ -373,7 +372,7 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         #Biaz
-        bias_slice = sqrt(self.bias)*mat(ones((1,X.shape[1]),dtype=float64))
+        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         cv = bias_slice
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
@@ -384,14 +383,14 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
-        diagG = mat(diagG).T
+        diagG = np.mat(diagG).T
         
         #listX = []
         #for ci in range(fsize):
         #    listX.append(X[ci])
         
         U, S, VT = la.svd(cv, full_matrices = False)
-        U, S, VT = mat(U), mat(S), mat(VT)
+        U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
         Omega = 1. / (S * S + rp) - rpinv
         
         self.selected = []
@@ -414,15 +413,15 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             #sample_60 = pyrandom.sample(notselected, 1)
             for ci in sample_60:
                 cv = X[ci]
-                GXT_ci = VT.T * multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
+                GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
                 ca = GXT_ci * (1. / (1. + cv * GXT_ci))
                 updA = self.dualvec - ca * (cv * self.dualvec)
                 #updF = self.F - X_s.T * (X_s * (ca * (cv * self.dualvec))) + cv.T * (cv * updA)
                 updF = bias_slice.T * (bias_slice * updA) + X_s.T * (X_s * updA) + cv.T * (cv * updA) #PREFITTING (SLOW)
-                invupddiagG = 1. / (diagG - multiply(ca, GXT_ci))
+                invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
                 if not self.measure == None:
-                    loopred = Y - multiply(invupddiagG, updA)
+                    loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
                     if bestlooperf == None:
                         bestlooperf = looperf_i
@@ -433,15 +432,15 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
                 else:
                     #This default squared performance is a bit faster to compute than the one loaded separately.
                     updtrainingerr = updF - self.Y
-                    updtrainingerr = mean(sum(multiply(updtrainingerr, updtrainingerr), axis = 0))
+                    updtrainingerr = np.mean(sum(np.multiply(updtrainingerr, updtrainingerr), axis = 0))
                     looperf_i = updtrainingerr
-                    #loodiff = multiply(invupddiagG, updA)
-                    #looperf_i = mean(sum(multiply(loodiff, loodiff), axis = 0))
+                    #loodiff = np.multiply(invupddiagG, updA)
+                    #looperf_i = np.mean(sum(np.multiply(loodiff, loodiff), axis = 0))
                     if looperf_i < bestlooperf:
                         bestcind = ci
                         bestlooperf = looperf_i
                 self.looperf.append(looperf_i)
-            self.looperf = mat(self.looperf)
+            self.looperf = np.mat(self.looperf)
             
             self.bestlooperf = bestlooperf
             print bestlooperf
@@ -449,10 +448,10 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             #cv = listX[bestcind]
             cv = X[bestcind]
             #GXT_bci = GXT[:, bestcind]
-            GXT_bci = VT.T * multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
+            GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
             self.dualvec = self.dualvec - ca * (cv * self.dualvec)
-            diagG = diagG - multiply(ca, GXT_bci)
+            diagG = diagG - np.multiply(ca, GXT_bci)
             #self.F = self.F + cv.T * (cv * self.dualvec)
             self.F = X_s.T * (X_s * self.dualvec) + cv.T * (cv * self.dualvec)
             #GXT = GXT - ca * (cv * GXT)
@@ -461,9 +460,9 @@ class SpaceEfficientGreedyRLS(AbstractSupervisedLearner, AbstractIterativeLearne
             X_sel = X[self.selected]
             if isinstance(X_sel, sp.base.spmatrix):
                 X_sel = X_sel.todense()
-            U, S, VT = la.svd(vstack([X_sel, bias_slice]), full_matrices = False)
-            U, S, VT = mat(U), mat(S), mat(VT)
-            Omega = 1. / (multiply(S, S) + rp) - rpinv
+            U, S, VT = la.svd(np.vstack([X_sel, bias_slice]), full_matrices = False)
+            U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
+            Omega = 1. / (np.multiply(S, S) + rp) - rpinv
             currentfcount += 1
             
             #Linear model with bias

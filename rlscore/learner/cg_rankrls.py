@@ -1,21 +1,18 @@
 from math import sqrt
 
 import numpy as np
-import numpy.linalg as la
 from scipy.sparse import csc_matrix
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import cg
 import scipy.sparse as sp
 
-from rlscore.learner.abstract_learner import AbstractSupervisedLearner
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
 from rlscore import model
 from rlscore.utilities import array_tools
-from rlscore.measure import measure_utilities
 from rlscore.measure import sqmprank
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
-class CGRankRLS(AbstractIterativeLearner):
+class CGRankRLS(object):
     """Conjugate gradient RankRLS.
     
     Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
@@ -78,11 +75,11 @@ class CGRankRLS(AbstractIterativeLearner):
     """
 
     def __init__(self, **kwargs):
-        super(CGRankRLS, self).__init__(**kwargs)
         if kwargs.has_key("regparam"):
             self.regparam = float(kwargs["regparam"])
         else:
             self.regparam = 0.
+        self.callbackfun = None
         if 'train_labels' in kwargs:
             Y = kwargs['train_labels']
             self.Y = array_tools.as_labelmatrix(Y)
@@ -113,6 +110,11 @@ class CGRankRLS(AbstractIterativeLearner):
         else:
             self.qidmap = None
         self.results = {}
+ 
+    def createLearner(cls, **kwargs):
+        learner = cls(**kwargs)
+        return learner
+    createLearner = classmethod(createLearner)
     
     
     def setQids(self, qids):
@@ -199,13 +201,13 @@ class CGRankRLS(AbstractIterativeLearner):
             def cb(v):
                 self.A = np.mat(v).T
                 self.b = np.mat(np.zeros((1,1)))
-                self.callback()
+                self.callbackfun.callback(self)
         else:
             cb = None
         XLY = X_csr*Y-X_csr*(P*(PT*Y))
         try:
             self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
-        except Finished, e:
+        except Finished:
             pass
         self.b = np.mat(np.zeros((1,1)))
         self.results['model'] = self.getModel()
@@ -232,7 +234,7 @@ class CGRankRLS(AbstractIterativeLearner):
             def cb(v):
                 self.A = np.mat(v).T
                 self.b = np.mat(np.zeros((1,1)))
-                self.callback()
+                self.callbackfun.callback()
         else:
             cb = None
         XLY = X_csr * (pairs_csc.T * M)
@@ -273,7 +275,7 @@ class EarlyStopCB(object):
                 try:
                     perf = self.measure(self.Y_valid[query], P[query])
                     perfs.append(perf)
-                except UndefinedPerformance, e:
+                except UndefinedPerformance:
                     pass
             perf = np.mean(perfs)
         else:

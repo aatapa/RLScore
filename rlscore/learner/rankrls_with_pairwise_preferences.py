@@ -1,19 +1,9 @@
-from math import sqrt
-
 import numpy as np
-import numpy.linalg as la
 from scipy.sparse import csc_matrix
 from scipy.sparse import coo_matrix
-from scipy.sparse.linalg import LinearOperator
-from scipy.sparse.linalg import cg
-import scipy.sparse as sp
 
-from rlscore.learner.abstract_learner import AbstractSupervisedLearner
+
 from rlscore.learner.abstract_learner import AbstractSvdLearner
-from rlscore import model
-from rlscore.utilities import array_tools
-from rlscore.measure import measure_utilities
-from rlscore.measure import sqmprank
 from rlscore.utilities import creators
 from rlscore.utilities import decomposition
 

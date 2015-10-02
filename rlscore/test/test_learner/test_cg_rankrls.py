@@ -27,8 +27,6 @@ class Test(unittest.TestCase):
             rpool['train_labels'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            k = LinearKernel.createKernel(**rpool)
-            rpool['kernel_obj'] = k
             rls = CGRankRLS.createLearner(**rpool)
             rls.train()
             model = rls.getModel()   
@@ -65,8 +63,6 @@ class Test(unittest.TestCase):
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            k = LinearKernel.createKernel(**rpool)
-            rpool['kernel_obj'] = k
             rls = CGRankRLS.createLearner(**rpool)
             rls.train()
             model = rls.getModel()   

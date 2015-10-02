@@ -1,5 +1,3 @@
-import sys
-
 from numpy import *
 import numpy.linalg as la
 import unittest

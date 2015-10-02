@@ -18,14 +18,14 @@ class LinearKernel(object):
         by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, train_features, bias=0.0, basis_vectors=None, **kwargs):
+    def __init__(self, train_features, bias=0.0, basis_vectors=None):
         if basis_vectors != None:
             self.train_X = basis_vectors
         else:
             self.train_X = train_features
         self.bias = bias
 
-    def createKernel(cls, **kwargs):
+#    def createKernel(cls, **kwargs):
         """Initializes a kernel object from the arguments."""
         #new_kwargs = {}
         #if kwargs.has_key('basis_vectors'):
@@ -34,9 +34,9 @@ class LinearKernel(object):
         #if "bias" in kwargs:
         #    new_kwargs["bias"] = float(kwargs["bias"])
         #kernel = cls(**new_kwargs)
-        kernel = cls(**kwargs)
-        return kernel
-    createKernel = classmethod(createKernel)  
+#        kernel = cls(**kwargs)
+#        return kernel
+#    createKernel = classmethod(createKernel)  
     
     def getKM(self, X):
         """Returns the kernel matrix between the basis vectors and X.

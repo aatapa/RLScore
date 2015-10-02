@@ -1,25 +1,11 @@
-
-# from numpy import *
 import numpy as np
-import numpy.linalg as la
 
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import cg
-from scipy.sparse.linalg import bicg
 from scipy.sparse.linalg import bicgstab
 
-from rlscore.learner.abstract_learner import AbstractIterativeLearner
-from rlscore import model
-from rlscore.utilities import array_tools
-from rlscore.utilities import decomposition
 from rlscore.utilities import sparse_kronecker_multiplication_tools_python
-from scipy.optimize import line_search
-from scipy.optimize import check_grad
 from cg_kron_rls import KernelPairwiseModel
-#from scipy.sparse.linalg import lsqr
-#from scipy.sparse.linalg import lsmr
-from scipy.sparse.linalg import *
-from scipy.optimize import fmin_l_bfgs_b
 
 TRAIN_LABELS = 'train_labels'
 CALLBACK_FUNCTION = 'callback'
@@ -42,7 +28,7 @@ def dual_gradient(a, K1, K2, Y, rowind, colind, lamb):
     Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
     return v_after + lamb*Ka
         
-def dual_Hu(u, a, K1, K2, rowind, colind, lamb):
+def dual_Hu(u, a, K1, K2, Y, rowind, colind, lamb):
     P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)            
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
@@ -101,7 +87,7 @@ def hessian(v, p, X1, X2, Y, rowind, colind, lamb):
     #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
 
 
-class KronSVM(AbstractIterativeLearner):
+class KronSVM(object):
         
     
     def __init__(self, **kwargs):
@@ -146,9 +132,7 @@ class KronSVM(AbstractIterativeLearner):
         
         x1tsize, x1fsize = X1.shape #m, d
         x2tsize, x2fsize = X2.shape #q, r
-        lsize = len(self.label_row_inds) #n
         
-        kronfcount = x1fsize * x2fsize
         
         label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
         label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
@@ -234,11 +218,13 @@ class KronSVM(AbstractIterativeLearner):
             print "function value", func(w)
             w = w - w_new
             self.W = w.reshape((x1fsize, x2fsize), order='C')
-            self.callback()
+            if self.callfackfun != None:
+                self.callbackfun.callback(self)
             #print i
         self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
         print w
-        self.finished()
+        if self.callfackfun != None:
+            self.callbackfun.finished(self)
 
     def solve_linear(self, regparam):
         self.regparam = regparam
@@ -303,9 +289,10 @@ class KronSVM(AbstractIterativeLearner):
             #print i, "primal objective", func(w, X1, X2, Y, rowind, colind, lamb), "gradient norm", np.linalg.norm(g)
             #print "predictions", sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
             self.W = w.reshape((x1fsize, x2fsize), order='C')
-            self.callback()
+            if self.callfackfun != None:
+                self.callbackfun.callback(self)
         self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
-        #self.finished()
+
 
     def dual_from_primal(self):
         w = self.W.ravel()
@@ -387,6 +374,7 @@ class KronSVM(AbstractIterativeLearner):
             A = LinearOperator((ddim, ddim), matvec=mv, rmatvec=rv, dtype=np.float64)
             #a_new = lsqr(A, B, iter_lim=inneriter)[0]
             #def callback(xk):
+            #    print " inner iter zero coefficients:", sum(np.isclose(xk, 0. )), "out of", len(xk) 
             #    residual = np.linalg.norm(A.dot(xk)-B)
             #    print "redidual is", residual
             a_new = bicgstab(A, B, maxiter=inneriter)[0]
@@ -399,7 +387,8 @@ class KronSVM(AbstractIterativeLearner):
             #print "gradient norm", np.linalg.norm(dual_gradient(a, K1, K2, Y, rowind, colind, lamb))
             self.A = a
             self.dual_model = KernelPairwiseModel(a, rowind, colind)
-            self.callback()
+            if self.callfackfun != None:
+                self.callbackfun.callback(self)
             #w = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
             #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #z2 = (1. - Y*P)
@@ -492,7 +481,6 @@ class KronSVM(AbstractIterativeLearner):
             A = LinearOperator((ddim, ddim), matvec=mv, dtype=np.float64)
             a_new = bicgstab(A, g, maxiter=inneriter)[0]
             #a_new = lsqr(A, g)[0]
-            obj = func(a)
             a = a - a_new
             self.a = a
             self.dual_model = KernelPairwiseModel(a, rowind, colind)
@@ -513,7 +501,8 @@ class KronSVM(AbstractIterativeLearner):
             #z2 = (1. - Y*P)
             #z2 = np.where(z2>0, z2, 0)
             #print np.dot(z2,z2)
-            self.callback()
+            if self.callfackfun != None:
+                self.callbackfun.callback(self)
             #print i
         #self.model = LinearPairwiseModel(self.W, X1.shape[1], X2.shape[1])
         self.dual_model = KernelPairwiseModel(a, rowind, colind)

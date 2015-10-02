@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import *
 
 from rlscore.utilities import array_tools
 
@@ -10,7 +9,7 @@ def sqmprank_singletask(Y, P):
     predictions = np.mat(predictions)
     vlen = correct.shape[0]
     diff = correct - predictions
-    onevec = mat(ones((vlen, 1)))
+    onevec = np.mat(np.ones((vlen, 1)))
     centereddiff = vlen * diff - onevec * (onevec.T * diff)
     sqerror = (centereddiff.T * diff)[0, 0] / ((len(correct) ** 2 - len(correct)) / 2)
     return sqerror
@@ -20,12 +19,12 @@ def sqmprank_multitask(Y, Y_predicted):
     Y_predicted = np.mat(Y_predicted)
     vlen = Y.shape[0]
     centeredsqerror = Y - Y_predicted
-    onevec = mat(ones((vlen, 1)))
+    onevec = np.mat(np.ones((vlen, 1)))
     tempvec = onevec.T * centeredsqerror
-    multiply(vlen, centeredsqerror, centeredsqerror)
-    subtract(centeredsqerror, tempvec, centeredsqerror)
-    multiply(centeredsqerror, centeredsqerror, centeredsqerror)
-    performances = mean(centeredsqerror, axis = 0) / ((vlen ** 2 - vlen) / 2)
+    np.multiply(vlen, centeredsqerror, centeredsqerror)
+    np.subtract(centeredsqerror, tempvec, centeredsqerror)
+    np.multiply(centeredsqerror, centeredsqerror, centeredsqerror)
+    performances = np.mean(centeredsqerror, axis = 0) / ((vlen ** 2 - vlen) / 2)
     performances = np.array(performances)[0]
     return performances
 
