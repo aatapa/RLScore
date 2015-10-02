@@ -6,11 +6,11 @@ from rlscore.utilities import creators
 
 import cython_pairwise_cv_for_rls
 
-from rlscore.learner.abstract_learner import AbstractSvdSupervisedLearner
+from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.measure.measure_utilities import UndefinedPerformance
 import numpy as np
 
-class RLS(AbstractSvdSupervisedLearner):
+class RLS(AbstractSvdLearner):
     """Regularized least-squares regression/classification.
     
     Implements a training algorithm that is cubic either in the
@@ -67,28 +67,27 @@ class RLS(AbstractSvdSupervisedLearner):
     """
     
     #def __init__(self, train_labels, train_features = None, kernel_matrix = None, kernel_obj = None, regparam=1.0):
-    def __init__(self, **kwargs):
-        self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
-        if kwargs.has_key("regparam"):
-            self.regparam = float(kwargs["regparam"])
-        else:
-            self.regparam = 1.
+    def __init__(self, svdad, train_labels, regparam=1.0):
+        #self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = svdad
+        self.Y = array_tools.as_labelmatrix(train_labels)
+        self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
-        self.results = {}
     
     
     def createLearner(cls, **kwargs):
-        #new_kwargs = {}
-        #new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        #new_kwargs["train_labels"] = kwargs["train_labels"]
-        #if kwargs.has_key("regparam"):
-        #   new_kwargs['regparam'] = kwargs["regparam"]
-        learner = cls(**kwargs)
+        new_kwargs = {}
+        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
+        new_kwargs["train_labels"] = kwargs["train_labels"]
+        if kwargs.has_key("regparam"):
+           new_kwargs['regparam'] = kwargs["regparam"]
+        learner = cls(**new_kwargs)
         return learner
     createLearner = classmethod(createLearner)
 
+    def train(self):
+        self.solve()
    
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -109,7 +108,7 @@ class RLS(AbstractSvdSupervisedLearner):
         self.newevals = 1. / (self.evals + regparam)
         self.regparam = regparam
         self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
-        self.results["model"] = self.getModel()
+        #self.results["model"] = self.getModel()
         #if self.U == None:
         #    pass
             #Dual RLS
