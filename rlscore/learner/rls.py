@@ -185,22 +185,23 @@ class RLS(AbstractSvdLearner):
         return np.array(LOO)
     
     
-    def computePairwiseCV(self, pairs):
+    def computePairwiseCV(self, pairs_start_inds, pairs_end_inds):
+        
+        
+        pairslen = len(pairs_start_inds)
+        assert len(pairs_end_inds) == pairslen
         
         bevals = multiply(self.evals, self.newevals)
-        
-        print np.array(pairs)[:, 0], np.array(pairs)[:, 1]
         
         svecsbevals = multiply(self.svecs, bevals)
         svecsbevalssvecsT = svecsbevals * self.svecs.T
         svecsbevalssvecsTY = svecsbevalssvecsT * self.Y
-        IminusAB = mat(identity(self.Y.shape[0])) - svecsbevalssvecsT
         
-        results_first = np.zeros((len(pairs), self.Y.shape[1]))
-        results_second = np.zeros((len(pairs), self.Y.shape[1]))
-        cython_pairwise_cv_for_rls.computePairwiseCV(len(pairs),
-                                                     np.array(pairs)[:, 0],
-                                                     np.array(pairs)[:, 1],
+        results_first = np.zeros((pairslen, self.Y.shape[1]))
+        results_second = np.zeros((pairslen, self.Y.shape[1]))
+        cython_pairwise_cv_for_rls.computePairwiseCV(pairslen,
+                                                     pairs_start_inds,
+                                                     pairs_end_inds,
                                                      self.Y.shape[1],
                                                      self.Y,
                                                      svecsbevalssvecsT,
