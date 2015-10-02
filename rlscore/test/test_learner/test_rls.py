@@ -1,19 +1,17 @@
 import unittest
 
-from numpy import *
+import numpy as np
 import numpy.linalg as la
 
-from rlscore.utilities import decomposition
-from rlscore.utilities import adapter
 from rlscore.learner import RLS
 
 class Test(unittest.TestCase):
     
     def setUp(self):
-        random.seed(100)
-        self.X = random.random((10,100))
+        np.random.seed(100)
+        self.X = np.random.random((10,100))
         #data matrix full of zeros
-        self.X_zeros = zeros((10,100))
+        self.X_zeros = np.zeros((10,100))
         self.testm = [self.X, self.X.T, self.X_zeros]
         #some basis vectors
         self.basis_vectors = [0,3,7,8]
@@ -27,21 +25,21 @@ class Test(unittest.TestCase):
         print("Testing the cross-validation routines of the RLS module.")
         print
         print
-        floattype = float64
+        floattype = np.float64
         
         m, n = 400, 100
-        Xtrain = mat(random.rand(m, n))
-        K = Xtrain * Xtrain.T
+        Xtrain = np.random.rand(m, n)
+        K = np.dot(Xtrain, Xtrain.T)
         ylen = 2
-        Y = mat(zeros((m, ylen), dtype=floattype))
-        Y = mat(random.rand(m, ylen))
+        Y = np.zeros((m, ylen), dtype=floattype)
+        Y = np.random.rand(m, ylen)
         
         hoindices = [45]
         hoindices2 = [45, 50]
         hoindices3 = [45, 50, 55]
         hocompl = list(set(range(m)) - set(hoindices))
         
-        Kho = K[ix_(hocompl, hocompl)]
+        Kho = K[np.ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
         kwargs = {}
@@ -59,7 +57,7 @@ class Test(unittest.TestCase):
         kwargs['kernel_matrix'] = Kho
         dualrls_naive = RLS.createLearner(**kwargs)
         
-        testkm = K[ix_(hocompl, hoindices)]
+        testkm = K[np.ix_(hocompl, hoindices)]
         trainX = Xtrain[hocompl]
         testX = Xtrain[hoindices]
         kwargs = {}
@@ -73,7 +71,7 @@ class Test(unittest.TestCase):
             print
             print("Regparam 2^%1d" % loglambdas[j])
             
-            dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
+            dumbho = np.dot(testkm.T, np.dot(la.inv(Kho + regparam * np.eye(Kho.shape[0])), Yho))
             print(str(dumbho) + ' Dumb HO (dual)')
             
             dualrls_naive.solve(regparam)
@@ -107,11 +105,11 @@ class Test(unittest.TestCase):
         hoindices = range(100, 300)
         hocompl = list(set(range(m)) - set(hoindices))
         
-        Kho = K[ix_(hocompl, hocompl)]
+        Kho = K[np.ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
-        testkm = K[ix_(hocompl, hoindices)]
+        testkm = K[np.ix_(hocompl, hoindices)]
         
-        dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
+        dumbho = np.dot(testkm.T, np.dot(la.inv(Kho + regparam * np.eye(Kho.shape[0])), Yho))
         
         kwargs = {}
         kwargs['train_labels'] = Y
@@ -120,7 +118,7 @@ class Test(unittest.TestCase):
         predho2 = dualrls.computeHO(hoindices2)
         print predho2, 'Fast HO'
         #hopred = dualrls.computePairwiseCV([hoindices2, [4,5], [6,7]])
-        hopred = dualrls.computePairwiseCV(array([hoindices2[0], 4, 6]), array([hoindices2[1], 5, 7]))
+        hopred = dualrls.computePairwiseCV(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
         print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
         #print hopred[0][0], hopred[0][1], 'Fast'
         #hopreds.append((hopred[0][0], hopred[0][1]))
