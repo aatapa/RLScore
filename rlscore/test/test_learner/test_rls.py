@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         print
         print
         print
-        print "Testing the cross-validation routines of the RLS module."
+        print("Testing the cross-validation routines of the RLS module.")
         print
         print
         floattype = float64
@@ -36,8 +36,9 @@ class Test(unittest.TestCase):
         Y = mat(zeros((m, ylen), dtype=floattype))
         Y = mat(random.rand(m, ylen))
         
-        #hoindices = [45, 50, 55]
         hoindices = [45]
+        hoindices2 = [45, 50]
+        hoindices3 = [45, 50, 55]
         hocompl = list(set(range(m)) - set(hoindices))
         
         Kho = K[ix_(hocompl, hocompl)]
@@ -70,14 +71,14 @@ class Test(unittest.TestCase):
         for j in range(0, len(loglambdas)):
             regparam = 2. ** loglambdas[j]
             print
-            print "Regparam 2^%1d" % loglambdas[j]
+            print("Regparam 2^%1d" % loglambdas[j])
             
             dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
-            print dumbho, 'Dumb HO (dual)'
+            print(str(dumbho) + ' Dumb HO (dual)')
             
             dualrls_naive.solve(regparam)
             predho1 = dualrls_naive.getModel().predict(testkm.T)
-            print predho1, 'Naive HO (dual)'
+            print (str(predho1) + ' Naive HO (dual)')
             
             dualrls.solve(regparam)
             predho2 = dualrls.computeHO(hoindices)
@@ -113,14 +114,16 @@ class Test(unittest.TestCase):
         dumbho = testkm.T * la.inv(Kho + regparam * eye(Kho.shape[0])) * Yho
         
         kwargs = {}
-        kwargs['train_labels'] = Yho
-        kwargs['kernel_matrix'] = Kho
-        dualrls_naive = RLS.createLearner(**kwargs)
-        dualrls_naive.solve(regparam)
-        predho1 = dualrls_naive.getModel().predict(testkm.T)
-        print sum(abs(predho1-dumbho)), 'Naive HO (dual)'
-        
+        kwargs['train_labels'] = Y
+        kwargs['train_features'] = Xtrain
         dualrls.solve(regparam)
-        predho2 = dualrls.computeHO(hoindices)
-        print sum(abs(predho2-dumbho)), 'Fast HO (dual)'
+        predho2 = dualrls.computeHO(hoindices2)
+        print predho2, 'Fast HO'
+        #hopred = dualrls.computePairwiseCV([hoindices2, [4,5], [6,7]])
+        hopred = dualrls.computePairwiseCV(array([hoindices2[0], 4, 6]), array([hoindices2[1], 5, 7]))
+        print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
+        #print hopred[0][0], hopred[0][1], 'Fast'
+        #hopreds.append((hopred[0][0], hopred[0][1]))
+        #self.assertAlmostEqual(hopreds[0][0], hopreds[1][0])
+        #self.assertAlmostEqual(hopreds[0][1], hopreds[1][1])
         
