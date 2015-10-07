@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         kwargs["Y"] = Y
         kwargs["X"] = X
         kwargs["regparam"] = 1
-        learner = RLS.createLearner(**kwargs)
+        learner = RLS(**kwargs)
         learner.train()
         model = learner.getModel()
         print
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         kwargs["kernel"] = "GaussianKernel"
         Y = np.random.random((10))
         kwargs["Y"] = Y
-        learner = RLS.createLearner(**kwargs)
+        learner = RLS(**kwargs)
         learner.train()
         model = learner.getModel()
         self.all_pred_cases(model)
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
         kwargs["kernel"] = "GaussianKernel"
         Y = np.random.random((10,2))
         kwargs["Y"] = Y
-        learner = RLS.createLearner(**kwargs)
+        learner = RLS(**kwargs)
         learner.train()
         model = learner.getModel()
         self.all_pred_cases(model)

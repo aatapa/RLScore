@@ -13,7 +13,7 @@ kwargs = {}
 kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["regparam"] = 1
-learner = AllPairsRankRLS.createLearner(**kwargs)
+learner = AllPairsRankRLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

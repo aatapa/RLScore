@@ -107,12 +107,6 @@ class KronSVM(object):
             self.callbackfun = None
     
     
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
-    
     def train(self):
         #self.solve_linear_new(self.regparam)
         #self.solve_linear(self.regparam)

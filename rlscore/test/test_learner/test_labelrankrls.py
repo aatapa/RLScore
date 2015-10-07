@@ -99,13 +99,13 @@ class Test(unittest.TestCase):
         rpool["X"] = Xtrain
         rpool["Y"] = Y
         rpool["qids"] = mapQids(qidlist)
-        primalrls = LabelRankRLS.createLearner(**rpool)        
+        primalrls = LabelRankRLS(**rpool)        
         
         rpool = {}
         rpool["kernel_matrix"] = K
         rpool["Y"] = Y
         rpool["qids"] = mapQids(qidlist)        
-        dualrls = LabelRankRLS.createLearner(**rpool)
+        dualrls = LabelRankRLS(**rpool)
         
         
         rpool = {}
@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
         rpool['Y'] = Yho
         #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['qids'] = mapQids(qidlist_cv)
-        primalrls_naive = LabelRankRLS.createLearner(**rpool)
+        primalrls_naive = LabelRankRLS(**rpool)
 
         
         rpool = {}
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         rpool['X'] = Xcv
         #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['qids'] = mapQids(qidlist_cv)
-        dualrls_naive = LabelRankRLS.createLearner(**rpool)
+        dualrls_naive = LabelRankRLS(**rpool)
         
         
         

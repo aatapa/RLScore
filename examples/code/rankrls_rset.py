@@ -19,7 +19,7 @@ kwargs["coef0"] = 1
 kwargs["degree"] = 3
 kwargs["gamma"] = 2
 kwargs["kernel"] = "PolynomialKernel"
-learner = AllPairsRankRLS.createLearner(**kwargs)
+learner = AllPairsRankRLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

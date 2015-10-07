@@ -17,7 +17,7 @@ kwargs["basis_vectors"] = train_features[basis_vectors]
 kwargs["regparam"] = 1
 kwargs["gamma"] = 0.01
 kwargs["kernel"] = "PolynomialKernel"
-learner = RLS.createLearner(**kwargs)
+learner = RLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

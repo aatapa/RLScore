@@ -75,16 +75,6 @@ class AllPairsRankRLS(AbstractSvdLearner):
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
 
-    def createLearner(cls, **kwargs):
-        #new_kwargs = {}
-        #new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        #new_kwargs["Y"] = kwargs["Y"]
-        #if kwargs.has_key("regparam"):
-        #    new_kwargs['regparam'] = kwargs["regparam"]
-        #learner = cls(**new_kwargs)
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
 
     def train(self):
         self.solve()    

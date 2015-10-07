@@ -45,17 +45,17 @@ class Test(unittest.TestCase):
         kwargs = {}
         kwargs['Y'] = Y
         kwargs['kernel_matrix'] = K
-        dualrls = RLS.createLearner(**kwargs)
+        dualrls = RLS(**kwargs)
         
         kwargs = {}
         kwargs["X"] = Xtrain
         kwargs["Y"] = Y
-        primalrls = RLS.createLearner(**kwargs)
+        primalrls = RLS(**kwargs)
         
         kwargs = {}
         kwargs['Y'] = Yho
         kwargs['kernel_matrix'] = Kho
-        dualrls_naive = RLS.createLearner(**kwargs)
+        dualrls_naive = RLS(**kwargs)
         
         testkm = K[np.ix_(hocompl, hoindices)]
         trainX = Xtrain[hocompl]
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         kwargs = {}
         kwargs['Y'] = Yho
         kwargs['X'] = trainX
-        primalrls_naive = RLS.createLearner(**kwargs)
+        primalrls_naive = RLS(**kwargs)
         
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):

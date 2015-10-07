@@ -43,12 +43,6 @@ class CGKronRLS(object):
             self.callbackfun = None
     
     
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
-    
     def train(self):
         if self.resource_pool.has_key('kmatrix1'):
             self.solve_kernel(self.regparam)

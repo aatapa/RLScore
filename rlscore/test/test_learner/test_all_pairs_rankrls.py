@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = Ycv
             rpool['X'] = Xcv
             rpool['regparam'] = regparam
-            naivedualrls = AllPairsRankRLS.createLearner(**rpool)
+            naivedualrls = AllPairsRankRLS(**rpool)
             naivedualrls.solve(regparam)
             hopreds = []
             
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = trainlabels
             rpool['X'] = Xtrain
             rpool['regparam'] = regparam
-            hodualrls = AllPairsRankRLS.createLearner(**rpool)
+            hodualrls = AllPairsRankRLS(**rpool)
             hodualrls.solve(regparam)
             hopred = hodualrls.computePairwiseCV([hoindices], oind=oind)
             print hopred[0][0], hopred[0][1], 'Fast'
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = trainlabels
             rpool['X'] = Xtrain
             rpool['regparam'] = regparam
-            hoprimalrls = AllPairsRankRLS.createLearner(**rpool)
+            hoprimalrls = AllPairsRankRLS(**rpool)
             hoprimalrls.solve(regparam)
             hopred = hoprimalrls.computeHO(hoindices)
             print hopred[0, oind], hopred[1, oind], 'HO'

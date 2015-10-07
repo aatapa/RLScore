@@ -58,13 +58,13 @@ class Test(unittest.TestCase):
         #rpool['Y'] = Y
         #rpool['kernel_matrix'] = K[basis_vectors]
         #rpool['basis_vectors'] = basis_vectors
-        #dualrls = RLS.createLearner(**rpool)
+        #dualrls = RLS(**rpool)
         
         rpool = {}
         rpool['Y'] = Y
         rpool['X'] = Xtrain
         rpool['basis_vectors'] = Xtrain[basis_vectors]
-        primalrls = RLS.createLearner(**rpool)
+        primalrls = RLS(**rpool)
         
         testkm = K[ix_(hocompl, hoindices)]
         Xhocompl = Xtrain[hocompl]
@@ -75,12 +75,12 @@ class Test(unittest.TestCase):
         rpool['X'] = Xhocompl
         rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xhocompl})
         rpool['kernel_obj'] = rk
-        dualrls_naive = RLS.createLearner(**rpool)
+        dualrls_naive = RLS(**rpool)
         
         rpool = {}
         rpool['Y'] = Yho
         rpool['X'] = Xhocompl
-        primalrls_naive = RLS.createLearner(**rpool)
+        primalrls_naive = RLS(**rpool)
         
         rsaK = K[:, basis_vectors] * la.inv(K[ix_(basis_vectors, basis_vectors)]) * K[basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]

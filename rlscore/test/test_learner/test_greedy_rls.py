@@ -44,7 +44,7 @@ def speedtest():
     rpool['subsetsize'] = str(desiredfcount)
     rpool['regparam'] = rp
     rpool['bias'] = bias
-    grls = GreedyRLS.createLearner(**rpool)
+    grls = GreedyRLS(**rpool)
     grls.train()
     
     print grls.selected
@@ -152,8 +152,8 @@ class Test(unittest.TestCase):
         rpool['subsetsize'] = str(desiredfcount)
         rpool['regparam'] = rp
         rpool['bias'] = bias
-        grls = GreedyRLS.createLearner(**rpool)
-        #grls = MTGreedyRLS.createLearner(**rpool)
+        grls = GreedyRLS(**rpool)
+        #grls = MTGreedyRLS(**rpool)
         grls.train()
         print grls.selected
         print grls.A[grls.selected]

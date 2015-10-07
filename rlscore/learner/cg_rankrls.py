@@ -110,11 +110,6 @@ class CGRankRLS(object):
         else:
             self.qidmap = None
         self.results = {}
- 
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def setQids(self, qids):

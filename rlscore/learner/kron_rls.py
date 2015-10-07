@@ -36,12 +36,6 @@ class KronRLS(object):
         self.trained = False
     
     
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
-    
     def train(self):
         if self.kernelmode:
             self.solve_kernel(self.regparam)

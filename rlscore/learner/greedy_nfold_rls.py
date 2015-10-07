@@ -34,11 +34,6 @@ class GreedyNFoldRLS(object):
             self.resource_pool['cross-validation_folds'] = qids
         self.setQids(qids)
         self.results = {}
-
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def setQids(self, qids):

@@ -24,12 +24,12 @@ class Test(unittest.TestCase):
             rpool['Y'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = RLS.createLearner(**rpool)
+            rls = RLS(**rpool)
             rls.solve(regparam)
             model = rls.getModel()
             W = model.W
             b = model.b
-            rls = CGRLS.createLearner(**rpool)
+            rls = CGRLS(**rpool)
             rls.train()
             model = rls.getModel()
             W2 = model.W

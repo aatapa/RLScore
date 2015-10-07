@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         params = {}
         params["kernel_matrix"] = B * K_Kron_train_x * B.T
         params["Y"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
-        ordrls_learner = RLS.createLearner(**params)
+        ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.getModel()
         K_Kron_test_x = np.kron(K_test2, K_test1) * B.T
@@ -129,13 +129,13 @@ class Test(unittest.TestCase):
         params["label_col_inds"] = label_col_inds
         tcb = TestCallback()
         params['callback'] = tcb
-        linear_kron_learner = CGKronRLS.createLearner(**params)
+        linear_kron_learner = CGKronRLS(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
         linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
         
         #params["warm_start"] = linear_kron_learner.W
-        #linear_kron_learner = CGKronRLS.createLearner(**params)
+        #linear_kron_learner = CGKronRLS(**params)
         #linear_kron_learner.train()
         #linear_kron_model = linear_kron_learner.getModel()
         #linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
                 print 'finished'
         tcb = KernelCallback()
         params['callback'] = tcb
-        kernel_kron_learner = CGKronRLS.createLearner(**params)
+        kernel_kron_learner = CGKronRLS(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2)

@@ -17,7 +17,7 @@ kwargs["coef0"] = 1
 kwargs["degree"] = 3
 kwargs["gamma"] = 2
 kwargs["kernel"] = "PolynomialKernel"
-learner = RLS.createLearner(**kwargs)
+learner = RLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

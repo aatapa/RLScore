@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
         rpool['subsetsize'] = desiredfcount
         rpool['regparam'] = rp
         rpool['bias'] = 2.
-        grls = GreedyNFoldRLS.createLearner(**rpool)
+        grls = GreedyNFoldRLS(**rpool)
         grls.train()
         print grls.selected
         print grls.A[selected_plus_bias]

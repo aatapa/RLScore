@@ -43,5 +43,5 @@ def createLearnerByModuleName(**kwargs):
     lname = kwargs['learner']
     exec "from rlscore.learner import " + lname
     learnerclazz = eval(lname)
-    learner = learnerclazz.createLearner(**kwargs)
+    learner = learnerclazz(**kwargs)
     return learner

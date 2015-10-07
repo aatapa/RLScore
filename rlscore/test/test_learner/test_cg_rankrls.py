@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = CGRankRLS.createLearner(**rpool)
+            rls = CGRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   
             W = model.W
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = CGRankRLS.createLearner(**rpool)
+            rls = CGRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   
             W = model.W

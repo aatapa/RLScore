@@ -67,24 +67,16 @@ class RLS(AbstractSvdLearner):
     """
     
     #def __init__(self, Y, X = None, kernel_matrix = None, kernel_obj = None, regparam=1.0):
-    def __init__(self, svdad, Y, regparam=1.0):
-        #self.svdad = creators.createSVDAdapter(**kwargs)
-        self.svdad = svdad
-        self.Y = array_tools.as_labelmatrix(Y)
-        self.regparam = regparam
+    def __init__(self, **kwargs):
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
+        if kwargs.has_key("regparam"):
+            self.regparam = float(kwargs["regparam"])
+        else:
+            self.regparam = 1.
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
-    
-    
-    def createLearner(cls, **kwargs):
-        new_kwargs = {}
-        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        new_kwargs["Y"] = kwargs["Y"]
-        if kwargs.has_key("regparam"):
-           new_kwargs['regparam'] = kwargs["regparam"]
-        learner = cls(**new_kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
+        self.size = self.Y.shape[0]
 
     def train(self):
         self.solve()

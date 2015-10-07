@@ -123,12 +123,6 @@ class MMC(AbstractSvdLearner):
         self.results = {}
     
     
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
-    
     def train(self):
         """Trains the learning algorithm.
         """

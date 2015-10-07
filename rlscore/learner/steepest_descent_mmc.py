@@ -84,12 +84,6 @@ class SteepestDescentMMC(AbstractSvdLearner):
         self.results = {}
     
     
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
-    
     def train(self):
         self.solve(self.regparam)
        

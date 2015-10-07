@@ -13,7 +13,7 @@ kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["train_preferences"] = train_preferences
 kwargs["regparam"] = 1
-learner = CGRankRLS.createLearner(**kwargs)
+learner = CGRankRLS(**kwargs)
 learner.train()
 model = learner.getModel()
 P = model.predict(test_features)

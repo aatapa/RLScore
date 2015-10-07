@@ -11,7 +11,7 @@ kwargs = {}
 kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["regparam"] = 1
-learner = AllPairsRankRLS.createLearner(**kwargs)
+learner = AllPairsRankRLS(**kwargs)
 learner.train()
 model = learner.getModel()
 P = model.predict(test_features)

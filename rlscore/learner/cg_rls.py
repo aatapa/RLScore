@@ -65,11 +65,6 @@ class CGRLS(object):
         else:
             self.callbackfun = None
         self.results = {}
-
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def train(self):

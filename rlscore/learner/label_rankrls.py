@@ -57,27 +57,21 @@ class LabelRankRLS(AbstractSvdLearner):
     Machine Learning, 75(1):129-165, 2009.
     """
 
-    def __init__(self, svdad, Y, qids, regparam=1.0):
-        self.svdad = svdad
-        self.Y = array_tools.as_labelmatrix(Y)
-        self.size = self.Y.shape[0]
-        self.regparam = regparam
-        self.svals = svdad.svals
-        self.svecs = svdad.rsvecs
-        self.setQids(qids)
-        #self.results = {}
-    
-    
-    def createLearner(cls, **kwargs):
-        new_kwargs = {}
-        new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        new_kwargs["Y"] = kwargs["Y"]
-        new_kwargs["qids"] = kwargs["qids"]
+    def __init__(self, **kwargs): 
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
         if kwargs.has_key("regparam"):
-            new_kwargs['regparam'] = float(kwargs["regparam"])
-        learner = cls(**new_kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
+            self.regparam = float(kwargs["regparam"])
+        else:
+            self.regparam = 1.
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
+        self.size = self.Y.shape[0]
+        self.Y = array_tools.as_labelmatrix(self.Y)
+        self.size = self.Y.shape[0]
+        qids = kwargs["qids"]
+        self.setQids(qids)
+    
     
     
     def setQids(self, qids):

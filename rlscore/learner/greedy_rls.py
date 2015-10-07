@@ -77,12 +77,6 @@ class GreedyRLS(object):
         self.results = {}
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
-
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
-    
     
     def train(self):
         """Trains the learning algorithm.

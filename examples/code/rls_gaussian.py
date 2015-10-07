@@ -15,7 +15,7 @@ kwargs["X"] = train_features
 kwargs["regparam"] = 1
 kwargs["gamma"] = 0.01
 kwargs["kernel"] = "GaussianKernel"
-learner = RLS.createLearner(**kwargs)
+learner = RLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

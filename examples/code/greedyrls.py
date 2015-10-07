@@ -17,7 +17,7 @@ kwargs["regparam"] = 1
 kwargs["bias"] = 1
 kwargs["test_measure"] = "auc"
 kwargs["subsetsize"] = 10
-learner = GreedyRLS.createLearner(**kwargs)
+learner = GreedyRLS(**kwargs)
 learner.train()
 model = learner.getModel()
 P = model.predict(test_features)
