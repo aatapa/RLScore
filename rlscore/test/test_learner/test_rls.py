@@ -76,23 +76,23 @@ class Test(unittest.TestCase):
             
             dualrls_naive.solve(regparam)
             predho1 = dualrls_naive.getModel().predict(testkm.T)
-            print (str(predho1) + ' Naive HO (dual)')
+            print(str(predho1) + ' Naive HO (dual)')
             
             dualrls.solve(regparam)
             predho2 = dualrls.computeHO(hoindices)
-            print predho2, 'Fast HO (dual)'
+            print(str(predho2) + ' Fast HO (dual)')
             
             dualrls.solve(regparam)
             predho = dualrls.computeLOO()[hoindices[0]]
-            print predho, 'Fast LOO (dual)'
+            print(str(predho) + ' Fast LOO (dual)')
             
             primalrls_naive.solve(regparam)
             predho3 = primalrls_naive.getModel().predict(testX)
-            print predho3, 'Naive HO (primal)'
+            print(str(predho3) + ' Naive HO (primal)')
             
             primalrls.solve(regparam)
             predho4 = primalrls.computeHO(hoindices)
-            print predho4, 'Fast HO (primal)'
+            print(str(predho4) + ' Fast HO (primal)')
             for predho in [predho1, predho2, predho3, predho4]:
                 self.assertEqual(dumbho.shape, predho.shape)
                 for row in range(predho.shape[0]):
@@ -100,8 +100,8 @@ class Test(unittest.TestCase):
                         self.assertAlmostEqual(dumbho[row,col],predho[row,col])
             primalrls.solve(regparam)
             predho = primalrls.computeLOO()[hoindices[0]]
-            print predho, 'Fast LOO (primal)'
-        print
+            print(str(predho) + ' Fast LOO (primal)')
+        print()
         hoindices = range(100, 300)
         hocompl = list(set(range(m)) - set(hoindices))
         
@@ -116,12 +116,7 @@ class Test(unittest.TestCase):
         kwargs['train_features'] = Xtrain
         dualrls.solve(regparam)
         predho2 = dualrls.computeHO(hoindices2)
-        print predho2, 'Fast HO'
-        #hopred = dualrls.computePairwiseCV([hoindices2, [4,5], [6,7]])
+        print(str(predho2) + ' Fast HO')
         hopred = dualrls.computePairwiseCV(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
         print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
-        #print hopred[0][0], hopred[0][1], 'Fast'
-        #hopreds.append((hopred[0][0], hopred[0][1]))
-        #self.assertAlmostEqual(hopreds[0][0], hopreds[1][0])
-        #self.assertAlmostEqual(hopreds[0][1], hopreds[1][1])
         

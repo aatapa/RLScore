@@ -32,13 +32,7 @@ class Test(unittest.TestCase):
     
     def testLabelRankRLS(self):
         
-        print
-        print
-        print
-        print
-        print "Testing the cross-validation routines of the LabelRankRLS module."
-        print
-        print
+        print("Testing the cross-validation routines of the LabelRankRLS module.\n")
         
         np.random.seed(100)
         floattype = np.float64
@@ -90,7 +84,6 @@ class Test(unittest.TestCase):
         Lcv = L[np.ix_(hocompl, hocompl)]
         
         Xcv = Xtrain[hocompl]
-        #Pcv = P[hocompl]#KLUDGE!!!!!
         Pcv = P[np.ix_(hocompl, range(1, P.shape[1]))]#KLUDGE!!!!!
         Xtest = Xtrain[hoindices]
         Yho = Y[hocompl]
@@ -111,7 +104,6 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool['train_features'] = Xcv
         rpool['train_labels'] = Yho
-        #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['train_qids'] = mapQids(qidlist_cv)
         primalrls_naive = LabelRankRLS.createLearner(**rpool)
 
@@ -120,7 +112,6 @@ class Test(unittest.TestCase):
         rpool['kernel_matrix'] = Kcv
         rpool['train_labels'] = Yho
         rpool['train_features'] = Xcv
-        #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['train_qids'] = mapQids(qidlist_cv)
         dualrls_naive = LabelRankRLS.createLearner(**rpool)
         
@@ -132,30 +123,30 @@ class Test(unittest.TestCase):
         for j in range(0, len(loglambdas)):
             regparam = 2. ** loglambdas[j]
             print
-            print "Regparam 2^%1d" % loglambdas[j]
+            print("Regparam 2^%1d" % loglambdas[j])
             
             
-            print np.squeeze(np.array((testkm.T * la.inv(Lcv * Kcv + regparam * np.eye(Lcv.shape[0])) * Lcv * Yho).T)), 'Dumb HO'
+            print(str(np.squeeze(np.array((testkm.T * la.inv(Lcv * Kcv + regparam * np.eye(Lcv.shape[0])) * Lcv * Yho).T))) + ' Dumb HO')
             
             predhos = []
             primalrls_naive.solve(regparam)
             predho = primalrls_naive.getModel().predict(Xtest)
-            print predho.T, 'Naive HO (primal)'
+            print(str(predho.T) + ' Naive HO (primal)')
             predhos.append(predho)
             
             dualrls_naive.solve(regparam)
             predho = dualrls_naive.getModel().predict(testkm.T)
-            print predho.T, 'Naive HO (dual)'
+            print(str(predho.T) + ' Naive HO (dual)')
             predhos.append(predho)
             
             primalrls.solve(regparam)
             predho = np.squeeze(primalrls.computeHO(hoindices))
-            print predho.T, 'Fast HO (primal)'
+            print(str(predho.T) + ' Fast HO (primal)')
             predhos.append(predho)
             
             dualrls.solve(regparam)
             predho = np.squeeze(dualrls.computeHO(hoindices))
-            print predho.T, 'Fast HO (dual)'
+            print(str(predho.T) + ' Fast HO (dual)')
             predhos.append(predho)
             
             predho0 = predhos.pop(0)
