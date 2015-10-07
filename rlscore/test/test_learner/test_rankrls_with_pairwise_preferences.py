@@ -39,8 +39,6 @@ class Test(unittest.TestCase):
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            k = LinearKernel(Xtrain)
-            rpool['kernel_obj'] = k
             rls = PPRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   

@@ -10,15 +10,15 @@ from rlscore.utilities.adapter import PreloadedKernelMatrixSvdAdapter
 class AbstractSvdLearner(object):
     """Base class for singular value decomposition based learners"""
     
-    def __init__(self, **kwargs):
+    def __init__(self, X, kernel="LinearKernel", **kwargs):
         #THE GREAT SVD MONOLITH!!!
-        if kwargs.has_key('kernel_matrix'):
-            self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)
+        kwargs["kernel"] = kernel
+        if kernel == "precomputed":
+            kwargs["kernel_matrix"] = X
+            self.svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)        
         else:
-            if not kwargs.has_key('kernel_obj'):
-                if not kwargs.has_key("kernel"):
-                    kwargs["kernel"] = "LinearKernel"
-                kwargs['kernel_obj'] = creators.createKernelByModuleName(**kwargs)
+            kwargs['X'] = X
+            kwargs['kernel_obj'] = creators.createKernelByModuleName(**kwargs)
             if isinstance(kwargs['kernel_obj'], LinearKernel):
                 self.svdad = LinearSvdAdapter.createAdapter(**kwargs)
             else:

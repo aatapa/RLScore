@@ -112,7 +112,8 @@ class Test(unittest.TestCase):
         #Train an ordinary RLS regressor for reference
         K_Kron_train_x = np.kron(K_train1, K_train2)
         params = {}
-        params["kernel_matrix"] = K_Kron_train_x
+        params["X"] = K_Kron_train_x
+        params["kernel"] = "precomputed"
         params["Y"] = Y_train.reshape(trainlabelcount, 1)
         ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
@@ -155,7 +156,8 @@ class Test(unittest.TestCase):
         
         #Train an ordinary RankRLS for reference
         params = {}
-        params["kernel_matrix"] = K_Kron_train_x
+        params["X"] = K_Kron_train_x
+        params["kernel"] = "precomputed"
         params["Y"] = Y_train.reshape(trainlabelcount, 1)
         params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         rankrls_learner = LabelRankRLS(**params)

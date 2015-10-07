@@ -132,14 +132,16 @@ class Test(unittest.TestCase):
         #Train ordinary RLS in two steps for a reference
         params = {}
         params["regparam"] = regparam2
-        params["kernel_matrix"] = K_train2
+        params["X"] = K_train2
+        params['kernel'] = 'precomputed'
         params["Y"] = Y_train.T
         ordinary_rls_first_step = RLS(**params)
         ordinary_rls_first_step.train()
         firststeploo = ordinary_rls_first_step.computeLOO().T
         params = {}
         params["regparam"] = regparam1
-        params["kernel_matrix"] = K_train1
+        params["X"] = K_train1
+        params["kernel"] = "precomputed"
         params["Y"] = firststeploo
         ordinary_rls_second_step = RLS(**params)
         ordinary_rls_second_step.train()

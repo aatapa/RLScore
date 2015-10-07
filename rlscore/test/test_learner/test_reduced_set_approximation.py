@@ -22,12 +22,9 @@ class Test(unittest.TestCase):
         print "Testing the cross-validation routines of the RLS module."
         print
         print
-        floattype = float64
         
         m, n = 100, 300
         Xtrain = random.rand(m, n)
-        ylen = 1
-        Y = mat(zeros((m, ylen), dtype=floattype))
         Y = mat(random.rand(m, 1))
         basis_vectors = [0,3,7,8]
         
@@ -44,43 +41,35 @@ class Test(unittest.TestCase):
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
         bk = GaussianKernel(**{'X':Xtrain[basis_vectors], 'gamma':0.001})
-        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xtrain})
         
         rpool = {}
         rpool['X'] = Xtrain
         bk2 = GaussianKernel(**{'X':Xtrain, 'gamma':0.001})
         K = np.mat(bk2.getKM(Xtrain))
         
-        Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
-        #rpool = {}
-        #rpool['Y'] = Y
-        #rpool['kernel_matrix'] = K[basis_vectors]
-        #rpool['basis_vectors'] = basis_vectors
-        #dualrls = RLS(**rpool)
         
         rpool = {}
         rpool['Y'] = Y
         rpool['X'] = Xtrain
         rpool['basis_vectors'] = Xtrain[basis_vectors]
-        primalrls = RLS(**rpool)
         
-        testkm = K[ix_(hocompl, hoindices)]
         Xhocompl = Xtrain[hocompl]
         testX = Xtrain[hoindices]
         
         rpool = {}
         rpool['Y'] = Yho
         rpool['X'] = Xhocompl
-        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xhocompl})
-        rpool['kernel_obj'] = rk
+        rpool["kernel"] = "RsetKernel"
+        rpool["base_kernel"] = bk
+        rpool["basis_features"] = Xtrain[basis_vectors]
+        #rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xhocompl})
         dualrls_naive = RLS(**rpool)
         
         rpool = {}
         rpool['Y'] = Yho
         rpool['X'] = Xhocompl
-        primalrls_naive = RLS(**rpool)
         
         rsaK = K[:, basis_vectors] * la.inv(K[ix_(basis_vectors, basis_vectors)]) * K[basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]

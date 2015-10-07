@@ -44,7 +44,8 @@ class Test(unittest.TestCase):
         
         kwargs = {}
         kwargs['Y'] = Y
-        kwargs['kernel_matrix'] = K
+        kwargs['X'] = K
+        kwargs['kernel'] = 'precomputed'
         dualrls = RLS(**kwargs)
         
         kwargs = {}
@@ -54,7 +55,8 @@ class Test(unittest.TestCase):
         
         kwargs = {}
         kwargs['Y'] = Yho
-        kwargs['kernel_matrix'] = Kho
+        kwargs['X'] = Kho
+        kwargs['kernel'] = 'precomputed'
         dualrls_naive = RLS(**kwargs)
         
         testkm = K[np.ix_(hocompl, hoindices)]

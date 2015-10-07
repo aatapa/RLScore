@@ -22,22 +22,19 @@ def createKernelByModuleName(**kwargs):
     kernel = kernelclazz(**new_kwargs)
     return kernel
 
-def createSVDAdapter(**kwargs):
-    if kwargs.has_key(KERNEL_NAME):
-        kernel = createKernelByModuleName(**kwargs)
-        kwargs['kernel_obj'] = kernel
-    if kwargs.has_key('kernel_matrix'):
-        svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)
-    else:
-        if not kwargs.has_key('kernel_obj'):
-            if not kwargs.has_key("kernel"):
-                kwargs["kernel"] = "LinearKernel"
-            kwargs['kernel_obj'] = createKernelByModuleName(**kwargs)
-        if isinstance(kwargs['kernel_obj'], LinearKernel):
-            svdad = LinearSvdAdapter.createAdapter(**kwargs)
+def createSVDAdapter(X, kernel="LinearKernel", **kwargs):
+        kwargs[KERNEL_NAME] = kernel
+        if kernel == "precomputed":
+            kwargs["kernel_matrix"] = X
+            svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)        
         else:
-            svdad = SvdAdapter.createAdapter(**kwargs)   
-    return svdad
+            kwargs['X'] = X
+            kwargs['kernel_obj'] = createKernelByModuleName(**kwargs)
+            if isinstance(kwargs['kernel_obj'], LinearKernel):
+                svdad = LinearSvdAdapter.createAdapter(**kwargs)
+            else:
+                svdad = SvdAdapter.createAdapter(**kwargs)
+        return svdad
 
 def createLearnerByModuleName(**kwargs):
     lname = kwargs['learner']

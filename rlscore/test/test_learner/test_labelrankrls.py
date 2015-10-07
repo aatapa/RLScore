@@ -102,7 +102,8 @@ class Test(unittest.TestCase):
         primalrls = LabelRankRLS(**rpool)        
         
         rpool = {}
-        rpool["kernel_matrix"] = K
+        rpool["X"] = K
+        rpool['kernel'] = 'precomputed'
         rpool["Y"] = Y
         rpool["qids"] = mapQids(qidlist)        
         dualrls = LabelRankRLS(**rpool)
@@ -117,9 +118,9 @@ class Test(unittest.TestCase):
 
         
         rpool = {}
-        rpool['kernel_matrix'] = Kcv
+        rpool['X'] = Kcv
+        rpool['kernel'] = 'precomputed'        
         rpool['Y'] = Yho
-        rpool['X'] = Xcv
         #rpool['kernel_obj'] = LinearKernel(**rpool)
         rpool['qids'] = mapQids(qidlist_cv)
         dualrls_naive = LabelRankRLS(**rpool)
