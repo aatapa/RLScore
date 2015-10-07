@@ -53,13 +53,13 @@ class Test(unittest.TestCase):
         X_test1, Y_test1 = self.generate_data(testpos1, testneg1, 5, 0, 1)
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
-        #kernel1 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train1)
-        kernel1 = LinearKernel(train_features=X_train1)
+        #kernel1 = GaussianKernel.createKernel(gamma=0.01, X=X_train1)
+        kernel1 = LinearKernel(X_train1)
         K_train1 = kernel1.getKM(X_train1)
         K_test1 = kernel1.getKM(X_test1)
         
         #kernel2 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train2)
-        kernel2 = LinearKernel(train_features=X_train2)
+        kernel2 = LinearKernel(X_train2)
         K_train2 = kernel2.getKM(X_train2)
         K_test2 = kernel2.getKM(X_test2)
         
@@ -98,8 +98,8 @@ class Test(unittest.TestCase):
 #         params["regparam"] = regparam
 #         params["xmatrix1"] = X_train1
 #         params["xmatrix2"] = X_train2
-#         params["train_labels"] = Y_train
-#         linear_kron_learner = KronRLS.createLearner(**params)
+#         params["Y"] = Y_train
+#         linear_kron_learner = KronRLS(**params)
 #         linear_kron_learner.train()
 #         linear_kron_model = linear_kron_learner.getModel()
 #         linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2)
@@ -111,8 +111,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train
-        linear_two_step_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train
+        linear_two_step_learner = TwoStepRLS(**params)
         linear_two_step_learner.train()
         linear_two_step_model = linear_two_step_learner.getModel()
         linear_two_step_testpred = linear_two_step_model.predictWithDataMatrices(X_test1, X_test2)
@@ -123,8 +123,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train
-        kernel_two_step_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train
+        kernel_two_step_learner = TwoStepRLS(**params)
         kernel_two_step_learner.train()
         kernel_two_step_model = kernel_two_step_learner.getModel()
         kernel_two_step_testpred = kernel_two_step_model.predictWithKernelMatrices(K_test1, K_test2)
@@ -133,15 +133,15 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam"] = regparam2
         params["kernel_matrix"] = K_train2
-        params["train_labels"] = Y_train.T
-        ordinary_rls_first_step = RLS.createLearner(**params)
+        params["Y"] = Y_train.T
+        ordinary_rls_first_step = RLS(**params)
         ordinary_rls_first_step.train()
         firststeploo = ordinary_rls_first_step.computeLOO().T
         params = {}
         params["regparam"] = regparam1
         params["kernel_matrix"] = K_train1
-        params["train_labels"] = firststeploo
-        ordinary_rls_second_step = RLS.createLearner(**params)
+        params["Y"] = firststeploo
+        ordinary_rls_second_step = RLS(**params)
         ordinary_rls_second_step.train()
         secondsteploo = ordinary_rls_second_step.computeLOO()
         #print 'Basic RLS', secondsteploo[0, 0]
@@ -164,8 +164,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["xmatrix1"] = X_train1[range(1, X_train1.shape[0])]
         params["xmatrix2"] = X_train2[range(1, X_train2.shape[0])]
-        params["train_labels"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
-        linear_kron_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
+        linear_kron_learner = TwoStepRLS(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
         linear_kron_testpred_00 = linear_kron_model.predictWithDataMatrices(X_train1[0], X_train2[0])
@@ -176,8 +176,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["xmatrix1"] = X_train1[[0, 1] + range(3, K_train1.shape[0])]
         params["xmatrix2"] = X_train2[[0, 1, 2, 3] + range(5, K_train2.shape[0])]
-        params["train_labels"] = Y_train[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
-        linear_kron_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
+        linear_kron_learner = TwoStepRLS(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
         linear_kron_testpred_24 = linear_kron_model.predictWithDataMatrices(X_train1[2], X_train2[4])
@@ -188,8 +188,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_(range(1, K_train1.shape[0]), range(1, K_train1.shape[1]))]
         params["kmatrix2"] = K_train2[np.ix_(range(1, K_train2.shape[0]), range(1, K_train2.shape[1]))]
-        params["train_labels"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
-        kernel_kron_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
+        kernel_kron_learner = TwoStepRLS(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         kernel_kron_testpred_00 = kernel_kron_model.predictWithKernelMatrices(K_train1[range(1, K_train1.shape[0]), 0], K_train2[0, range(1, K_train2.shape[0])])
@@ -200,8 +200,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1] + range(3, K_train1.shape[0]))]
         params["kmatrix2"] = K_train2[np.ix_([0, 1, 2, 3] + range(5, K_train2.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
-        params["train_labels"] = Y_train[np.ix_([0, 1] + range(3, Y_train.shape[0]), [0, 1, 2, 3] + range(5, Y_train.shape[1]))]
-        kernel_kron_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train[np.ix_([0, 1] + range(3, Y_train.shape[0]), [0, 1, 2, 3] + range(5, Y_train.shape[1]))]
+        kernel_kron_learner = TwoStepRLS(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         #print K_train1[range(1, K_train1.shape[0]), 0].shape, K_train2[0, range(1, K_train2.shape[0])].shape
@@ -245,8 +245,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train
-        kernel_two_step_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train
+        kernel_two_step_learner = TwoStepRLS(**params)
         kernel_two_step_learner.train()
         kernel_two_step_model = kernel_two_step_learner.getModel()
         kernel_two_step_testpred = kernel_two_step_model.predictWithKernelMatrices(K_test1, K_test2)
@@ -265,8 +265,8 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
         params["kmatrix2"] = K_train2[np.ix_(traincolinds, traincolinds)]
-        params["train_labels"] = Y_train[np.ix_(trainrowinds, traincolinds)]
-        kernel_kron_learner = TwoStepRLS.createLearner(**params)
+        params["Y"] = Y_train[np.ix_(trainrowinds, traincolinds)]
+        kernel_kron_learner = TwoStepRLS(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         #kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_train1[np.ix_([rowind, colind], trainrowinds)], K_train2[np.ix_([rowind, colind], traincolinds)])

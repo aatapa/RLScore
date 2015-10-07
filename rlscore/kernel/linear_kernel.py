@@ -9,7 +9,7 @@ class LinearKernel(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     bias : float, optional (default 0.)
         Constant added to each kernel evaluation
@@ -18,11 +18,11 @@ class LinearKernel(object):
         by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, train_features, bias=0.0, basis_vectors=None):
+    def __init__(self, X, bias=0.0, basis_vectors=None):
         if basis_vectors != None:
             self.train_X = basis_vectors
         else:
-            self.train_X = train_features
+            self.train_X = X
         self.bias = bias
 
 #    def createKernel(cls, **kwargs):

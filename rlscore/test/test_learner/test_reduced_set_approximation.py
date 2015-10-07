@@ -43,44 +43,44 @@ class Test(unittest.TestCase):
         
         #bk = LinearKernel.Kernel()
         #bk = GaussianKernel.Kernel()
-        bk = GaussianKernel(**{'train_features':Xtrain[basis_vectors], 'gamma':0.001})
-        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xtrain})
+        bk = GaussianKernel(**{'X':Xtrain[basis_vectors], 'gamma':0.001})
+        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xtrain})
         
         rpool = {}
-        rpool['train_features'] = Xtrain
-        bk2 = GaussianKernel(**{'train_features':Xtrain, 'gamma':0.001})
+        rpool['X'] = Xtrain
+        bk2 = GaussianKernel(**{'X':Xtrain, 'gamma':0.001})
         K = np.mat(bk2.getKM(Xtrain))
         
         Kho = K[ix_(hocompl, hocompl)]
         Yho = Y[hocompl]
         
         #rpool = {}
-        #rpool['train_labels'] = Y
+        #rpool['Y'] = Y
         #rpool['kernel_matrix'] = K[basis_vectors]
         #rpool['basis_vectors'] = basis_vectors
-        #dualrls = RLS.createLearner(**rpool)
+        #dualrls = RLS(**rpool)
         
         rpool = {}
-        rpool['train_labels'] = Y
-        rpool['train_features'] = Xtrain
+        rpool['Y'] = Y
+        rpool['X'] = Xtrain
         rpool['basis_vectors'] = Xtrain[basis_vectors]
-        primalrls = RLS.createLearner(**rpool)
+        primalrls = RLS(**rpool)
         
         testkm = K[ix_(hocompl, hoindices)]
         Xhocompl = Xtrain[hocompl]
         testX = Xtrain[hoindices]
         
         rpool = {}
-        rpool['train_labels'] = Yho
-        rpool['train_features'] = Xhocompl
-        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'train_features':Xhocompl})
+        rpool['Y'] = Yho
+        rpool['X'] = Xhocompl
+        rk = RsetKernel(**{'base_kernel':bk, 'basis_features':Xtrain[basis_vectors], 'X':Xhocompl})
         rpool['kernel_obj'] = rk
-        dualrls_naive = RLS.createLearner(**rpool)
+        dualrls_naive = RLS(**rpool)
         
         rpool = {}
-        rpool['train_labels'] = Yho
-        rpool['train_features'] = Xhocompl
-        primalrls_naive = RLS.createLearner(**rpool)
+        rpool['Y'] = Yho
+        rpool['X'] = Xhocompl
+        primalrls_naive = RLS(**rpool)
         
         rsaK = K[:, basis_vectors] * la.inv(K[ix_(basis_vectors, basis_vectors)]) * K[basis_vectors]
         rsaKho = rsaK[ix_(hocompl, hocompl)]

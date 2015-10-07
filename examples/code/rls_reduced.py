@@ -11,13 +11,13 @@ basis_vectors = np.loadtxt("./examples/data/bvectors.indices")
 train_features = read_sparse("./examples/data/class_train.features")
 test_features = read_sparse("./examples/data/class_test.features")
 kwargs = {}
-kwargs["train_labels"] = train_labels
+kwargs["Y"] = train_labels
+kwargs["X"] = train_features
 kwargs["basis_vectors"] = train_features[basis_vectors]
-kwargs["train_features"] = train_features
 kwargs["regparam"] = 1
 kwargs["gamma"] = 0.01
 kwargs["kernel"] = "PolynomialKernel"
-learner = RLS.createLearner(**kwargs)
+learner = RLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

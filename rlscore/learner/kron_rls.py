@@ -9,14 +9,14 @@ from rlscore.utilities import decomposition
 
 from rlscore.utilities import sparse_kronecker_multiplication_tools
 
-from rlscore.pairwise_model import LinearPairwiseModel
-from rlscore.pairwise_model import KernelPairwiseModel
+from rlscore.pairwise_predictor import LinearPairwisePredictor
+from rlscore.pairwise_predictor import KernelPairwisePredictor
 
 class KronRLS(object):
     
     
     def __init__(self, **kwargs):
-        Y = kwargs["train_labels"]
+        Y = kwargs["Y"]
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         if kwargs.has_key('kmatrix1'):
@@ -34,12 +34,6 @@ class KronRLS(object):
         else:
             self.regparam = 1.
         self.trained = False
-    
-    
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def train(self):
@@ -76,7 +70,7 @@ class KronRLS(object):
         label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
         label_row_inds = np.array(label_row_inds, dtype = np.int32)
         label_col_inds = np.array(label_col_inds, dtype = np.int32)
-        self.model = KernelPairwiseModel(self.A.ravel(), label_row_inds, label_col_inds)
+        self.model = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
     
     
     def solve_linear(self, regparam):
@@ -107,7 +101,7 @@ class KronRLS(object):
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwiseModel(self.W)
+        self.model = LinearPairwisePredictor(self.W)
     
     
     def solve_linear_conditional_ranking(self, regparam):
@@ -139,7 +133,7 @@ class KronRLS(object):
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwiseModel(self.W)
+        self.model = LinearPairwisePredictor(self.W)
     
     
     def imputationLOO(self):

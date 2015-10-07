@@ -23,11 +23,11 @@ class Test(unittest.TestCase):
             Xtrain = np.mat(np.random.rand(n, m))
             Y = np.mat(np.random.rand(m, 1))
             rpool = {}
-            rpool['train_features'] = Xtrain.T
-            rpool['train_labels'] = Y
+            rpool['X'] = Xtrain.T
+            rpool['Y'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = CGRankRLS.createLearner(**rpool)
+            rls = CGRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   
             W = model.W
@@ -58,12 +58,12 @@ class Test(unittest.TestCase):
                     pairs.append((b, a))
             pairs = np.array(pairs)
             rpool = {}
-            rpool['train_features'] = Xtrain.T
-            #rpool['train_labels'] = Y
+            rpool['X'] = Xtrain.T
+            #rpool['Y'] = Y
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = CGRankRLS.createLearner(**rpool)
+            rls = CGRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   
             W = model.W

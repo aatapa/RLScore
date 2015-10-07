@@ -43,27 +43,27 @@ class Test(unittest.TestCase):
         Yho = Y[hocompl]
         
         kwargs = {}
-        kwargs['train_labels'] = Y
+        kwargs['Y'] = Y
         kwargs['kernel_matrix'] = K
-        dualrls = RLS.createLearner(**kwargs)
+        dualrls = RLS(**kwargs)
         
         kwargs = {}
-        kwargs["train_features"] = Xtrain
-        kwargs["train_labels"] = Y
-        primalrls = RLS.createLearner(**kwargs)
+        kwargs["X"] = Xtrain
+        kwargs["Y"] = Y
+        primalrls = RLS(**kwargs)
         
         kwargs = {}
-        kwargs['train_labels'] = Yho
+        kwargs['Y'] = Yho
         kwargs['kernel_matrix'] = Kho
-        dualrls_naive = RLS.createLearner(**kwargs)
+        dualrls_naive = RLS(**kwargs)
         
         testkm = K[np.ix_(hocompl, hoindices)]
         trainX = Xtrain[hocompl]
         testX = Xtrain[hoindices]
         kwargs = {}
-        kwargs['train_labels'] = Yho
-        kwargs['train_features'] = trainX
-        primalrls_naive = RLS.createLearner(**kwargs)
+        kwargs['Y'] = Yho
+        kwargs['X'] = trainX
+        primalrls_naive = RLS(**kwargs)
         
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):
@@ -112,8 +112,8 @@ class Test(unittest.TestCase):
         dumbho = np.dot(testkm.T, np.dot(la.inv(Kho + regparam * np.eye(Kho.shape[0])), Yho))
         
         kwargs = {}
-        kwargs['train_labels'] = Y
-        kwargs['train_features'] = Xtrain
+        kwargs['Y'] = Y
+        kwargs['X'] = Xtrain
         dualrls.solve(regparam)
         predho2 = dualrls.computeHO(hoindices2)
         print(str(predho2) + ' Fast HO')

@@ -29,13 +29,13 @@ class SteepestDescentMMC(AbstractSvdLearner):
         else:
             self.oneclass = False
         
-        if kwargs.has_key("train_labels"):
-            train_labels = kwargs["train_labels"]
+        if kwargs.has_key("Y"):
+            Y = kwargs["Y"]
         else:
-            train_labels = None
-        if train_labels != None:
-            #Y_orig = array_tools.as_labelmatrix(train_labels)
-            Y_orig = array_tools.as_array(train_labels)
+            Y = None
+        if Y != None:
+            #Y_orig = array_tools.as_labelmatrix(Y)
+            Y_orig = array_tools.as_array(Y)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
                 self.Y = np.zeros((Y_orig.shape[0], 2))
@@ -82,12 +82,6 @@ class SteepestDescentMMC(AbstractSvdLearner):
         else:
             self.fixedindices = []
         self.results = {}
-    
-    
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def train(self):

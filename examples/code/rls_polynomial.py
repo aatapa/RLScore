@@ -10,14 +10,14 @@ test_labels = np.loadtxt("./examples/data/class_test.labels")
 train_features = read_sparse("./examples/data/class_train.features")
 test_features = read_sparse("./examples/data/class_test.features")
 kwargs = {}
-kwargs["train_labels"] = train_labels
-kwargs["train_features"] = train_features
+kwargs["Y"] = train_labels
+kwargs["X"] = train_features
 kwargs["regparam"] = 1
 kwargs["coef0"] = 1
 kwargs["degree"] = 3
 kwargs["gamma"] = 2
 kwargs["kernel"] = "PolynomialKernel"
-learner = RLS.createLearner(**kwargs)
+learner = RLS(**kwargs)
 learner.train()
 kwargs = {}
 kwargs["learner"] = learner

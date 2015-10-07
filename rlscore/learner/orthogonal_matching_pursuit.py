@@ -4,7 +4,7 @@ import numpy as np
 import numpy.linalg as la
 import scipy
 
-from rlscore import model
+from rlscore import predictor
 
 class OrthogonalMatchingPursuit(object):
     
@@ -21,7 +21,7 @@ class OrthogonalMatchingPursuit(object):
         if not Y.shape[1] == 1:
             raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
         
-        X = self.resource_pool['train_features']
+        X = self.resource_pool['X']
         if isinstance(X, scipy.sparse.base.spmatrix):
             self.X = X.todense()
         else:
@@ -114,5 +114,5 @@ class OrthogonalMatchingPursuit(object):
     
     
     def getModel(self):
-        return model.LinearModel(self.W, self.b)
+        return predictor.LinearPredictor(self.W, self.b)
 

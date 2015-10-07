@@ -9,7 +9,6 @@ KERNEL_NAME = 'kernel'
 def createKernelByModuleName(**kwargs):
     kname = kwargs[KERNEL_NAME]
     exec "from ..kernel import " + kname
-    pcgstr = "kernel."
     kernelclazz = eval(kname)
     #get kernel arguments
     args = inspect.getargspec(kernelclazz.__init__)[0]
@@ -44,5 +43,5 @@ def createLearnerByModuleName(**kwargs):
     lname = kwargs['learner']
     exec "from rlscore.learner import " + lname
     learnerclazz = eval(lname)
-    learner = learnerclazz.createLearner(**kwargs)
+    learner = learnerclazz(**kwargs)
     return learner

@@ -5,21 +5,20 @@ import numpy as np
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
-from rlscore.pairwise_model import LinearPairwiseModel
-from rlscore.pairwise_model import KernelPairwiseModel
+from rlscore.pairwise_predictor import LinearPairwisePredictor
+from rlscore.pairwise_predictor import KernelPairwisePredictor
 from rlscore.utilities import array_tools
 from rlscore.utilities import sparse_kronecker_multiplication_tools_python
 
 
 
-TRAIN_LABELS = 'train_labels'
 CALLBACK_FUNCTION = 'callback'
 
 
 class CGKronRLS(object):
     
-    '''def __init__(self, train_labels, label_row_inds, label_col_inds, regparam=1.0):
-        self.Y = array_tools.as_labelmatrix(train_labels)
+    '''def __init__(self, Y, label_row_inds, label_col_inds, regparam=1.0):
+        self.Y = array_tools.as_labelmatrix(Y)
         self.regparam = regparam
         self.label_row_inds = label_row_inds
         self.label_col_inds = label_col_inds
@@ -28,7 +27,7 @@ class CGKronRLS(object):
     
     def __init__(self, **kwargs):
         self.resource_pool = kwargs
-        Y = kwargs[TRAIN_LABELS]
+        Y = kwargs["Y"]
         self.label_row_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
         self.label_col_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
         Y = array_tools.as_labelmatrix(Y)
@@ -42,12 +41,6 @@ class CGKronRLS(object):
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
-    
-    
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def train(self):
@@ -95,7 +88,7 @@ class CGKronRLS(object):
         
         G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
         self.A = bicgstab(G, self.Y, maxiter = maxiter, callback = cgcb)[0]
-        self.model = KernelPairwiseModel(self.A, self.label_row_inds, self.label_col_inds)
+        self.model = KernelPairwisePredictor(self.A, self.label_row_inds, self.label_col_inds)
     
     
     def solve_linear(self, regparam):
@@ -139,7 +132,7 @@ class CGKronRLS(object):
         else:
             x0 = None
         self.W = bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0].reshape((x1fsize, x2fsize), order='F')
-        self.model = LinearPairwiseModel(self.W)
+        self.model = LinearPairwisePredictor(self.W)
         if not self.callbackfun == None:
                 self.callbackfun.finished(self)
     
@@ -147,7 +140,7 @@ class CGKronRLS(object):
     
     def getModel(self):
         if not hasattr(self, "model"):
-            self.model = LinearPairwiseModel(self.W, self.X1.shape[1], self.X2.shape[1])
+            self.model = LinearPairwisePredictor(self.W, self.X1.shape[1], self.X2.shape[1])
         return self.model
 
     

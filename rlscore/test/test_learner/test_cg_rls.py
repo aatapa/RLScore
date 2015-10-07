@@ -20,16 +20,16 @@ class Test(unittest.TestCase):
             Xtrain = np.mat(np.random.rand(m, n))
             Y = np.mat(np.random.rand(m, 1))
             rpool = {}
-            rpool['train_features'] = Xtrain
-            rpool['train_labels'] = Y
+            rpool['X'] = Xtrain
+            rpool['Y'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = RLS.createLearner(**rpool)
+            rls = RLS(**rpool)
             rls.solve(regparam)
             model = rls.getModel()
             W = model.W
             b = model.b
-            rls = CGRLS.createLearner(**rpool)
+            rls = CGRLS(**rpool)
             rls.train()
             model = rls.getModel()
             W2 = model.W

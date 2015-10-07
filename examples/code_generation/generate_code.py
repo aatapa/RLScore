@@ -33,7 +33,7 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
             code.append('kwargs["%s"] = "%s"' %(key, lparams[key]))
         else:
             code.append('kwargs["%s"] = '%key +str(lparams[key]))
-    code.append("learner = %s.createLearner(**kwargs)" %learner)
+    code.append("learner = %s(**kwargs)" %learner)
     code.append("learner.train()")
     #If model selection
     if selector:

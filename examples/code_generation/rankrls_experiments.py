@@ -11,8 +11,8 @@ rqfiles = {"train_features":'./examples/data/rank_train.features',
             "test_qids":'./examples/data/rank_test.qids',
             }
 
-defparams = {"train_features":"train_features", "train_labels":"train_labels"}
-defqparams = {"train_features":"train_features", "train_labels":"train_labels", "train_qids":"train_qids"}
+defparams = {"X":"train_features", "Y":"train_labels"}
+defqparams = {"X":"train_features", "Y":"train_labels", "qids":"train_qids"}
 
 experiments = {"rankrls_defparams":{
                 "learner":"AllPairsRankRLS",

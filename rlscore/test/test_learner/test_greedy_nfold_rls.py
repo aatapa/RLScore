@@ -140,13 +140,13 @@ class Test(unittest.TestCase):
         print 'foo'        
     
         rpool = {}
-        rpool['train_features'] = Xtrain
-        rpool['train_labels'] = Y
-        rpool['train_qids'] = indslist
+        rpool['X'] = Xtrain
+        rpool['Y'] = Y
+        rpool['qids'] = indslist
         rpool['subsetsize'] = desiredfcount
         rpool['regparam'] = rp
         rpool['bias'] = 2.
-        grls = GreedyNFoldRLS.createLearner(**rpool)
+        grls = GreedyNFoldRLS(**rpool)
         grls.train()
         print grls.selected
         print grls.A[selected_plus_bias]

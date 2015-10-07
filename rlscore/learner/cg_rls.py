@@ -8,7 +8,7 @@ from scipy import sparse
 from numpy import ones
 
 from rlscore.utilities import array_tools
-from rlscore import model
+from rlscore import predictor
 from rlscore.measure import sqerror
 
 class CGRLS(object):
@@ -25,11 +25,11 @@ class CGRLS(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     regparam: float (regparam > 0)
         regularization parameter
-    train_labels: {array-like}, shape = [n_samples] or [n_samples, 1]
+    Y: {array-like}, shape = [n_samples] or [n_samples, 1]
         Training set labels
     validation_features:: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
         Data matrix for validation set, needed if early stopping used
@@ -49,9 +49,8 @@ class CGRLS(object):
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
 
-    def __init__(self, train_features, train_labels, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0, **kwargs):
-        X = train_features
-        self.Y = array_tools.as_labelmatrix(train_labels)
+    def __init__(self, X, Y, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0, **kwargs):
+        self.Y = array_tools.as_labelmatrix(Y)
         self.X = csc_matrix(X.T)
         self.bias = float(bias)
         self.regparam = float(regparam)
@@ -66,18 +65,13 @@ class CGRLS(object):
         else:
             self.callbackfun = None
         self.results = {}
-
-    def createLearner(cls, **kwargs):
-        learner = cls(**kwargs)
-        return learner
-    createLearner = classmethod(createLearner)
     
     
     def train(self):
         """Trains the learning algorithm.
         
         After the learner is trained, one can call the method getModel
-        to get the trained model
+        to get the trained predictor
         """
         regparam = self.regparam
         Y = self.Y
@@ -105,18 +99,18 @@ class CGRLS(object):
         else:
             self.b = sqrt(self.bias)*self.A[-1]
             self.A = self.A[:-1]
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def getModel(self):
-        """Returns the trained model, call this only after training.
+        """Returns the trained predictor, call this only after training.
         
         Returns
         -------
-        model : LinearModel
+        predictor : LinearPredictor
             prediction function
         """
-        return model.LinearModel(self.A, self.b)
+        return predictor.LinearPredictor(self.A, self.b)
 
 
 class EarlyStopCB(object):
@@ -141,7 +135,7 @@ class EarlyStopCB(object):
         else:
             b = sqrt(b)*A[-1]
             A = A[:-1]
-        m = model.LinearModel(A,b)
+        m = predictor.LinearPredictor(A,b)
         P = m.predict(self.X_valid)
         perf = self.measure(self.Y_valid,P)
         if self.bestperf == None or (self.measure.iserror == (perf < self.bestperf)):

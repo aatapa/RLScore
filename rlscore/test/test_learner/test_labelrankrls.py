@@ -89,33 +89,29 @@ class Test(unittest.TestCase):
         Yho = Y[hocompl]
         
         rpool = {}
-        rpool["train_features"] = Xtrain
-        rpool["train_labels"] = Y
-        rpool["train_qids"] = mapQids(qidlist)
-        primalrls = LabelRankRLS.createLearner(**rpool)        
+        rpool["X"] = Xtrain
+        rpool["Y"] = Y
+        rpool["qids"] = mapQids(qidlist)
+        primalrls = LabelRankRLS(**rpool)        
         
         rpool = {}
         rpool["kernel_matrix"] = K
-        rpool["train_labels"] = Y
-        rpool["train_qids"] = mapQids(qidlist)        
-        dualrls = LabelRankRLS.createLearner(**rpool)
-        
+        rpool["Y"] = Y
+        rpool["qids"] = mapQids(qidlist)        
+        dualrls = LabelRankRLS(**rpool)
         
         rpool = {}
-        rpool['train_features'] = Xcv
-        rpool['train_labels'] = Yho
-        rpool['train_qids'] = mapQids(qidlist_cv)
-        primalrls_naive = LabelRankRLS.createLearner(**rpool)
+        rpool['X'] = Xcv
+        rpool['Y'] = Yho
+        rpool['qids'] = mapQids(qidlist_cv)
+        primalrls_naive = LabelRankRLS(**rpool)
 
-        
         rpool = {}
         rpool['kernel_matrix'] = Kcv
-        rpool['train_labels'] = Yho
-        rpool['train_features'] = Xcv
-        rpool['train_qids'] = mapQids(qidlist_cv)
-        dualrls_naive = LabelRankRLS.createLearner(**rpool)
-        
-        
+        rpool['Y'] = Yho
+        rpool['X'] = Xcv
+        rpool['qids'] = mapQids(qidlist_cv)
+        dualrls_naive = LabelRankRLS(**rpool)
         
         testkm = K[np.ix_(hocompl, hoindices)]
         
