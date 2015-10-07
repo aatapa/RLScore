@@ -5,48 +5,33 @@ import numpy as np
 import numpy.linalg as la
 
 from rlscore.learner import AllPairsRankRLS
-from rlscore.kernel import LinearKernel
 
 class Test(unittest.TestCase):
     
     def testAllPairsRankRLS(self):
         
-        print
-        print
-        print
-        print
-        print "Testing the cross-validation routines of the AllPairsRankRLS module."
-        print
-        print
+        print("Testing the cross-validation routines of the AllPairsRankRLS module.\n\n")
         
         np.random.seed(100)
         floattype = np.float64
         
         m, n, h = 30, 200, 10
-        Xtrain = np.mat(np.random.rand(m, n))
-        #trainlabels = np.sum(Xtrain, 0)
-        trainlabels = np.mat(np.random.rand(m, h))
-        trainkm = Xtrain * Xtrain.T
+        Xtrain = np.random.rand(m, n)
+        trainlabels = np.random.rand(m, h)
+        trainkm = np.dot(Xtrain, Xtrain.T)
         ylen = 1
-        
-        def complement(indices, m):
-            compl = range(m)
-            for ind in indices:
-                compl.remove(ind)
-            return compl
         
         L = np.mat(m * np.eye(m) - np.ones((m, m), dtype=floattype))
         
         hoindices = [5, 7]
         hoindices3 = [5, 7, 9]
-        hocompl = complement(hoindices, m)
-        hocompl3 = complement(hoindices3, m)
+        hocompl = list(set(range(m)) - set(hoindices))
+        hocompl3 = list(set(range(m)) - set(hoindices3))
         
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):
             regparam = 2. ** loglambdas[j]
-            print
-            print "Regparam 2^%1d" % loglambdas[j]
+            print("\nRegparam 2^%1d" % loglambdas[j])
             
             Kcv = trainkm[np.ix_(hocompl, hocompl)]
             Ycv = trainlabels[hocompl]
@@ -67,7 +52,7 @@ class Test(unittest.TestCase):
             hopreds = []
             
             hopred = naivedualrls.getModel().predict(Xtest)
-            print hopred[0, oind], hopred[1, oind], 'Naive'
+            print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' Naive')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             
             rpool = {}
@@ -76,9 +61,9 @@ class Test(unittest.TestCase):
             rpool['regparam'] = regparam
             hodualrls = AllPairsRankRLS.createLearner(**rpool)
             hodualrls.solve(regparam)
-            hopred = hodualrls.computePairwiseCV([hoindices], oind=oind)
-            print hopred[0][0], hopred[0][1], 'Fast'
-            hopreds.append((hopred[0][0], hopred[0][1]))
+            hopred = hodualrls.computePairwiseCV([hoindices[0]], [hoindices[1]], oind=oind)
+            print(str(hopred[0][0]) + ' ' + str(hopred[1][0]) + ' Fast')
+            hopreds.append((hopred[0][0], hopred[1][0]))
             self.assertAlmostEqual(hopreds[0][0], hopreds[1][0])
             self.assertAlmostEqual(hopreds[0][1], hopreds[1][1])
             hopreds = []
@@ -90,11 +75,11 @@ class Test(unittest.TestCase):
             hoprimalrls = AllPairsRankRLS.createLearner(**rpool)
             hoprimalrls.solve(regparam)
             hopred = hoprimalrls.computeHO(hoindices)
-            print hopred[0, oind], hopred[1, oind], 'HO'
+            print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' HO')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             
             hopred = Xtest * la.inv(Xcv.T * Lcv * Xcv + regparam * np.mat(np.eye(n))) * Xcv.T * Lcv * Ycv
-            print hopred[0, oind], hopred[1, oind], 'Dumb (primal)'
+            print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' Dumb (primal)')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             
             hopred0 = hopreds.pop(0)
