@@ -10,8 +10,8 @@ test_labels = np.loadtxt("./examples/data/rank_test.labels")
 train_features = read_sparse("./examples/data/rank_train.features")
 test_features = read_sparse("./examples/data/rank_test.features")
 kwargs = {}
-kwargs["train_labels"] = train_labels
-kwargs["train_features"] = train_features
+kwargs["Y"] = train_labels
+kwargs["X"] = train_features
 kwargs["regparam"] = 1
 learner = AllPairsRankRLS.createLearner(**kwargs)
 learner.train()

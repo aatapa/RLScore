@@ -13,7 +13,7 @@ class MMC(AbstractSvdLearner):
     
     There are three ways to supply the training data for the learner.
     
-    1. train_features: supply the data matrix directly, by default
+    1. X: supply the data matrix directly, by default
     MMC will use the linear kernel.
     
     2. kernel_obj: supply the kernel object that has been initialized
@@ -23,13 +23,13 @@ class MMC(AbstractSvdLearner):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     regparam: float (regparam > 0)
         regularization parameter
     number_of_clusters: int (number_of_clusters >1)
         number of clusters to be found
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
         Data matrix
     kernel_obj: kernel object, optional
         kernel object, initialized with the training set
@@ -47,7 +47,7 @@ class MMC(AbstractSvdLearner):
     361-368, ACM, 2009.
     """
     
-    #def __init__(self, svdad, number_of_clusters=2, regparam=1.0, train_labels = None, fixed_indices=None, callback=None):
+    #def __init__(self, svdad, number_of_clusters=2, regparam=1.0, Y = None, fixed_indices=None, callback=None):
     def __init__(self, **kwargs):
         self.svdad = creators.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
@@ -68,13 +68,13 @@ class MMC(AbstractSvdLearner):
             self.callbackfun = kwargs["callback"]
         else:
             self.callbackfun = None
-        if kwargs.has_key("train_labels"):
-            train_labels = kwargs["train_labels"]
+        if kwargs.has_key("Y"):
+            Y = kwargs["Y"]
         else:
-            train_labels = None
-        if train_labels != None:
-            #Y_orig = array_tools.as_labelmatrix(train_labels)
-            Y_orig = array_tools.as_array(train_labels)
+            Y = None
+        if Y != None:
+            #Y_orig = array_tools.as_labelmatrix(Y)
+            Y_orig = array_tools.as_array(Y)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
                 self.Y = np.zeros((Y_orig.shape[0], 2))

@@ -9,7 +9,6 @@ KERNEL_NAME = 'kernel'
 def createKernelByModuleName(**kwargs):
     kname = kwargs[KERNEL_NAME]
     exec "from ..kernel import " + kname
-    pcgstr = "kernel."
     kernelclazz = eval(kname)
     #get kernel arguments
     args = inspect.getargspec(kernelclazz.__init__)[0]

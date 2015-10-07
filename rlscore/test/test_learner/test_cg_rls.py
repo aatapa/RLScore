@@ -20,8 +20,8 @@ class Test(unittest.TestCase):
             Xtrain = np.mat(np.random.rand(m, n))
             Y = np.mat(np.random.rand(m, 1))
             rpool = {}
-            rpool['train_features'] = Xtrain
-            rpool['train_labels'] = Y
+            rpool['X'] = Xtrain
+            rpool['Y'] = Y
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
             rls = RLS.createLearner(**rpool)

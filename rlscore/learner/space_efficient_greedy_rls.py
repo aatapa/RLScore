@@ -4,7 +4,7 @@ import numpy as np
 import numpy.linalg as la
 import scipy.sparse as sp
 
-from rlscore import model
+from rlscore import predictor
 
 class SpaceEfficientGreedyRLS(object):
     
@@ -14,13 +14,13 @@ class SpaceEfficientGreedyRLS(object):
         
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
-        X = self.resource_pool['train_features']
+        X = self.resource_pool['X']
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = self.resource_pool['train_labels']
+        self.Y = self.resource_pool['Y']
         #Number of training examples
         self.size = self.Y.shape[0]
         if self.resource_pool.has_key('bias'):
@@ -50,7 +50,7 @@ class SpaceEfficientGreedyRLS(object):
     
     
     def getModel(self):
-        return model.LinearModel(self.A, self.b)
+        return predictor.LinearPredictor(self.A, self.b)
     
     
     def solve_bu(self, regparam):
@@ -164,7 +164,7 @@ class SpaceEfficientGreedyRLS(object):
             #print self.performances
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
@@ -178,7 +178,7 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def solve_tradeoff(self, regparam):
@@ -334,7 +334,7 @@ class SpaceEfficientGreedyRLS(object):
             #print self.performances
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
@@ -345,7 +345,7 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def solve_weak(self, regparam):
@@ -465,7 +465,7 @@ class SpaceEfficientGreedyRLS(object):
             Omega = 1. / (np.multiply(S, S) + rp) - rpinv
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
@@ -475,6 +475,6 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
 
 

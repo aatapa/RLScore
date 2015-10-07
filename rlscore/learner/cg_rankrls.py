@@ -7,7 +7,7 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import cg
 import scipy.sparse as sp
 
-from rlscore import model
+from rlscore import predictor
 from rlscore.utilities import array_tools
 from rlscore.measure import sqmprank
 from rlscore.measure.measure_utilities import UndefinedPerformance
@@ -21,9 +21,9 @@ class CGRankRLS(object):
     There are three ways to supply the pairwise preferences for the training set, depending
     on the arguments supplied by the user.
     
-    1. train_labels: pairwise preferences constructed between all data point pairs
+    1. Y: pairwise preferences constructed between all data point pairs
     
-    2. train_labels, train_qids: pairwise preferences constructed between all data
+    2. Y, qids: pairwise preferences constructed between all data
     points belonging to the same query.
     
     3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
@@ -38,16 +38,16 @@ class CGRankRLS(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     regparam: float (regparam > 0)
         regularization parameter
-    train_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
+    Y: {array-like}, shape = [n_samples] or [n_samples, 1], optional
         Training set labels (alternative to: 'train_preferences')
-    train_qids: list of n_queries index lists, optional
-        Training set qids,  (can be supplied with 'train_labels')
+    qids: list of n_queries index lists, optional
+        Training set qids,  (can be supplied with 'Y')
     train_preferences: {array-like}, shape = [n_preferences, 2], optional
-        Pairwise preference indices (alternative to: 'train_labels')
+        Pairwise preference indices (alternative to: 'Y')
         The array contains pairwise preferences one pair per row, i.e. the data point
         corresponding to the first index is preferred over the data point corresponding
         to the second index.
@@ -80,8 +80,8 @@ class CGRankRLS(object):
         else:
             self.regparam = 0.
         self.callbackfun = None
-        if 'train_labels' in kwargs:
-            Y = kwargs['train_labels']
+        if 'Y' in kwargs:
+            Y = kwargs['Y']
             self.Y = array_tools.as_labelmatrix(Y)
             #Number of training examples
             self.size = Y.shape[0]
@@ -101,11 +101,11 @@ class CGRankRLS(object):
             self.learn_from_labels = False
         else:
             raise Exception('Neither labels nor preference information found')
-        X = kwargs['train_features']
+        X = kwargs['X']
         self.X = csc_matrix(X.T)
         self.bias = 0.
-        if 'train_qids' in kwargs:
-            qids = kwargs['train_qids']
+        if 'qids' in kwargs:
+            qids = kwargs['qids']
             self.setQids(qids)
         else:
             self.qidmap = None
@@ -167,7 +167,7 @@ class CGRankRLS(object):
         """Trains the learning algorithm.
         
         After the learner is trained, one can call the method getModel
-        to get the trained model
+        to get the trained predictor
         """
         if self.learn_from_labels:
             self.trainWithLabels()
@@ -210,7 +210,7 @@ class CGRankRLS(object):
         except Finished:
             pass
         self.b = np.mat(np.zeros((1,1)))
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def trainWithPreferences(self):
@@ -240,18 +240,18 @@ class CGRankRLS(object):
         XLY = X_csr * (pairs_csc.T * M)
         self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
         self.b = np.mat(np.zeros((1,self.A.shape[1])))
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def getModel(self):
-        """Returns the trained model, call this only after training.
+        """Returns the trained predictor, call this only after training.
         
         Returns
         -------
-        model : LinearModel
+        predictor : LinearPredictor
             prediction function
         """
-        return model.LinearModel(self.A, self.b)
+        return predictor.LinearPredictor(self.A, self.b)
 
 class EarlyStopCB(object):
     
@@ -267,7 +267,7 @@ class EarlyStopCB(object):
         self.maxiter = maxiter
     
     def callback(self, learner):
-        m = model.LinearModel(learner.A, learner.b)
+        m = predictor.LinearPredictor(learner.A, learner.b)
         P = m.predict(self.X_valid)
         if self.qids_valid:
             perfs = []

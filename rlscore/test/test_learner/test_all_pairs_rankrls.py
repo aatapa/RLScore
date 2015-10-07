@@ -59,8 +59,8 @@ class Test(unittest.TestCase):
             
             oind = 1
             rpool = {}
-            rpool['train_labels'] = Ycv
-            rpool['train_features'] = Xcv
+            rpool['Y'] = Ycv
+            rpool['X'] = Xcv
             rpool['regparam'] = regparam
             naivedualrls = AllPairsRankRLS.createLearner(**rpool)
             naivedualrls.solve(regparam)
@@ -71,8 +71,8 @@ class Test(unittest.TestCase):
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             
             rpool = {}
-            rpool['train_labels'] = trainlabels
-            rpool['train_features'] = Xtrain
+            rpool['Y'] = trainlabels
+            rpool['X'] = Xtrain
             rpool['regparam'] = regparam
             hodualrls = AllPairsRankRLS.createLearner(**rpool)
             hodualrls.solve(regparam)
@@ -84,8 +84,8 @@ class Test(unittest.TestCase):
             hopreds = []
             
             rpool = {}
-            rpool['train_labels'] = trainlabels
-            rpool['train_features'] = Xtrain
+            rpool['Y'] = trainlabels
+            rpool['X'] = Xtrain
             rpool['regparam'] = regparam
             hoprimalrls = AllPairsRankRLS.createLearner(**rpool)
             hoprimalrls.solve(regparam)

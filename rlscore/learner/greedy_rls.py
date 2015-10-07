@@ -2,7 +2,7 @@
 from scipy import sparse as sp
 import numpy as np
 from rlscore.learner.abstract_learner import CallbackFunction as CF
-from rlscore import model
+from rlscore import predictor
 from rlscore.utilities import array_tools
 #import pyximport; pyximport.install()
 import cython_greedy_rls
@@ -19,9 +19,9 @@ class GreedyRLS(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    train_labels: {array-like}, shape = [n_samples] or [n_samples, n_labels] (if n_labels >1)
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels] (if n_labels >1)
         Training set labels
     regparam: float (regparam > 0)
         regularization parameter
@@ -47,13 +47,13 @@ class GreedyRLS(object):
         else:
             self.callbackfun = None
         self.regparam = float(kwargs['regparam'])
-        X = kwargs['train_features']
+        X = kwargs['X']
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = kwargs['train_labels']
+        self.Y = kwargs['Y']
         self.Y = array_tools.as_labelmatrix(self.Y)
         #Number of training examples
         self.size = self.Y.shape[0]
@@ -88,7 +88,7 @@ class GreedyRLS(object):
         """Trains the learning algorithm.
         
         After the learner is trained, one can call the method getModel
-        to get the trained model
+        to get the trained predictor
         """
         
         #The current version works only with the squared error measure
@@ -236,7 +236,7 @@ class GreedyRLS(object):
             #print bestlooperf
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
             
@@ -350,7 +350,7 @@ class GreedyRLS(object):
             self.selected.append(bestcind)
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
             
@@ -362,18 +362,18 @@ class GreedyRLS(object):
         self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results['model'] = self.getModel()
+        self.results['predictor'] = self.getModel()
     
     
     def getModel(self):
-        """Returns the trained model, call this only after training.
+        """Returns the trained predictor, call this only after training.
         
         Returns
         -------
-        model : LinearModel
-            prediction function (model.W contains at most "subsetsize" number of non-zero coefficients)
+        predictor : LinearPredictor
+            prediction function (predictor.W contains at most "subsetsize" number of non-zero coefficients)
         """
-        return model.LinearModel(self.A, self.b)
+        return predictor.LinearPredictor(self.A, self.b)
     
     
     def solve_bu(self, regparam):
@@ -482,7 +482,7 @@ class GreedyRLS(object):
             #print bestlooperf
             currentfcount += 1
             
-            #Linear model with bias
+            #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
             

@@ -9,7 +9,7 @@ class PolynomialKernel(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     gamma : float, optional (default 1.0)
         Kernel parameter
@@ -24,11 +24,11 @@ class PolynomialKernel(object):
         by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, train_features, degree=2, gamma=1.0, coef0=0, bias=0.0, basis_vectors=None):
+    def __init__(self, X, degree=2, gamma=1.0, coef0=0, bias=0.0, basis_vectors=None):
         if basis_vectors != None:
             self.train_X = basis_vectors
         else:
-            self.train_X = train_features
+            self.train_X = X
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0

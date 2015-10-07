@@ -10,8 +10,8 @@ test_labels = np.loadtxt("./examples/data/reg_test.labels")
 train_features = read_sparse("./examples/data/reg_train.features")
 test_features = read_sparse("./examples/data/reg_test.features")
 kwargs = {}
-kwargs["train_labels"] = train_labels
-kwargs["train_features"] = train_features
+kwargs["Y"] = train_labels
+kwargs["X"] = train_features
 kwargs["regparam"] = 1
 learner = RLS.createLearner(**kwargs)
 learner.train()

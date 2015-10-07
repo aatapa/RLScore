@@ -3,7 +3,7 @@ cfiles = {"train_features":'./examples/data/class_train.features',
                           "test_features":'./examples/data/class_test.features',
                           "test_labels":'./examples/data/class_test.labels'}
 
-defparams = {"train_features":"train_features", "train_labels":"train_labels", "test_features":"test_features", "test_labels":"test_labels"}
+defparams = {"X":"train_features", "Y":"train_labels", "test_features":"test_features", "test_labels":"test_labels"}
 
 experiments = {"greedyrls":{
                 "learner":"GreedyRLS",

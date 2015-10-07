@@ -37,7 +37,7 @@ class AbstractKernelTest(unittest.TestCase):
         for X in self.trainsets:
             #Reduced set approximation is also tested
             for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
-                rpool = {'train_features' : X, 'basis_vectors': bvecs}
+                rpool = {'X' : X, 'basis_vectors': bvecs}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
@@ -64,7 +64,7 @@ class AbstractKernelTest(unittest.TestCase):
             X_test = np.random.random((22,X.shape[1]))
             #Reduced set approximation is also tested
             for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
-                rpool = {'train_features' : X, 'basis_vectors': bvecs}
+                rpool = {'X' : X, 'basis_vectors': bvecs}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
@@ -95,7 +95,7 @@ class AbstractKernelTest(unittest.TestCase):
         for bvecs in [None, X[self.bvecinds]]:
             K_c = None
             for X in trainsets:
-                p = {'train_features' : X,
+                p = {'X' : X,
                          'basis_vectors': bvecs}
                 p.update(params)
                 k = self.kernel(**p)

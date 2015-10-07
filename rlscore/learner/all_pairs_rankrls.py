@@ -24,7 +24,7 @@ class AllPairsRankRLS(AbstractSvdLearner):
     
     There are three ways to supply the training data for the learner.
     
-    1. train_features: supply the data matrix directly, by default
+    1. X: supply the data matrix directly, by default
     RLS will use the linear kernel.
     
     2. kernel_obj: supply the kernel object that has been initialized
@@ -36,11 +36,11 @@ class AllPairsRankRLS(AbstractSvdLearner):
 
     Parameters
     ----------
-    train_labels: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
     regparam: float (regparam > 0)
         regularization parameter
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
         Data matrix
     kernel_obj: kernel object, optional
         kernel object, initialized with the training set
@@ -63,10 +63,10 @@ class AllPairsRankRLS(AbstractSvdLearner):
 
     """
     
-    #def __init__(self, svdad, train_labels, regparam=1.0):
+    #def __init__(self, svdad, Y, regparam=1.0):
     def __init__(self, **kwargs):
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
+        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
         if kwargs.has_key("regparam"):
             self.regparam = float(kwargs["regparam"])
         else:
@@ -78,7 +78,7 @@ class AllPairsRankRLS(AbstractSvdLearner):
     def createLearner(cls, **kwargs):
         #new_kwargs = {}
         #new_kwargs["svdad"] = creators.createSVDAdapter(**kwargs)
-        #new_kwargs["train_labels"] = kwargs["train_labels"]
+        #new_kwargs["Y"] = kwargs["Y"]
         #if kwargs.has_key("regparam"):
         #    new_kwargs['regparam'] = kwargs["regparam"]
         #learner = cls(**new_kwargs)

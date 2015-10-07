@@ -38,8 +38,8 @@ def speedtest():
             print 'round'
     tcb = TestCallback()
     rpool['callback'] = tcb
-    rpool['train_features'] = Xtrain.T
-    rpool['train_labels'] = Y
+    rpool['X'] = Xtrain.T
+    rpool['Y'] = Y
     
     rpool['subsetsize'] = str(desiredfcount)
     rpool['regparam'] = rp
@@ -144,10 +144,10 @@ class Test(unittest.TestCase):
                 pass
         tcb = TestCallback()
         rpool['callback'] = tcb
-        rpool['train_features'] = Xtrain.T
-        rpool['train_labels'] = Y
-        #rpool['multi_task_train_features'] = [Xtrain.T,Xtrain.T]
-        #rpool['multi_task_train_labels'] = [Y[:,0], Y[:,1]]
+        rpool['X'] = Xtrain.T
+        rpool['Y'] = Y
+        #rpool['multi_task_X'] = [Xtrain.T,Xtrain.T]
+        #rpool['multi_task_Y'] = [Y[:,0], Y[:,1]]
         
         rpool['subsetsize'] = str(desiredfcount)
         rpool['regparam'] = rp

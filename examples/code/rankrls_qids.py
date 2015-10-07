@@ -12,9 +12,9 @@ test_features = read_sparse("./examples/data/rank_test.features")
 train_features = read_sparse("./examples/data/rank_train.features")
 test_qids = read_qids("./examples/data/rank_test.qids")
 kwargs = {}
-kwargs["train_labels"] = train_labels
-kwargs["train_qids"] = train_qids
-kwargs["train_features"] = train_features
+kwargs["Y"] = train_labels
+kwargs["X"] = train_features
+kwargs["qids"] = train_qids
 kwargs["regparam"] = 1
 learner = LabelRankRLS.createLearner(**kwargs)
 learner.train()

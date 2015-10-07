@@ -32,10 +32,10 @@ class InteractiveRlsClassifier(AbstractSvdLearner):
         #else:
         #    self.oneclass = False
         
-        if not kwargs.has_key("train_labels"):
+        if not kwargs.has_key("Y"):
             self.classvec = np.zeros(self.size)
         else:
-            self.classvec = kwargs["train_labels"]
+            self.classvec = kwargs["Y"]
         #self.size = self.classvec.shape[0]
         self.Y = -np.ones((self.size, self.labelcount))
         self.classcounts = np.zeros((self.labelcount), dtype = np.int32)

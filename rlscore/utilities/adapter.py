@@ -11,7 +11,7 @@ from math import sqrt
 import numpy as np
 
 from rlscore.utilities import decomposition
-from rlscore import model
+from rlscore import predictor
 from rlscore.utilities import array_tools
 
 
@@ -50,7 +50,7 @@ class SvdAdapter(object):
         @return: svals, evecs, U, Z
         @rtype: tuple of numpy matrices
         """
-        train_X = rpool['train_features']
+        train_X = rpool['X']
         kernel = rpool['kernel_obj']
         if rpool.has_key('basis_vectors'):
             basis_vectors = rpool['basis_vectors']
@@ -75,7 +75,7 @@ class SvdAdapter(object):
     def createModel(self, svdlearner):
         A = svdlearner.A
         A = self.reducedSetTransformation(A)
-        mod = model.DualModel(A, self.kernel)
+        mod = predictor.KernelPredictor(A, self.kernel)
         return mod
 
 class LinearSvdAdapter(SvdAdapter):
@@ -86,7 +86,7 @@ class LinearSvdAdapter(SvdAdapter):
     
     def decompositionFromPool(self, rpool):
         kernel = rpool['kernel_obj']
-        self.X = rpool['train_features']
+        self.X = rpool['X']
         if rpool.has_key('basis_vectors'):
             basis_vectors = rpool['basis_vectors']
         else:
@@ -128,9 +128,9 @@ class LinearSvdAdapter(SvdAdapter):
         if bias != 0:
             W_biaz = W[W.shape[0]-1] * math.sqrt(bias)
             W_features = W[range(W.shape[0]-1)]
-            mod = model.LinearModel(W_features, W_biaz)
+            mod = predictor.LinearPredictor(W_features, W_biaz)
         else:
-            mod = model.LinearModel(W, 0.)
+            mod = predictor.LinearPredictor(W, 0.)
         return mod
 
 def getPrimalDataMatrix(X, bias):
@@ -175,5 +175,5 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     def createModel(self, svdlearner):
         A = svdlearner.A
         A = self.reducedSetTransformation(A)
-        mod = model.LinearModel(A, 0.)
+        mod = predictor.LinearPredictor(A, 0.)
         return mod

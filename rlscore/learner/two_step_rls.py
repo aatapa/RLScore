@@ -15,7 +15,7 @@ class TwoStepRLS(object):
     
     
     def __init__(self, **kwargs):
-        Y = kwargs["train_labels"]
+        Y = kwargs["Y"]
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         if kwargs.has_key('kmatrix1'):
@@ -82,7 +82,7 @@ class TwoStepRLS(object):
         
         self.A = np.multiply(self.VTYU, newevals)
         self.A = self.V * self.A * self.U.T
-        self.model = KernelPairwiseModel(self.A)
+        self.model = KernelPairwisePredictor(self.A)
         
         #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
         #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
@@ -118,7 +118,7 @@ class TwoStepRLS(object):
         
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwiseModel(self.W)
+        self.model = LinearPairwisePredictor(self.W)
     
     
     def computeLOO(self):
@@ -220,7 +220,7 @@ class TwoStepRLS(object):
         return self.model
 
     
-class KernelPairwiseModel(object):
+class KernelPairwisePredictor(object):
     
     def __init__(self, A, kernel = None):
         """Initializes the dual model
@@ -250,7 +250,7 @@ class KernelPairwiseModel(object):
         return P
 
 
-class LinearPairwiseModel(object):
+class LinearPairwisePredictor(object):
     
     def __init__(self, W):
         """Initializes the linear model

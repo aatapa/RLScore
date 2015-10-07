@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 from rlscore.kernel import LinearKernel
-from rlscore.learner.cg_kron_rls import CGKronRLS, KernelPairwiseModel
+from rlscore.learner.cg_kron_rls import CGKronRLS, KernelPairwisePredictor
 from rlscore.learner.rls import RLS
 
 
@@ -44,13 +44,13 @@ class Test(unittest.TestCase):
         X_test1, Y_test1 = self.generate_data(testpos1, testneg1, 5, 0, 1)
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
-        #kernel1 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train1)
-        kernel1 = LinearKernel(train_features=X_train1)
+        #kernel1 = GaussianKernel.createKernel(gamma=0.01, X=X_train1)
+        kernel1 = LinearKernel(X_train1)
         K_train1 = kernel1.getKM(X_train1)
         K_test1 = kernel1.getKM(X_test1)
         
-        #kernel2 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train2)
-        kernel2 = LinearKernel(train_features=X_train2)
+        #kernel2 = GaussianKernel.createKernel(gamma=0.01, X=X_train2)
+        kernel2 = LinearKernel(X_train2)
         K_train2 = kernel2.getKM(X_train2)
         K_test2 = kernel2.getKM(X_test2)
         
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         K_Kron_train_x = np.kron(K_train2, K_train1)
         params = {}
         params["kernel_matrix"] = B * K_Kron_train_x * B.T
-        params["train_labels"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
+        params["Y"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.getModel()
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train_nonzeros
+        params["Y"] = Y_train_nonzeros
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
         tcb = TestCallback()
@@ -145,7 +145,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train_nonzeros
+        params["Y"] = Y_train_nonzeros
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
         class KernelCallback():
@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
                 self.round = 0
             def callback(self, learner):
                 self.round = self.round + 1
-                tp = KernelPairwiseModel(learner.A, learner.label_row_inds, learner.label_col_inds).predictWithKernelMatrices(K_test1, K_test2)
+                tp = KernelPairwisePredictor(learner.A, learner.label_row_inds, learner.label_col_inds).predictWithKernelMatrices(K_test1, K_test2)
                 print self.round, np.mean(np.abs(tp - ordrls_testpred))
             def finished(self, learner):
                 print 'finished'

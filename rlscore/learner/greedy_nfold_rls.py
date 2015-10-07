@@ -12,14 +12,14 @@ class GreedyNFoldRLS(object):
         @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
         """
         
-        Y = self.resource_pool['train_labels']
+        Y = self.resource_pool['Y']
         self.Y = Y
         #Number of training examples
         self.size = Y.shape[0]
         if not Y.shape[1] == 1:
             raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
         
-        X = self.resource_pool['train_features']
+        X = self.resource_pool['X']
         self.setDataMatrix(X.T)
         if self.resource_pool.has_key('bias'):
             self.bias = float(self.resource_pool['bias'])
@@ -29,7 +29,7 @@ class GreedyNFoldRLS(object):
             self.measure = self.resource_pool['measure']
         else:
             self.measure = None
-        qids = self.resource_pool['train_qids']
+        qids = self.resource_pool['qids']
         if not self.resource_pool.has_key('cross-validation_folds'):
             self.resource_pool['cross-validation_folds'] = qids
         self.setQids(qids)

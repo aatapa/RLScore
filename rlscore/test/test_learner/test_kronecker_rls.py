@@ -50,13 +50,13 @@ class Test(unittest.TestCase):
         X_test1, Y_test1 = self.generate_data(testpos1, testneg1, 5, 0, 1)
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
-        #kernel1 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train1)
-        kernel1 = LinearKernel(train_features=X_train1)
+        #kernel1 = GaussianKernel.createKernel(gamma=0.01, X=X_train1)
+        kernel1 = LinearKernel(X_train1)
         K_train1 = kernel1.getKM(X_train1)
         K_test1 = kernel1.getKM(X_test1)
         
-        #kernel2 = GaussianKernel.createKernel(gamma=0.01, train_features=X_train2)
-        kernel2 = LinearKernel(train_features=X_train2)
+        #kernel2 = GaussianKernel.createKernel(gamma=0.01, X=X_train2)
+        kernel2 = LinearKernel(X_train2)
         K_train2 = kernel2.getKM(X_train2)
         K_test2 = kernel2.getKM(X_test2)
         
@@ -92,7 +92,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         linear_kron_learner = KronRLS.createLearner(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         kernel_kron_learner = KronRLS.createLearner(**params)
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
         K_Kron_train_x = np.kron(K_train1, K_train2)
         params = {}
         params["kernel_matrix"] = K_Kron_train_x
-        params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
+        params["Y"] = Y_train.reshape(trainlabelcount, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.getModel()
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         params = {}
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         params["regparam"] = regparam
         linear_kron_condrank_learner = KronRLS.createLearner(**params)
         linear_kron_condrank_learner.solve_linear_conditional_ranking(regparam)
@@ -156,8 +156,8 @@ class Test(unittest.TestCase):
         #Train an ordinary RankRLS for reference
         params = {}
         params["kernel_matrix"] = K_Kron_train_x
-        params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
-        params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        params["Y"] = Y_train.reshape(trainlabelcount, 1)
+        params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         rankrls_learner = LabelRankRLS.createLearner(**params)
         rankrls_learner.solve(regparam)
         rankrls_model = rankrls_learner.getModel()
@@ -187,7 +187,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         kron_learner = KronRLS.createLearner(**params)
         kron_learner.train()
         #kron_learner.solve_kernel(regparam)
@@ -198,7 +198,7 @@ class Test(unittest.TestCase):
         params = {}
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         linear_kron_learner = KronRLS.createLearner(**params)
         linear_kron_learner.solve_linear(regparam)
         
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
         K_Kron_train_x = np.kron(K_train1, K_train2)
         params = {}
         params["kernel_matrix"] = K_Kron_train_x
-        params["train_labels"] = Y_train.reshape(trainlabelcount, 1)
+        params["Y"] = Y_train.reshape(trainlabelcount, 1)
         ordrls_learner = RLS.createLearner(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.getModel()
@@ -251,7 +251,7 @@ class Test(unittest.TestCase):
         params = {}
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         condrank_learner = ConditionalRanking.createLearner(**params)
         condrank_learner.solve(regparam)
         condrank_model = condrank_learner.getModel()
@@ -260,16 +260,16 @@ class Test(unittest.TestCase):
         params = {}
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["train_labels"] = Y_train
+        params["Y"] = Y_train
         linear_kron_condrank_learner = KronRLS.createLearner(**params)
         linear_kron_condrank_learner.solve_linear_conditional_ranking(regparam)
         condrank_model = linear_kron_condrank_learner.getModel()
         
         params = {}
         params["kmatrix"] = K_Kron_train_x
-        params["train_labels"] = Y_train.reshape(trainlabelcount, 1)#Y_train.reshape(Y_train.shape[0]*Y_train.shape[1],1)
-        #params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
-        params["train_qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        params["Y"] = Y_train.reshape(trainlabelcount, 1)#Y_train.reshape(Y_train.shape[0]*Y_train.shape[1],1)
+        #params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         rankrls_learner = LabelRankRLS.createLearner(**params)
         
         rankrls_learner.solve(regparam)

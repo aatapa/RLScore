@@ -5,7 +5,7 @@ from scipy import sparse
 
 from rlscore.learner.rls import RLS
 from rlscore.reader import read_sparse
-from rlscore import model as mod
+from rlscore import predictor as mod
 from rlscore.utilities import array_tools
 
 
@@ -18,39 +18,39 @@ class Test(unittest.TestCase):
     
     def testModel(self):
         
-        train_labels = np.random.random((10))
+        Y = np.random.random((10))
         test_labels = np.random.random((10))
-        train_features = np.random.random((10,100))
+        X = np.random.random((10,100))
         test_features = np.random.random((10,100))
         kwargs = {}
-        kwargs["train_labels"] = train_labels
-        kwargs["train_features"] = train_features
+        kwargs["Y"] = Y
+        kwargs["X"] = X
         kwargs["regparam"] = 1
         learner = RLS.createLearner(**kwargs)
         learner.train()
         model = learner.getModel()
         print
         #print 'Ten data points, single label '
-        model = mod.LinearModel(np.random.random((100)))
+        model = mod.LinearPredictor(np.random.random((100)))
         self.all_pred_cases(model)
         
-        model = mod.LinearModel(np.random.random((100, 2)))
+        model = mod.LinearPredictor(np.random.random((100, 2)))
         self.all_pred_cases(model)
         
-        #model = mod.LinearModel(np.random.random((1, 2)))
+        #model = mod.LinearPredictor(np.random.random((1, 2)))
         #self.all_pred_cases(model)
         
         kwargs["kernel"] = "GaussianKernel"
-        train_labels = np.random.random((10))
-        kwargs["train_labels"] = train_labels
+        Y = np.random.random((10))
+        kwargs["Y"] = Y
         learner = RLS.createLearner(**kwargs)
         learner.train()
         model = learner.getModel()
         self.all_pred_cases(model)
         
         kwargs["kernel"] = "GaussianKernel"
-        train_labels = np.random.random((10,2))
-        kwargs["train_labels"] = train_labels
+        Y = np.random.random((10,2))
+        kwargs["Y"] = Y
         learner = RLS.createLearner(**kwargs)
         learner.train()
         model = learner.getModel()

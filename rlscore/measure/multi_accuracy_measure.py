@@ -1,5 +1,3 @@
-import numpy as np
-
 
 def ova_accuracy(Y, P):
     """One-vs-all classification accuracy for multi-class problems.

@@ -16,9 +16,9 @@ class PPRankRLS(AbstractSvdLearner):
     There are three ways to supply the pairwise preferences for the training set, depending
     on the arguments supplied by the user.
     
-    1. train_labels: pairwise preferences constructed between all data point pairs
+    1. Y: pairwise preferences constructed between all data point pairs
     
-    2. train_labels, train_qids: pairwise preferences constructed between all data
+    2. Y, qids: pairwise preferences constructed between all data
     points belonging to the same query.
     
     3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
@@ -33,16 +33,16 @@ class PPRankRLS(AbstractSvdLearner):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     regparam: float (regparam > 0)
         regularization parameter
-    train_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
+    Y: {array-like}, shape = [n_samples] or [n_samples, 1], optional
         Training set labels (alternative to: 'train_preferences')
-    train_qids: list of n_queries index lists, optional
-        Training set qids,  (can be supplied with 'train_labels')
+    qids: list of n_queries index lists, optional
+        Training set qids,  (can be supplied with 'Y')
     train_preferences: {array-like}, shape = [n_preferences, 2], optional
-        Pairwise preference indices (alternative to: 'train_labels')
+        Pairwise preference indices (alternative to: 'Y')
         The array contains pairwise preferences one pair per row, i.e. the data point
         corresponding to the first index is preferred over the data point corresponding
         to the second index.
@@ -78,7 +78,7 @@ class PPRankRLS(AbstractSvdLearner):
         self.pairs = kwargs['train_preferences']
         self.learn_from_labels = False
         self.svdad = creators.createSVDAdapter(**kwargs)
-        #self.Y = array_tools.as_labelmatrix(kwargs["train_labels"])
+        #self.Y = array_tools.as_labelmatrix(kwargs["Y"])
         #if kwargs.has_key("regparam"):
         #    self.regparam = float(kwargs["regparam"])
         #else:
@@ -86,7 +86,7 @@ class PPRankRLS(AbstractSvdLearner):
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.results = {}
-        X = kwargs['train_features']
+        X = kwargs['X']
         self.X = csc_matrix(X)
         self.bias = 0.
         self.results = {}

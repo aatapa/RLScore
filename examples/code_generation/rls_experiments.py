@@ -8,7 +8,7 @@ rfiles = {"train_features":'./examples/data/reg_train.features',
                           "test_features":'./examples/data/reg_test.features',
                           "test_labels":'./examples/data/reg_test.labels'}
 
-defparams = {"train_features":"train_features", "train_labels":"train_labels"}
+defparams = {"X":"train_features", "Y":"train_labels"}
 
 experiments = {"rls_defparams":{
                 "learner":"RLS",

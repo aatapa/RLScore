@@ -12,7 +12,7 @@ class GaussianKernel(object):
 
     Parameters
     ----------
-    train_features: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
     gamma : float, optional (default 1.0)
         Kernel width
@@ -23,13 +23,13 @@ class GaussianKernel(object):
         by default basis_vectors = range(n_samples).
     """
       
-    def __init__(self, train_features, gamma=1.0, bias=0.0, basis_vectors=None):
+    def __init__(self, X, gamma=1.0, bias=0.0, basis_vectors=None):
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
         if basis_vectors != None:
             self.train_X = basis_vectors
         else:
-            self.train_X = train_features
+            self.train_X = X
         if sp.issparse(self.train_X):
             self.train_norms = ((self.train_X.T.multiply(self.train_X.T)).sum(axis=0)).T
         else:

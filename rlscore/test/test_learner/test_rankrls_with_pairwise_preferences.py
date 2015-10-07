@@ -34,14 +34,14 @@ class Test(unittest.TestCase):
                     pairs.append((b, a))
             pairs = np.array(pairs)
             rpool = {}
-            rpool['train_features'] = Xtrain
-            #rpool['train_labels'] = Y
+            rpool['X'] = Xtrain
+            #rpool['Y'] = Y
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            k = LinearKernel.createKernel(**rpool)
+            k = LinearKernel(Xtrain)
             rpool['kernel_obj'] = k
-            rls = PPRankRLS.createLearner(**rpool)
+            rls = PPRankRLS(**rpool)
             rls.train()
             model = rls.getModel()   
             W = model.W
