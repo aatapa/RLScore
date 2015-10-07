@@ -36,7 +36,12 @@ def decomposeKernelMatrix(K, trunc = None):
     @type trunc: int
     @return: the square roots of the nonzero eigenvalues and the corresponding eigenvectors of K. The square roots of the eigenvectors are contained in a r*1-matrix, where r is the number of nonzero eigenvalues. 
     @rtype: a tuple of two numpy matrices"""
-    evals, evecs = la.eigh(K)
+    try:
+        evals, evecs = la.eigh(K)
+    except LinAlgError, e:
+        print 'Warning, caught a LinAlgError while eigen decomposing: ' + str(e)
+        K = K + np.eye(K.shape[0]) * 0.0000000001
+        evals, evecs = la.eigh(K)
     evals, evecs = np.mat(evals), np.mat(evecs)
     nz = 0
     maxnz = K.shape[0]

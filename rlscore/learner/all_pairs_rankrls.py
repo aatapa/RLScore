@@ -113,7 +113,7 @@ class AllPairsRankRLS(AbstractSvdLearner):
             - nP * (fastinv * (nP.T * self.multipleright))))
     
     
-    def computePairwiseCV(self, pairs, oind=0):
+    def computePairwiseCV(self, pairs_start_inds, pairs_end_inds, oind=0):
         """Method for computing leave-pair-out predictions for a trained RankRLS.
         
         Parameters
@@ -183,12 +183,14 @@ class AllPairsRankRLS(AbstractSvdLearner):
             return GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_
         GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_ = hack()
         
-        results = []
+        results_start, results_end = [], []
         
         #This loops through the list of hold-out pairs.
         #Each pair is handled in a constant time.
-        def looppairs(results):
-            for i, j in pairs:
+        def looppairs(results_start, results_end):
+            for pairind in range(len(pairs_start_inds)):
+                
+                i, j = pairs_start_inds[pairind], pairs_end_inds[pairind]
                 
                 Gii = Gdiag_[i]
                 Gij = G[i, j]
@@ -242,8 +244,8 @@ class AllPairsRankRLS(AbstractSvdLearner):
                 F0 = GDYi - (Gii * t1 + Gij * t2 + GCi * b0)
                 F1 = GDYj - (Gij * t1 + Gjj * t2 + GCj * b0)
                 
-                results.append((F0, F1))
-        looppairs(results)
+                results_start.append(F0), results_end.append(F1)
+        looppairs(results_start, results_end)
         #allresults.append(results)
         # if Y.shape[1] > 1:
             # allresultsvec = []
@@ -257,7 +259,7 @@ class AllPairsRankRLS(AbstractSvdLearner):
             # return allresultsvec
         # else:
             # return allresults[0]
-        return results
+        return np.array(results_start), np.array(results_end)
     
     
     def computeHO(self, indices):
@@ -447,22 +449,24 @@ class LPOCV(object):
         #special handling for concordance index / auc
         if self.measure.func_name in ["cindex", "auc"]:
             for index in range(Y.shape[1]):
-                pairs = []
+                pairs_start_inds, pairs_end_inds = [], []
                 for i in range(Y.shape[0] - 1):
                     for j in range(i + 1, Y.shape[0]):
                         if Y[i, index] > Y[j, index]:
-                            pairs.append((i, j))
+                            pairs_start_inds.append(i)
+                            pairs_end_inds.append(j)
                         elif Y[i, index] < Y[j, index]:
-                            pairs.append((j, i))
-                if len(pairs) > 0:
-                    pred = rls.computePairwiseCV(pairs, index)
+                            pairs_start_inds.append(j)
+                            pairs_end_inds.append(i)
+                if len(pairs_start_inds) > 0:
+                    pred_start, pred_end = rls.computePairwiseCV(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
                     auc = 0.
-                    for pair in pred:
-                        if pair[0] > pair[1]:
+                    for h in range(len(pred_start)):
+                        if pred_start[h] > pred_end[h]:
                             auc += 1.
-                        elif pair[0] == pair[1]:
+                        elif pred_start[h] == pred_end[h]:
                             auc += 0.5
-                    auc /= len(pred)
+                    auc /= len(pairs_start_inds)
                     perfs.append(auc)
             if len(perfs) > 0:
                 performance = np.mean(perfs)
@@ -471,16 +475,17 @@ class LPOCV(object):
             return performance
         else:
             #Horribly inefficient, but maybe OK for small data sets
-            pairs = []
+            pairs_start_inds, pairs_end_inds = [], []
             for i in range(Y.shape[0]):
                 for j in range(Y.shape[0]):
-                    pairs.append((i,j))
+                    pairs_start_inds.append(i)
+                    pairs_end_inds.append(j)
             for index in range(Y.shape[1]):
-                preds = rls.computePairwiseCV(pairs, index)
-                for i in range(len(pairs)):
-                    pair = pairs[i]
+                pred_start, pred_end = rls.computePairwiseCV(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
+                for i in range(len(pairs_start_inds)):
+                    pair_start, pair_end = pred_start[i], pred_end[i]
                     pred = preds[i]
-                    perfs.append(self.measure(np.array([Y[pair[0],index],Y[pair[1],index]]), np.array(pred)))
+                    perfs.append(self.measure(np.array([Y[pair_start, index],Y[pair_end, index]]), np.array(pred)))
             perf = np.mean(perfs)
             return perf
 

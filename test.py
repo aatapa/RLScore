@@ -17,6 +17,7 @@ def testLearners():
     from rlscore.test.test_learner.test_greedy_rls import Test as grlstest
     from rlscore.test.test_learner.test_rls import Test as rlstest
     from rlscore.test.test_learner.test_all_pairs_rankrls import Test as apranktest
+    from rlscore.test.test_learner.test_rankrls_with_pairwise_preferences import Test as ppranktest
     from rlscore.test.test_learner.test_labelrankrls import Test as lranktest
     #from rlscore.test.test_learner.test_greedy_labelrankrls import Test as glrrlstest
     #from rlscore.test.test_learner.test_greedy_nfold_rls import Test as gnfrlstest

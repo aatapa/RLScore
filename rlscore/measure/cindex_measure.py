@@ -2,7 +2,6 @@ from numpy import array
 import numpy as np
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.utilities import array_tools
-from rlscore.utilities import swapped
 
 def cindex_singletask(Y, P):
     Y = np.array(Y).T[0]
@@ -28,6 +27,35 @@ def cindex_singletask(Y, P):
     s = swapped.count_swapped(correct, predictions)
     disagreement = float(s)/float(pairs)
     return 1. - disagreement
+
+def cindex_singletask_SLOW(Y, P):
+    correct = Y
+    predictions = P
+    assert len(correct) == len(predictions)
+    disagreement = 0.
+    decisions = 0.
+    for i in range(len(correct)):
+        for j in range(len(correct)):
+                if correct[i] > correct[j]:
+                    decisions += 1.
+                    if predictions[i] < predictions[j]:
+                        disagreement += 1.
+                    elif predictions[i] == predictions[j]:
+                        disagreement += 0.5
+    #Disagreement error is not defined for cases where there
+    #are no disagreeing pairs
+    if decisions == 0:
+        raise UndefinedPerformance("No pairs, all the instances have the same  output")
+    else:
+        disagreement /= decisions
+    return 1. - disagreement
+
+try:
+    from rlscore.utilities import swapped
+except Exception, e:
+    print(e)
+    print('Warning: could not import the fast cython implementation of the concordance index measure. Using a slow python-based one instead.')
+    cindex_singletask = cindex_singletask_SLOW
 
 def cindex_multitask(Y, P):
     perfs = []
