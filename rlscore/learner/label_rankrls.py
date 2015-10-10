@@ -103,7 +103,7 @@ class LabelRankRLS(AbstractSvdLearner):
         self.qids = qids
 
     def train(self):
-        self.solve()    
+        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
