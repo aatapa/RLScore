@@ -1,8 +1,12 @@
 import unittest
+import random as pyrandom
+pyrandom.seed(100)
 
 import numpy as np
 from rlscore.kernel import LinearKernel
-from rlscore.learner.cg_kron_rls import CGKronRLS, KernelPairwisePredictor
+from rlscore.learner.cg_kron_rls import CGKronRLS
+from rlscore.pairwise_predictor import LinearPairwisePredictor
+from rlscore.pairwise_predictor import KernelPairwisePredictor
 from rlscore.learner.rls import RLS
 
 
@@ -10,7 +14,6 @@ class Test(unittest.TestCase):
     
     def setUp(self):
         np.random.seed(55)
-        #random.seed(100)
     
     
     def generate_data(self, poscount, negcount, dim, mean1, mean2):
@@ -30,17 +33,17 @@ class Test(unittest.TestCase):
     
     def generate_xortask(self):
         np.random.seed(55)
-        trainpos1 = 50
-        trainneg1 = 50
-        trainpos2 = 60
-        trainneg2 = 70
+        trainpos1 = 5
+        trainneg1 = 5
+        trainpos2 = 6
+        trainneg2 = 7
         X_train1, Y_train1 = self.generate_data(trainpos1, trainneg1, 5, 0, 1)
         X_train2, Y_train2 = self.generate_data(trainpos2, trainneg2, 5, 4, 6)
         
-        testpos1 = 26
-        testneg1 = 27
-        testpos2 = 25
-        testneg2 = 25
+        testpos1 = 6
+        testneg1 = 7
+        testpos2 = 5
+        testneg2 = 8
         X_test1, Y_test1 = self.generate_data(testpos1, testneg1, 5, 0, 1)
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
@@ -73,43 +76,27 @@ class Test(unittest.TestCase):
     
     def test_cg_kron_rls(self):
         
-        
         regparam = 0.0001
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
         rows, columns = Y_train.shape
-        print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns
         rowstimescols = rows * columns
-        indmatrix = np.mat(range(rowstimescols)).T.reshape(rows, columns)
-        
-        #label_row_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1,1,2,2,2,2,3,4,5,6,6,7,9]
-        #label_col_inds = [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1,0,1,1,2,2,2,3,4,4,4,5,5,12]
-        pointrange = np.arange(rows, columns)
-        label_row_inds, label_col_inds = np.unravel_index(pointrange, (rows, columns)) 
-        Y_train_nonzeros = []
-        Y_alt = []
-        B = np.mat(np.zeros((len(label_row_inds), rowstimescols)))
-        for ind in range(len(label_row_inds)):
-            i, j = label_row_inds[ind], label_col_inds[ind]
-            Y_train_nonzeros.append(Y_train[i, j])
-            Y_alt.append(Y_train[i, j])
-            #B[ind, i * columns + j] = 1.
-            B[ind, j * rows + i] = 1.
-        #print B
-        Y_train_nonzeros = np.mat(Y_train_nonzeros).T
-        #Y_train_nonzeros = B * Y_train.reshape(rowstimescols, 1)
+        allindices = np.arange(rowstimescols)
+        all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (rows, columns), order = 'F') 
+        incinds = pyrandom.sample(allindices, 50)
+        label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds] 
+        Y_train_known_outputs = Y_train.reshape(rowstimescols, order = 'F')[incinds]
         
         #Train an ordinary RLS regressor for reference
-        K_Kron_train_x = np.kron(K_train2, K_train1)
         params = {}
-        params["X"] = B * K_Kron_train_x * B.T
+        params["X"] = np.kron(K_train2, K_train1)[np.ix_(incinds, incinds)]
         params["kernel"] = "precomputed"
-        params["Y"] = Y_train_nonzeros#B*(B.T * Y_train_nonzeros).reshape(rows, columns).reshape(rowstimescols, 1) # #Y_train.reshape(rowstimescols, 1)
+        params["Y"] = Y_train_known_outputs
         ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.getModel()
-        K_Kron_test_x = np.kron(K_test2, K_test1) * B.T
-        ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
+        K_Kron_test = np.kron(K_test2, K_test1)[:, incinds]
+        ordrls_testpred = ordrls_model.predict(K_Kron_test)
         ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1], order = 'F')
         
         #Train linear Kronecker RLS
@@ -118,14 +105,15 @@ class Test(unittest.TestCase):
                 self.round = 0
             def callback(self, learner):
                 self.round = self.round + 1
-                print self.round
+                tp = LinearPairwisePredictor(learner.W).predictWithDataMatrices(X_test1, X_test2)
+                print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred))))
             def finished(self, learner):
-                print 'finished'
+                print('finished')
         params = {}
         params["regparam"] = regparam
         params["xmatrix1"] = X_train1
         params["xmatrix2"] = X_train2
-        params["Y"] = Y_train_nonzeros
+        params["Y"] = Y_train_known_outputs
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
         tcb = TestCallback()
@@ -133,20 +121,15 @@ class Test(unittest.TestCase):
         linear_kron_learner = CGKronRLS(**params)
         linear_kron_learner.train()
         linear_kron_model = linear_kron_learner.getModel()
-        linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
-        
-        #params["warm_start"] = linear_kron_learner.W
-        #linear_kron_learner = CGKronRLS(**params)
-        #linear_kron_learner.train()
-        #linear_kron_model = linear_kron_learner.getModel()
-        #linear_kron_testpred = linear_kron_model.predictWithDataMatricesAlt(X_test1, X_test2).reshape(X_test1.shape[0], X_test2.shape[0], order = 'F')
+        linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2)
+        linear_kron_testpred_alt = linear_kron_model.predictWithDataMatrices(X_test1, X_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
         #Train kernel Kronecker RLS
         params = {}
         params["regparam"] = regparam
         params["kmatrix1"] = K_train1
         params["kmatrix2"] = K_train2
-        params["Y"] = Y_train_nonzeros
+        params["Y"] = Y_train_known_outputs
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
         class KernelCallback():
@@ -164,12 +147,14 @@ class Test(unittest.TestCase):
         kernel_kron_learner.train()
         kernel_kron_model = kernel_kron_learner.getModel()
         kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2)
-        kernel_kron_testpred_alt = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2, row_inds = [0, 0, 1], col_inds = [0, 1, 0])
+        kernel_kron_testpred_alt = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
-        print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], kernel_kron_testpred_alt[0], ordrls_testpred[0, 0]
-        print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], kernel_kron_testpred_alt[1], ordrls_testpred[0, 1]
-        print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], kernel_kron_testpred_alt[2], ordrls_testpred[1, 0]
-        print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
+        print('Predictions: Linear CgKronRLS, Kernel CgKronRLS, ordinary RLS')
+        print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))#, linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]
+        print('[0, 1]: ' + str(linear_kron_testpred[0, 1]) + ' ' + str(kernel_kron_testpred[0, 1]) + ' ' + str(ordrls_testpred[0, 1]))#, linear_kron_testpred_alt[1], kernel_kron_testpred_alt[1]
+        print('[1, 0]: ' + str(linear_kron_testpred[1, 0]) + ' ' + str(kernel_kron_testpred[1, 0]) + ' ' + str(ordrls_testpred[1, 0]))#, linear_kron_testpred_alt[2], kernel_kron_testpred_alt[2]
+        print('Meanabsdiff: linear KronRLS - ordinary RLS, kernel KronRLS - ordinary RLS')
+        print(str(np.mean(np.abs(linear_kron_testpred - ordrls_testpred))) + ' ' + str(np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))))
 
 
 if __name__=="__main__":

@@ -7,13 +7,16 @@ import random as pyrandom
 pyrandom.seed(200)
 
 from rlscore.learner.abstract_learner import AbstractSvdLearner
+from rlscore.utilities import creators
 from rlscore.utilities import array_tools
 
 class SteepestDescentMMC(AbstractSvdLearner):
     
     
     def __init__(self, **kwargs):
-        super(SteepestDescentMMC, self).__init__(**kwargs)
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
         if kwargs.has_key('callback'):
             self.callbackfun = kwargs['callback']
         else:

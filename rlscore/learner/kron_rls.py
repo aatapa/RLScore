@@ -101,7 +101,7 @@ class KronRLS(object):
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwisePredictor(self.W)
+        self.model = LinearPairwisePredictor(np.array(self.W))
     
     
     def solve_linear_conditional_ranking(self, regparam):
@@ -133,7 +133,7 @@ class KronRLS(object):
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwisePredictor(self.W)
+        self.model = LinearPairwisePredictor(np.asarray(self.W))
     
     
     def imputationLOO(self):
@@ -156,7 +156,7 @@ class KronRLS(object):
             #    #loopred[i, j] = P[i, j]
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
-        return loopred
+        return np.asarray(loopred)
     
     
     def compute_ho(self, row_inds, col_inds):
@@ -209,7 +209,7 @@ class KronRLS(object):
         bar()
         hopred = baz()
         #print rowcount, colcount, hosize, hopred.shape
-        return hopred.reshape(rowcount, colcount)
+        return np.asarray(hopred.reshape(rowcount, colcount))
     
     
     def nested_imputationLOO(self, outer_row_coord, outer_col_coord,):
@@ -266,7 +266,7 @@ class KronRLS(object):
         temp1 = P - (np.multiply(a, Y) + bc * Y_out)
         temp2 = P_out - (np.multiply(bc, Y) + dY_out)
         loopred = np.multiply(invGshift_1, temp1) + np.multiply(invGshift_2, temp2)
-        return loopred
+        return np.artray(loopred)
     
     
     def nested_imputationLOO_BU(self, outer_row_coord, outer_col_coord):
@@ -314,7 +314,7 @@ class KronRLS(object):
                 loopred[i, j] = invGshift_1 * temp1 + invGshift_2 * temp2
                 #loopred[i, j] = (1. / (1. - ccc)) * (P[i, j] - ccc * self.Y[i, j])
                 #loopred[i, j] = P[i, j]
-        return loopred
+        return np.asarray(loopred)
     
     
     def prepareLooCaches(self):

@@ -122,13 +122,24 @@ class Test(unittest.TestCase):
         ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
         ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1])
         
-        print
-        print type(linear_kron_testpred), type(kernel_kron_testpred), type(ordrls_testpred)
-        print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], ordrls_testpred[0, 0]
-        print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], ordrls_testpred[0, 1]
-        print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], ordrls_testpred[1, 0]
+        print('')
+        print('Prediction: linear KronRLS, kernel KronRLS, ordinary RLS')
+        print('[0, 0] ' + str(linear_kron_testpred[0, 0]) + ' ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))
+        print('[0, 1] ' + str(linear_kron_testpred[0, 1]) + ' ' + str(kernel_kron_testpred[0, 1]) + ' ' + str(ordrls_testpred[0, 1]))
+        print('[1, 0] ' + str(linear_kron_testpred[1, 0]) + ' ' + str(kernel_kron_testpred[1, 0]) + ' ' + str(ordrls_testpred[1, 0]))
+        print('Meanabsdiff: linear KronRLS - ordinary RLS, kernel KronRLS - ordinary RLS')
+        print(str(np.mean(np.abs(linear_kron_testpred - ordrls_testpred))) + ' ' + str(np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))))
         
-        print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
+        print('')
+        ordrls_loopred = ordrls_learner.computeLOO().reshape(Y_train.shape[0], Y_train.shape[1])
+        linear_kron_loopred = linear_kron_learner.imputationLOO()
+        kernel_kron_loopred = kernel_kron_learner.imputationLOO()
+        print('In-sample LOO: linear KronRLS, kernel KronRLS, ordinary RLS')
+        print('[0, 0] ' + str(linear_kron_loopred[0, 0]) + ' ' + str(kernel_kron_loopred[0, 0]) + ' ' + str(ordrls_loopred[0, 0]))
+        print('[0, 1] ' + str(linear_kron_loopred[0, 1]) + ' ' + str(kernel_kron_loopred[0, 1]) + ' ' + str(ordrls_loopred[0, 1]))
+        print('[1, 0] ' + str(linear_kron_loopred[1, 0]) + ' ' + str(kernel_kron_loopred[1, 0]) + ' ' + str(ordrls_loopred[1, 0]))
+        print('Meanabsdiff: linear KronRLS - ordinary RLS, kernel KronRLS - ordinary RLS')
+        print(str(np.mean(np.abs(linear_kron_loopred - ordrls_loopred))) + ' ' + str(np.mean(np.abs(kernel_kron_loopred - ordrls_loopred))))
     
     
     def test_conditional_ranking(self):
@@ -166,10 +177,10 @@ class Test(unittest.TestCase):
         K_test_x = np.kron(K_test1, K_test2)
         ordrankrls_testpred = rankrls_model.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
         condrank_testpred = condrank_model.predictWithDataMatrices(X_test1, X_test2)
-        print
+        print('')
         #print condrank_testpred.ravel().shape, Y_test.ravel().shape, ordrankrls_testpred.ravel().shape, Y_test.ravel().shape
         
-        print 'TEST cond vs rankrls', np.mean(np.abs(condrank_testpred - ordrankrls_testpred))
+        print('TEST cond vs rankrls ' + str(np.mean(np.abs(condrank_testpred - ordrankrls_testpred))))
     
     
     

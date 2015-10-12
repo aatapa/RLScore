@@ -129,23 +129,40 @@ class Test(unittest.TestCase):
         kernel_two_step_model = kernel_two_step_learner.getModel()
         kernel_two_step_testpred = kernel_two_step_model.predictWithKernelMatrices(K_test1, K_test2)
         
-        #Train ordinary RLS in two steps for a reference
+        #Train ordinary kernel RLS in two steps for a reference
         params = {}
         params["regparam"] = regparam2
         params["X"] = K_train2
         params['kernel'] = 'precomputed'
         params["Y"] = Y_train.T
-        ordinary_rls_first_step = RLS(**params)
-        ordinary_rls_first_step.train()
-        firststeploo = ordinary_rls_first_step.computeLOO().T
+        ordinary_kernel_rls_first_step = RLS(**params)
+        ordinary_kernel_rls_first_step.train()
+        firststeploo = ordinary_kernel_rls_first_step.computeLOO().T
         params = {}
         params["regparam"] = regparam1
         params["X"] = K_train1
         params["kernel"] = "precomputed"
         params["Y"] = firststeploo
-        ordinary_rls_second_step = RLS(**params)
-        ordinary_rls_second_step.train()
-        secondsteploo = ordinary_rls_second_step.computeLOO()
+        ordinary_kernel_rls_second_step = RLS(**params)
+        ordinary_kernel_rls_second_step.train()
+        secondsteploo_kernel_rls = ordinary_kernel_rls_second_step.computeLOO()
+        #print 'Basic RLS', secondsteploo[0, 0]
+        
+        #Train ordinary linear RLS in two steps for a reference
+        params = {}
+        params["regparam"] = regparam2
+        params["X"] = X_train2
+        params["Y"] = Y_train.T
+        ordinary_linear_rls_first_step = RLS(**params)
+        ordinary_linear_rls_first_step.train()
+        firststeploo = ordinary_linear_rls_first_step.computeLOO().T
+        params = {}
+        params["regparam"] = regparam1
+        params["X"] = X_train1
+        params["Y"] = firststeploo
+        ordinary_linear_rls_second_step = RLS(**params)
+        ordinary_linear_rls_second_step.train()
+        secondsteploo_linear_rls = ordinary_linear_rls_second_step.computeLOO()
         #print 'Basic RLS', secondsteploo[0, 0]
         
         print
@@ -209,9 +226,9 @@ class Test(unittest.TestCase):
         #print K_train1[range(1, K_train1.shape[0]), 0].shape, K_train2[0, range(1, K_train2.shape[0])].shape
         kernel_kron_testpred_24 = kernel_kron_model.predictWithKernelMatrices(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
         
-        print Y_train.shape, secondsteploo.shape, kernel_twostepoutofsampleloo.shape
-        print secondsteploo[0, 0], linear_kron_testpred_00, kernel_kron_testpred_00, linear_twostepoutofsampleloo[0, 0], kernel_twostepoutofsampleloo[0, 0]
-        print secondsteploo[2, 4], linear_kron_testpred_24, kernel_kron_testpred_24, linear_twostepoutofsampleloo[2, 4], kernel_twostepoutofsampleloo[2, 4]
+        print Y_train.shape, secondsteploo_linear_rls.shape, kernel_twostepoutofsampleloo.shape
+        print secondsteploo_linear_rls[0, 0], secondsteploo_kernel_rls[0, 0], linear_kron_testpred_00, kernel_kron_testpred_00, linear_twostepoutofsampleloo[0, 0], kernel_twostepoutofsampleloo[0, 0]
+        print secondsteploo_linear_rls[2, 4], secondsteploo_kernel_rls[2, 4], linear_kron_testpred_24, kernel_kron_testpred_24, linear_twostepoutofsampleloo[2, 4], kernel_twostepoutofsampleloo[2, 4]
         print
         #print 'Two-step RLS LOO', twostepoutofsampleloo[2, 4]
         #print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
