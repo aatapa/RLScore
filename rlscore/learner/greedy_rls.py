@@ -77,6 +77,7 @@ class GreedyRLS(object):
         self.results = {}
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
+        self.train()
     
     def train(self):
         """Trains the learning algorithm.
@@ -368,6 +369,22 @@ class GreedyRLS(object):
             prediction function (predictor.W contains at most "subsetsize" number of non-zero coefficients)
         """
         return predictor.LinearPredictor(self.A, self.b)
+    
+    
+    def predict(self, X):
+        """Predicts outputs for new inputs.
+
+        Parameters
+        ----------
+        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+            input data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples, n_tasks]
+            predictions
+        """
+        return predictor.LinearPredictor(self.A, self.b).predict(X)
     
     
     def solve_bu(self, regparam):
