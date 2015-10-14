@@ -349,6 +349,22 @@ class GreedyRLS(object):
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
+    def predict(self, X):
+        """Predicts outputs for new inputs.
+
+        Parameters
+        ----------
+        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+            input data matrix
+        
+        Returns
+        ----------
+        P: array, shape = [n_samples, n_tasks]
+            predictions
+        """
+        return predictor.LinearPredictor(self.A, self.b).predict(X)
+    
+    
     def solve_bu(self, regparam):
         self.regparam = regparam
         X = self.X
