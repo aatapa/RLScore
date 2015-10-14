@@ -1,7 +1,6 @@
 
 from scipy import sparse as sp
 import numpy as np
-from rlscore.learner.abstract_learner import CallbackFunction as CF
 from rlscore import predictor
 from rlscore.utilities import array_tools
 #import pyximport; pyximport.install()
@@ -41,42 +40,29 @@ class GreedyRLS(object):
     325-330, IEEE Computer Society, 2010.
     """
     
-    def __init__(self, **kwargs):
-        if kwargs.has_key('callback'):
-            self.callbackfun = kwargs['callback']
-        else:
-            self.callbackfun = None
-        self.regparam = float(kwargs['regparam'])
-        X = kwargs['X']
+    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=0., measure=None, callbackfun=None, **kwargs):
+        self.callbackfun = callbackfun
+        self.regparam = regparam
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = kwargs['Y']
-        self.Y = array_tools.as_labelmatrix(self.Y)
+        self.Y = array_tools.as_labelmatrix(Y)
         #Number of training examples
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
         #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
-        if kwargs.has_key('bias'):
-            self.bias = float(kwargs['bias'])
-        else:
-            self.bias = 0.
-        if kwargs.has_key('measure'):
-            self.measure = kwargs['measure']
-        else:
-            self.measure = None
-        
+        self.bias = 0.
+        self.measure = measure
         fsize = X.shape[1]
-        if not kwargs.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        self.desiredfcount = int(kwargs['subsetsize'])
+        self.desiredfcount = subsetsize
         if not fsize >= self.desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(self.desiredfcount) + ' of features to be selected.')
         self.results = {}
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
+        self.train()
     
     def train(self):
         """Trains the learning algorithm.
@@ -233,6 +219,7 @@ class GreedyRLS(object):
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+            self.predictor = predictor.LinearPredictor(self.A, self.b)
             
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
@@ -242,6 +229,7 @@ class GreedyRLS(object):
         self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
     def solve_new(self, regparam, floattype):
@@ -347,6 +335,7 @@ class GreedyRLS(object):
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+            self.predictor = predictor.LinearPredictor(self.A, self.b)
             
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
@@ -356,18 +345,8 @@ class GreedyRLS(object):
         self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
-        self.results['predictor'] = self.getModel()
-    
-    
-    def getModel(self):
-        """Returns the trained predictor, call this only after training.
-        
-        Returns
-        -------
-        predictor : LinearPredictor
-            prediction function (predictor.W contains at most "subsetsize" number of non-zero coefficients)
-        """
-        return predictor.LinearPredictor(self.A, self.b)
+        #self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
     def solve_bu(self, regparam):
@@ -479,7 +458,7 @@ class GreedyRLS(object):
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
-            
+            self.predictor = predictor.LinearPredictor(self.A, self.b)            
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
         if not self.callbackfun == None:
@@ -496,10 +475,11 @@ class GreedyRLS(object):
 #        #self.A = np.mat(eye(fsize+1))[:,selected_plus_bias]*(X_biased[selected_plus_bias]*self.dualvec)
 #        self.results[SELECTED_FEATURES] = self.selected
 #        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
 
 
 
-class DefaultCallback(CF):
+class DefaultCallback(object):
     
     
     def __init__(self, **kwargs):
@@ -522,7 +502,7 @@ class DefaultCallback(CF):
         print 'LOOCV mean squared error', learner.bestlooperf
         print 'The indices of selected features', learner.selected
         if not self.test_features == None:
-            mod = learner.getModel()
+            mod = learner.predictor
             tpreds = mod.predict(self.test_features)
             if not self.test_measure == None:
                 test_perf = self.test_measure(self.test_labels, tpreds)
@@ -530,4 +510,7 @@ class DefaultCallback(CF):
                 testdiff = self.test_labels - tpreds
                 test_perf = np.mean(np.multiply(testdiff, testdiff))
             print 'Test performance', test_perf
+    
+    def finished(self, learner):
+        pass
 
