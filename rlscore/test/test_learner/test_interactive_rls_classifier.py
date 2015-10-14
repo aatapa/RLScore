@@ -1,9 +1,6 @@
 
-import pyximport; pyximport.install()
-
 from StringIO import StringIO
 import random
-random.seed(100)
 import unittest
 
 import numpy as np
@@ -11,9 +8,8 @@ import numpy as np
 from rlscore import core
 from rlscore import reader
 from rlscore import writer
-from rlscore.learner.steepest_descent_mmc import SteepestDescentMMC as MMC
-#from rlscore.learner.steepest_descent_mmc_alt import SteepestDescentMMC as MMC
-#from rlscore.learner.mmc import MMC as MMC
+from rlscore.learner.interactive_rls_classifier import InteractiveRlsClassifier
+
 
 
 def generate_2d_gaussian_clusters(num, mux, muy, var, seed=None):
@@ -65,10 +61,9 @@ def dotesting(ppc = 400):
         kwargs['kernel'] = 'GaussianKernel'
         kwargs['gamma'] = 2. ** (-20.)
         kwargs['bias'] = '1'
-        kwargs['number_of_clusters'] = classcount
+        #kwargs['number_of_clusters'] = classcount
         kwargs['regparam'] = 2. ** (-30.)
         #kwargs['learner'] = 'MMC'
-        kwargs['learner'] = 'SteepestDescentMMC'
         kwargs['callback'] = tcb
         kwargs['basis_vectors'] = bvecs
         
@@ -84,8 +79,7 @@ def dotesting(ppc = 400):
         kwargs['callback'] = tcb
         
         #mselector = None
-        mmc = MMC(**kwargs)
-        #mmc = SteepestDescentMMC.createLearner(**kwargs)
+        mmc = InteractiveRlsClassifier(**kwargs)
         mmc.train()
         #trainresults = core.trainModel(**kwargs)
         #model = trainresults['model']
@@ -100,5 +94,5 @@ class Test(unittest.TestCase):
 if __name__=="__main__":
     import cProfile
     #dotesting()
-    cProfile.run('dotesting(1500)')
+    cProfile.run('dotesting()')
 
