@@ -4,7 +4,6 @@ import numpy as np
 
 from rlscore.learner import CGRLS
 from rlscore.learner import RLS
-from rlscore.kernel import LinearKernel
 
 
 
@@ -26,12 +25,11 @@ class Test(unittest.TestCase):
             rpool["bias"] = 1.0
             rls = RLS(**rpool)
             rls.solve(regparam)
-            model = rls.getModel()
+            model = rls.predictor
             W = model.W
             b = model.b
             rls = CGRLS(**rpool)
-            rls.train()
-            model = rls.getModel()
+            model = rls.predictor
             W2 = model.W
             b2 = model.b
             for i in range(W.shape[0]):

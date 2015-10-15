@@ -5,6 +5,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 
 from rlscore.learner import CGRankRLS
+from rlscore.learner.cg_rankrls import PCGRankRLS
 from rlscore.kernel import LinearKernel
 
 
@@ -28,8 +29,7 @@ class Test(unittest.TestCase):
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
             rls = CGRankRLS(**rpool)
-            rls.train()
-            model = rls.getModel()   
+            model = rls.predictor   
             W = model.W
             In = np.mat(np.identity(n))
             Im = np.mat(np.identity(m))
@@ -63,9 +63,8 @@ class Test(unittest.TestCase):
             rpool['train_preferences'] = pairs
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
-            rls = CGRankRLS(**rpool)
-            rls.train()
-            model = rls.getModel()   
+            rls = PCGRankRLS(**rpool)
+            model = rls.predictor   
             W = model.W
             In = np.mat(np.identity(n))
             Im = np.mat(np.identity(m))

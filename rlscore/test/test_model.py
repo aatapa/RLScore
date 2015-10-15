@@ -4,9 +4,7 @@ import numpy as np
 from scipy import sparse
 
 from rlscore.learner.rls import RLS
-from rlscore.reader import read_sparse
 from rlscore import predictor as mod
-from rlscore.utilities import array_tools
 
 
 class Test(unittest.TestCase):
@@ -19,16 +17,13 @@ class Test(unittest.TestCase):
     def testModel(self):
         
         Y = np.random.random((10))
-        test_labels = np.random.random((10))
         X = np.random.random((10,100))
-        test_features = np.random.random((10,100))
         kwargs = {}
         kwargs["Y"] = Y
         kwargs["X"] = X
         kwargs["regparam"] = 1
         learner = RLS(**kwargs)
-        learner.train()
-        model = learner.getModel()
+        model = learner.predictor
         print
         #print 'Ten data points, single label '
         model = mod.LinearPredictor(np.random.random((100)))
@@ -44,16 +39,14 @@ class Test(unittest.TestCase):
         Y = np.random.random((10))
         kwargs["Y"] = Y
         learner = RLS(**kwargs)
-        learner.train()
-        model = learner.getModel()
+        model = learner.predictor
         self.all_pred_cases(model)
         
         kwargs["kernel"] = "GaussianKernel"
         Y = np.random.random((10,2))
         kwargs["Y"] = Y
         learner = RLS(**kwargs)
-        learner.train()
-        model = learner.getModel()
+        model = learner.predictor
         self.all_pred_cases(model)
         #test_perf = cindex(test_labels, P)
         #print "test set performance: %f" %test_perf

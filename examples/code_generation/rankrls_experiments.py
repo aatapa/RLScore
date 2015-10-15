@@ -79,11 +79,11 @@ experiments = {"rankrls_defparams":{
                 "files": rqfiles},
                
                 "rankrls_cg_preferences":{
-                "learner":"CGRankRLS",
+                "learner":"PCGRankRLS",
                 "lpath":"rlscore.learner.cg_rankrls",
                 "measure":"cindex",
                 "sparams":{"measure":"cindex"},
-                "lfparams": dict(defparams.items() + [("train_preferences", "train_preferences")]),
+                "lfparams": {"X":"train_features", "train_preferences":"train_preferences"},
                 "lparams": {"regparam":1},
                 "files": dict(rfiles.items() + [("train_preferences", './examples/data/rank_train.preferences') ])},                
                

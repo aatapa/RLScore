@@ -18,8 +18,6 @@ kwargs["bias"] = 1
 kwargs["test_measure"] = "auc"
 kwargs["subsetsize"] = 10
 learner = GreedyRLS(**kwargs)
-learner.train()
-model = learner.getModel()
-P = model.predict(test_features)
+P = learner.predict(test_features)
 test_perf = auc(test_labels, P)
 print "test set performance: %f" %test_perf

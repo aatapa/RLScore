@@ -1,17 +1,9 @@
-
-import sys
-
 from numpy import *
 random.seed(100)
 import numpy.linalg as la
 import unittest
 
 from rlscore.learner import GreedyRLS
-#from rlscore.learner.space_efficient_greedy_rls import SpaceEfficientGreedyRLS as GreedyRLS
-#from rlscore.learner.multi_task_greedy_rls import MultiTaskGreedyRLS as MTGreedyRLS
-from rlscore.measure import sqerror
-from rlscore.measure import sqmprank
-from rlscore.learner.abstract_learner import CallbackFunction as CF
 
     
     
@@ -31,11 +23,13 @@ def speedtest():
     Y = mat(random.rand(tsize, ylen), dtype=float64)
     
     rpool = {}
-    class TestCallback(CF):
+    class TestCallback(object):
         def callback(self, learner):
             #print learner.performances[len(learner.performances)-1]
             #print 'GreedyRLS', learner.looperf.T
             print 'round'
+        def finished(self, learner):
+            pass
     tcb = TestCallback()
     rpool['callback'] = tcb
     rpool['X'] = Xtrain.T
@@ -45,7 +39,6 @@ def speedtest():
     rpool['regparam'] = rp
     rpool['bias'] = bias
     grls = GreedyRLS(**rpool)
-    grls.train()
     
     print grls.selected
     print grls.A[grls.selected]
@@ -137,10 +130,12 @@ class Test(unittest.TestCase):
         
         
         rpool = {}
-        class TestCallback(CF):
+        class TestCallback(object):
             def callback(self, learner):
                 #print learner.performances[len(learner.performances)-1]
                 print 'GreedyRLS', learner.looperf.T
+                pass
+            def finished(self, learner):
                 pass
         tcb = TestCallback()
         rpool['callback'] = tcb
@@ -149,12 +144,11 @@ class Test(unittest.TestCase):
         #rpool['multi_task_X'] = [Xtrain.T,Xtrain.T]
         #rpool['multi_task_Y'] = [Y[:,0], Y[:,1]]
         
-        rpool['subsetsize'] = str(desiredfcount)
+        rpool['subsetsize'] = desiredfcount
         rpool['regparam'] = rp
         rpool['bias'] = bias
         grls = GreedyRLS(**rpool)
         #grls = MTGreedyRLS(**rpool)
-        grls.train()
         print grls.selected
         print grls.A[grls.selected]
         print grls.b

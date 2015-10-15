@@ -14,7 +14,6 @@ kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["regparam"] = 1
 learner = AllPairsRankRLS(**kwargs)
-learner.train()
 kwargs = {}
 kwargs["learner"] = learner
 kwargs["measure"] = cindex
@@ -23,7 +22,6 @@ grid = [2**i for i in range(-10,11)]
 learner, perfs = grid_search(crossvalidator, grid)
 for i in range(len(grid)):
     print "parameter %f cv_performance %f" %(grid[i], perfs[i])
-model = learner.getModel()
-P = model.predict(test_features)
+P = learner.predict(test_features)
 test_perf = cindex(test_labels, P)
 print "test set performance: %f" %test_perf

@@ -3,12 +3,12 @@ import numpy as np
 import scipy.sparse
 
 from rlscore.utilities import decomposition
-from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
+from rlscore.predictor import PredictorInterface
 
-class LabelRankRLS(AbstractSvdLearner):
+class LabelRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from query-structured
@@ -57,21 +57,22 @@ class LabelRankRLS(AbstractSvdLearner):
     Machine Learning, 75(1):129-165, 2009.
     """
 
-    def __init__(self, **kwargs): 
+
+    def __init__(self, X, Y, qids, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        kwargs['kernel'] =  kernel
+        kwargs['X'] = X
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
-        if kwargs.has_key("regparam"):
-            self.regparam = float(kwargs["regparam"])
-        else:
-            self.regparam = 1.
+        self.Y = array_tools.as_labelmatrix(Y)
+        self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
         self.Y = array_tools.as_labelmatrix(self.Y)
         self.size = self.Y.shape[0]
-        qids = kwargs["qids"]
         self.setQids(qids)
-    
+        self.solve(self.regparam)
     
     
     def setQids(self, qids):
@@ -102,8 +103,8 @@ class LabelRankRLS(AbstractSvdLearner):
                 self.qidmap[qid] = [i]
         self.qids = qids
 
-    def train(self):
-        self.solve(self.regparam)
+#    def train(self):
+#        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -171,6 +172,7 @@ class LabelRankRLS(AbstractSvdLearner):
             #self.A = self.U.T * (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright))
             #self.A = self.U.T * np.multiply(self.svals.T,  self.svecs.T * self.A)
         #self.results['model'] = self.getModel()
+        self.predictor = self.svdad.createModel(self)
     
     
     def computeHO(self, indices):

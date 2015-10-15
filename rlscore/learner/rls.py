@@ -6,11 +6,11 @@ from rlscore.utilities import creators
 
 import cython_pairwise_cv_for_rls
 
-from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.measure.measure_utilities import UndefinedPerformance
 import numpy as np
+from rlscore.predictor import PredictorInterface
 
-class RLS(AbstractSvdLearner):
+class RLS(PredictorInterface):
     """Regularized least-squares regression/classification.
     
     Implements a training algorithm that is cubic either in the
@@ -67,19 +67,22 @@ class RLS(AbstractSvdLearner):
     """
     
     #def __init__(self, Y, X = None, kernel_matrix = None, kernel_obj = None, regparam=1.0):
-    def __init__(self, **kwargs):
+ 
+    def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        kwargs['X'] = X
+        kwargs['kernel'] = kernel
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
-        if kwargs.has_key("regparam"):
-            self.regparam = float(kwargs["regparam"])
-        else:
-            self.regparam = 1.
+        self.Y = array_tools.as_labelmatrix(Y)
+        self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
+        self.solve(self.regparam)   
 
-    def train(self):
-        self.solve(self.regparam)
+#    def train(self):
+#        self.solve(self.regparam)
    
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -110,6 +113,7 @@ class RLS(AbstractSvdLearner):
             #bevals = multiply(self.svals, self.newevals)
             #self.A = self.U.T * multiply(bevals.T, self.svecsTY)
         #    self.A = self.U.T * multiply(self.svals.T, self.svecs.T * self.A)
+        self.predictor = self.svdad.createModel(self)
     
     
     def computeHO(self, indices):

@@ -10,8 +10,11 @@ from rlscore.utilities import decomposition
 
 import cython_two_step_rls_cv
 
+from rlscore.pairwise_predictor import PairwisePredictorInterface
+from rlscore.pairwise_predictor import LinearPairwisePredictor
+from rlscore.pairwise_predictor import KernelPairwisePredictor
 
-class TwoStepRLS(object):
+class TwoStepRLS(PairwisePredictorInterface):
     
     
     def __init__(self, **kwargs):
@@ -37,6 +40,7 @@ class TwoStepRLS(object):
         else:
             self.regparam2 = kwargs["regparam"]
         self.trained = False
+        self.train()
     
     
     def train(self):
@@ -76,7 +80,12 @@ class TwoStepRLS(object):
         
         self.A = np.multiply(self.VTYU, newevals)
         self.A = self.V * self.A * self.U.T
-        self.model = KernelPairwisePredictor(self.A)
+        self.A = np.array(self.A)
+        #self.predictor = KernelPairwisePredictor(self.A)
+        label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
+        label_row_inds = np.array(label_row_inds, dtype = np.int32)
+        label_col_inds = np.array(label_col_inds, dtype = np.int32)
+        self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
         
         #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
         #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
@@ -112,7 +121,8 @@ class TwoStepRLS(object):
         
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.model = LinearPairwisePredictor(self.W)
+        #self.predictor = LinearPairwisePredictor(self.W)
+        self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
     def computeLOO(self):
@@ -208,67 +218,63 @@ class TwoStepRLS(object):
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
         cython_two_step_rls_cv.compute_symmetric_double_loo(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results
-    
-    
-    def getModel(self):
-        return self.model
 
     
-class KernelPairwisePredictor(object):
-    
-    def __init__(self, A, kernel = None):
-        """Initializes the dual model
-        @param A: dual coefficient matrix
-        @type A: numpy matrix"""
-        self.A = A
-        self.kernel = kernel
-    
-    
-    def predictWithKernelMatrices(self, K1pred, K2pred):
-        """Computes predictions for test examples.
-
-        Parameters
-        ----------
-        K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
-            the first part of the test data matrix
-        K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
-            the second part of the test data matrix
-        
-        Returns
-        ----------
-        P: array, shape = [n_samples1, n_samples2]
-            predictions
-        """
-        #print K1pred.shape, self.A.shape, K2pred.shape
-        P = np.array(np.dot(np.dot(K1pred, self.A), K2pred.T))
-        return P
-
-
-class LinearPairwisePredictor(object):
-    
-    def __init__(self, W):
-        """Initializes the linear model
-        @param W: primal coefficient matrix
-        @type W: numpy matrix"""
-        self.W = W
-    
-    
-    def predictWithDataMatrices(self, X1pred, X2pred):
-        """Computes predictions for test examples.
-
-        Parameters
-        ----------
-        X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
-            the first part of the test data matrix
-        X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
-            the second part of the test data matrix
-        
-        Returns
-        ----------
-        P: array, shape = [n_samples1, n_samples2]
-            predictions
-        """
-        P = np.array(np.dot(np.dot(X1pred, self.W), X2pred.T))
-        return P
+# class KernelPairwisePredictor(object):
+#     
+#     def __init__(self, A, kernel = None):
+#         """Initializes the dual model
+#         @param A: dual coefficient matrix
+#         @type A: numpy matrix"""
+#         self.A = A
+#         self.kernel = kernel
+#     
+#     
+#     def predict(self, K1pred, K2pred):
+#         """Computes predictions for test examples.
+# 
+#         Parameters
+#         ----------
+#         K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
+#             the first part of the test data matrix
+#         K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
+#             the second part of the test data matrix
+#         
+#         Returns
+#         ----------
+#         P: array, shape = [n_samples1, n_samples2]
+#             predictions
+#         """
+#         #print K1pred.shape, self.A.shape, K2pred.shape
+#         P = np.array(np.dot(np.dot(K1pred, self.A), K2pred.T))
+#         return P
+# 
+# 
+# class LinearPairwisePredictor(object):
+#     
+#     def __init__(self, W):
+#         """Initializes the linear model
+#         @param W: primal coefficient matrix
+#         @type W: numpy matrix"""
+#         self.W = W
+#     
+#     
+#     def predict(self, X1pred, X2pred):
+#         """Computes predictions for test examples.
+# 
+#         Parameters
+#         ----------
+#         X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
+#             the first part of the test data matrix
+#         X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
+#             the second part of the test data matrix
+#         
+#         Returns
+#         ----------
+#         P: array, shape = [n_samples1, n_samples2]
+#             predictions
+#         """
+#         P = np.array(np.dot(np.dot(X1pred, self.W), X2pred.T))
+#         return P
 
 

@@ -1,12 +1,8 @@
-import sys
-
 import numpy as np
 import numpy.linalg as la
 
-from rlscore.utilities import decomposition
 import unittest
 from rlscore.learner import LabelRankRLS
-from rlscore.kernel import LinearKernel
 
 def mapQids(qids):
     """Maps qids to running numbering starting from zero, and partitions
@@ -15,7 +11,6 @@ def mapQids(qids):
     #Used in FileReader, rls_predict
     qid_dict = {}
     folds = {}
-    qid_list = []
     counter = 0
     for index, qid in enumerate(qids):
         if not qid in qid_dict:
@@ -45,16 +40,11 @@ class Test(unittest.TestCase):
         Y[:, 0] = np.sum(Xtrain, 1)
         
         
-        objcount = 20
         labelcount = 5
         
         hoindices = range(labelcount)
         hocompl = list(set(range(m)) - set(hoindices))
         
-        size = m
-        
-        P = np.mat(np.zeros((m, objcount), dtype=np.float64))
-        Q = np.mat(np.zeros((objcount, m), dtype=np.float64))
         qidlist = [0 for i in range(100)]
         for h in range(5, 12):
             qidlist[h] = 1
@@ -79,12 +69,9 @@ class Test(unittest.TestCase):
         L = np.multiply(np.eye(m), D) - P * P.T
         
         Kcv = K[np.ix_(hocompl, hocompl)]
-        Ycv = Y[hocompl]
-        Ktest = K[np.ix_(hoindices, hocompl)]
         Lcv = L[np.ix_(hocompl, hocompl)]
         
         Xcv = Xtrain[hocompl]
-        Pcv = P[np.ix_(hocompl, range(1, P.shape[1]))]#KLUDGE!!!!!
         Xtest = Xtrain[hoindices]
         Yho = Y[hocompl]
         
@@ -128,12 +115,12 @@ class Test(unittest.TestCase):
             
             predhos = []
             primalrls_naive.solve(regparam)
-            predho = primalrls_naive.getModel().predict(Xtest)
+            predho = primalrls_naive.predictor.predict(Xtest)
             print(str(predho.T) + ' Naive HO (primal)')
             predhos.append(predho)
             
             dualrls_naive.solve(regparam)
-            predho = dualrls_naive.getModel().predict(testkm.T)
+            predho = dualrls_naive.predictor.predict(testkm.T)
             print(str(predho.T) + ' Naive HO (dual)')
             predhos.append(predho)
             

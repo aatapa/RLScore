@@ -79,6 +79,16 @@ experiments = {"rls_defparams":{
                 "lparams": {"regparam":1, "kernel":"PolynomialKernel", "gamma":0.01},
                 "files": dict(cfiles.items()+[("basis_vectors",'./examples/data/bvectors.indices')])},
                
+               "rls_reduced_linear":{
+                "learner":"RLS",
+                "lpath":"rlscore.learner.rls",
+                "measure":"auc",
+                "selector":"LOOCV",
+                "sparams":{"measure":"auc"},
+                "lfparams": dict(defparams.items()+[("basis_vectors","basis_vectors")]),
+                "lparams": {"regparam":1, "kernel":"LinearKernel"},
+                "files": dict(cfiles.items()+[("basis_vectors",'./examples/data/bvectors.indices')])},
+               
                "cg_rls":{
                 "learner":"CGRLS",
                 "lpath":"rlscore.learner.cg_rls",

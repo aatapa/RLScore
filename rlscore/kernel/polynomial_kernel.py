@@ -34,31 +34,6 @@ class PolynomialKernel(object):
         self.coef0 = coef0
         self.bias = bias
         
-#    def createKernel(cls, **kwargs):
-#        """Initializes a kernel object from the arguments."""
-#        new_kwargs = {}
-#        if kwargs.has_key('basis_vectors'):
-#            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
-#        new_kwargs["train_features"] = kwargs["train_features"]
-#        if 'degree' in kwargs:
-#            new_kwargs['degree'] = int(kwargs['degree'])
-#        if "gamma" in kwargs:
-#            new_kwargs["gamma"] = float(kwargs["gamma"])
-#        if "bias" in kwargs:
-#            new_kwargs["bias"] = float(kwargs["bias"])
-#        if 'coef0' in kwargs:
-#            new_kwargs['coef0'] = float(kwargs['coef0'])
-#        kernel = cls(**new_kwargs)
-#        return kernel
-#    createKernel = classmethod(createKernel)  
-
-#    def kernel(self, x, z):
-#        #Note, current implementation overrides the kernel matrix building methods
-#        #of AbstractKernel, so that this method is never called when building the
-#        #kernel matrix. This is left just to document what the kernel function
-#        #itself is like.
-#        """Kernel function is evaluated with the given arguments x and z."""
-#        return (self.gamma * (x.T * z)[0, 0] + self.coef0) ** self.degree
 
     def getKM(self, X):
         """Returns the kernel matrix between the basis vectors and X.

@@ -147,7 +147,6 @@ class Test(unittest.TestCase):
         rpool['regparam'] = rp
         rpool['bias'] = 2.
         grls = GreedyNFoldRLS(**rpool)
-        grls.train()
         print grls.selected
         print grls.A[selected_plus_bias]
         

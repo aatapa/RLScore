@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from numpy import *
@@ -7,7 +6,6 @@ import numpy as np
 
 from rlscore.learner import RLS
 from rlscore.kernel import GaussianKernel
-from rlscore.kernel import RsetKernel
 
 
 class Test(unittest.TestCase):
@@ -38,8 +36,6 @@ class Test(unittest.TestCase):
         hoindices = [0, 1, 2]
         hocompl = complement(hoindices, m)
         
-        #bk = LinearKernel.Kernel()
-        #bk = GaussianKernel.Kernel()
         bk = GaussianKernel(**{'X':Xtrain[basis_vectors], 'gamma':0.001})
         
         rpool = {}
@@ -84,7 +80,7 @@ class Test(unittest.TestCase):
             dumbho = np.squeeze(np.array(rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho))
             
             dualrls_naive.solve(regparam)
-            predho1 = np.squeeze(dualrls_naive.getModel().predict(testX))
+            predho1 = np.squeeze(dualrls_naive.predictor.predict(testX))
             print predho1.T, 'Naive HO (dual)'
             
             #dualrls.solve(regparam)

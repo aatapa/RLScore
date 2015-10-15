@@ -1,13 +1,9 @@
 
-from StringIO import StringIO
 import random
 import unittest
 
 import numpy as np
 
-from rlscore import core
-from rlscore import reader
-from rlscore import writer
 from rlscore.learner.interactive_rls_classifier import InteractiveRlsClassifier
 
 
@@ -56,16 +52,16 @@ def dotesting(ppc = 400):
         bvecs = random.sample(range(ppc), 100)
         
         kwargs = {}
-        kwargs['train_features'] = X
+        kwargs['X'] = X
         kwargs['regparam'] = '1'
         kwargs['kernel'] = 'GaussianKernel'
         kwargs['gamma'] = 2. ** (-20.)
-        kwargs['bias'] = '1'
+        kwargs['bias'] = 1
         #kwargs['number_of_clusters'] = classcount
         kwargs['regparam'] = 2. ** (-30.)
         #kwargs['learner'] = 'MMC'
         kwargs['callback'] = tcb
-        kwargs['basis_vectors'] = bvecs
+        kwargs['basis_vectors'] = X[bvecs]
         
         class TestCallback(object):
             def __init__(self):
@@ -80,7 +76,6 @@ def dotesting(ppc = 400):
         
         #mselector = None
         mmc = InteractiveRlsClassifier(**kwargs)
-        mmc.train()
         #trainresults = core.trainModel(**kwargs)
         #model = trainresults['model']
         #writer.write_ints('./examples/predictions/clusters.txt', trainresults['predicted_clusters_for_training_data'])

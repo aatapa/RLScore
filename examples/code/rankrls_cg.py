@@ -12,8 +12,6 @@ kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["regparam"] = 1
 learner = CGRankRLS(**kwargs)
-learner.train()
-model = learner.getModel()
-P = model.predict(test_features)
+P = learner.predict(test_features)
 test_perf = cindex(test_labels, P)
 print "test set performance: %f" %test_perf

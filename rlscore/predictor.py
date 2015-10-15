@@ -4,6 +4,23 @@ import numpy as np
 
 from rlscore.utilities import array_tools
 
+class PredictorInterface(object):
+    """Predicts outputs for new inputs.
+
+    Parameters
+     ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+       input data matrix
+        
+    Returns
+     ----------
+    P: array, shape = [n_samples, n_tasks]
+        predictions
+    """
+    
+    def predict(self, X):
+        return self.predictor.predict(X)
+
 class KernelPredictor(object):
     """Represents a dual model for making predictions.
     

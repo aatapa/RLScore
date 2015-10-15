@@ -5,7 +5,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 
 from rlscore.learner.rankrls_with_pairwise_preferences import PPRankRLS
-from rlscore.kernel import LinearKernel, GaussianKernel
+from rlscore.kernel import GaussianKernel
 
 
 
@@ -44,8 +44,7 @@ class Test(unittest.TestCase):
             trainkm = ker.getKM(Xtrain)
             #rpool['kernel_obj'] = k
             rls = PPRankRLS(**rpool)
-            rls.train()
-            model = rls.getModel()   
+            model = rls.predictor   
             P1 = model.predict(Xtest)
             #W = model.W
             In = np.mat(np.identity(n))

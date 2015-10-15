@@ -5,12 +5,13 @@ from rlscore import predictor
 from rlscore.utilities import array_tools
 #import pyximport; pyximport.install()
 import cython_greedy_rls
+from rlscore.predictor import PredictorInterface
 
 SELECTED_FEATURES = 'selected_features'
 GREEDYRLS_LOO_PERFORMANCES = 'GreedyRLS_LOO_performances'
 GREEDYRLS_TEST_PERFORMANCES = 'GreedyRLS_test_performances'
 
-class GreedyRLS(object):
+class GreedyRLS(PredictorInterface):
     """Linear time greedy forward selection for RLS.
     
     Performs greedy forward selection, where at each step the feature selected
@@ -53,7 +54,7 @@ class GreedyRLS(object):
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
         #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
-        self.bias = 0.
+        self.bias = bias
         self.measure = measure
         fsize = X.shape[1]
         self.desiredfcount = subsetsize
@@ -347,22 +348,6 @@ class GreedyRLS(object):
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
         #self.results['predictor'] = self.getModel()
         self.predictor = predictor.LinearPredictor(self.A, self.b)
-    
-    
-    def predict(self, X):
-        """Predicts outputs for new inputs.
-
-        Parameters
-        ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-            input data matrix
-        
-        Returns
-        ----------
-        P: array, shape = [n_samples, n_tasks]
-            predictions
-        """
-        return predictor.LinearPredictor(self.A, self.b).predict(X)
     
     
     def solve_bu(self, regparam):

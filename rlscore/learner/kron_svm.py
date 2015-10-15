@@ -215,7 +215,7 @@ class KronSVM(object):
             if self.callfackfun != None:
                 self.callbackfun.callback(self)
             #print i
-        self.model = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
         print w
         if self.callfackfun != None:
             self.callbackfun.finished(self)
@@ -285,7 +285,7 @@ class KronSVM(object):
             self.W = w.reshape((x1fsize, x2fsize), order='C')
             if self.callfackfun != None:
                 self.callbackfun.callback(self)
-        self.model = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
 
 
     def dual_from_primal(self):
@@ -401,18 +401,12 @@ class KronSVM(object):
             #z2 = np.where(z2>0, z2, 0)
             #print np.dot(z2,z2)
             #print i
-        #self.model = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
-        self.dual_model = KernelPairwisePredictor(a, rowind, colind)
+        #self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = KernelPairwisePredictor(a, rowind, colind)
         #z = np.where(a!=0, a, 0)
         #sv = np.nonzero(z)[0]
-        #self.model = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
+        #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
         self.finished()
-
-    
-    def getModel(self):
-        #if not hasattr(self, "model"):
-        self.model = LinearPairwisePredictor(self.W, self.X1.shape[1], self.X2.shape[1])
-        return self.model
 
     def solve_dual_symm(self, regparam):
         self.regparam = regparam
@@ -477,7 +471,7 @@ class KronSVM(object):
             #a_new = lsqr(A, g)[0]
             a = a - a_new
             self.a = a
-            self.dual_model = KernelPairwisePredictor(a, rowind, colind)
+            self.predictor = KernelPairwisePredictor(a, rowind, colind)
             #w = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
             #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #z2 = (1. - Y*P)
@@ -498,11 +492,11 @@ class KronSVM(object):
             if self.callfackfun != None:
                 self.callbackfun.callback(self)
             #print i
-        #self.model = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
-        self.dual_model = KernelPairwisePredictor(a, rowind, colind)
+        #self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = KernelPairwisePredictor(a, rowind, colind)
         #z = np.where(a!=0, a, 0)
         #sv = np.nonzero(z)[0]
-        #self.model = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
+        #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
         self.finished()    
 
 class KernelPairwisePredictor(object):
@@ -516,7 +510,7 @@ class KernelPairwisePredictor(object):
         self.kernel = kernel
     
     
-    def predictWithKernelMatrices(self, K1pred, K2pred):
+    def predict(self, K1pred, K2pred):
         """Computes predictions for test examples.
 
         Parameters
@@ -550,7 +544,7 @@ class LinearPairwisePredictor(object):
         self.dim1, self.dim2 = dim1, dim2
     
     
-    def predictWithDataMatrices(self, X1pred, X2pred):
+    def predict(self, X1pred, X2pred):
         """Computes predictions for test examples.
         
         Parameters

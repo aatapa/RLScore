@@ -34,7 +34,6 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
         else:
             code.append('kwargs["%s"] = '%key +str(lparams[key]))
     code.append("learner = %s(**kwargs)" %learner)
-    code.append("learner.train()")
     #If model selection
     if selector:
         code.append("kwargs = {}")
@@ -46,9 +45,8 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
         code.append("learner, perfs = grid_search(crossvalidator, grid)")
         code.append("for i in range(len(grid)):")
         code.append('    print "parameter %f cv_performance %f" %(grid[i], perfs[i])')
-    code.append("model = learner.getModel()")
     if "test_features" in files.keys():
-        code.append("P = model.predict(test_features)")
+        code.append("P = learner.predict(test_features)")
         if measure != None and "test_labels" in files.keys():
             if "test_qids" in files.keys():
                 code.append("from rlscore.measure.measure_utilities import UndefinedPerformance")

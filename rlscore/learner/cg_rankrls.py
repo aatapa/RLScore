@@ -11,8 +11,9 @@ from rlscore import predictor
 from rlscore.utilities import array_tools
 from rlscore.measure import sqmprank
 from rlscore.measure.measure_utilities import UndefinedPerformance
+from rlscore.predictor import PredictorInterface
 
-class CGRankRLS(object):
+class CGRankRLS(PredictorInterface):
     """Conjugate gradient RankRLS.
     
     Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
@@ -46,11 +47,6 @@ class CGRankRLS(object):
         Training set labels (alternative to: 'train_preferences')
     qids: list of n_queries index lists, optional
         Training set qids,  (can be supplied with 'Y')
-    train_preferences: {array-like}, shape = [n_preferences, 2], optional
-        Pairwise preference indices (alternative to: 'Y')
-        The array contains pairwise preferences one pair per row, i.e. the data point
-        corresponding to the first index is preferred over the data point corresponding
-        to the second index.
     validation_features:: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
         Data matrix for validation set, needed if early stopping used
     validation_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
@@ -74,42 +70,29 @@ class CGRankRLS(object):
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
 
-    def __init__(self, **kwargs):
-        if kwargs.has_key("regparam"):
-            self.regparam = float(kwargs["regparam"])
-        else:
-            self.regparam = 0.
+    def __init__(self, X, Y, regparam = 1.0, qids = None, validation_features=None, validation_labels=None, validation_qids=None, **kwargs):
+        self.regparam = regparam
         self.callbackfun = None
-        if 'Y' in kwargs:
-            Y = kwargs['Y']
-            self.Y = array_tools.as_labelmatrix(Y)
-            #Number of training examples
-            self.size = Y.shape[0]
-            if self.Y.shape[1] > 1:
-                raise Exception('CGRankRLS does not currently work in multi-label mode')
-            self.learn_from_labels = True
-            if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
-                validation_X = kwargs['validation_features']
-                validation_Y = kwargs['validation_labels']
-                if 'validation_qids' in kwargs:
-                    validation_qids = kwargs['validation_qids']
-                else:
-                    validation_qids = None
-                self.callbackfun = EarlyStopCB(validation_X, validation_Y, validation_qids)
-        elif 'train_preferences' in kwargs:
-            self.pairs = kwargs['train_preferences']
-            self.learn_from_labels = False
-        else:
-            raise Exception('Neither labels nor preference information found')
-        X = kwargs['X']
+        self.Y = array_tools.as_labelmatrix(Y)
+        #Number of training examples
+        self.size = Y.shape[0]
+        if self.Y.shape[1] > 1:
+            raise Exception('CGRankRLS does not currently work in multi-label mode')
+        self.learn_from_labels = True
+        if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
+            validation_X = kwargs['validation_features']
+            validation_Y = kwargs['validation_labels']
+            if 'validation_qids' in kwargs:
+                validation_qids = kwargs['validation_qids']
+            else:
+                validation_qids = None
+            self.callbackfun = EarlyStopCB(validation_X, validation_Y, validation_qids)
         self.X = csc_matrix(X.T)
-        self.bias = 0.
-        if 'qids' in kwargs:
-            qids = kwargs['qids']
+        if qids != None:
             self.setQids(qids)
         else:
             self.qidmap = None
-        self.results = {}
+        self.train()
     
     
     def setQids(self, qids):
@@ -142,35 +125,10 @@ class CGRankRLS(object):
         self.indslist = []
         for qid in self.qidmap.keys():
             self.indslist.append(self.qidmap[qid])
-    
-    
-    def solve(self, regparam):
-        """Trains the learning algorithm, using the given regularization parameter.
-        
-        This implementation simply changes the regparam, and then calls the train method.
-        
-        Parameters
-        ----------
-        regparam: float (regparam > 0)
-            regularization parameter
-        """
-        self.regparam = regparam
-        self.train()
+
     
     
     def train(self):
-        """Trains the learning algorithm.
-        
-        After the learner is trained, one can call the method getModel
-        to get the trained predictor
-        """
-        if self.learn_from_labels:
-            self.trainWithLabels()
-        else:
-            self.trainWithPreferences()
-    
-    
-    def trainWithLabels(self):
         regparam = self.regparam
         #regparam = 0.
         if self.qidmap != None:
@@ -205,10 +163,66 @@ class CGRankRLS(object):
         except Finished:
             pass
         self.b = np.mat(np.zeros((1,1)))
-        self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
     
+class PCGRankRLS(PredictorInterface):
+    """Conjugate gradient RankRLS with pairwise preferences.
     
-    def trainWithPreferences(self):
+    Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
+    large high-dimensional but sparse data.
+    
+    There are three ways to supply the pairwise preferences for the training set, depending
+    on the arguments supplied by the user.
+    
+
+    
+    3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
+    
+    In order to make training faster, one can use the early stopping technique by
+    supplying a separate validationset to be used for determining, when to terminate
+    optimization. In this case, training stops once validation set error has failed to
+    decrease for ten consequtive iterations. In this case, the caller should
+    provide the parameters validation_features, validation_labels and optionally, validation_qids.
+    Currently, this option is not supported when learning directly from pairwise
+    preferences. 
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    regparam: float (regparam > 0)
+        regularization parameter
+    train_preferences: {array-like}, shape = [n_preferences, 2], optional
+        Pairwise preference indices (alternative to: 'Y')
+        The array contains pairwise preferences one pair per row, i.e. the data point
+        corresponding to the first index is preferred over the data point corresponding
+        to the second index.
+
+ 
+       
+    References
+    ----------
+    
+    RankRLS algorithm is described in [1]_, using the conjugate gradient optimization
+    together with early stopping was considered in detail in [2]_. 
+    
+    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    An efficient algorithm for learning to rank from preference graphs.
+    Machine Learning, 75(1):129-165, 2009.
+    
+    .. [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
+    Large Scale Training Methods for Linear RankRLS
+    ECML/PKDD-10 Workshop on Preference Learning, 2010.
+    """
+
+    def __init__(self, X, train_preferences, regparam = 1., **kwargs):
+        self.regparam = regparam
+        self.callbackfun = None
+        self.pairs = train_preferences
+        self.X = csc_matrix(X.T)
+        self.train()
+    
+    def train(self):
         regparam = self.regparam
         X = self.X.tocsc()
         X_csr = X.tocsr()
@@ -235,18 +249,9 @@ class CGRankRLS(object):
         XLY = X_csr * (pairs_csc.T * M)
         self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
         self.b = np.mat(np.zeros((1,self.A.shape[1])))
-        self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
     
-    
-    def getModel(self):
-        """Returns the trained predictor, call this only after training.
-        
-        Returns
-        -------
-        predictor : LinearPredictor
-            prediction function
-        """
-        return predictor.LinearPredictor(self.A, self.b)
+
 
 class EarlyStopCB(object):
     

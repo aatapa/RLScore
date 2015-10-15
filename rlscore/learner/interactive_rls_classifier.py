@@ -7,35 +7,32 @@ import random as pyrandom
 pyrandom.seed(200)
 #from numpy import *
 import numpy as np
+from rlscore.utilities import creators
 
-from rlscore.learner.abstract_learner import AbstractSvdLearner
-
-class InteractiveRlsClassifier(AbstractSvdLearner):
+class InteractiveRlsClassifier(object):
     
-    
-    def __init__(self, **kwargs):
-        super(InteractiveRlsClassifier, self).__init__(**kwargs)
-        if kwargs.has_key('callback'):
-            self.callbackfun = kwargs['callback']
-        else:
-            self.callbackfun = None
-        self.regparam = float(kwargs["regparam"])
+    def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
+        kwargs['X'] = X 
+        kwargs['kernel'] = kernel
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
+        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svals = self.svdad.svals
+        self.svecs = self.svdad.rsvecs
+        self.callbackfun = callback
+        self.regparam = regparam
         self.constraint = 0
-        if not kwargs.has_key('number_of_clusters'):
-            #raise Exception("Parameter 'number_of_clusters' must be given.")
-            self.labelcount = 2
-        else:
-            self.labelcount = int(kwargs['number_of_clusters'])
-         
+        self.labelcount = number_of_clusters
+        self.size = X.shape[0] 
         #if self.labelcount == 2:
         #    self.oneclass = True
         #else:
         #    self.oneclass = False
         
-        if not kwargs.has_key("Y"):
+        if Y == None:
             self.classvec = np.zeros(self.size)
         else:
-            self.classvec = kwargs["Y"]
+            self.classvec = Y
         #self.size = self.classvec.shape[0]
         self.Y = -np.ones((self.size, self.labelcount))
         self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
@@ -45,8 +42,9 @@ class InteractiveRlsClassifier(AbstractSvdLearner):
             self.classcounts[clazzind] = self.classcounts[clazzind] + 1
         
         self.fixedindices = []
-        if kwargs.has_key('fixed_indices'):
-            self.fixedindices = kwargs['fixed_indices']
+        if fixed_indices != None:
+            self.fixedindices = fixed_indices
+        self.train()
     
     
     def train(self):

@@ -10,8 +10,9 @@ from numpy import ones
 from rlscore.utilities import array_tools
 from rlscore import predictor
 from rlscore.measure import sqerror
+from rlscore.predictor import PredictorInterface
 
-class CGRLS(object):
+class CGRLS(PredictorInterface):
     """Conjugate gradient RLS.
     
     Trains linear RLS using the conjugate gradient training algorithm. Suitable for
@@ -49,22 +50,21 @@ class CGRLS(object):
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
 
-    def __init__(self, X, Y, validation_features=None, validation_labels=None, regparam=1.0, bias=1.0, **kwargs):
+    def __init__(self, X, Y, regparam = 1.0, bias = 1.0, validation_features=None, validation_labels=None, **kwargs):
         self.Y = array_tools.as_labelmatrix(Y)
         self.X = csc_matrix(X.T)
-        self.bias = float(bias)
-        self.regparam = float(regparam)
+        self.bias = bias
+        self.regparam = regparam
         if self.bias != 0.:
             bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
             self.X = sparse.vstack([self.X,bias_slice]).tocsc()
-        else:
-            self.bias = 0.
         self.X_csr = self.X.tocsr()
         if validation_features != None and validation_labels != None:
             self.callbackfun = EarlyStopCB(validation_features, validation_labels)
         else:
             self.callbackfun = None
         self.results = {}
+        self.train()
     
     
     def train(self):
@@ -99,19 +99,11 @@ class CGRLS(object):
         else:
             self.b = sqrt(self.bias)*self.A[-1]
             self.A = self.A[:-1]
-        self.results['predictor'] = self.getModel()
-    
-    
-    def getModel(self):
-        """Returns the trained predictor, call this only after training.
-        
-        Returns
-        -------
-        predictor : LinearPredictor
-            prediction function
-        """
-        return predictor.LinearPredictor(self.A, self.b)
+        #self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)   
 
+    def predict(self, X):
+        return self.predictor.predict(X)
 
 class EarlyStopCB(object):
     

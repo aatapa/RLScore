@@ -120,7 +120,7 @@ class LinearSvdAdapter(SvdAdapter):
         A = self.reducedSetTransformation(A)
         fs = self.X
         if self.basis_vectors != None:
-            fs = self.X[self.basis_vectors]
+            fs = self.basis_vectors
         bias = self.bias
         X = getPrimalDataMatrix(fs, bias)
         #The hyperplane is a linear combination of the feature vectors of the basis examples

@@ -1,11 +1,12 @@
 
 import random
 import numpy as np
-from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
+from rlscore.predictor import PredictorInterface
 
-class MMC(AbstractSvdLearner):
+
+class MMC(PredictorInterface):
     """RLS-based maximum-margin clustering.
     
     Performs stochastic search, that aims to find a labeling of the data such
@@ -47,31 +48,24 @@ class MMC(AbstractSvdLearner):
     361-368, ACM, 2009.
     """
     
-    #def __init__(self, svdad, number_of_clusters=2, regparam=1.0, Y = None, fixed_indices=None, callback=None):
-    def __init__(self, **kwargs):
+    def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
+        kwargs['X'] = X 
+        kwargs['kernel'] = kernel
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
-        self.regparam = float(kwargs["regparam"])
+        self.regparam = regparam
         self.constraint = 0
         #if not kwargs.has_key('number_of_clusters'):
         #    raise Exception("Parameter 'number_of_clusters' must be given.")
-        if kwargs.has_key("number_of_clusters"):
-            self.labelcount = int(kwargs["number_of_clusters"])
-        else:
-            self.labelcount = 2
+        self.labelcount = number_of_clusters
         if self.labelcount == 2:
             self.oneclass = True
         else:
             self.oneclass = False
-        if kwargs.has_key("callback"):
-            self.callbackfun = kwargs["callback"]
-        else:
-            self.callbackfun = None
-        if kwargs.has_key("Y"):
-            Y = kwargs["Y"]
-        else:
-            Y = None
+        self.callbackfun = callback
         if Y != None:
             #Y_orig = array_tools.as_labelmatrix(Y)
             Y_orig = array_tools.as_array(Y)
@@ -116,12 +110,12 @@ class MMC(AbstractSvdLearner):
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
         self.fixedindices = []
-        if kwargs.has_key("fixed_indices"):
-            self.fixedindices = kwargs["fixed_indices"]
+        if fixed_indices != None:
+            self.fixedindices = fixed_indices
         else:
             self.fixedindices = []
         self.results = {}
-    
+        self.train()
     
     def train(self):
         """Trains the learning algorithm.
@@ -204,7 +198,7 @@ class MMC(AbstractSvdLearner):
         if self.oneclass:
             self.Y = self.Y[:, 0]
         self.results['predicted_clusters_for_training_data'] = self.Y
-        self.results['model'] = self.getModel()
+        self.predictor = self.svdad.createModel(self)
     
     
     def computeGlobalFitness(self):

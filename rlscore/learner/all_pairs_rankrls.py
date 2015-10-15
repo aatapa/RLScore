@@ -2,12 +2,12 @@ import numpy as np
 from numpy import array, eye, float64, multiply, mat, ones, sqrt, sum, zeros
 import numpy.linalg as la
 
-from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
+from rlscore.predictor import PredictorInterface
 
-class AllPairsRankRLS(AbstractSvdLearner):
+class AllPairsRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from a single
@@ -64,20 +64,22 @@ class AllPairsRankRLS(AbstractSvdLearner):
     """
     
     #def __init__(self, svdad, Y, regparam=1.0):
-    def __init__(self, **kwargs):
+    def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        kwargs['kernel'] =  kernel
+        kwargs['X'] = X
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(kwargs["Y"])
-        if kwargs.has_key("regparam"):
-            self.regparam = float(kwargs["regparam"])
-        else:
-            self.regparam = 1.
+        self.Y = array_tools.as_labelmatrix(Y)
+        self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
-
-
-    def train(self):
         self.solve(self.regparam)
+
+
+#    def train(self):
+#        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -111,6 +113,7 @@ class AllPairsRankRLS(AbstractSvdLearner):
         self.A = self.svecs * multiply(1. / self.svals.T, \
             (multiply(neweigvals.T, self.multipleright) \
             - nP * (fastinv * (nP.T * self.multipleright))))
+        self.predictor = self.svdad.createModel(self)
     
     
     def computePairwiseCV(self, pairs_start_inds, pairs_end_inds, oind=0):

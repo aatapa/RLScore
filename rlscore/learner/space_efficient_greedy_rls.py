@@ -178,7 +178,6 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['predictor'] = self.getModel()
     
     
     def solve_tradeoff(self, regparam):
@@ -345,7 +344,8 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['predictor'] = self.getModel()
+        #self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
     def solve_weak(self, regparam):
@@ -475,6 +475,6 @@ class SpaceEfficientGreedyRLS(object):
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        self.results['predictor'] = self.getModel()
+        self.predictor = predictor.LinearPredictor(self.A, self.b)
 
 

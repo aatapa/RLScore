@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
             naivedualrls.solve(regparam)
             hopreds = []
             
-            hopred = naivedualrls.getModel().predict(Xtest)
+            hopred = naivedualrls.predictor.predict(Xtest)
             print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' Naive')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             

@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
             print(str(dumbho) + ' Dumb HO (dual)')
             
             dualrls_naive.solve(regparam)
-            predho1 = dualrls_naive.getModel().predict(testkm.T)
+            predho1 = dualrls_naive.predictor.predict(testkm.T)
             print(str(predho1) + ' Naive HO (dual)')
             
             dualrls.solve(regparam)
@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
             print(str(predho) + ' Fast LOO (dual)')
             
             primalrls_naive.solve(regparam)
-            predho3 = primalrls_naive.getModel().predict(testX)
+            predho3 = primalrls_naive.predictor.predict(testX)
             print(str(predho3) + ' Naive HO (primal)')
             
             primalrls.solve(regparam)

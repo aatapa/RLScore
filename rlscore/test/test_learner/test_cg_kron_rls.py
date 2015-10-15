@@ -92,9 +92,9 @@ class Test(unittest.TestCase):
         params["X"] = np.kron(K_train2, K_train1)[np.ix_(incinds, incinds)]
         params["kernel"] = "precomputed"
         params["Y"] = Y_train_known_outputs
+        params["regparam"] = regparam
         ordrls_learner = RLS(**params)
-        ordrls_learner.solve(regparam)
-        ordrls_model = ordrls_learner.getModel()
+        ordrls_model = ordrls_learner.predictor
         K_Kron_test = np.kron(K_test2, K_test1)[:, incinds]
         ordrls_testpred = ordrls_model.predict(K_Kron_test)
         ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1], order = 'F')
@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
                 self.round = 0
             def callback(self, learner):
                 self.round = self.round + 1
-                tp = LinearPairwisePredictor(learner.W).predictWithDataMatrices(X_test1, X_test2)
+                tp = LinearPairwisePredictor(learner.W).predict(X_test1, X_test2)
                 print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred))))
             def finished(self, learner):
                 print('finished')
@@ -119,10 +119,8 @@ class Test(unittest.TestCase):
         tcb = TestCallback()
         params['callback'] = tcb
         linear_kron_learner = CGKronRLS(**params)
-        linear_kron_learner.train()
-        linear_kron_model = linear_kron_learner.getModel()
-        linear_kron_testpred = linear_kron_model.predictWithDataMatrices(X_test1, X_test2)
-        linear_kron_testpred_alt = linear_kron_model.predictWithDataMatrices(X_test1, X_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
+        linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
+        linear_kron_testpred_alt = linear_kron_learner.predict(X_test1, X_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
         #Train kernel Kronecker RLS
         params = {}
@@ -137,17 +135,15 @@ class Test(unittest.TestCase):
                 self.round = 0
             def callback(self, learner):
                 self.round = self.round + 1
-                tp = KernelPairwisePredictor(learner.A, learner.label_row_inds, learner.label_col_inds).predictWithKernelMatrices(K_test1, K_test2)
+                tp = KernelPairwisePredictor(learner.A, learner.label_row_inds, learner.label_col_inds).predict(K_test1, K_test2)
                 print self.round, np.mean(np.abs(tp - ordrls_testpred))
             def finished(self, learner):
                 print 'finished'
         tcb = KernelCallback()
         params['callback'] = tcb
         kernel_kron_learner = CGKronRLS(**params)
-        kernel_kron_learner.train()
-        kernel_kron_model = kernel_kron_learner.getModel()
-        kernel_kron_testpred = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2)
-        kernel_kron_testpred_alt = kernel_kron_model.predictWithKernelMatrices(K_test1, K_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
+        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2)
+        kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
         print('Predictions: Linear CgKronRLS, Kernel CgKronRLS, ordinary RLS')
         print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))#, linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]

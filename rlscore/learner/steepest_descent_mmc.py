@@ -6,11 +6,10 @@ import numpy as np
 import random as pyrandom
 pyrandom.seed(200)
 
-from rlscore.learner.abstract_learner import AbstractSvdLearner
 from rlscore.utilities import creators
 from rlscore.utilities import array_tools
 
-class SteepestDescentMMC(AbstractSvdLearner):
+class SteepestDescentMMC(object):
     
     
     def __init__(self, **kwargs):
@@ -161,7 +160,8 @@ class SteepestDescentMMC(AbstractSvdLearner):
             converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
             #converged = self.findSteepestDirRotateClasses(1000)
             #print self.classcounts.T
-            self.callback()
+            if not self.callbackfun == None:
+                self.callbackfun.callback(self)
             if converged: break
         
         if self.oneclass:

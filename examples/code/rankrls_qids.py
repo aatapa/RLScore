@@ -17,9 +17,7 @@ kwargs["X"] = train_features
 kwargs["qids"] = train_qids
 kwargs["regparam"] = 1
 learner = LabelRankRLS(**kwargs)
-learner.train()
-model = learner.getModel()
-P = model.predict(test_features)
+P = learner.predict(test_features)
 from rlscore.measure.measure_utilities import UndefinedPerformance
 perfs = []
 for query in test_qids:

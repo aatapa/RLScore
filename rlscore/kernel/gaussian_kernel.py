@@ -36,29 +36,6 @@ class GaussianKernel(object):
             self.train_norms = np.mat((np.multiply(self.train_X.T, self.train_X.T).sum(axis=0))).T  
         self.gamma = gamma
         self.bias = bias
-        
-#    def createKernel(cls, **kwargs):
-#        """Initializes a kernel object from the arguments."""
-#        new_kwargs = {}
-#        new_kwargs["train_features"] = kwargs["train_features"]
-#        if kwargs.has_key('basis_vectors'):
-#            new_kwargs['basis_vectors'] = kwargs['basis_vectors']
-#        if "gamma" in kwargs:
-#            new_kwargs["gamma"] = float(kwargs["gamma"])
-#        if "bias" in kwargs:
-#            new_kwargs["bias"] = float(kwargs["bias"])
-#        kernel = cls(**new_kwargs)
-#        return kernel
-#    createKernel = classmethod(createKernel)   
-        
-#    def kernel(self, x, z):
-#        #Note, current implementation overrides the kernel matrix building methods
-#        #of AbstractKernel, so that this method is never called when building the
-#        #kernel matrix. This is left just to document what the kernel function
-#        #itself is like.
-#        """Kernel function is evaluated with the given arguments x and z."""
-#        f = x-z
-#        return np.exp(-self.gamma * (f.T * f)[0,0])
             
 
     def getKM(self, X):
