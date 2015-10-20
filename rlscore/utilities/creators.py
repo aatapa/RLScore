@@ -35,10 +35,3 @@ def createSVDAdapter(X, kernel="LinearKernel", **kwargs):
             else:
                 svdad = SvdAdapter.createAdapter(**kwargs)
         return svdad
-
-def createLearnerByModuleName(**kwargs):
-    lname = kwargs['learner']
-    exec "from rlscore.learner import " + lname
-    learnerclazz = eval(lname)
-    learner = learnerclazz(**kwargs)
-    return learner

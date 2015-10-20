@@ -4,7 +4,7 @@ import numpy as np
 from rlscore.kernel import LinearKernel
 from rlscore.learner.kron_rls import KronRLS
 from rlscore.learner.rls import RLS
-from rlscore.learner.label_rankrls import LabelRankRLS
+from rlscore.learner.query_rankrls import QueryRankRLS
 
 
 class Test(unittest.TestCase):
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
         params["kernel"] = "precomputed"
         params["Y"] = Y_train.reshape(trainlabelcount, 1)
         params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
-        rankrls_learner = LabelRankRLS(**params)
+        rankrls_learner = QueryRankRLS(**params)
         rankrls_learner.solve(regparam)
         K_test_x = np.kron(K_test1, K_test2)
         ordrankrls_testpred = rankrls_learner.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
@@ -272,7 +272,7 @@ class Test(unittest.TestCase):
         params["Y"] = Y_train.reshape(trainlabelcount, 1)#Y_train.reshape(Y_train.shape[0]*Y_train.shape[1],1)
         #params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
         params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
-        rankrls_learner = LabelRankRLS(**params)
+        rankrls_learner = QueryRankRLS(**params)
         
         rankrls_learner.solve(regparam)
         rankrls_model = rankrls_learner.predictor

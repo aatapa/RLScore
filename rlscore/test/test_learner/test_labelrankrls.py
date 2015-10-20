@@ -2,7 +2,7 @@ import numpy as np
 import numpy.linalg as la
 
 import unittest
-from rlscore.learner import LabelRankRLS
+from rlscore.learner import QueryRankRLS
 
 def mapQids(qids):
     """Maps qids to running numbering starting from zero, and partitions
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
     
     def testLabelRankRLS(self):
         
-        print("Testing the cross-validation routines of the LabelRankRLS module.\n")
+        print("Testing the cross-validation routines of the QueryRankRLS module.\n")
         
         np.random.seed(100)
         floattype = np.float64
@@ -79,20 +79,20 @@ class Test(unittest.TestCase):
         rpool["X"] = Xtrain
         rpool["Y"] = Y
         rpool["qids"] = mapQids(qidlist)
-        primalrls = LabelRankRLS(**rpool)        
+        primalrls = QueryRankRLS(**rpool)        
         
         rpool = {}
         rpool["X"] = K
         rpool['kernel'] = 'precomputed'
         rpool["Y"] = Y
         rpool["qids"] = mapQids(qidlist)        
-        dualrls = LabelRankRLS(**rpool)
+        dualrls = QueryRankRLS(**rpool)
         
         rpool = {}
         rpool['X'] = Xcv
         rpool['Y'] = Yho
         rpool['qids'] = mapQids(qidlist_cv)
-        primalrls_naive = LabelRankRLS(**rpool)
+        primalrls_naive = QueryRankRLS(**rpool)
 
         rpool = {}
         rpool['X'] = Kcv
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
         rpool['Y'] = Yho
         #rpool['X'] = Xcv
         rpool['qids'] = mapQids(qidlist_cv)
-        dualrls_naive = LabelRankRLS(**rpool)
+        dualrls_naive = QueryRankRLS(**rpool)
         
         testkm = K[np.ix_(hocompl, hoindices)]
         

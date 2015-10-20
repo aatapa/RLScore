@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.all_pairs_rankrls import AllPairsRankRLS
+from rlscore.learner.global_rankrls import GlobalRankRLS
 from rlscore.reader import read_sparse
 from rlscore.reader import read_sparse
 from rlscore.measure import cindex
@@ -11,7 +11,7 @@ kwargs = {}
 kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["regparam"] = 1
-learner = AllPairsRankRLS(**kwargs)
+learner = GlobalRankRLS(**kwargs)
 P = learner.predict(test_features)
 test_perf = cindex(test_labels, P)
 print "test set performance: %f" %test_perf

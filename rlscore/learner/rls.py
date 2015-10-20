@@ -7,8 +7,10 @@ from rlscore.utilities import creators
 import cython_pairwise_cv_for_rls
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
+from rlscore.measure import sqerror
 import numpy as np
 from rlscore.predictor import PredictorInterface
+from rlscore.utilities.cross_validation import grid_search
 
 class RLS(PredictorInterface):
     """Regularized least-squares regression/classification.
@@ -225,6 +227,36 @@ class RLS(PredictorInterface):
         return np.array(results)'''
 
 
+class LeaveOneOutRLS(PredictorInterface):
+    
+    def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 15)]
+        else:
+            grid = regparams
+        if measure == None:
+            measure = sqerror
+        learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = LOOCV(learner, measure)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
+            
+class KfoldRLS(PredictorInterface):
+    
+    def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 15)]
+        else:
+            grid = regparams
+        if measure == None:
+            self.measure = sqerror
+        else:
+            self.measure = measure
+        learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = NfoldCV(learner, measure, folds)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
+
 
 class LOOCV(object):
     
@@ -237,7 +269,7 @@ class LOOCV(object):
         Y = self.rls.Y
         P = self.rls.computeLOO()
         perf = self.measure(Y, P)
-        return perf
+        return perf, P
 
 class NfoldCV(object):
     
@@ -253,8 +285,10 @@ class NfoldCV(object):
         rls.solve(regparam)
         Y = rls.Y
         performances = []
+        P_all = []
         for fold in folds:
             P = rls.computeHO(fold)
+            P_all.append(P)
             try:
                 performance = measure(Y[fold], P)
                 performances.append(performance)
@@ -265,5 +299,5 @@ class NfoldCV(object):
             performance = np.mean(performances)
         else:
             raise UndefinedPerformance("Performance undefined for all folds")
-        return performance
+        return performance, P_all
 

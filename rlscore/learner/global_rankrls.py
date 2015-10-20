@@ -6,8 +6,11 @@ from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
+from rlscore.utilities.cross_validation import grid_search
+from rlscore.measure import cindex
+from rlscore.learner.rls import NfoldCV
 
-class AllPairsRankRLS(PredictorInterface):
+class GlobalRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from a single
@@ -409,40 +412,39 @@ class AllPairsRankRLS(PredictorInterface):
             results.append(F)
         return results
 
-class NfoldCV(object):
+class LeavePairOutRankRLS(PredictorInterface):
     
-    def __init__(self, learner, measure, folds):
-        self.rls = learner
-        self.measure = measure
-        self.folds = folds
-        
-    def cv(self, regparam):
-        rls = self.rls
-        folds = self.folds
-        measure = self.measure
-        rls.solve(regparam)
-        Y = rls.Y
-        performances = []
-        for fold in folds:
-            P = rls.computeHO(fold)
-            try:
-                performance = measure(Y[fold], P)
-                performances.append(performance)
-            except UndefinedPerformance:
-                pass
-            #performance = measure_utilities.aggregate(performances)
-        if len(performances) > 0:
-            performance = np.mean(performances)
+    def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 15)]
         else:
-            raise UndefinedPerformance("Performance undefined for all folds")
-        return performance
+            grid = regparams
+        learner = GlobalRankRLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = LPOCV(learner)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
+        
+class KfoldRankRLS(PredictorInterface):
+    
+    def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 15)]
+        else:
+            grid = regparams
+        if measure == None:
+            self.measure = cindex
+        else:
+            self.measure = measure
+        learner = GlobalRankRLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = NfoldCV(learner, measure, folds)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
 
 class LPOCV(object):
     
-    
-    def __init__(self, learner, measure):
+    def __init__(self, learner):
         self.rls = learner
-        self.measure = measure
+        self.measure = cindex
 
     def cv(self, regparam):
         rls = self.rls
@@ -450,47 +452,32 @@ class LPOCV(object):
         Y = rls.Y
         perfs = []
         #special handling for concordance index / auc
-        if self.measure.func_name in ["cindex", "auc"]:
-            for index in range(Y.shape[1]):
-                pairs_start_inds, pairs_end_inds = [], []
-                for i in range(Y.shape[0] - 1):
-                    for j in range(i + 1, Y.shape[0]):
-                        if Y[i, index] > Y[j, index]:
-                            pairs_start_inds.append(i)
-                            pairs_end_inds.append(j)
-                        elif Y[i, index] < Y[j, index]:
-                            pairs_start_inds.append(j)
-                            pairs_end_inds.append(i)
-                if len(pairs_start_inds) > 0:
-                    pred_start, pred_end = rls.computePairwiseCV(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
-                    auc = 0.
-                    for h in range(len(pred_start)):
-                        if pred_start[h] > pred_end[h]:
-                            auc += 1.
-                        elif pred_start[h] == pred_end[h]:
-                            auc += 0.5
-                    auc /= len(pairs_start_inds)
-                    perfs.append(auc)
-            if len(perfs) > 0:
-                performance = np.mean(perfs)
-            else:
-                raise UndefinedPerformance("Performance undefined for all folds")
-            return performance
-        else:
-            #Horribly inefficient, but maybe OK for small data sets
+        for index in range(Y.shape[1]):
             pairs_start_inds, pairs_end_inds = [], []
-            for i in range(Y.shape[0]):
-                for j in range(Y.shape[0]):
-                    pairs_start_inds.append(i)
-                    pairs_end_inds.append(j)
-            for index in range(Y.shape[1]):
+            for i in range(Y.shape[0] - 1):
+                for j in range(i + 1, Y.shape[0]):
+                    if Y[i, index] > Y[j, index]:
+                        pairs_start_inds.append(i)
+                        pairs_end_inds.append(j)
+                    elif Y[i, index] < Y[j, index]:
+                        pairs_start_inds.append(j)
+                        pairs_end_inds.append(i)
+            if len(pairs_start_inds) > 0:
                 pred_start, pred_end = rls.computePairwiseCV(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
-                for i in range(len(pairs_start_inds)):
-                    pair_start, pair_end = pred_start[i], pred_end[i]
-                    pred = preds[i]
-                    perfs.append(self.measure(np.array([Y[pair_start, index],Y[pair_end, index]]), np.array(pred)))
-            perf = np.mean(perfs)
-            return perf
+                auc = 0.
+                for h in range(len(pred_start)):
+                    if pred_start[h] > pred_end[h]:
+                        auc += 1.
+                    elif pred_start[h] == pred_end[h]:
+                        auc += 0.5
+                auc /= len(pairs_start_inds)
+                perfs.append(auc)
+        if len(perfs) > 0:
+            performance = np.mean(perfs)
+        else:
+            raise UndefinedPerformance("Performance undefined for all folds")
+        return performance, np.array([0])
+
 
                 
         

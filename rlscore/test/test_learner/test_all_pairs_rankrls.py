@@ -4,13 +4,13 @@ import unittest
 import numpy as np
 import numpy.linalg as la
 
-from rlscore.learner import AllPairsRankRLS
+from rlscore.learner import GlobalRankRLS
 
 class Test(unittest.TestCase):
     
     def testAllPairsRankRLS(self):
         
-        print("Testing the cross-validation routines of the AllPairsRankRLS module.\n\n")
+        print("Testing the cross-validation routines of the GlobalRankRLS module.\n\n")
         
         np.random.seed(100)
         floattype = np.float64
@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = Ycv
             rpool['X'] = Xcv
             rpool['regparam'] = regparam
-            naivedualrls = AllPairsRankRLS(**rpool)
+            naivedualrls = GlobalRankRLS(**rpool)
             naivedualrls.solve(regparam)
             hopreds = []
             
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = trainlabels
             rpool['X'] = Xtrain
             rpool['regparam'] = regparam
-            hodualrls = AllPairsRankRLS(**rpool)
+            hodualrls = GlobalRankRLS(**rpool)
             hodualrls.solve(regparam)
             hopred = hodualrls.computePairwiseCV([hoindices[0]], [hoindices[1]], oind=oind)
             print(str(hopred[0][0]) + ' ' + str(hopred[1][0]) + ' Fast')
@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
             rpool['Y'] = trainlabels
             rpool['X'] = Xtrain
             rpool['regparam'] = regparam
-            hoprimalrls = AllPairsRankRLS(**rpool)
+            hoprimalrls = GlobalRankRLS(**rpool)
             hoprimalrls.solve(regparam)
             hopred = hoprimalrls.computeHO(hoindices)
             print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' HO')

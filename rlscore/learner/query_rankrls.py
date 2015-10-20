@@ -7,8 +7,10 @@ from rlscore.utilities import array_tools
 from rlscore.utilities import creators
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
+from rlscore.measure import cindex
+from rlscore.utilities.cross_validation import grid_search
 
-class LabelRankRLS(PredictorInterface):
+class QueryRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from query-structured
@@ -227,6 +229,22 @@ class LabelRankRLS(PredictorInterface):
             return np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY)))
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
+class LeaveQueryOutRankRLS(PredictorInterface):
+    
+    def __init__(self, X, Y, qids, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 15)]
+        else:
+            grid = regparams
+        if measure == None:
+            self.measure = cindex
+        else:
+            self.measure = measure
+        learner = QueryRankRLS(X, Y, qids, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = LQOCV(learner, measure)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
+
 class LQOCV(object):
     
     def __init__(self, learner, measure):
@@ -239,9 +257,11 @@ class LQOCV(object):
         rls.solve(regparam)
         Y = rls.Y
         performances = []
+        predictions = []
         folds = rls.qids
         for fold in folds:
             P = rls.computeHO(fold)
+            predictions.append(P)
             try:
                 performance = measure(Y[fold], P)
                 performances.append(performance)
@@ -252,4 +272,4 @@ class LQOCV(object):
             performance = np.mean(performances)
         else:
             raise UndefinedPerformance("Performance undefined for all folds")
-        return performance
+        return performance, predictions

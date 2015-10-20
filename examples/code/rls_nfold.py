@@ -1,28 +1,23 @@
 import numpy as np
-from rlscore.learner.rls import RLS
+from rlscore.learner.rls import KfoldRLS
 from rlscore.reader import read_folds
 from rlscore.reader import read_sparse
 from rlscore.reader import read_sparse
 from rlscore.measure import auc
-from rlscore.learner.rls import NfoldCV
-from rlscore.utilities.grid_search import grid_search
 train_labels = np.loadtxt("./examples/data/class_train.labels")
 test_labels = np.loadtxt("./examples/data/class_test.labels")
 folds = read_folds("./examples/data/folds.txt")
 train_features = read_sparse("./examples/data/class_train.features")
 test_features = read_sparse("./examples/data/class_test.features")
 kwargs = {}
+kwargs['measure']=auc
+kwargs['regparams'] = [2**i for i in range(-10,11)]
 kwargs["Y"] = train_labels
 kwargs["X"] = train_features
-kwargs["regparam"] = 1
-learner = RLS(**kwargs)
-kwargs = {}
-kwargs["learner"] = learner
 kwargs["folds"] = folds
-kwargs["measure"] = auc
-crossvalidator = NfoldCV(**kwargs)
-grid = [2**i for i in range(-10,11)]
-learner, perfs = grid_search(crossvalidator, grid)
+learner = KfoldRLS(**kwargs)
+grid = kwargs['regparams']
+perfs = learner.cv_performances
 for i in range(len(grid)):
     print "parameter %f cv_performance %f" %(grid[i], perfs[i])
 P = learner.predict(test_features)

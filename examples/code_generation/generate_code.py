@@ -1,7 +1,7 @@
 import sys
 readers = {"folds":"read_folds", "train_features":"read_sparse", "test_features":"read_sparse", "train_qids":"read_qids", "test_qids":"read_qids"}
 
-def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=None, sparams=None):
+def generate(learner, lpath, lparams, lfparams, files, measure=None, selection=False):
     #learner: module for the learning algorithm
     #lparams: parameters for the learning algorithm
     #files: file:path pairs
@@ -14,15 +14,16 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
             code.append("from rlscore.reader import %s" %readers[key])
     if measure != None:
         code.append("from rlscore.measure import %s" %measure)
-    if selector != None:
-        code.append("from %s import %s" %(lpath, selector))
-        code.append("from rlscore.utilities.grid_search import grid_search")
     for key in files:
         if key in readers:
             code.append('%s = %s("%s")' %(key, readers[key], files[key]))
         else:
             code.append('%s = np.loadtxt("%s")' %(key, files[key])) 
     code.append("kwargs = {}")
+    if measure != None and selection:
+        code.append("kwargs['measure']=%s" %measure)
+    if selection:
+        code.append("kwargs['regparams'] = [2**i for i in range(-10,11)]")
     for key in lfparams:
         if key == "basis_vectors":
             code.append('kwargs["%s"] = '%key +"train_features["+str(lfparams[key])+"]")
@@ -35,14 +36,9 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selector=No
             code.append('kwargs["%s"] = '%key +str(lparams[key]))
     code.append("learner = %s(**kwargs)" %learner)
     #If model selection
-    if selector:
-        code.append("kwargs = {}")
-        code.append('kwargs["learner"] = learner')
-        for key in sparams:
-            code.append('kwargs["%s"] = '%key +str(sparams[key]))        
-        code.append("crossvalidator = %s(**kwargs)" %selector)
-        code.append("grid = [2**i for i in range(-10,11)]")
-        code.append("learner, perfs = grid_search(crossvalidator, grid)")
+    if selection:
+        code.append("grid = kwargs['regparams']")
+        code.append("perfs = learner.cv_performances")
         code.append("for i in range(len(grid)):")
         code.append('    print "parameter %f cv_performance %f" %(grid[i], perfs[i])')
     if "test_features" in files.keys():

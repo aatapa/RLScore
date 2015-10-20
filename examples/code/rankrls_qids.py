@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.label_rankrls import LabelRankRLS
+from rlscore.learner.query_rankrls import QueryRankRLS
 from rlscore.reader import read_qids
 from rlscore.reader import read_sparse
 from rlscore.reader import read_sparse
@@ -16,7 +16,7 @@ kwargs["Y"] = train_labels
 kwargs["X"] = train_features
 kwargs["qids"] = train_qids
 kwargs["regparam"] = 1
-learner = LabelRankRLS(**kwargs)
+learner = QueryRankRLS(**kwargs)
 P = learner.predict(test_features)
 from rlscore.measure.measure_utilities import UndefinedPerformance
 perfs = []

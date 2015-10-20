@@ -1,4 +1,4 @@
-from all_pairs_rankrls import AllPairsRankRLS
+from rlscore.learner.global_rankrls import GlobalRankRLS
 from cg_rankrls import CGRankRLS
 from cg_rls import CGRLS
 #from conditional_ranking import ConditionalRanking
@@ -18,7 +18,7 @@ try:
 except ImportError, e:
     print e
 #from kernel_dependency import KernelDependency
-from label_rankrls import LabelRankRLS
+from rlscore.learner.query_rankrls import QueryRankRLS
 #from learner_interface import LearnerInterface
 try:
     from mmc import MMC
