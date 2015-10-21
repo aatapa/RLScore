@@ -69,7 +69,8 @@ class SvdAdapter(object):
             #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
             return A_red
-        else: return csr_matrix(A)
+        else:
+            return A
     
     
     def createModel(self, svdlearner):
