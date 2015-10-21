@@ -81,9 +81,7 @@ class Test(unittest.TestCase):
         Y_test = Y_test.ravel(order = 'F')
         train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
         test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
-        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, train_rows, train_columns
         trainlabelcount = train_rows * train_columns
-        indmatrix = np.mat(range(trainlabelcount)).T.reshape(train_rows, train_columns)
         
         #Train linear Kronecker RLS with data-matrices
         params = {}
@@ -111,9 +109,8 @@ class Test(unittest.TestCase):
         params["Y"] = Y_train.reshape(trainlabelcount, 1, order = 'F')
         ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
-        ordrls_model = ordrls_learner.predictor
         K_Kron_test_x = np.kron(K_test2, K_test1)
-        ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
+        ordrls_testpred = ordrls_learner.predict(K_Kron_test_x)
         ordrls_testpred = ordrls_testpred.reshape((test_rows, test_columns), order = 'F')
         
         print('')
@@ -161,21 +158,18 @@ class Test(unittest.TestCase):
         params = {}
         params["X"] = K_Kron_train_x
         params["kernel"] = "precomputed"
-        params["Y"] = Y_train.reshape(trainlabelcount, 1)
-        #qids = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        params["Y"] = Y_train.reshape((trainlabelcount, 1), order = 'F')
         qids = []
-        for i in range(Y_train.shape[0]):
-            for j in range(Y_train.shape[1]):
+        for j in range(Y_train.shape[1]):
+            for i in range(Y_train.shape[0]):
                 qids.append(i)
         params["qids"] = qids
         rankrls_learner = QueryRankRLS(**params)
         rankrls_learner.solve(regparam)
-        K_test_x = np.kron(K_test1, K_test2)
-        ordrankrls_testpred = rankrls_learner.predict(K_test_x).reshape(Y_test.shape[0], Y_test.shape[1])
+        K_test_x = np.kron(K_test2, K_test1)
+        ordrankrls_testpred = rankrls_learner.predict(K_test_x)
         condrank_testpred = linear_kron_condrank_learner.predict(X_test1, X_test2)
         print('')
-        #print condrank_testpred.ravel().shape, Y_test.ravel().shape, ordrankrls_testpred.ravel().shape, Y_test.ravel().shape
-        
         print('TEST cond vs rankrls ' + str(np.mean(np.abs(condrank_testpred - ordrankrls_testpred))))
     
     

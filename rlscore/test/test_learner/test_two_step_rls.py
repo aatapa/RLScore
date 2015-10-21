@@ -81,10 +81,12 @@ class Test(unittest.TestCase):
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 \
             = self.generate_xortask()
-        rows, columns = Y_train.shape
-        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns
-        trainlabelcount = rows * columns
-        indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
+        Y_train = Y_train.ravel(order = 'F')
+        Y_test = Y_test.ravel(order = 'F')
+        train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
+        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
+        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, train_rows, train_columns
+        trainlabelcount = train_rows * train_columns
         
         
 #         #Train linear Kronecker RLS with data-matrices
@@ -94,8 +96,7 @@ class Test(unittest.TestCase):
 #         params["xmatrix2"] = X_train2
 #         params["Y"] = Y_train
 #         linear_kron_learner = KronRLS(**params)
-#         linear_kron_model = linear_kron_learner.predictor
-#         linear_kron_testpred = linear_kron_model.predict(X_test1, X_test2)
+#         linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
         
         
         #Train linear two-step RLS with data-matrices
@@ -106,8 +107,7 @@ class Test(unittest.TestCase):
         params["xmatrix2"] = X_train2
         params["Y"] = Y_train
         linear_two_step_learner = TwoStepRLS(**params)
-        linear_two_step_model = linear_two_step_learner.predictor
-        linear_two_step_testpred = linear_two_step_model.predict(X_test1, X_test2)
+        linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo()
         
         #Train kernel two-step RLS with pre-computed kernel matrices
         params = {}
@@ -117,52 +117,37 @@ class Test(unittest.TestCase):
         params["kmatrix2"] = K_train2
         params["Y"] = Y_train
         kernel_two_step_learner = TwoStepRLS(**params)
-        kernel_two_step_model = kernel_two_step_learner.predictor
-        kernel_two_step_testpred = kernel_two_step_model.predict(K_test1, K_test2)
+        kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo()
+        
+        #Train ordinary linear RLS in two steps for a reference
+        params = {}
+        params["regparam"] = regparam2
+        params["X"] = X_train2
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F').T
+        ordinary_linear_rls_first_step = RLS(**params)
+        firststeploo = ordinary_linear_rls_first_step.computeLOO().T
+        params = {}
+        params["regparam"] = regparam1
+        params["X"] = X_train1
+        params["Y"] = firststeploo.reshape((train_rows, train_columns), order = 'F')
+        ordinary_linear_rls_second_step = RLS(**params)
+        secondsteploo_linear_rls = ordinary_linear_rls_second_step.computeLOO()
         
         #Train ordinary kernel RLS in two steps for a reference
         params = {}
         params["regparam"] = regparam2
         params["X"] = K_train2
         params['kernel'] = 'precomputed'
-        params["Y"] = Y_train.T
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F').T
         ordinary_kernel_rls_first_step = RLS(**params)
         firststeploo = ordinary_kernel_rls_first_step.computeLOO().T
         params = {}
         params["regparam"] = regparam1
         params["X"] = K_train1
         params["kernel"] = "precomputed"
-        params["Y"] = firststeploo
+        params["Y"] = firststeploo.reshape((train_rows, train_columns), order = 'F')
         ordinary_kernel_rls_second_step = RLS(**params)
         secondsteploo_kernel_rls = ordinary_kernel_rls_second_step.computeLOO()
-        #print 'Basic RLS', secondsteploo[0, 0]
-        
-        #Train ordinary linear RLS in two steps for a reference
-        params = {}
-        params["regparam"] = regparam2
-        params["X"] = X_train2
-        params["Y"] = Y_train.T
-        ordinary_linear_rls_first_step = RLS(**params)
-        firststeploo = ordinary_linear_rls_first_step.computeLOO().T
-        params = {}
-        params["regparam"] = regparam1
-        params["X"] = X_train1
-        params["Y"] = firststeploo
-        ordinary_linear_rls_second_step = RLS(**params)
-        secondsteploo_linear_rls = ordinary_linear_rls_second_step.computeLOO()
-        #print 'Basic RLS', secondsteploo[0, 0]
-        
-        print
-        #print type(linear_kron_testpred), type(kernel_kron_testpred), type(ordrls_testpred)
-        #print linear_kron_testpred[0, 0], kernel_kron_testpred[0, 0], ordrls_testpred[0, 0]
-        #print linear_kron_testpred[0, 1], kernel_kron_testpred[0, 1], ordrls_testpred[0, 1]
-        #print linear_kron_testpred[1, 0], kernel_kron_testpred[1, 0], ordrls_testpred[1, 0]
-        #print linear_kron_testpred[0, 0], kernel_two_step_testpred[0, 0]
-        #print linear_kron_testpred[0, 1], kernel_two_step_testpred[0, 1]
-        #print linear_kron_testpred[1, 0], kernel_two_step_testpred[1, 0]
-        
-        linear_twostepoutofsampleloo = linear_two_step_learner.computeLOO()
-        kernel_twostepoutofsampleloo = kernel_two_step_learner.computeLOO()
         
         #Train linear two-step RLS without out-of-sample rows or columns for [0,0]
         params = {}
@@ -170,10 +155,9 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["xmatrix1"] = X_train1[range(1, X_train1.shape[0])]
         params["xmatrix2"] = X_train2[range(1, X_train2.shape[0])]
-        params["Y"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
-        linear_kron_learner = TwoStepRLS(**params)
-        linear_kron_model = linear_kron_learner.predictor
-        linear_kron_testpred_00 = linear_kron_model.predict(X_train1[0], X_train2[0])
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(range(1, train_rows), range(1, train_columns))].ravel(order = 'F')
+        linear_two_step_learner_00 = TwoStepRLS(**params)
+        linear_two_step_testpred_00 = linear_two_step_learner_00.predict(X_train1[0], X_train2[0])
         
         #Train linear two-step RLS without out-of-sample rows or columns for [2,4]
         params = {}
@@ -181,10 +165,9 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["xmatrix1"] = X_train1[[0, 1] + range(3, K_train1.shape[0])]
         params["xmatrix2"] = X_train2[[0, 1, 2, 3] + range(5, K_train2.shape[0])]
-        params["Y"] = Y_train[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
-        linear_kron_learner = TwoStepRLS(**params)
-        linear_kron_model = linear_kron_learner.predictor
-        linear_kron_testpred_24 = linear_kron_model.predict(X_train1[2], X_train2[4])
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_([0, 1] + range(3, train_rows), [0, 1, 2, 3] + range(5, train_columns))].ravel(order = 'F')
+        linear_two_step_learner_24 = TwoStepRLS(**params)
+        linear_two_step_testpred_24 = linear_two_step_learner_24.predict(X_train1[2], X_train2[4])
         
         #Train kernel two-step RLS without out-of-sample rows or columns for [0,0]
         params = {}
@@ -192,10 +175,9 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_(range(1, K_train1.shape[0]), range(1, K_train1.shape[1]))]
         params["kmatrix2"] = K_train2[np.ix_(range(1, K_train2.shape[0]), range(1, K_train2.shape[1]))]
-        params["Y"] = Y_train[np.ix_(range(1, Y_train.shape[0]), range(1, Y_train.shape[1]))]
-        kernel_kron_learner = TwoStepRLS(**params)
-        kernel_kron_model = kernel_kron_learner.predictor
-        kernel_kron_testpred_00 = kernel_kron_model.predict(K_train1[range(1, K_train1.shape[0]), 0], K_train2[0, range(1, K_train2.shape[0])])
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(range(1, train_rows), range(1, train_columns))].ravel(order = 'F')
+        kernel_two_step_learner_00 = TwoStepRLS(**params)
+        kernel_two_step_testpred_00 = kernel_two_step_learner_00.predict(K_train1[range(1, K_train1.shape[0]), 0], K_train2[0, range(1, K_train2.shape[0])])
         
         #Train kernel two-step RLS without out-of-sample rows or columns for [2,4]
         params = {}
@@ -203,20 +185,47 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1] + range(3, K_train1.shape[0]))]
         params["kmatrix2"] = K_train2[np.ix_([0, 1, 2, 3] + range(5, K_train2.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
-        params["Y"] = Y_train[np.ix_([0, 1] + range(3, Y_train.shape[0]), [0, 1, 2, 3] + range(5, Y_train.shape[1]))]
-        kernel_kron_learner = TwoStepRLS(**params)
-        kernel_kron_model = kernel_kron_learner.predictor
-        #print K_train1[range(1, K_train1.shape[0]), 0].shape, K_train2[0, range(1, K_train2.shape[0])].shape
-        kernel_kron_testpred_24 = kernel_kron_model.predict(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_([0, 1] + range(3, train_rows), [0, 1, 2, 3] + range(5, train_columns))].ravel(order = 'F')
+        kernel_two_step_learner_24 = TwoStepRLS(**params)
+        kernel_two_step_testpred_24 = kernel_two_step_learner_24.predict(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
         
-        print Y_train.shape, secondsteploo_linear_rls.shape, kernel_twostepoutofsampleloo.shape
-        print secondsteploo_linear_rls[0, 0], secondsteploo_kernel_rls[0, 0], linear_kron_testpred_00, kernel_kron_testpred_00, linear_twostepoutofsampleloo[0, 0], kernel_twostepoutofsampleloo[0, 0]
-        print secondsteploo_linear_rls[2, 4], secondsteploo_kernel_rls[2, 4], linear_kron_testpred_24, kernel_kron_testpred_24, linear_twostepoutofsampleloo[2, 4], kernel_twostepoutofsampleloo[2, 4]
-        print
-        #print 'Two-step RLS LOO', twostepoutofsampleloo[2, 4]
-        #print np.mean(np.abs(linear_kron_testpred - ordrls_testpred)), np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))
+        print('')
+        print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordnary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')
+        print('[0, 0]: ' + str(secondsteploo_linear_rls[0, 0])
+                         + ' ' + str(secondsteploo_kernel_rls[0, 0])
+                         + ' ' + str(linear_two_step_testpred_00)
+                         + ' ' + str(kernel_two_step_testpred_00)
+                         + ' ' + str(linear_twostepoutofsampleloo[0, 0])
+                         + ' ' + str(kernel_twostepoutofsampleloo[0, 0]))
+        print('[2, 4]: ' + str(secondsteploo_linear_rls[2, 4])
+                         + ' ' + str(secondsteploo_kernel_rls[2, 4])
+                         + ' ' + str(linear_two_step_testpred_24)
+                         + ' ' + str(kernel_two_step_testpred_24)
+                         + ' ' + str(linear_twostepoutofsampleloo[2, 4])
+                         + ' ' + str(kernel_twostepoutofsampleloo[2, 4]))
         
         
+        
+        #Train kernel two-step RLS with pre-computed kernel matrices and with output at position [2, 4] changed
+        Y_24 = Y_train.copy()
+        Y_24 = Y_24.reshape((train_rows, train_columns), order = 'F')
+        Y_24[2, 4] = 55.
+        Y_24 = Y_24.ravel(order = 'F')
+        params = {}
+        params["regparam1"] = regparam1
+        params["regparam2"] = regparam2
+        params["kmatrix1"] = K_train1
+        params["kmatrix2"] = K_train2
+        params["Y"] = Y_24
+        kernel_two_step_learner_Y_24 = TwoStepRLS(**params)
+        kernel_two_step_testpred_Y_24 = kernel_two_step_learner_Y_24.predict(K_test1, K_test2)
+        
+        
+        kernel_two_step_learner_inSampleLOO_24a = kernel_two_step_learner.in_sample_loo()[2, 4]
+        kernel_two_step_learner_inSampleLOO_24b = kernel_two_step_learner_Y_24.in_sample_loo()[2, 4]
+        print('')
+        print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [2, 4]')
+        print('[2, 4] ' + str(kernel_two_step_learner_inSampleLOO_24a) + ' ' + str(kernel_two_step_learner_inSampleLOO_24b))
         
         
         
@@ -236,10 +245,11 @@ class Test(unittest.TestCase):
         K_test1 = K_test2
         Y_train = 0.5 * (Y_train + Y_train.T)
         
-        rows, columns = Y_train.shape
-        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns
-        trainlabelcount = rows * columns
-        indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
+        Y_train = Y_train.ravel(order = 'F')
+        Y_test = Y_test.ravel(order = 'F')
+        train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
+        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
+        trainlabelcount = train_rows * train_columns
         
         #Train symmetric kernel two-step RLS with pre-computed kernel matrices
         params = {}
@@ -249,8 +259,7 @@ class Test(unittest.TestCase):
         params["kmatrix2"] = K_train2
         params["Y"] = Y_train
         kernel_two_step_learner = TwoStepRLS(**params)
-        kernel_two_step_model = kernel_two_step_learner.predictor
-        kernel_two_step_testpred = kernel_two_step_model.predict(K_test1, K_test2)
+        kernel_two_step_testpred = kernel_two_step_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
         
         #Train two-step RLS without out-of-sample rows or columns
         rowind, colind = 2, 4
@@ -266,15 +275,16 @@ class Test(unittest.TestCase):
         params["regparam2"] = regparam2
         params["kmatrix1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
         params["kmatrix2"] = K_train2[np.ix_(traincolinds, traincolinds)]
-        params["Y"] = Y_train[np.ix_(trainrowinds, traincolinds)]
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(trainrowinds, traincolinds)].ravel(order = 'F')
         kernel_kron_learner = TwoStepRLS(**params)
-        kernel_kron_model = kernel_kron_learner.predictor
-        #kernel_kron_testpred = kernel_kron_model.predict(K_train1[np.ix_([rowind, colind], trainrowinds)], K_train2[np.ix_([rowind, colind], traincolinds)])
-        kernel_kron_testpred = kernel_kron_model.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)])
-        print kernel_kron_testpred
+        kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')
         
-        fcsho = kernel_two_step_learner.compute_symmetric_double_LOO()
-        print fcsho[2, 4]
+        fcsho = kernel_two_step_learner.compute_symmetric_double_LOO().reshape((train_rows, train_columns), order = 'F')
+        
+        print('')
+        print('Symmetric double out-of-sample LOO: Test prediction, LOO')
+        print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]))
+        
         
 
 

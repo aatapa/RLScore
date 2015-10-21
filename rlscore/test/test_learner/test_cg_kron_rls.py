@@ -79,10 +79,13 @@ class Test(unittest.TestCase):
         regparam = 0.0001
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
-        rows, columns = Y_train.shape
-        rowstimescols = rows * columns
+        Y_train = Y_train.ravel(order = 'F')
+        Y_test = Y_test.ravel(order = 'F')
+        train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
+        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
+        rowstimescols = train_rows * train_columns
         allindices = np.arange(rowstimescols)
-        all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (rows, columns), order = 'F') 
+        all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (train_rows, train_columns), order = 'F') 
         incinds = pyrandom.sample(allindices, 50)
         label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds] 
         Y_train_known_outputs = Y_train.reshape(rowstimescols, order = 'F')[incinds]
@@ -97,7 +100,7 @@ class Test(unittest.TestCase):
         ordrls_model = ordrls_learner.predictor
         K_Kron_test = np.kron(K_test2, K_test1)[:, incinds]
         ordrls_testpred = ordrls_model.predict(K_Kron_test)
-        ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1], order = 'F')
+        ordrls_testpred = ordrls_testpred.reshape((test_rows, test_columns), order = 'F')
         
         #Train linear Kronecker RLS
         class TestCallback():
@@ -106,7 +109,7 @@ class Test(unittest.TestCase):
             def callback(self, learner):
                 self.round = self.round + 1
                 tp = LinearPairwisePredictor(learner.W).predict(X_test1, X_test2)
-                print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred))))
+                print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred.ravel(order = 'F')))))
             def finished(self, learner):
                 print('finished')
         params = {}
@@ -119,7 +122,7 @@ class Test(unittest.TestCase):
         tcb = TestCallback()
         params['callback'] = tcb
         linear_kron_learner = CGKronRLS(**params)
-        linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
+        linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2).reshape((test_rows, test_columns), order = 'F')
         linear_kron_testpred_alt = linear_kron_learner.predict(X_test1, X_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
         #Train kernel Kronecker RLS
@@ -136,13 +139,13 @@ class Test(unittest.TestCase):
             def callback(self, learner):
                 self.round = self.round + 1
                 tp = KernelPairwisePredictor(learner.A, learner.label_row_inds, learner.label_col_inds).predict(K_test1, K_test2)
-                print self.round, np.mean(np.abs(tp - ordrls_testpred))
+                print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred.ravel(order = 'F')))))
             def finished(self, learner):
-                print 'finished'
+                print('finished')
         tcb = KernelCallback()
         params['callback'] = tcb
         kernel_kron_learner = CGKronRLS(**params)
-        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2)
+        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
         kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
         
         print('Predictions: Linear CgKronRLS, Kernel CgKronRLS, ordinary RLS')

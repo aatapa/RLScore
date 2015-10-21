@@ -20,17 +20,19 @@ class KronRLS(PairwisePredictorInterface):
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
         Y = array_tools.as_labelmatrix(Y)
-        self.Y = Y
         if kwargs.has_key('kmatrix1'):
             K1 = np.mat(kwargs['kmatrix1'])
             K2 = np.mat(kwargs['kmatrix2'])
+            Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
             X1 = np.mat(kwargs['xmatrix1'])
             X2 = np.mat(kwargs['xmatrix2'])
+            Y = Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
+        self.Y = Y
         if kwargs.has_key("regparam"):
             self.regparam = kwargs["regparam"]
         else:
@@ -110,36 +112,35 @@ class KronRLS(PairwisePredictorInterface):
     def solve_linear_conditional_ranking(self, regparam):
         self.regparam = regparam
         X1, X2 = self.X1, self.X2
-        Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
-        if not self.trained:
-            self.trained = True
-            svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
-            self.svals1 = svals1.T
-            self.evals1 = np.multiply(self.svals1, self.svals1)
-            self.V = V
-            self.rsvecs1 = np.mat(rsvecs1)
-            
-            qlen = X2.shape[0]
-            onevec = (1./np.math.sqrt(qlen))*np.mat(np.ones((qlen,1)))
-            C = np.mat(np.eye(qlen))-onevec*onevec.T
-            
-            svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T * C)
-            self.svals2 = svals2.T
-            self.evals2 = np.multiply(self.svals2, self.svals2)
-            self.U = U
-            self.rsvecs2 = np.mat(rsvecs2)
-            
-            self.VTYU = V.T * Y * C * U
+        Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
+        
+        svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
+        self.svals1 = svals1.T
+        self.evals1 = np.multiply(self.svals1, self.svals1)
+        self.V = V
+        self.rsvecs1 = np.mat(rsvecs1)
+        
+        qlen = X2.shape[0]
+        onevec = (1. / np.math.sqrt(qlen)) * np.mat(np.ones((qlen, 1)))
+        C = np.mat(np.eye(qlen)) - onevec * onevec.T
+        
+        svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T * C)
+        self.svals2 = svals2.T
+        self.evals2 = np.multiply(self.svals2, self.svals2)
+        self.U = U
+        self.rsvecs2 = np.mat(rsvecs2)
+        
+        self.VTYU = V.T * Y * C * U
         
         kronsvals = self.svals1 * self.svals2.T
         
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.predictor = LinearPairwisePredictor(np.asarray(self.W))
+        self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
-    def imputationLOO(self):
+    def in_sample_loo(self):
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
@@ -159,7 +160,7 @@ class KronRLS(PairwisePredictorInterface):
             #    #loopred[i, j] = P[i, j]
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
-        return np.asarray(loopred)
+        return np.asarray(loopred).ravel(order = 'F')
     
     
     def compute_ho(self, row_inds, col_inds):
@@ -215,7 +216,7 @@ class KronRLS(PairwisePredictorInterface):
         return np.asarray(hopred.reshape(rowcount, colcount))
     
     
-    def nested_imputationLOO(self, outer_row_coord, outer_col_coord,):
+    def nested_in_sample_loo(self, outer_row_coord, outer_col_coord,):
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
@@ -272,7 +273,7 @@ class KronRLS(PairwisePredictorInterface):
         return np.artray(loopred)
     
     
-    def nested_imputationLOO_BU(self, outer_row_coord, outer_col_coord):
+    def nested_in_sample_loo_BU(self, outer_row_coord, outer_col_coord):
         P = self.K1.T * self.A * self.K2
         P_out = P[outer_row_coord, outer_col_coord]
         Y_out = self.Y[outer_row_coord, outer_col_coord]
@@ -335,7 +336,7 @@ class KronRLS(PairwisePredictorInterface):
         self.diagGcache = self.Vsqr * self.newlooevals.T * self.Usqr.T
     
     
-    def nested_imputationLooApproximation(self, outer_row_coord, outer_col_coord):
+    def nested_in_sample_looApproximation(self, outer_row_coord, outer_col_coord):
         Y_out = self.Y[outer_row_coord, outer_col_coord]
         
         #d = (self.Vsqr[outer_row_coord] * self.newlooevals.T * self.Usqr[outer_col_coord].T)[0, 0]

@@ -20,17 +20,19 @@ class TwoStepRLS(PairwisePredictorInterface):
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
         Y = array_tools.as_labelmatrix(Y)
-        self.Y = Y
         if kwargs.has_key('kmatrix1'):
             K1 = np.mat(kwargs['kmatrix1'])
             K2 = np.mat(kwargs['kmatrix2'])
+            Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
             X1 = np.mat(kwargs['xmatrix1'])
             X2 = np.mat(kwargs['xmatrix2'])
+            Y = Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
+        self.Y = Y
         if kwargs.has_key('regparam1'):
             self.regparam1 = kwargs["regparam1"]
         else:
@@ -125,7 +127,30 @@ class TwoStepRLS(PairwisePredictorInterface):
         self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
-    def computeLOO(self):
+    def in_sample_loo(self):
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
+            P = X1 * self.W * X2.T
+        else:
+            P = self.K1 * self.A * self.K2.T
+        
+        newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
+        Vsqr = np.multiply(self.V, self.V)
+        Usqr = np.multiply(self.U, self.U)
+        #loopred = mat(zeros((self.V.shape[0], self.U.shape[0])))
+        #print self.U.shape[0], self.V.shape[0], self.Y.shape, loopred.shape, P.shape
+        #for i in range(self.V.shape[0]):
+            #cache = Vsqr[i] * newevals.T
+            #for j in range(self.U.shape[0]):
+            #    ccc = (cache * Usqr[j].T)[0, 0]
+            #    loopred[i, j] = (1. / (1. - ccc)) * (P[i, j] - ccc * self.Y[i, j])
+            #    #loopred[i, j] = P[i, j]
+        ccc = Vsqr * newevals.T * Usqr.T
+        loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
+        return np.asarray(loopred)
+    
+    
+    def out_of_sample_loo(self):
         
         bevals_col = np.multiply(self.evals2, self.newevals2).T
         
@@ -218,63 +243,5 @@ class TwoStepRLS(PairwisePredictorInterface):
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
         cython_two_step_rls_cv.compute_symmetric_double_loo(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results
-
-    
-# class KernelPairwisePredictor(object):
-#     
-#     def __init__(self, A, kernel = None):
-#         """Initializes the dual model
-#         @param A: dual coefficient matrix
-#         @type A: numpy matrix"""
-#         self.A = A
-#         self.kernel = kernel
-#     
-#     
-#     def predict(self, K1pred, K2pred):
-#         """Computes predictions for test examples.
-# 
-#         Parameters
-#         ----------
-#         K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
-#             the first part of the test data matrix
-#         K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
-#             the second part of the test data matrix
-#         
-#         Returns
-#         ----------
-#         P: array, shape = [n_samples1, n_samples2]
-#             predictions
-#         """
-#         #print K1pred.shape, self.A.shape, K2pred.shape
-#         P = np.array(np.dot(np.dot(K1pred, self.A), K2pred.T))
-#         return P
-# 
-# 
-# class LinearPairwisePredictor(object):
-#     
-#     def __init__(self, W):
-#         """Initializes the linear model
-#         @param W: primal coefficient matrix
-#         @type W: numpy matrix"""
-#         self.W = W
-#     
-#     
-#     def predict(self, X1pred, X2pred):
-#         """Computes predictions for test examples.
-# 
-#         Parameters
-#         ----------
-#         X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
-#             the first part of the test data matrix
-#         X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
-#             the second part of the test data matrix
-#         
-#         Returns
-#         ----------
-#         P: array, shape = [n_samples1, n_samples2]
-#             predictions
-#         """
-#         P = np.array(np.dot(np.dot(X1pred, self.W), X2pred.T))
-#         return P
 
 

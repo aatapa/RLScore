@@ -20,45 +20,59 @@ def sparse_mat_from_left(*args):
 def sparse_mat_from_right(*args):
     sparse_kronecker_multiplication_tools.sparse_mat_from_right(*args)
 
-def x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, row_inds_C, col_inds_C, row_inds_B, col_inds_B):
+def x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, row_inds_C = None, col_inds_C = None, row_inds_B = None, col_inds_B = None):
+    if len(M.shape) == 1:
+        M = M[..., np.newaxis]
     rc_m, cc_m = M.shape
+    if len(N.shape) == 1:
+        N = N[..., np.newaxis]
     rc_n, cc_n = N.shape
+    
+    if row_inds_C == None:
+        row_inds_C, col_inds_C = np.unravel_index(np.arange(rc_m * rc_n), (rc_n, rc_m), order = 'F')
+        #Not sure why the next row is necessary
+        row_inds_C, col_inds_C = np.array(row_inds_C, dtype = np.int32), np.array(col_inds_C, dtype = np.int32)
+    else:
+        assert len(row_inds_C) == len(col_inds_C)
+    if row_inds_B == None:
+        row_inds_B, col_inds_B = np.unravel_index(np.arange(cc_m * cc_n), (cc_n, cc_m), order = 'F')
+        #Not sure why the next row is necessary
+        row_inds_B, col_inds_B = np.array(row_inds_B, dtype = np.int32), np.array(col_inds_B, dtype = np.int32)
+    else:
+        assert len(row_inds_B) == len(col_inds_B)
+
     u_len = len(row_inds_C)
     v_len = len(row_inds_B)
     
     if rc_m * v_len + cc_n * u_len < rc_n * v_len + cc_m * u_len:
-    #if False:
-    #if True:
-        #print 'foo'
         temp = np.zeros((cc_n, rc_m))
         sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, v, M.T, row_inds_B, col_inds_B, v_len, rc_m)
         x_after = np.zeros((u_len))
         sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, N, temp, row_inds_C, col_inds_C, u_len, cc_n)
-        return x_after
     else:
-        #print 'bar'
         temp = np.zeros((rc_n, cc_m))
         sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, N, v, row_inds_B, col_inds_B, v_len, rc_n)
         x_after = np.zeros((u_len))
         sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, temp, M.T, row_inds_C, col_inds_C, u_len, cc_m)
-        return x_after
+    return x_after
+
 
 def x_gets_A_kron_B_times_sparse_v(v, A, B, row_inds, col_inds):
+    if len(A.shape) == 1:
+        A = A[..., np.newaxis]
     rc_a, cc_a = A.shape
+    if len(B.shape) == 1:
+        B = B[..., np.newaxis]
     rc_b, cc_b = B.shape
     nzc_v = len(row_inds)
     len_c = rc_a * cc_b
     
     if rc_a * cc_a * cc_b + cc_b * nzc_v < rc_b * cc_a * cc_b + cc_a * nzc_v:
-    #if False:
-    #if True:
-        #print 'foo'
         temp = np.zeros((cc_a, cc_b))
         sparse_kronecker_multiplication_tools.sparse_mat_from_left(temp, v, B, row_inds, col_inds, nzc_v, cc_b)
         temp = np.dot(A, temp)
         return temp.reshape((len_c,), order = 'F')
     else:
-        #print 'bar'
         temp = np.zeros((rc_a, rc_b))
         sparse_kronecker_multiplication_tools.sparse_mat_from_right(temp, A, v, row_inds, col_inds, nzc_v, rc_a)
         temp = np.dot(temp, B)
@@ -66,7 +80,11 @@ def x_gets_A_kron_B_times_sparse_v(v, A, B, row_inds, col_inds):
 
 
 def x_gets_subset_of_A_kron_B_times_v(v, A, B, row_inds, col_inds):
+    if len(A.shape) == 1:
+        A = A[..., np.newaxis]
     rc_a, cc_a = A.shape
+    if len(B.shape) == 1:
+        B = B[..., np.newaxis]
     rc_b, cc_b = B.shape
     nzc_x = len(row_inds)
     
@@ -74,8 +92,6 @@ def x_gets_subset_of_A_kron_B_times_v(v, A, B, row_inds, col_inds):
     temp = v.reshape((cc_a, rc_b), order = 'F')
     
     if rc_a * cc_a * cc_b + cc_b * nzc_x < rc_b * cc_a * cc_b + cc_a * nzc_x:
-    #if False:
-    #if True:
         temp = np.dot(A, temp)
         sparse_kronecker_multiplication_tools.compute_subset_of_matprod_entries(x_after, temp, B, row_inds, col_inds, nzc_x, rc_b)
         return x_after
