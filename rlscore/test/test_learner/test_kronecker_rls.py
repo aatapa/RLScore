@@ -77,10 +77,13 @@ class Test(unittest.TestCase):
         regparam = 0.001
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
-        rows, columns = Y_train.shape
-        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, rows, columns
-        trainlabelcount = rows * columns
-        indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
+        Y_train = Y_train.ravel(order = 'F')
+        Y_test = Y_test.ravel(order = 'F')
+        train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
+        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
+        #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, train_rows, train_columns
+        trainlabelcount = train_rows * train_columns
+        indmatrix = np.mat(range(trainlabelcount)).T.reshape(train_rows, train_columns)
         
         #Train linear Kronecker RLS with data-matrices
         params = {}
@@ -89,7 +92,7 @@ class Test(unittest.TestCase):
         params["xmatrix2"] = X_train2
         params["Y"] = Y_train
         linear_kron_learner = KronRLS(**params)
-        linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
+        linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2).reshape((test_rows, test_columns), order = 'F')
         
         #Train kernel Kronecker RLS with pre-computed kernel matrices
         params = {}
@@ -98,20 +101,20 @@ class Test(unittest.TestCase):
         params["kmatrix2"] = K_train2
         params["Y"] = Y_train
         kernel_kron_learner = KronRLS(**params)
-        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2)
+        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
         
         #Train an ordinary RLS regressor for reference
-        K_Kron_train_x = np.kron(K_train1, K_train2)
+        K_Kron_train_x = np.kron(K_train2, K_train1)
         params = {}
         params["X"] = K_Kron_train_x
         params["kernel"] = "precomputed"
-        params["Y"] = Y_train.reshape(trainlabelcount, 1)
+        params["Y"] = Y_train.reshape(trainlabelcount, 1, order = 'F')
         ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.predictor
-        K_Kron_test_x = np.kron(K_test1, K_test2)
+        K_Kron_test_x = np.kron(K_test2, K_test1)
         ordrls_testpred = ordrls_model.predict(K_Kron_test_x)
-        ordrls_testpred = ordrls_testpred.reshape(Y_test.shape[0], Y_test.shape[1])
+        ordrls_testpred = ordrls_testpred.reshape((test_rows, test_columns), order = 'F')
         
         print('')
         print('Prediction: linear KronRLS, kernel KronRLS, ordinary RLS')
@@ -122,9 +125,9 @@ class Test(unittest.TestCase):
         print(str(np.mean(np.abs(linear_kron_testpred - ordrls_testpred))) + ' ' + str(np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))))
         
         print('')
-        ordrls_loopred = ordrls_learner.computeLOO().reshape(Y_train.shape[0], Y_train.shape[1])
-        linear_kron_loopred = linear_kron_learner.imputationLOO()
-        kernel_kron_loopred = kernel_kron_learner.imputationLOO()
+        ordrls_loopred = ordrls_learner.computeLOO().reshape((train_rows, train_columns), order = 'F')
+        linear_kron_loopred = linear_kron_learner.in_sample_loo().reshape((train_rows, train_columns), order = 'F')
+        kernel_kron_loopred = kernel_kron_learner.in_sample_loo().reshape((train_rows, train_columns), order = 'F')
         print('In-sample LOO: linear KronRLS, kernel KronRLS, ordinary RLS')
         print('[0, 0] ' + str(linear_kron_loopred[0, 0]) + ' ' + str(kernel_kron_loopred[0, 0]) + ' ' + str(ordrls_loopred[0, 0]))
         print('[0, 1] ' + str(linear_kron_loopred[0, 1]) + ' ' + str(kernel_kron_loopred[0, 1]) + ' ' + str(ordrls_loopred[0, 1]))
@@ -138,12 +141,11 @@ class Test(unittest.TestCase):
         regparam = 0.001
         
         K_train1, K_train2, Y_train, K_test1, K_test2, Y_test, X_train1, X_train2, X_test1, X_test2 = self.generate_xortask()
-        rows, columns = Y_train.shape
-        trainlabelcount = rows * columns
-        indmatrix = np.mat(range(trainlabelcount)).T.reshape(rows, columns)
+        train_rows, train_columns = Y_train.shape
+        trainlabelcount = train_rows * train_columns
         
-        K_Kron_train_x = np.kron(K_train1, K_train2)
-        K_test_x = np.kron(K_test1, K_test2)
+        K_Kron_train_x = np.kron(K_train2, K_train1)
+        K_test_x = np.kron(K_test2, K_test1)
         
         
         #Train linear Conditional Ranking Kronecker RLS
@@ -160,7 +162,12 @@ class Test(unittest.TestCase):
         params["X"] = K_Kron_train_x
         params["kernel"] = "precomputed"
         params["Y"] = Y_train.reshape(trainlabelcount, 1)
-        params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        #qids = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        qids = []
+        for i in range(Y_train.shape[0]):
+            for j in range(Y_train.shape[1]):
+                qids.append(i)
+        params["qids"] = qids
         rankrls_learner = QueryRankRLS(**params)
         rankrls_learner.solve(regparam)
         K_test_x = np.kron(K_test1, K_test2)
@@ -219,7 +226,7 @@ class Test(unittest.TestCase):
         ordrls_model = ordrls_learner.predictor
         
         ordrls_loopred = ordrls_learner.computeLOO().reshape(Y_train.shape[0], Y_train.shape[1])
-        kron_loopred = linear_kron_learner.imputationLOO()
+        kron_loopred = linear_kron_learner.in_sample_loo()
         print 'LOO', np.sum(np.abs(ordrls_loopred-kron_loopred))
         
         #return
@@ -233,7 +240,7 @@ class Test(unittest.TestCase):
         #Test nested LOO in setting 1
         outer_row_coord, outer_col_coord = 2, 5
         inner_row_coord, inner_col_coord = 6, 7
-        kron_lpopred = linear_kron_learner.nested_imputationLOO(outer_row_coord, outer_col_coord)
+        kron_lpopred = linear_kron_learner.nested_in_sample_loo(outer_row_coord, outer_col_coord)
         kron_lpopred[outer_row_coord, outer_col_coord] = 0.
         ordrls_lpopred = np.mat(np.zeros((trainlabelcount, 1)))
         for i in range(trainlabelcount):
