@@ -160,7 +160,12 @@ class Test(unittest.TestCase):
         params["X"] = K_Kron_train_x
         params["kernel"] = "precomputed"
         params["Y"] = Y_train.reshape(trainlabelcount, 1)
-        params["qids"] = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        #qids = [range(i*Y_train.shape[1], (i+1)*Y_train.shape[1]) for i in range(Y_train.shape[0])]
+        qids = []
+        for i in range(Y_train.shape[0]):
+            for j in range(Y_train.shape[1]):
+                qids.append(i)
+        params["qids"] = qids
         rankrls_learner = QueryRankRLS(**params)
         rankrls_learner.solve(regparam)
         K_test_x = np.kron(K_test1, K_test2)
