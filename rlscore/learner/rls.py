@@ -185,16 +185,15 @@ class RLS(PredictorInterface):
     
     def computePairwiseCV(self, pairs_start_inds, pairs_end_inds):
         
-        
         pairslen = len(pairs_start_inds)
         assert len(pairs_end_inds) == pairslen
         
         bevals = multiply(self.evals, self.newevals)
         
         svecsbevals = multiply(self.svecs, bevals)
+         
         svecsbevalssvecsT = svecsbevals * self.svecs.T
-        svecsbevalssvecsTY = svecsbevalssvecsT * self.Y
-        
+        svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
         cython_pairwise_cv_for_rls.computePairwiseCV(pairslen,
