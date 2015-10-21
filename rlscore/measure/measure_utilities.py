@@ -25,6 +25,26 @@ def wrapper(measure, Y, Y_predicted, qids):
     perfs = perfs/normalizers
     return perfs
 
+def qids_to_splits(qids):
+    """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
+    
+    @param qids: A list of qid parameters.
+    @type qids: List of integers."""
+    qidmap = {}
+    i = 0
+    for qid in qids:
+        if not qid in qidmap:
+            qidmap[qid] = i
+            i+=1
+    new_qids = []
+    for qid in qids:
+        new_qids.append(qidmap[qid])
+    qidcount = np.max(new_qids)+1
+    splits = [[] for i in range(qidcount)]
+    for i, qid in enumerate(new_qids):
+        splits[qid].append(i) 
+    return splits
+
 
 def aggregate(performances):
     normalizer = np.sum(np.logical_not(np.isnan(performances)))

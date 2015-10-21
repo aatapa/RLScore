@@ -12,6 +12,8 @@ from rlscore.utilities import array_tools
 from rlscore.measure import sqmprank
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
+from rlscore.learner.query_rankrls import map_qids
+from rlscore.measure.measure_utilities import qids_to_splits
 
 class CGRankRLS(PredictorInterface):
     """Conjugate gradient RankRLS.
@@ -70,7 +72,7 @@ class CGRankRLS(PredictorInterface):
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
 
-    def __init__(self, X, Y, regparam = 1.0, qids = None, validation_features=None, validation_labels=None, validation_qids=None, **kwargs):
+    def __init__(self, X, Y, regparam = 1.0, qids = None, callbackfun=None, **kwargs):
         self.regparam = regparam
         self.callbackfun = None
         self.Y = array_tools.as_labelmatrix(Y)
@@ -79,62 +81,63 @@ class CGRankRLS(PredictorInterface):
         if self.Y.shape[1] > 1:
             raise Exception('CGRankRLS does not currently work in multi-label mode')
         self.learn_from_labels = True
-        if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
-            validation_X = kwargs['validation_features']
-            validation_Y = kwargs['validation_labels']
-            if 'validation_qids' in kwargs:
-                validation_qids = kwargs['validation_qids']
-            else:
-                validation_qids = None
-            self.callbackfun = EarlyStopCB(validation_X, validation_Y, validation_qids)
+        self.callbackfun = callbackfun
         self.X = csc_matrix(X.T)
+        #if qids != None:
+        #    self.setQids(qids)
+        #else:
+        #    self.qidmap = None
+        #self.train()
         if qids != None:
-            self.setQids(qids)
+            self.qids = map_qids(qids)
+            self.splits = qids_to_splits(self.qids)
         else:
-            self.qidmap = None
+            self.qids = None
+        #self.solve(self.regparam)
         self.train()
     
     
-    def setQids(self, qids):
-        """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
-        
-        @param qids: A list of qid parameters.
-        @type qids: List of integers."""
-        
-        self.qidlist = [-1 for i in range(self.size)]
-        for i in range(len(qids)):
-            for j in qids[i]:
-                if j >= self.size:
-                    raise Exception("Index %d in query out of training set index bounds" %j)
-                elif j < 0:
-                    raise Exception("Negative index %d in query, query indices must be non-negative" %j)
-                else:
-                    self.qidlist[j] = i
-        if -1 in self.qidlist:
-            raise Exception("Not all training examples were assigned a query")
-        
-        
-        self.qidmap = {}
-        for i in range(len(self.qidlist)):
-            qid = self.qidlist[i]
-            if self.qidmap.has_key(qid):
-                sameqids = self.qidmap[qid]
-                sameqids.append(i)
-            else:
-                self.qidmap[qid] = [i]
-        self.indslist = []
-        for qid in self.qidmap.keys():
-            self.indslist.append(self.qidmap[qid])
+#     def setQids(self, qids):
+#         """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
+#         
+#         @param qids: A list of qid parameters.
+#         @type qids: List of integers."""
+#         
+#         self.qidlist = [-1 for i in range(self.size)]
+#         for i in range(len(qids)):
+#             for j in qids[i]:
+#                 if j >= self.size:
+#                     raise Exception("Index %d in query out of training set index bounds" %j)
+#                 elif j < 0:
+#                     raise Exception("Negative index %d in query, query indices must be non-negative" %j)
+#                 else:
+#                     self.qidlist[j] = i
+#         if -1 in self.qidlist:
+#             raise Exception("Not all training examples were assigned a query")
+#         
+#         
+#         self.qidmap = {}
+#         for i in range(len(self.qidlist)):
+#             qid = self.qidlist[i]
+#             if self.qidmap.has_key(qid):
+#                 sameqids = self.qidmap[qid]
+#                 sameqids.append(i)
+#             else:
+#                 self.qidmap[qid] = [i]
+#         self.indslist = []
+#         for qid in self.qidmap.keys():
+#             self.indslist.append(self.qidmap[qid])
 
     
     
     def train(self):
         regparam = self.regparam
         #regparam = 0.
-        if self.qidmap != None:
-            P = sp.lil_matrix((self.size, len(self.qidmap.keys())))
-            for qidind in range(len(self.indslist)):
-                inds = self.indslist[qidind]
+        qids = self.qids
+        if qids != None:
+            P = sp.lil_matrix((self.size, len(set(qids))))
+            for qidind in range(len(self.splits)):
+                inds = self.splits[qidind]
                 qsize = len(inds)
                 for i in inds:
                     P[i, qidind] = 1. / sqrt(qsize)
@@ -258,7 +261,7 @@ class EarlyStopCB(object):
     def __init__(self, X_valid, Y_valid, qids_valid = None, measure=sqmprank, maxiter=10):
         self.X_valid = array_tools.as_matrix(X_valid)
         self.Y_valid = array_tools.as_labelmatrix(Y_valid)
-        self.qids_valid = qids_valid
+        self.qids_valid = qids_to_splits(qids_valid)
         self.measure = measure
         self.bestperf = None
         self.bestA = None

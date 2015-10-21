@@ -216,13 +216,13 @@ def read_svmlight(fname):
     X = sparse.coo_matrix((values,(rows,columns)),(linecounter, feaspace_dim), dtype=float64)
     X = X.tocsr()
     Y = np.array(all_outputs)
-    if not qids == None:
-        Q = mapQids(qids)
-    else:
-        Q = None
-    f.close()
+    #if not qids == None:
+    #    Q = mapQids(qids)
+    #else:
+    #    Q = None
+    #f.close()
     #return {"spmatrix":X, "matrix":Y, "qids":Q}
-    return X, Y, Q
+    return X, Y, qids
 
 
 def read_preferences(fname):
@@ -264,8 +264,8 @@ def read_qids(fname):
     if len(qids) == len(set(qids)):
         raise Exception("Error in the qid file: all the supplied queries consist only of a single example\n")
     f.close()
-    Q = mapQids(qids)
-    return Q
+    #Q = mapQids(qids)
+    return qids
 
 def mapQids(qids):
     q_partition = []

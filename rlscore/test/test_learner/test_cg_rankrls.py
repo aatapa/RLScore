@@ -7,7 +7,7 @@ from scipy.sparse import coo_matrix
 from rlscore.learner import CGRankRLS
 from rlscore.learner.cg_rankrls import PCGRankRLS
 from rlscore.kernel import LinearKernel
-
+from rlscore.learner import QueryRankRLS
 
 
 class Test(unittest.TestCase):
@@ -81,5 +81,30 @@ class Test(unittest.TestCase):
                     self.assertAlmostEqual(W[i], W2[i], places=4)
                     
     def testQueryData(self):
-        """ToBeImplemented"""
-        pass
+        np.random.seed(100)
+        floattype = np.float64
+        m, n = 100, 400 #data, features
+        Xtrain = np.mat(np.random.rand(m, n))
+        Y = np.mat(np.zeros((m, 1), dtype=floattype))
+        Y[:, 0] = np.sum(Xtrain, 1)
+        qidlist = [0 for i in range(100)]
+        for h in range(5, 12):
+            qidlist[h] = 1
+        for h in range(12, 32):
+            qidlist[h] = 2
+        for h in range(32, 34):
+            qidlist[h] = 3
+        for h in range(34, 85):
+            qidlist[h] = 4
+        for h in range(85, 100):
+            qidlist[h] = 5
+        kwargs = {}
+        kwargs['X'] = Xtrain
+        kwargs['Y'] = Y
+        kwargs['qids'] = qidlist
+        kwargs['regparam'] = 1.0
+        learner1 = QueryRankRLS(**kwargs)
+        learner2 = CGRankRLS(**kwargs)
+        mdiff = np.max(1. - learner1.predictor.W / learner2.predictor.W)
+        if mdiff > 0.01:
+            assert False

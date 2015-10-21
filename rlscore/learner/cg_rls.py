@@ -32,10 +32,6 @@ class CGRLS(PredictorInterface):
         regularization parameter
     Y: {array-like}, shape = [n_samples] or [n_samples, 1]
         Training set labels
-    validation_features:: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix for validation set, needed if early stopping used
-    validation_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
-        Validation set labels, needed if early stopping used
     bias: float, optional
         value of constant feature added to each data point (default 0)
         
@@ -50,7 +46,7 @@ class CGRLS(PredictorInterface):
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
 
-    def __init__(self, X, Y, regparam = 1.0, bias = 1.0, validation_features=None, validation_labels=None, **kwargs):
+    def __init__(self, X, Y, regparam = 1.0, bias = 1.0, callbackfun = None, **kwargs):
         self.Y = array_tools.as_labelmatrix(Y)
         self.X = csc_matrix(X.T)
         self.bias = bias
@@ -59,10 +55,7 @@ class CGRLS(PredictorInterface):
             bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
             self.X = sparse.vstack([self.X,bias_slice]).tocsc()
         self.X_csr = self.X.tocsr()
-        if validation_features != None and validation_labels != None:
-            self.callbackfun = EarlyStopCB(validation_features, validation_labels)
-        else:
-            self.callbackfun = None
+        self.callbackfun = callbackfun
         self.results = {}
         self.train()
     
@@ -89,7 +82,7 @@ class CGRLS(PredictorInterface):
             cb = None
         try:
             self.A = np.mat(cg(G, Y, callback=cb)[0]).T
-        except Finished, e:
+        except Finished:
             pass
         if self.callbackfun != None:
             self.callbackfun.finished(self)

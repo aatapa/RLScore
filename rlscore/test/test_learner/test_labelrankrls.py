@@ -78,20 +78,20 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool["X"] = Xtrain
         rpool["Y"] = Y
-        rpool["qids"] = mapQids(qidlist)
+        rpool["qids"] = qidlist
         primalrls = QueryRankRLS(**rpool)        
         
         rpool = {}
         rpool["X"] = K
         rpool['kernel'] = 'precomputed'
         rpool["Y"] = Y
-        rpool["qids"] = mapQids(qidlist)        
+        rpool["qids"] = qidlist        
         dualrls = QueryRankRLS(**rpool)
         
         rpool = {}
         rpool['X'] = Xcv
         rpool['Y'] = Yho
-        rpool['qids'] = mapQids(qidlist_cv)
+        rpool['qids'] = qidlist_cv
         primalrls_naive = QueryRankRLS(**rpool)
 
         rpool = {}
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         rpool['kernel'] = 'precomputed'        
         rpool['Y'] = Yho
         #rpool['X'] = Xcv
-        rpool['qids'] = mapQids(qidlist_cv)
+        rpool['qids'] = qidlist_cv
         dualrls_naive = QueryRankRLS(**rpool)
         
         testkm = K[np.ix_(hocompl, hoindices)]

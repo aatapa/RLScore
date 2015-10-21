@@ -24,6 +24,8 @@ for i in range(len(grid)):
     print "parameter %f cv_performance %f" %(grid[i], perfs[i])
 P = learner.predict(test_features)
 from rlscore.measure.measure_utilities import UndefinedPerformance
+from rlscore.measure.measure_utilities import qids_to_splits
+test_qids = qids_to_splits(test_qids)
 perfs = []
 for query in test_qids:
     try:
