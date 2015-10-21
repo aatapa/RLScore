@@ -70,7 +70,7 @@ class CGRankRLS(PredictorInterface):
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
 
-    def __init__(self, X, Y, regparam = 1.0, qids = None, validation_features=None, validation_labels=None, validation_qids=None, **kwargs):
+    def __init__(self, X, Y, regparam = 1.0, qids = None, callbackfun=None, **kwargs):
         self.regparam = regparam
         self.callbackfun = None
         self.Y = array_tools.as_labelmatrix(Y)
@@ -79,14 +79,7 @@ class CGRankRLS(PredictorInterface):
         if self.Y.shape[1] > 1:
             raise Exception('CGRankRLS does not currently work in multi-label mode')
         self.learn_from_labels = True
-        if ('validation_features' in kwargs) and ('validation_labels' in kwargs):
-            validation_X = kwargs['validation_features']
-            validation_Y = kwargs['validation_labels']
-            if 'validation_qids' in kwargs:
-                validation_qids = kwargs['validation_qids']
-            else:
-                validation_qids = None
-            self.callbackfun = EarlyStopCB(validation_X, validation_Y, validation_qids)
+        self.callbackfun = callbackfun
         self.X = csc_matrix(X.T)
         if qids != None:
             self.setQids(qids)
