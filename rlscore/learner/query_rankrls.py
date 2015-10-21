@@ -9,6 +9,7 @@ from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
 from rlscore.measure import cindex
 from rlscore.utilities.cross_validation import grid_search
+from rlscore.measure.measure_utilities import qids_to_splits
 
 class QueryRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
@@ -73,37 +74,39 @@ class QueryRankRLS(PredictorInterface):
         self.size = self.Y.shape[0]
         self.Y = array_tools.as_labelmatrix(self.Y)
         self.size = self.Y.shape[0]
-        self.setQids(qids)
+        #self.setQids(qids)
+        self.qids = map_qids(qids)
+        self.qidlist = qids_to_splits(self.qids)
         self.solve(self.regparam)
     
-    
-    def setQids(self, qids):
-        """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
-        
-        @param qids: A list of qid parameters.
-        @type qids: List of integers."""
-        
-        self.qidlist = [-1 for i in range(self.size)]
-        for i in range(len(qids)):
-            for j in qids[i]:
-                if j >= self.size:
-                    raise Exception("Index %d in query out of training set index bounds" %j)
-                elif j < 0:
-                    raise Exception("Negative index %d in query, query indices must be non-negative" %j)
-                else:
-                    self.qidlist[j] = i
-        if -1 in self.qidlist:
-            raise Exception("Not all training examples were assigned a query")
-        
-        self.qidmap = {}
-        for i in range(len(self.qidlist)):
-            qid = self.qidlist[i]
-            if self.qidmap.has_key(qid):
-                sameqids = self.qidmap[qid]
-                sameqids.append(i)
-            else:
-                self.qidmap[qid] = [i]
-        self.qids = qids
+
+    #def setQids(self, qids):
+    #    """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
+    #    
+    #    @param qids: A list of qid parameters.
+    #    @type qids: List of integers."""
+    #    
+    #    self.qidlist = [-1 for i in range(self.size)]
+    #    for i in range(len(qids)):
+    #        for j in qids[i]:
+    #            if j >= self.size:
+    #                raise Exception("Index %d in query out of training set index bounds" %j)
+    #            elif j < 0:
+    #                raise Exception("Negative index %d in query, query indices must be non-negative" %j)
+    #            else:
+    #                self.qidlist[j] = i
+    #    if -1 in self.qidlist:
+    #        raise Exception("Not all training examples were assigned a query")
+    #    
+    #    self.qidmap = {}
+    #    for i in range(len(self.qidlist)):
+    #        qid = self.qidlist[i]
+    #        if self.qidmap.has_key(qid):
+    #            sameqids = self.qidmap[qid]
+    #            sameqids.append(i)
+    #        else:
+    #            self.qidmap[qid] = [i]
+    #    self.qids = qids
 
 #    def train(self):
 #        self.solve(self.regparam)
@@ -117,7 +120,7 @@ class QueryRankRLS(PredictorInterface):
             regularization parameter
         """
         if not hasattr(self, "D"):
-            qidlist = self.qidlist
+            qidlist = self.qids
             objcount = max(qidlist) + 1
             
             labelcounts = np.mat(np.zeros((1, objcount)))
@@ -197,14 +200,10 @@ class QueryRankRLS(PredictorInterface):
         
         if len(indices) != len(set(indices)):
             raise Exception('Hold-out can have each index only once.')
-        
-        hoqid = self.qidlist[indices[0]]
-        for ind in indices:
-            if not hoqid == self.qidlist[ind]:
-                raise Exception('All examples in the hold-out set must have the same qid.')
-        
-        if not len(self.qidmap[hoqid]) == len(indices):
-            raise Exception('All examples in the whole training set having the same qid as the examples in the hold-out set must belong to the hold out set.')
+        #hoqid = self.qidlist[indices[0]]
+        #for ind in indices:
+        #    if not hoqid == self.qidlist[ind]:
+        #        raise Exception('All examples in the hold-out set must have the same qid.')
         
         indlen = len(indices)
         Qleft = self.multipleleft[indices]
@@ -258,7 +257,7 @@ class LQOCV(object):
         Y = rls.Y
         performances = []
         predictions = []
-        folds = rls.qids
+        folds = rls.qidlist
         for fold in folds:
             P = rls.computeHO(fold)
             predictions.append(P)
@@ -273,3 +272,15 @@ class LQOCV(object):
         else:
             raise UndefinedPerformance("Performance undefined for all folds")
         return performance, predictions
+    
+def map_qids(qids):
+    qidmap = {}
+    i = 0
+    for qid in qids:
+        if not qid in qidmap:
+            qidmap[qid] = i
+            i+=1
+    new_qids = []
+    for qid in qids:
+        new_qids.append(qidmap[qid])
+    return new_qids
