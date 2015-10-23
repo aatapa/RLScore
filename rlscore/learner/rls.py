@@ -208,7 +208,7 @@ class RLS(PredictorInterface):
                                                      svecsbevalssvecsTY,
                                                      results_first,
                                                      results_second)
-        return results_first, results_second
+        return np.squeeze(results_first), np.squeeze(results_second)
         
         '''
         results = []

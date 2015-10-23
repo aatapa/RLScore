@@ -1059,7 +1059,7 @@ static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_xrange;
 static PyObject *__pyx_builtin_id;
 static PyObject *__pyx_builtin_IndexError;
-static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second); /* proto */
+static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second); /* proto */
 static int __pyx_array_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array_getbuffer_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -1164,6 +1164,7 @@ static char __pyx_k_results_second[] = "results_second";
 static char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static char __pyx_k_dtype_is_object[] = "dtype_is_object";
 static char __pyx_k_computePairwiseCV[] = "computePairwiseCV";
+static char __pyx_k_hatmatrixdiagonal[] = "hatmatrixdiagonal";
 static char __pyx_k_strided_and_direct[] = "<strided and direct>";
 static char __pyx_k_svecsbevalssvecsTY[] = "svecsbevalssvecsTY";
 static char __pyx_k_strided_and_indirect[] = "<strided and indirect>";
@@ -1234,6 +1235,7 @@ static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
+static PyObject *__pyx_n_s_hatmatrixdiagonal;
 static PyObject *__pyx_kp_s_home_aatapa_Dropbox_python_RLSc;
 static PyObject *__pyx_n_s_i;
 static PyObject *__pyx_n_s_ia;
@@ -1328,6 +1330,7 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1comput
   __Pyx_memviewslice __pyx_v_svecs = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_bevals = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_rank;
+  __Pyx_memviewslice __pyx_v_hatmatrixdiagonal = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_results_first = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_results_second = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -1338,12 +1341,13 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1comput
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("computePairwiseCV (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_pairslen,&__pyx_n_s_pairs_first,&__pyx_n_s_pairs_second,&__pyx_n_s_outputlen,&__pyx_n_s_Y,&__pyx_n_s_svecs,&__pyx_n_s_bevals,&__pyx_n_s_rank,&__pyx_n_s_svecsbevalssvecsTY,&__pyx_n_s_results_first,&__pyx_n_s_results_second,0};
-    PyObject* values[11] = {0,0,0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_pairslen,&__pyx_n_s_pairs_first,&__pyx_n_s_pairs_second,&__pyx_n_s_outputlen,&__pyx_n_s_Y,&__pyx_n_s_svecs,&__pyx_n_s_bevals,&__pyx_n_s_rank,&__pyx_n_s_hatmatrixdiagonal,&__pyx_n_s_svecsbevalssvecsTY,&__pyx_n_s_results_first,&__pyx_n_s_results_second,0};
+    PyObject* values[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case 12: values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
         case 11: values[10] = PyTuple_GET_ITEM(__pyx_args, 10);
         case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
         case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
@@ -1366,58 +1370,63 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1comput
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pairs_first)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pairs_second)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_outputlen)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_svecs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_bevals)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_rank)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  8:
-        if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_svecsbevalssvecsTY)) != 0)) kw_args--;
+        if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_hatmatrixdiagonal)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  9:
-        if (likely((values[9] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_first)) != 0)) kw_args--;
+        if (likely((values[9] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_svecsbevalssvecsTY)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case 10:
-        if (likely((values[10] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_second)) != 0)) kw_args--;
+        if (likely((values[10] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_first)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, 10); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 10); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        }
+        case 11:
+        if (likely((values[11] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_second)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, 11); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "computePairwiseCV") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 11) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 12) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -1431,6 +1440,7 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1comput
       values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
       values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
       values[10] = PyTuple_GET_ITEM(__pyx_args, 10);
+      values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
     }
     __pyx_v_pairslen = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_pairslen == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_pairs_first = __Pyx_PyObject_to_MemoryviewSlice_ds_long(values[1]); if (unlikely(!__pyx_v_pairs_first.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -1440,26 +1450,27 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1comput
     __pyx_v_svecs = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[5]); if (unlikely(!__pyx_v_svecs.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_bevals = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[6]); if (unlikely(!__pyx_v_bevals.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_rank = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_rank == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_svecsbevalssvecsTY = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[8]); if (unlikely(!__pyx_v_svecsbevalssvecsTY.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_results_first = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[9]); if (unlikely(!__pyx_v_results_first.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_results_second = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[10]); if (unlikely(!__pyx_v_results_second.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_hatmatrixdiagonal = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[8]); if (unlikely(!__pyx_v_hatmatrixdiagonal.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_svecsbevalssvecsTY = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[9]); if (unlikely(!__pyx_v_svecsbevalssvecsTY.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_results_first = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[10]); if (unlikely(!__pyx_v_results_first.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_results_second = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[11]); if (unlikely(!__pyx_v_results_second.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 11, 11, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("computePairwiseCV", 1, 12, 12, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("rlscore.learner.cython_pairwise_cv_for_rls.computePairwiseCV", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(__pyx_self, __pyx_v_pairslen, __pyx_v_pairs_first, __pyx_v_pairs_second, __pyx_v_outputlen, __pyx_v_Y, __pyx_v_svecs, __pyx_v_bevals, __pyx_v_rank, __pyx_v_svecsbevalssvecsTY, __pyx_v_results_first, __pyx_v_results_second);
+  __pyx_r = __pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(__pyx_self, __pyx_v_pairslen, __pyx_v_pairs_first, __pyx_v_pairs_second, __pyx_v_outputlen, __pyx_v_Y, __pyx_v_svecs, __pyx_v_bevals, __pyx_v_rank, __pyx_v_hatmatrixdiagonal, __pyx_v_svecsbevalssvecsTY, __pyx_v_results_first, __pyx_v_results_second);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second) {
+static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_computePairwiseCV(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second) {
   int __pyx_v_i;
   int __pyx_v_j;
   int __pyx_v_pair_ind;
@@ -1494,17 +1505,17 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
   int __pyx_t_11;
   int __pyx_t_12;
   int __pyx_t_13;
-  int __pyx_t_14;
-  int __pyx_t_15;
-  int __pyx_t_16;
+  double __pyx_t_14;
+  double __pyx_t_15;
+  double __pyx_t_16;
   int __pyx_t_17;
   int __pyx_t_18;
   int __pyx_t_19;
   int __pyx_t_20;
   int __pyx_t_21;
-  double __pyx_t_22;
-  double __pyx_t_23;
-  double __pyx_t_24;
+  int __pyx_t_22;
+  int __pyx_t_23;
+  int __pyx_t_24;
   int __pyx_t_25;
   int __pyx_t_26;
   int __pyx_t_27;
@@ -1513,20 +1524,12 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
   int __pyx_t_30;
   int __pyx_t_31;
   int __pyx_t_32;
-  int __pyx_t_33;
-  int __pyx_t_34;
-  int __pyx_t_35;
-  int __pyx_t_36;
-  int __pyx_t_37;
-  int __pyx_t_38;
-  int __pyx_t_39;
-  int __pyx_t_40;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("computePairwiseCV", 0);
 
-  /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":25
+  /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":26
  *     cdef double RQY_i, RQY_j, a, b, d, det, ss_ii, ss_ij, ss_jj
  * 
  *     for pair_ind in range(pairslen):             # <<<<<<<<<<<<<<
@@ -1537,7 +1540,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_v_pair_ind = __pyx_t_2;
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":26
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":27
  * 
  *     for pair_ind in range(pairslen):
  *         i = pairs_first[pair_ind]             # <<<<<<<<<<<<<<
@@ -1547,120 +1550,94 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
     __pyx_t_3 = __pyx_v_pair_ind;
     __pyx_v_i = (*((long *) ( /* dim=0 */ (__pyx_v_pairs_first.data + __pyx_t_3 * __pyx_v_pairs_first.strides[0]) )));
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":27
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":28
  *     for pair_ind in range(pairslen):
  *         i = pairs_first[pair_ind]
  *         j = pairs_second[pair_ind]             # <<<<<<<<<<<<<<
  * 
- *         ss_ii = 0.
+ *         ss_ii = hatmatrixdiagonal[i]
  */
     __pyx_t_4 = __pyx_v_pair_ind;
     __pyx_v_j = (*((long *) ( /* dim=0 */ (__pyx_v_pairs_second.data + __pyx_t_4 * __pyx_v_pairs_second.strides[0]) )));
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":29
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":30
  *         j = pairs_second[pair_ind]
  * 
- *         ss_ii = 0.             # <<<<<<<<<<<<<<
+ *         ss_ii = hatmatrixdiagonal[i]             # <<<<<<<<<<<<<<
  *         ss_ij = 0.
- *         ss_jj = 0.
+ *         ss_jj = hatmatrixdiagonal[j]
  */
-    __pyx_v_ss_ii = 0.;
+    __pyx_t_5 = __pyx_v_i;
+    __pyx_v_ss_ii = (*((double *) ( /* dim=0 */ (__pyx_v_hatmatrixdiagonal.data + __pyx_t_5 * __pyx_v_hatmatrixdiagonal.strides[0]) )));
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":30
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":31
  * 
- *         ss_ii = 0.
+ *         ss_ii = hatmatrixdiagonal[i]
  *         ss_ij = 0.             # <<<<<<<<<<<<<<
- *         ss_jj = 0.
+ *         ss_jj = hatmatrixdiagonal[j]
  *         for rind in range(rank):
  */
     __pyx_v_ss_ij = 0.;
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":31
- *         ss_ii = 0.
- *         ss_ij = 0.
- *         ss_jj = 0.             # <<<<<<<<<<<<<<
- *         for rind in range(rank):
- *             ss_ii += bevals[rind] * svecs[i, rind] * svecs[i, rind]
- */
-    __pyx_v_ss_jj = 0.;
-
     /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":32
+ *         ss_ii = hatmatrixdiagonal[i]
  *         ss_ij = 0.
- *         ss_jj = 0.
+ *         ss_jj = hatmatrixdiagonal[j]             # <<<<<<<<<<<<<<
+ *         for rind in range(rank):
+ *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]
+ */
+    __pyx_t_6 = __pyx_v_j;
+    __pyx_v_ss_jj = (*((double *) ( /* dim=0 */ (__pyx_v_hatmatrixdiagonal.data + __pyx_t_6 * __pyx_v_hatmatrixdiagonal.strides[0]) )));
+
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":33
+ *         ss_ij = 0.
+ *         ss_jj = hatmatrixdiagonal[j]
  *         for rind in range(rank):             # <<<<<<<<<<<<<<
- *             ss_ii += bevals[rind] * svecs[i, rind] * svecs[i, rind]
  *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]
- */
-    __pyx_t_5 = __pyx_v_rank;
-    for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_rind = __pyx_t_6;
-
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":33
- *         ss_jj = 0.
- *         for rind in range(rank):
- *             ss_ii += bevals[rind] * svecs[i, rind] * svecs[i, rind]             # <<<<<<<<<<<<<<
- *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]
- *             ss_ii += bevals[rind] * svecs[j, rind] * svecs[j, rind]
- */
-      __pyx_t_7 = __pyx_v_rind;
-      __pyx_t_8 = __pyx_v_i;
-      __pyx_t_9 = __pyx_v_rind;
-      __pyx_t_10 = __pyx_v_i;
-      __pyx_t_11 = __pyx_v_rind;
-      __pyx_v_ss_ii = (__pyx_v_ss_ii + (((*((double *) ( /* dim=0 */ (__pyx_v_bevals.data + __pyx_t_7 * __pyx_v_bevals.strides[0]) ))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_8 * __pyx_v_svecs.strides[0]) ) + __pyx_t_9 * __pyx_v_svecs.strides[1]) )))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_10 * __pyx_v_svecs.strides[0]) ) + __pyx_t_11 * __pyx_v_svecs.strides[1]) )))));
-
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":34
- *         for rind in range(rank):
- *             ss_ii += bevals[rind] * svecs[i, rind] * svecs[i, rind]
- *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]             # <<<<<<<<<<<<<<
- *             ss_ii += bevals[rind] * svecs[j, rind] * svecs[j, rind]
  *         #Invert a symmetric 2x2 matrix
  */
-      __pyx_t_12 = __pyx_v_rind;
-      __pyx_t_13 = __pyx_v_i;
-      __pyx_t_14 = __pyx_v_rind;
-      __pyx_t_15 = __pyx_v_j;
-      __pyx_t_16 = __pyx_v_rind;
-      __pyx_v_ss_ij = (__pyx_v_ss_ij + (((*((double *) ( /* dim=0 */ (__pyx_v_bevals.data + __pyx_t_12 * __pyx_v_bevals.strides[0]) ))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_13 * __pyx_v_svecs.strides[0]) ) + __pyx_t_14 * __pyx_v_svecs.strides[1]) )))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_15 * __pyx_v_svecs.strides[0]) ) + __pyx_t_16 * __pyx_v_svecs.strides[1]) )))));
+    __pyx_t_7 = __pyx_v_rank;
+    for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+      __pyx_v_rind = __pyx_t_8;
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":35
- *             ss_ii += bevals[rind] * svecs[i, rind] * svecs[i, rind]
- *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]
- *             ss_ii += bevals[rind] * svecs[j, rind] * svecs[j, rind]             # <<<<<<<<<<<<<<
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":34
+ *         ss_jj = hatmatrixdiagonal[j]
+ *         for rind in range(rank):
+ *             ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]             # <<<<<<<<<<<<<<
  *         #Invert a symmetric 2x2 matrix
  *         #a, b, d = 1. - svecsbevalssvecsT[i, i], - svecsbevalssvecsT[i, j], 1. - svecsbevalssvecsT[j, j]
  */
-      __pyx_t_17 = __pyx_v_rind;
-      __pyx_t_18 = __pyx_v_j;
-      __pyx_t_19 = __pyx_v_rind;
-      __pyx_t_20 = __pyx_v_j;
-      __pyx_t_21 = __pyx_v_rind;
-      __pyx_v_ss_ii = (__pyx_v_ss_ii + (((*((double *) ( /* dim=0 */ (__pyx_v_bevals.data + __pyx_t_17 * __pyx_v_bevals.strides[0]) ))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_18 * __pyx_v_svecs.strides[0]) ) + __pyx_t_19 * __pyx_v_svecs.strides[1]) )))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_20 * __pyx_v_svecs.strides[0]) ) + __pyx_t_21 * __pyx_v_svecs.strides[1]) )))));
+      __pyx_t_9 = __pyx_v_rind;
+      __pyx_t_10 = __pyx_v_i;
+      __pyx_t_11 = __pyx_v_rind;
+      __pyx_t_12 = __pyx_v_j;
+      __pyx_t_13 = __pyx_v_rind;
+      __pyx_v_ss_ij = (__pyx_v_ss_ij + (((*((double *) ( /* dim=0 */ (__pyx_v_bevals.data + __pyx_t_9 * __pyx_v_bevals.strides[0]) ))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_10 * __pyx_v_svecs.strides[0]) ) + __pyx_t_11 * __pyx_v_svecs.strides[1]) )))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecs.data + __pyx_t_12 * __pyx_v_svecs.strides[0]) ) + __pyx_t_13 * __pyx_v_svecs.strides[1]) )))));
     }
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":38
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":37
  *         #Invert a symmetric 2x2 matrix
  *         #a, b, d = 1. - svecsbevalssvecsT[i, i], - svecsbevalssvecsT[i, j], 1. - svecsbevalssvecsT[j, j]
  *         a, b, d = 1. - ss_ii, - ss_ij, 1. - ss_jj             # <<<<<<<<<<<<<<
  *         det = 1. / (a * d - b * b)
  *         ia, ib, id = det * d, - det * b, det * a
  */
-    __pyx_t_22 = (1. - __pyx_v_ss_ii);
-    __pyx_t_23 = (-__pyx_v_ss_ij);
-    __pyx_t_24 = (1. - __pyx_v_ss_jj);
-    __pyx_v_a = __pyx_t_22;
-    __pyx_v_b = __pyx_t_23;
-    __pyx_v_d = __pyx_t_24;
+    __pyx_t_14 = (1. - __pyx_v_ss_ii);
+    __pyx_t_15 = (-__pyx_v_ss_ij);
+    __pyx_t_16 = (1. - __pyx_v_ss_jj);
+    __pyx_v_a = __pyx_t_14;
+    __pyx_v_b = __pyx_t_15;
+    __pyx_v_d = __pyx_t_16;
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":39
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":38
  *         #a, b, d = 1. - svecsbevalssvecsT[i, i], - svecsbevalssvecsT[i, j], 1. - svecsbevalssvecsT[j, j]
  *         a, b, d = 1. - ss_ii, - ss_ij, 1. - ss_jj
  *         det = 1. / (a * d - b * b)             # <<<<<<<<<<<<<<
  *         ia, ib, id = det * d, - det * b, det * a
  * 
  */
-    __pyx_t_24 = ((__pyx_v_a * __pyx_v_d) - (__pyx_v_b * __pyx_v_b));
-    if (unlikely(__pyx_t_24 == 0)) {
+    __pyx_t_16 = ((__pyx_v_a * __pyx_v_d) - (__pyx_v_b * __pyx_v_b));
+    if (unlikely(__pyx_t_16 == 0)) {
       #ifdef WITH_THREAD
       PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
       #endif
@@ -1668,66 +1645,66 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
       #ifdef WITH_THREAD
       PyGILState_Release(__pyx_gilstate_save);
       #endif
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
-    __pyx_v_det = (1. / __pyx_t_24);
+    __pyx_v_det = (1. / __pyx_t_16);
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":40
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":39
  *         a, b, d = 1. - ss_ii, - ss_ij, 1. - ss_jj
  *         det = 1. / (a * d - b * b)
  *         ia, ib, id = det * d, - det * b, det * a             # <<<<<<<<<<<<<<
  * 
  *         for oind in range(outputlen):
  */
-    __pyx_t_24 = (__pyx_v_det * __pyx_v_d);
-    __pyx_t_23 = ((-__pyx_v_det) * __pyx_v_b);
-    __pyx_t_22 = (__pyx_v_det * __pyx_v_a);
-    __pyx_v_ia = __pyx_t_24;
-    __pyx_v_ib = __pyx_t_23;
-    __pyx_v_id = __pyx_t_22;
+    __pyx_t_16 = (__pyx_v_det * __pyx_v_d);
+    __pyx_t_15 = ((-__pyx_v_det) * __pyx_v_b);
+    __pyx_t_14 = (__pyx_v_det * __pyx_v_a);
+    __pyx_v_ia = __pyx_t_16;
+    __pyx_v_ib = __pyx_t_15;
+    __pyx_v_id = __pyx_t_14;
 
-    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":42
+    /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":41
  *         ia, ib, id = det * d, - det * b, det * a
  * 
  *         for oind in range(outputlen):             # <<<<<<<<<<<<<<
  *             #RQY_i = svecsbevalssvecsTY[i, oind] - svecsbevalssvecsT[i, i] * Y[i, oind] - svecsbevalssvecsT[i, j] * Y[j, oind]
  *             #RQY_j = svecsbevalssvecsTY[j, oind] - svecsbevalssvecsT[j, i] * Y[i, oind] - svecsbevalssvecsT[j, j] * Y[j, oind]
  */
-    __pyx_t_5 = __pyx_v_outputlen;
-    for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_oind = __pyx_t_6;
+    __pyx_t_7 = __pyx_v_outputlen;
+    for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+      __pyx_v_oind = __pyx_t_8;
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":45
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":44
  *             #RQY_i = svecsbevalssvecsTY[i, oind] - svecsbevalssvecsT[i, i] * Y[i, oind] - svecsbevalssvecsT[i, j] * Y[j, oind]
  *             #RQY_j = svecsbevalssvecsTY[j, oind] - svecsbevalssvecsT[j, i] * Y[i, oind] - svecsbevalssvecsT[j, j] * Y[j, oind]
  *             RQY_i = svecsbevalssvecsTY[i, oind] - ss_ii * Y[i, oind] - ss_ij * Y[j, oind]             # <<<<<<<<<<<<<<
  *             RQY_j = svecsbevalssvecsTY[j, oind] - ss_ij * Y[i, oind] - ss_jj * Y[j, oind]
  *             lpo_i = ia * RQY_i + ib * RQY_j
  */
-      __pyx_t_25 = __pyx_v_i;
-      __pyx_t_26 = __pyx_v_oind;
-      __pyx_t_27 = __pyx_v_i;
-      __pyx_t_28 = __pyx_v_oind;
-      __pyx_t_29 = __pyx_v_j;
-      __pyx_t_30 = __pyx_v_oind;
-      __pyx_v_RQY_i = (((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecsbevalssvecsTY.data + __pyx_t_25 * __pyx_v_svecsbevalssvecsTY.strides[0]) ) + __pyx_t_26 * __pyx_v_svecsbevalssvecsTY.strides[1]) ))) - (__pyx_v_ss_ii * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_27 * __pyx_v_Y.strides[0]) ) + __pyx_t_28 * __pyx_v_Y.strides[1]) ))))) - (__pyx_v_ss_ij * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_29 * __pyx_v_Y.strides[0]) ) + __pyx_t_30 * __pyx_v_Y.strides[1]) )))));
+      __pyx_t_17 = __pyx_v_i;
+      __pyx_t_18 = __pyx_v_oind;
+      __pyx_t_19 = __pyx_v_i;
+      __pyx_t_20 = __pyx_v_oind;
+      __pyx_t_21 = __pyx_v_j;
+      __pyx_t_22 = __pyx_v_oind;
+      __pyx_v_RQY_i = (((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecsbevalssvecsTY.data + __pyx_t_17 * __pyx_v_svecsbevalssvecsTY.strides[0]) ) + __pyx_t_18 * __pyx_v_svecsbevalssvecsTY.strides[1]) ))) - (__pyx_v_ss_ii * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_19 * __pyx_v_Y.strides[0]) ) + __pyx_t_20 * __pyx_v_Y.strides[1]) ))))) - (__pyx_v_ss_ij * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_21 * __pyx_v_Y.strides[0]) ) + __pyx_t_22 * __pyx_v_Y.strides[1]) )))));
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":46
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":45
  *             #RQY_j = svecsbevalssvecsTY[j, oind] - svecsbevalssvecsT[j, i] * Y[i, oind] - svecsbevalssvecsT[j, j] * Y[j, oind]
  *             RQY_i = svecsbevalssvecsTY[i, oind] - ss_ii * Y[i, oind] - ss_ij * Y[j, oind]
  *             RQY_j = svecsbevalssvecsTY[j, oind] - ss_ij * Y[i, oind] - ss_jj * Y[j, oind]             # <<<<<<<<<<<<<<
  *             lpo_i = ia * RQY_i + ib * RQY_j
  *             lpo_j = ib * RQY_i + id * RQY_j
  */
-      __pyx_t_31 = __pyx_v_j;
-      __pyx_t_32 = __pyx_v_oind;
-      __pyx_t_33 = __pyx_v_i;
-      __pyx_t_34 = __pyx_v_oind;
-      __pyx_t_35 = __pyx_v_j;
-      __pyx_t_36 = __pyx_v_oind;
-      __pyx_v_RQY_j = (((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecsbevalssvecsTY.data + __pyx_t_31 * __pyx_v_svecsbevalssvecsTY.strides[0]) ) + __pyx_t_32 * __pyx_v_svecsbevalssvecsTY.strides[1]) ))) - (__pyx_v_ss_ij * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_33 * __pyx_v_Y.strides[0]) ) + __pyx_t_34 * __pyx_v_Y.strides[1]) ))))) - (__pyx_v_ss_jj * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_35 * __pyx_v_Y.strides[0]) ) + __pyx_t_36 * __pyx_v_Y.strides[1]) )))));
+      __pyx_t_23 = __pyx_v_j;
+      __pyx_t_24 = __pyx_v_oind;
+      __pyx_t_25 = __pyx_v_i;
+      __pyx_t_26 = __pyx_v_oind;
+      __pyx_t_27 = __pyx_v_j;
+      __pyx_t_28 = __pyx_v_oind;
+      __pyx_v_RQY_j = (((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_svecsbevalssvecsTY.data + __pyx_t_23 * __pyx_v_svecsbevalssvecsTY.strides[0]) ) + __pyx_t_24 * __pyx_v_svecsbevalssvecsTY.strides[1]) ))) - (__pyx_v_ss_ij * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_25 * __pyx_v_Y.strides[0]) ) + __pyx_t_26 * __pyx_v_Y.strides[1]) ))))) - (__pyx_v_ss_jj * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_27 * __pyx_v_Y.strides[0]) ) + __pyx_t_28 * __pyx_v_Y.strides[1]) )))));
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":47
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":46
  *             RQY_i = svecsbevalssvecsTY[i, oind] - ss_ii * Y[i, oind] - ss_ij * Y[j, oind]
  *             RQY_j = svecsbevalssvecsTY[j, oind] - ss_ij * Y[i, oind] - ss_jj * Y[j, oind]
  *             lpo_i = ia * RQY_i + ib * RQY_j             # <<<<<<<<<<<<<<
@@ -1736,7 +1713,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
  */
       __pyx_v_lpo_i = ((__pyx_v_ia * __pyx_v_RQY_i) + (__pyx_v_ib * __pyx_v_RQY_j));
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":48
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":47
  *             RQY_j = svecsbevalssvecsTY[j, oind] - ss_ij * Y[i, oind] - ss_jj * Y[j, oind]
  *             lpo_i = ia * RQY_i + ib * RQY_j
  *             lpo_j = ib * RQY_i + id * RQY_j             # <<<<<<<<<<<<<<
@@ -1745,26 +1722,26 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
  */
       __pyx_v_lpo_j = ((__pyx_v_ib * __pyx_v_RQY_i) + (__pyx_v_id * __pyx_v_RQY_j));
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":49
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":48
  *             lpo_i = ia * RQY_i + ib * RQY_j
  *             lpo_j = ib * RQY_i + id * RQY_j
  *             results_first[pair_ind, oind] = lpo_i             # <<<<<<<<<<<<<<
  *             results_second[pair_ind, oind] = lpo_j
  * 
  */
-      __pyx_t_37 = __pyx_v_pair_ind;
-      __pyx_t_38 = __pyx_v_oind;
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_results_first.data + __pyx_t_37 * __pyx_v_results_first.strides[0]) ) + __pyx_t_38 * __pyx_v_results_first.strides[1]) )) = __pyx_v_lpo_i;
+      __pyx_t_29 = __pyx_v_pair_ind;
+      __pyx_t_30 = __pyx_v_oind;
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_results_first.data + __pyx_t_29 * __pyx_v_results_first.strides[0]) ) + __pyx_t_30 * __pyx_v_results_first.strides[1]) )) = __pyx_v_lpo_i;
 
-      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":50
+      /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":49
  *             lpo_j = ib * RQY_i + id * RQY_j
  *             results_first[pair_ind, oind] = lpo_i
  *             results_second[pair_ind, oind] = lpo_j             # <<<<<<<<<<<<<<
  * 
  */
-      __pyx_t_39 = __pyx_v_pair_ind;
-      __pyx_t_40 = __pyx_v_oind;
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_results_second.data + __pyx_t_39 * __pyx_v_results_second.strides[0]) ) + __pyx_t_40 * __pyx_v_results_second.strides[1]) )) = __pyx_v_lpo_j;
+      __pyx_t_31 = __pyx_v_pair_ind;
+      __pyx_t_32 = __pyx_v_oind;
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_results_second.data + __pyx_t_31 * __pyx_v_results_second.strides[0]) ) + __pyx_t_32 * __pyx_v_results_second.strides[1]) )) = __pyx_v_lpo_j;
     }
   }
 
@@ -1788,6 +1765,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_compute
   __PYX_XDEC_MEMVIEW(&__pyx_v_Y, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_svecs, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_bevals, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_hatmatrixdiagonal, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_svecsbevalssvecsTY, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_results_first, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_results_second, 1);
@@ -13149,6 +13127,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
+  {&__pyx_n_s_hatmatrixdiagonal, __pyx_k_hatmatrixdiagonal, sizeof(__pyx_k_hatmatrixdiagonal), 0, 0, 1, 1},
   {&__pyx_kp_s_home_aatapa_Dropbox_python_RLSc, __pyx_k_home_aatapa_Dropbox_python_RLSc, sizeof(__pyx_k_home_aatapa_Dropbox_python_RLSc), 0, 0, 1, 0},
   {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
   {&__pyx_n_s_ia, __pyx_k_ia, sizeof(__pyx_k_ia), 0, 0, 1, 1},
@@ -13204,7 +13183,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -13354,10 +13333,10 @@ static int __Pyx_InitCachedConstants(void) {
  *                       long [:] pairs_first,
  *                       long [:] pairs_second,
  */
-  __pyx_tuple__12 = PyTuple_Pack(30, __pyx_n_s_pairslen, __pyx_n_s_pairs_first, __pyx_n_s_pairs_second, __pyx_n_s_outputlen, __pyx_n_s_Y, __pyx_n_s_svecs, __pyx_n_s_bevals, __pyx_n_s_rank, __pyx_n_s_svecsbevalssvecsTY, __pyx_n_s_results_first, __pyx_n_s_results_second, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_pair_ind, __pyx_n_s_oind, __pyx_n_s_rind, __pyx_n_s_RQY_i, __pyx_n_s_RQY_j, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_d, __pyx_n_s_det, __pyx_n_s_ss_ii, __pyx_n_s_ss_ij, __pyx_n_s_ss_jj, __pyx_n_s_ia, __pyx_n_s_ib, __pyx_n_s_id, __pyx_n_s_lpo_i, __pyx_n_s_lpo_j); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__12 = PyTuple_Pack(31, __pyx_n_s_pairslen, __pyx_n_s_pairs_first, __pyx_n_s_pairs_second, __pyx_n_s_outputlen, __pyx_n_s_Y, __pyx_n_s_svecs, __pyx_n_s_bevals, __pyx_n_s_rank, __pyx_n_s_hatmatrixdiagonal, __pyx_n_s_svecsbevalssvecsTY, __pyx_n_s_results_first, __pyx_n_s_results_second, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_pair_ind, __pyx_n_s_oind, __pyx_n_s_rind, __pyx_n_s_RQY_i, __pyx_n_s_RQY_j, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_d, __pyx_n_s_det, __pyx_n_s_ss_ii, __pyx_n_s_ss_ij, __pyx_n_s_ss_jj, __pyx_n_s_ia, __pyx_n_s_ib, __pyx_n_s_id, __pyx_n_s_lpo_i, __pyx_n_s_lpo_j); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(11, 0, 30, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_aatapa_Dropbox_python_RLSc, __pyx_n_s_computePairwiseCV, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(12, 0, 31, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_aatapa_Dropbox_python_RLSc, __pyx_n_s_computePairwiseCV, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "View.MemoryView":276
  *         return self.name
