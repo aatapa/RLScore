@@ -189,10 +189,9 @@ class RLS(PredictorInterface):
         assert len(pairs_end_inds) == pairslen
         
         bevals = multiply(self.evals, self.newevals)
-        
         svecsbevals = multiply(self.svecs, bevals)
-         
-        svecsbevalssvecsT = svecsbevals * self.svecs.T
+        hatmatrixdiagonal = np.squeeze(np.array(np.sum(np.multiply(self.svecs, svecsbevals), axis = 1)))
+        #svecsbevalssvecsT = svecsbevals * self.svecs.T
         svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
@@ -201,7 +200,11 @@ class RLS(PredictorInterface):
                                                      pairs_end_inds,
                                                      self.Y.shape[1],
                                                      self.Y,
-                                                     svecsbevalssvecsT,
+                                                     #svecsbevalssvecsT,
+                                                     self.svecs,
+                                                     np.squeeze(np.array(bevals)),
+                                                     self.svecs.shape[1],
+                                                     hatmatrixdiagonal,
                                                      svecsbevalssvecsTY,
                                                      results_first,
                                                      results_second)
