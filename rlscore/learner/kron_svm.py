@@ -5,7 +5,9 @@ from scipy.sparse.linalg import cg
 from scipy.sparse.linalg import bicgstab
 
 from rlscore.utilities import sparse_kronecker_multiplication_tools_python
-from cg_kron_rls import KernelPairwisePredictor
+from rlscore.pairwise_predictor import KernelPairwisePredictor
+from rlscore.pairwise_predictor import LinearPairwisePredictor
+
 
 TRAIN_LABELS = 'Y'
 CALLBACK_FUNCTION = 'callback'
@@ -100,17 +102,19 @@ class KronSVM(object):
         if kwargs.has_key("regparam"):
             self.regparam = kwargs["regparam"]
         else:
-            self.regparam = 0.
+            self.regparam = 1.0
         if kwargs.has_key(CALLBACK_FUNCTION):
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
+        self.train()
     
     
     def train(self):
-        #self.solve_linear_new(self.regparam)
-        #self.solve_linear(self.regparam)
-        self.solve_dual(self.regparam) 
+        if self.resource_pool.has_key('kmatrix1'):
+            self.solve_kernel(self.regparam)
+        else:
+            self.solve_linear(self.regparam)
     
     def solve_linear2(self, regparam):
         self.regparam = regparam
@@ -212,12 +216,12 @@ class KronSVM(object):
             print "function value", func(w)
             w = w - w_new
             self.W = w.reshape((x1fsize, x2fsize), order='C')
-            if self.callfackfun != None:
+            if self.callbackfun != None:
                 self.callbackfun.callback(self)
             #print i
-        self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = LinearPairwisePredictor(self.W)
         print w
-        if self.callfackfun != None:
+        if self.callbackfun != None:
             self.callbackfun.finished(self)
 
     def solve_linear(self, regparam):
@@ -283,7 +287,7 @@ class KronSVM(object):
             #print i, "primal objective", func(w, X1, X2, Y, rowind, colind, lamb), "gradient norm", np.linalg.norm(g)
             #print "predictions", sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
             self.W = w.reshape((x1fsize, x2fsize), order='C')
-            if self.callfackfun != None:
+            if self.callbackfun != None:
                 self.callbackfun.callback(self)
         self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
 
@@ -308,7 +312,7 @@ class KronSVM(object):
         A = cg(K, P, maxiter=100)[0]
         return KernelPairwisePredictor(A, rowind, colind)
 
-    def solve_dual(self, regparam):
+    def solve_kernel(self, regparam):
         self.regparam = regparam
         K1 = self.resource_pool['kmatrix1']
         K2 = self.resource_pool['kmatrix2']
@@ -381,7 +385,7 @@ class KronSVM(object):
             #print "gradient norm", np.linalg.norm(dual_gradient(a, K1, K2, Y, rowind, colind, lamb))
             self.A = a
             self.dual_model = KernelPairwisePredictor(a, rowind, colind)
-            if self.callfackfun != None:
+            if self.callbackfun != None:
                 self.callbackfun.callback(self)
             #w = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
             #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
@@ -406,7 +410,8 @@ class KronSVM(object):
         #z = np.where(a!=0, a, 0)
         #sv = np.nonzero(z)[0]
         #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
-        self.finished()
+        if self.callbackfun != None:
+            self.callbackfun.finished(self)
 
     def solve_dual_symm(self, regparam):
         self.regparam = regparam
@@ -489,7 +494,7 @@ class KronSVM(object):
             #z2 = (1. - Y*P)
             #z2 = np.where(z2>0, z2, 0)
             #print np.dot(z2,z2)
-            if self.callfackfun != None:
+            if self.callbackfun != None:
                 self.callbackfun.callback(self)
             #print i
         #self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
@@ -497,7 +502,8 @@ class KronSVM(object):
         #z = np.where(a!=0, a, 0)
         #sv = np.nonzero(z)[0]
         #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
-        self.finished()    
+        if self.callbackfun != None:
+            self.callbackfun.finished(self)   
 
 class KernelPairwisePredictor(object):
     
@@ -534,43 +540,43 @@ class KernelPairwisePredictor(object):
         P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
         return P
 
-class LinearPairwisePredictor(object):
-    
-    def __init__(self, W, dim1, dim2):
-        """Initializes the linear model
-        @param W: primal coefficient matrix
-        @type W: numpy matrix"""
-        self.W = W
-        self.dim1, self.dim2 = dim1, dim2
-    
-    
-    def predict(self, X1pred, X2pred):
-        """Computes predictions for test examples.
-        
-        Parameters
-        ----------
-        X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
-            the first part of the test data matrix
-        X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
-            the second part of the test data matrix
-        
-        Returns
-        ----------
-        P: array, shape = [n_samples1, n_samples2]
-            predictions
-        """
-        P = np.dot(np.dot(X1pred, self.W), X2pred.T)
-        return P
-    
-    
-    def predictWithDataMatricesAlt(self, X1pred, X2pred, row_inds = None, col_inds = None):
-        if row_inds == None:
-            P = np.dot(np.dot(X1pred, self.W), X2pred.T)
-            P = P.ravel()
-            #P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
-        else:
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
-            #P = X1pred * self.W * X2pred.T
-        return P
+# class LinearPairwisePredictor(object):
+#     
+#     def __init__(self, W, dim1, dim2):
+#         """Initializes the linear model
+#         @param W: primal coefficient matrix
+#         @type W: numpy matrix"""
+#         self.W = W
+#         self.dim1, self.dim2 = dim1, dim2
+#     
+#     
+#     def predict(self, X1pred, X2pred):
+#         """Computes predictions for test examples.
+#         
+#         Parameters
+#         ----------
+#         X1pred: {array-like, sparse matrix}, shape = [n_samples1, n_features1]
+#             the first part of the test data matrix
+#         X2pred: {array-like, sparse matrix}, shape = [n_samples2, n_features2]
+#             the second part of the test data matrix
+#         
+#         Returns
+#         ----------
+#         P: array, shape = [n_samples1, n_samples2]
+#             predictions
+#         """
+#         P = np.dot(np.dot(X1pred, self.W), X2pred.T)
+#         return P
+#     
+#     
+#     def predictWithDataMatricesAlt(self, X1pred, X2pred, row_inds = None, col_inds = None):
+#         if row_inds == None:
+#             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
+#             P = P.ravel()
+#             #P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
+#         else:
+#             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
+#             #P = X1pred * self.W * X2pred.T
+#         return P
 
 
