@@ -3,7 +3,7 @@
 import numpy as np
 
 from scipy.sparse.linalg import LinearOperator
-from scipy.sparse.linalg import bicgstab
+from scipy.sparse.linalg import minres
 
 from rlscore.pairwise_predictor import LinearPairwisePredictor
 from rlscore.pairwise_predictor import KernelPairwisePredictor
@@ -13,6 +13,17 @@ from rlscore.pairwise_predictor import PairwisePredictorInterface
 
 CALLBACK_FUNCTION = 'callback'
 
+def primal_rls_objective(w, X1, X2, Y, rowind, colind, lamb):
+    #primal form of the objective function for regularized least squares
+    #w: current primal solution
+    #X1: samples x features data matrix for domain 1
+    #X2: samples x features data matrix for domain 2
+    #rowind: row indices for training pairs
+    #colind: column indices for training pairs
+    #lamb: regularization parameter
+    P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+    z = (Y - P)
+    return 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
 
 class CGKronRLS(PairwisePredictorInterface):
     
@@ -40,6 +51,10 @@ class CGKronRLS(PairwisePredictorInterface):
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
+        if kwargs.has_key("compute_risk"):
+            self.compute_risk = kwargs["compute_risk"]
+        else:
+            self.compute_risk = False
         self.train()
     
     
@@ -64,6 +79,8 @@ class CGKronRLS(PairwisePredictorInterface):
         
         #Y = self.Y
         #self.itercount = 0
+        Y = np.array(self.Y).ravel()
+        self.bestloss = float("inf")
         def mv(v):
             assert v.shape[0] == len(self.label_row_inds)
             temp = np.zeros((K1.shape[1], K2.shape[0]))
@@ -81,13 +98,23 @@ class CGKronRLS(PairwisePredictorInterface):
             return None
         
         def cgcb(v):
-            self.A = v
+            if self.compute_risk:
+                P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds,label_col_inds)
+                z = (Y - P)
+                Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds)
+                loss = (np.dot(z,z)+regparam*np.dot(v,Ka))
+                print "loss", 0.5*loss
+                if loss < self.bestloss:
+                    self.A = v.copy()
+                    self.bestloss = loss
+            else:
+                self.A = v
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
 
         
         G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
-        self.A = bicgstab(G, self.Y, maxiter = maxiter, callback = cgcb)[0]
+        minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
         self.predictor = KernelPairwisePredictor(self.A, self.label_row_inds, self.label_col_inds)
     
     
@@ -107,7 +134,9 @@ class CGKronRLS(PairwisePredictorInterface):
         
         label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
         label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
-        
+        #Y = np.array(self.Y).ravel(order='F')
+        Y = np.array(self.Y).ravel()
+        self.bestloss = float("inf")
         def mv(v):
             v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
             v_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds) + regparam * v
@@ -118,7 +147,16 @@ class CGKronRLS(PairwisePredictorInterface):
             return None
         
         def cgcb(v):
-            self.W = v.reshape((x1fsize, x2fsize), order = 'F')
+            #self.W = v.reshape((x1fsize, x2fsize), order = 'F')
+            if self.compute_risk:
+                P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
+                z = (Y - P)
+                loss = (np.dot(z,z)+regparam*np.dot(v,v))
+                if loss < self.bestloss:
+                    self.W = v.copy().reshape((x1fsize, x2fsize), order = 'F')
+                    self.bestloss = loss
+            else:
+                self.W = v.reshape((x1fsize, x2fsize), order = 'F')
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
             
@@ -131,7 +169,8 @@ class CGKronRLS(PairwisePredictorInterface):
             x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
         else:
             x0 = None
-        self.W = bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0].reshape((x1fsize, x2fsize), order='F')
+        #self.W = bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0].reshape((x1fsize, x2fsize), order='F')
+        minres(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb, tol=1e-20)[0].reshape((x1fsize, x2fsize), order='F')
         self.predictor = LinearPairwisePredictor(self.W)
         if not self.callbackfun == None:
                 self.callbackfun.finished(self)

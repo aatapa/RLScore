@@ -41,7 +41,7 @@ class GreedyRLS(PredictorInterface):
     325-330, IEEE Computer Society, 2010.
     """
     
-    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=0., measure=None, callbackfun=None, **kwargs):
+    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=1.0, measure=None, callbackfun=None, **kwargs):
         self.callbackfun = callbackfun
         self.regparam = regparam
         if isinstance(X, sp.base.spmatrix):

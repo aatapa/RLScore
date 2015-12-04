@@ -1,8 +1,7 @@
 import numpy as np
 
 from scipy.sparse.linalg import LinearOperator
-from scipy.sparse.linalg import cg
-from scipy.sparse.linalg import bicgstab
+from scipy.sparse.linalg import qmr
 
 from rlscore.utilities import sparse_kronecker_multiplication_tools_python
 from rlscore.pairwise_predictor import KernelPairwisePredictor
@@ -107,6 +106,10 @@ class KronSVM(object):
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
+        if kwargs.has_key("compute_risk"):
+            self.compute_risk = kwargs["compute_risk"]
+        else:
+            self.compute_risk = False
         self.train()
     
     
@@ -209,7 +212,7 @@ class KronSVM(object):
         for i in range(maxiter):
             g = gradient(w)
             G = LinearOperator((fdim, fdim), matvec=mv, dtype=np.float64)
-            w_new = cg(G, g, maxiter=inneriter)[0]
+            w_new = qmr(G, g, maxiter=inneriter)[0]
             #r = G*w_new - g
             #e_rel = np.linalg.norm(r)/np.linalg.norm(g)
             #print e_rel, alpha
@@ -270,26 +273,49 @@ class KronSVM(object):
         w = np.zeros(fdim)
         #np.random.seed(1)
         #w = np.random.random(fdim)
+        self.bestloss = float("inf")
         def mv(v):
             return hessian(w, v, X1, X2, Y, rowind, colind, lamb)
+            
         for i in range(maxiter):
             g = gradient(w, X1, X2, Y, rowind, colind, lamb)
-            G = LinearOperator((fdim, fdim), matvec=mv, dtype=np.float64)
-            w_new = cg(G, g, maxiter=inneriter)[0]
+            G = LinearOperator((fdim, fdim), matvec=mv, rmatvec=mv, dtype=np.float64)
+            self.best_residual = float("inf")
+            self.w_new = None
+            def cgcb(v):
+                residual = np.linalg.norm(G.dot(v)-g)
+                #print "residual", residual
+                if residual < self.best_residual:
+                    self.best_residual = residual
+                    self.w_new = v.copy()
+            #self.w_new =
+            self.w_new = qmr(G, g, maxiter=inneriter)[0]
             #w_new = lsqr(G, g, iter_lim=inneriter)[0]
             #r = G*w_new - g
             #e_rel = np.linalg.norm(r)/np.linalg.norm(g)
             #print e_rel, alpha
             #print "function value", func(w)
             #func(w)
-            w = w - w_new
+            if np.all(w == w - self.w_new):
+                break
+            w = w - self.w_new
+            if self.compute_risk:
+                P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+                z = (1. - Y*P)
+                z = np.where(z>0, z, 0)
+                loss = 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
+                if loss < self.bestloss:
+                    self.W = w.reshape((x1fsize, x2fsize), order='C')
+                    self.bestloss = loss
+            else:
+                self.W = w.reshape((x1fsize, x2fsize), order='C')             
             #print "model", w
             #print i, "primal objective", func(w, X1, X2, Y, rowind, colind, lamb), "gradient norm", np.linalg.norm(g)
             #print "predictions", sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
-            self.W = w.reshape((x1fsize, x2fsize), order='C')
+            #self.W = w.reshape((x1fsize, x2fsize), order='C')
             if self.callbackfun != None:
                 self.callbackfun.callback(self)
-        self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
+        self.predictor = LinearPairwisePredictor(self.W)
 
 
     def dual_from_primal(self):
@@ -309,7 +335,7 @@ class KronSVM(object):
             return sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind, colind)
         K = LinearOperator((ddim, ddim), matvec=mv, rmatvec=rv, dtype=np.float64)
         #A = lsmr(K, P, maxiter=100)[0]
-        A = cg(K, P, maxiter=100)[0]
+        A = qmr(K, P, maxiter=100)[0]
         return KernelPairwisePredictor(A, rowind, colind)
 
     def solve_kernel(self, regparam):
@@ -338,7 +364,7 @@ class KronSVM(object):
         colind = np.array(colind, dtype = np.int32)
         ddim = len(rowind)
         a = np.zeros(ddim)
-        a_new = np.zeros(ddim)
+        self.bestloss = float("inf")
         def func(a):
             #REPLACE
             #P = np.dot(X,v)
@@ -365,6 +391,7 @@ class KronSVM(object):
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
+            #print "support vectors", len(sv)
             B = np.zeros(P.shape)
             B[sv] = P[sv]-Y[sv]
             B = B + lamb*a
@@ -375,15 +402,32 @@ class KronSVM(object):
             #    print " inner iter zero coefficients:", sum(np.isclose(xk, 0. )), "out of", len(xk) 
             #    residual = np.linalg.norm(A.dot(xk)-B)
             #    print "redidual is", residual
-            a_new = bicgstab(A, B, maxiter=inneriter)[0]
-            #a_new = bicgstab(A, B, x0=a, tol=0.01, callback=callback)[0]
+            self.best_residual = float("inf")
+            self.a_new = None
+            def cgcb(v):
+                print v          
+                #residual = np.linalg.norm(A.dot(v)-B)
+                #print "residual", residual
+                #if residual < self.best_residual:
+                #    self.best_residual = residual
+                #    self.a_new = v.copy()
+            self.a_new = qmr(A, B, maxiter=inneriter)[0]
+            #a_new = qmr(A, B, x0=a, tol=0.01, callback=callback)[0]
             #a_new = lsmr(A, B, maxiter=inneriter)[0]
-            ssize = 1.0
-            a = a - ssize*a_new
+            #ssize = 1.0
+            if np.all(a == a - self.a_new):
+                break
+            a = a - self.a_new
+            if self.compute_risk:
+                loss = func(a)
+                if loss < self.bestloss:
+                    self.A = a
+                    self.bestloss = loss
+            else:
+                self.A = a
             #print "dual objective", func(a), ssize
             #print "dual objective 2", dual_objective(a, K1, K2, Y, rowind, colind, lamb)
             #print "gradient norm", np.linalg.norm(dual_gradient(a, K1, K2, Y, rowind, colind, lamb))
-            self.A = a
             self.dual_model = KernelPairwisePredictor(a, rowind, colind)
             if self.callbackfun != None:
                 self.callbackfun.callback(self)
@@ -468,11 +512,11 @@ class KronSVM(object):
         def mv(v):
             return hessian(v)
         ssize = 1.0
-        print "Kronecker SVM"
+        #print "Kronecker SVM"
         for i in range(100):
             g = gradient(a)
             A = LinearOperator((ddim, ddim), matvec=mv, dtype=np.float64)
-            a_new = bicgstab(A, g, maxiter=inneriter)[0]
+            a_new = qmr(A, g, maxiter=inneriter)[0]
             #a_new = lsqr(A, g)[0]
             a = a - a_new
             self.a = a
