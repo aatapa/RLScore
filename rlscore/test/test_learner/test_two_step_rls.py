@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
         params["xmatrix2"] = X_train2
         params["Y"] = Y_train
         linear_two_step_learner = TwoStepRLS(**params)
-        linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo()
+        linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         
         #Train kernel two-step RLS with pre-computed kernel matrices
         params = {}
@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
         params["kmatrix2"] = K_train2
         params["Y"] = Y_train
         kernel_two_step_learner = TwoStepRLS(**params)
-        kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo()
+        kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         
         #Train ordinary linear RLS in two steps for a reference
         params = {}
@@ -190,7 +190,7 @@ class Test(unittest.TestCase):
         kernel_two_step_testpred_24 = kernel_two_step_learner_24.predict(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
         
         print('')
-        print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordnary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')
+        print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordinary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')
         print('[0, 0]: ' + str(secondsteploo_linear_rls[0, 0])
                          + ' ' + str(secondsteploo_kernel_rls[0, 0])
                          + ' ' + str(linear_two_step_testpred_00)
@@ -226,7 +226,29 @@ class Test(unittest.TestCase):
         print('')
         print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [2, 4]')
         print('[2, 4] ' + str(kernel_two_step_learner_inSampleLOO_24a) + ' ' + str(kernel_two_step_learner_inSampleLOO_24b))
+        print kernel_two_step_learner.in_sample_loo().ravel(order = 'F')[1], kernel_two_step_learner.in_sample_loo_ref()
         
+        
+        
+        #Train kernel two-step RLS with pre-computed kernel matrices and with output at position [1, 1] changed
+        Y_00 = Y_train.copy()
+        Y_00 = Y_00.reshape((train_rows, train_columns), order = 'F')
+        Y_00[0, 0] = 55.
+        Y_00 = Y_00.ravel(order = 'F')
+        params = {}
+        params["regparam1"] = regparam1
+        params["regparam2"] = regparam2
+        params["kmatrix1"] = K_train1
+        params["kmatrix2"] = K_train2
+        params["Y"] = Y_00
+        kernel_two_step_learner_Y_00 = TwoStepRLS(**params)
+        kernel_two_step_testpred_Y_00 = kernel_two_step_learner_Y_00.predict(K_test1, K_test2)
+        
+        kernel_two_step_learner_inSampleLOO_00a = kernel_two_step_learner.in_sample_loo()[0, 0]
+        kernel_two_step_learner_inSampleLOO_00b = kernel_two_step_learner_Y_00.in_sample_loo()[0, 0]
+        print('')
+        print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [0, 0]')
+        print('[0, 0] ' + str(kernel_two_step_learner_inSampleLOO_00a) + ' ' + str(kernel_two_step_learner_inSampleLOO_00b))
         
         
         #Create symmetric data

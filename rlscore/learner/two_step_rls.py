@@ -135,6 +135,10 @@ class TwoStepRLS(PairwisePredictorInterface):
             P = self.K1 * self.A * self.K2.T
         
         newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
+        #newevals = np.multiply(self.evals2 * self.evals1.T + self.regparam1 * self.evals2 + self.regparam2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
+        #P = np.multiply(self.VTYU, newevals)
+        #P = self.V * P * self.U.T
+        #P = np.array(P)
         Vsqr = np.multiply(self.V, self.V)
         Usqr = np.multiply(self.U, self.U)
         #loopred = mat(zeros((self.V.shape[0], self.U.shape[0])))
@@ -148,6 +152,46 @@ class TwoStepRLS(PairwisePredictorInterface):
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred)
+    
+    
+    def in_sample_loo_ref(self):
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
+            P = X1 * self.W * X2.T
+        else:
+            P = self.K1 * self.A * self.K2.T
+        
+        ylen = self.Y.shape[0] * self.Y.shape[1]
+        hocompl = [0] + range(2, ylen)
+        kron = np.kron(self.K2, self.K1)
+        regkron = np.kron(self.K2 + self.regparam2 * np.eye(self.K2.shape[0]), self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
+        invregkron = la.inv(regkron)
+        
+        weirdkron = kron - self.regparam2 * self.regparam1 * np.eye(self.K2.shape[0] * self.K1.shape[0])
+        invregweirdkron = la.inv(weirdkron + self.regparam2 * self.regparam1 * np.eye(self.K2.shape[0] * self.K1.shape[0]))
+        #invregkron = np.kron(la.inv(self.K2 + self.regparam2 * np.eye(self.K2.shape[0])), la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0])))
+        #invregkron_sampled = invregkron[hocompl][:, hocompl]
+        #regkron_sampled = regkron[hocompl][:, hocompl]
+        #invregkron_sampled = la.inv(regkron_sampled)
+        #predkron = np.kron(self.K2, self.K1)[1][:, hocompl]
+        #y_sampled = self.Y.ravel(order = 'F').T[hocompl]
+        #print self.Y, self.Y.ravel(order = 'F'), len(y_sampled)
+        YY = self.Y.ravel(order = 'F').T.copy()
+        YY[1] = 5
+        P = P.ravel(order = 'F').T
+        PP = np.dot(np.dot(kron, invregkron), YY)
+        #loopred = np.dot(predkron, np.dot(invregkron_sampled, y_sampled))
+        #loopred_a = self.Y.ravel(order = 'F').T[1] - (1. / regkron[1, 1]) * np.dot(invregkron, self.Y.ravel(order = 'F').T)[1]
+        #loopred_b = YY[1] - (1. / regkron[1, 1]) * np.dot(invregkron, YY)[1]
+        #loopred_a = self.Y.ravel(order = 'F').T[1] - (1. / invregweirdkron[1, 1]) * np.dot(invregweirdkron, self.Y.ravel(order = 'F').T)[1]
+        #loopred_b = YY[1] - (1. / invregweirdkron[1, 1]) * np.dot(invregweirdkron, YY)[1]
+        loopred_a = (1. / (1. - (weirdkron * invregweirdkron)[1, 1])) * (P[1] - (weirdkron * invregweirdkron)[1, 1] * self.Y.ravel(order = 'F').T[1])
+        loopred_b = (1. / (1. - (weirdkron * invregweirdkron)[1, 1])) * (PP[1] - (weirdkron * invregweirdkron)[1, 1] * YY[1])
+        loopred = (1. / (1. - (kron * invregkron)[1, 1])) * (P[1] - (kron * invregkron)[1, 1] * self.Y.ravel(order = 'F').T[1])
+        loopred2 = (1. / (1. - (kron * invregkron)[1, 1])) * (PP[1] - (kron * invregkron)[1, 1] * YY[1])
+        foo = np.zeros(ylen)
+        #foo[]
+        return loopred, loopred2, loopred_a, loopred_b
     
     
     def out_of_sample_loo(self):
@@ -181,7 +225,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         #LOO = multiply(LOO_ek, RQY)
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO_two_step = np.multiply(LOO_ek_row, self.V * (svecsm_row.T * LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
-        return LOO_two_step
+        return LOO_two_step.ravel(order = 'F')
     
     
     def compute_symmetric_double_LOO(self):
@@ -242,6 +286,6 @@ class TwoStepRLS(PairwisePredictorInterface):
         #print HO_row.shape
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
         cython_two_step_rls_cv.compute_symmetric_double_loo(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
-        return results
+        return results.ravel(order = 'F')
 
 
