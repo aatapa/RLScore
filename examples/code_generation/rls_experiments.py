@@ -35,6 +35,15 @@ experiments = {"rls_defparams":{
                 "lparams": {},
                 "files": rfiles,
                 "selection":True},
+
+                "rls_lpocv":{
+                 "learner":"LeavePairOutRLS",
+                 "lpath":"rlscore.learner.rls",
+                 "measure":"auc",
+                "lfparams": dict(defparams.items() + [("folds","folds")]),
+                "lparams": {},
+                "files": dict(cfiles.items()+[("folds",'./examples/data/folds.txt')]),
+                "selection":True},
                 
                 "rls_nfold":{
                  "learner":"KfoldRLS",

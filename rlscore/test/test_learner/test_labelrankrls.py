@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
         
         rpool = {}
         rpool["X"] = K
-        rpool['kernel'] = 'precomputed'
+        rpool['kernel'] = 'PrecomputedKernel'
         rpool["Y"] = Y
         rpool["qids"] = qidlist        
         dualrls = QueryRankRLS(**rpool)
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
 
         rpool = {}
         rpool['X'] = Kcv
-        rpool['kernel'] = 'precomputed'        
+        rpool['kernel'] = 'PrecomputedKernel'        
         rpool['Y'] = Yho
         #rpool['X'] = Xcv
         rpool['qids'] = qidlist_cv
@@ -125,12 +125,12 @@ class Test(unittest.TestCase):
             predhos.append(predho)
             
             primalrls.solve(regparam)
-            predho = np.squeeze(primalrls.computeHO(hoindices))
+            predho = np.squeeze(primalrls.holdout(hoindices))
             print(str(predho.T) + ' Fast HO (primal)')
             predhos.append(predho)
             
             dualrls.solve(regparam)
-            predho = np.squeeze(dualrls.computeHO(hoindices))
+            predho = np.squeeze(dualrls.holdout(hoindices))
             print(str(predho.T) + ' Fast HO (dual)')
             predhos.append(predho)
             

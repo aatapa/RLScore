@@ -24,7 +24,7 @@ def createKernelByModuleName(**kwargs):
 
 def createSVDAdapter(X, kernel="LinearKernel", **kwargs):
         kwargs[KERNEL_NAME] = kernel
-        if kernel == "precomputed":
+        if kernel == "PrecomputedKernel":
             kwargs["kernel_matrix"] = X
             svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)        
         else:

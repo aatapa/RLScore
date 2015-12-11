@@ -5,20 +5,21 @@ import numpy as np
 from rlscore.utilities import array_tools
 
 class PredictorInterface(object):
-    """Predicts outputs for new inputs.
-
-    Parameters
-     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-       input data matrix
-        
-    Returns
-     ----------
-    P: array, shape = [n_samples, n_tasks]
-        predictions
-    """
+    """Predictor interface"""
     
     def predict(self, X):
+        """Predicts outputs for new inputs.
+    
+        Parameters
+         ----------
+        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+           input data matrix
+            
+        Returns
+         ----------
+        P: array, shape = [n_samples, n_tasks]
+            predictions
+        """
         return self.predictor.predict(X)
 
 class KernelPredictor(object):

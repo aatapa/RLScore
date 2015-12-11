@@ -8,7 +8,7 @@ from rlscore.utilities import array_tools
 class GaussianKernel(object):
     """Gaussian (RBF) kernel.
     
-    k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) + bias
+    k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>)
 
     Parameters
     ----------
@@ -16,14 +16,12 @@ class GaussianKernel(object):
         Data matrix
     gamma : float, optional (default 1.0)
         Kernel width
-    bias : float, optional (default 0.)
-        Constant added to each kernel evaluation
     basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
         Indices for the subset of rows of X to be used as basis vectors. If set to None,
         by default basis_vectors = range(n_samples).
     """
       
-    def __init__(self, X, gamma=1.0, bias=0.0, basis_vectors=None):
+    def __init__(self, X, gamma=1.0, basis_vectors=None):
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
         if basis_vectors != None:
@@ -35,7 +33,6 @@ class GaussianKernel(object):
         else:
             self.train_norms = np.mat((np.multiply(self.train_X.T, self.train_X.T).sum(axis=0))).T  
         self.gamma = gamma
-        self.bias = bias
             
 
     def getKM(self, X):
@@ -70,8 +67,6 @@ class GaussianKernel(object):
         K = K - 2 * linkm
         K = - gamma * K
         K = np.exp(K)
-        if self.bias != 0:
-            K += self.bias
         return K.A.T
 
 

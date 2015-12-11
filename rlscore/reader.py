@@ -1,7 +1,6 @@
 from scipy import sparse
 from numpy import float64, loadtxt
 import numpy as np
-from cPickle import load as cPickleload
 
 def read_folds(fname):
     """ Reads a list of fold index lists.
@@ -78,7 +77,6 @@ def read_sparse(fname):
     columns = []
     values = []
     linecounter = 0
-    feaspace_dim = 0
     for line in f:
         linecounter += 1
         #Empty lines and commented lines are passed over
@@ -106,12 +104,8 @@ def read_sparse(fname):
             if not index > previous:
                 raise Exception("Error when reading in feature file: line %d features must be in ascending order\n" % (linecounter))
             previous = index
-            if index+1 > feaspace_dim:
-                feaspace_dim = index+1
     #That's all folks
-    row_size = linecounter
-    col_size = feaspace_dim
-    X = sparse.coo_matrix((values,(rows,columns)),(row_size, col_size), dtype=float64)
+    X = sparse.coo_matrix((values,(rows,columns)), dtype=float64)
     X = X.tocsr()
     f.close()
     return X
@@ -212,16 +206,9 @@ def read_svmlight(fname):
             previous = index
             if index > feaspace_dim:
                 feaspace_dim = index
-    #X = sparse.coo_matrix((values,(rows,columns)),(feaspace_dim, linecounter), dtype=float64)
     X = sparse.coo_matrix((values,(rows,columns)),(linecounter, feaspace_dim), dtype=float64)
     X = X.tocsr()
     Y = np.array(all_outputs)
-    #if not qids == None:
-    #    Q = mapQids(qids)
-    #else:
-    #    Q = None
-    #f.close()
-    #return {"spmatrix":X, "matrix":Y, "qids":Q}
     return X, Y, qids
 
 
@@ -264,10 +251,9 @@ def read_qids(fname):
     if len(qids) == len(set(qids)):
         raise Exception("Error in the qid file: all the supplied queries consist only of a single example\n")
     f.close()
-    #Q = mapQids(qids)
     return qids
 
-def mapQids(qids):
+def map_qids(qids):
     q_partition = []
     prev = qids[0]
     query = [0]
@@ -284,15 +270,4 @@ def mapQids(qids):
 
 def loadtxtint(fname):
     return loadtxt(fname, dtype=int)
-
-DEFAULT_READERS = {
-                   "spmatrix": read_sparse,
-                   "matrix": loadtxt,#read_dense,dtype=<type 'float'>
-                   "qids": read_qids,
-                   "preferences": loadtxt,#read_preferences,
-                   "index_partition":read_folds, 
-                   'model': cPickleload,#read_pickle,
-                   'basis_vectors_variable_type': loadtxtint,#read_bvectors,
-                   'data_set': read_svmlight,
-                   }
 

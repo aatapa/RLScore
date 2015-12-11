@@ -18,7 +18,7 @@ class LinearKernel(object):
         by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, X, bias=0.0, basis_vectors=None):
+    def __init__(self, X, bias=1.0, basis_vectors=None):
         if basis_vectors != None:
             self.train_X = basis_vectors
         else:

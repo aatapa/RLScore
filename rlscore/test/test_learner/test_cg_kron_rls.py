@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
         #Train an ordinary RLS regressor for reference
         params = {}
         params["X"] = np.kron(K_train2, K_train1)[np.ix_(incinds, incinds)]
-        params["kernel"] = "precomputed"
+        params["kernel"] = "PrecomputedKernel"
         params["Y"] = Y_train_known_outputs
         params["regparam"] = regparam
         ordrls_learner = RLS(**params)

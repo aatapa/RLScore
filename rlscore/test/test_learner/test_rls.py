@@ -45,18 +45,19 @@ class Test(unittest.TestCase):
         kwargs = {}
         kwargs['Y'] = Y
         kwargs['X'] = K
-        kwargs['kernel'] = 'precomputed'
+        kwargs['kernel'] = 'PrecomputedKernel'
         dualrls = RLS(**kwargs)
         
         kwargs = {}
         kwargs["X"] = Xtrain
         kwargs["Y"] = Y
+        kwargs["bias"] = 0.
         primalrls = RLS(**kwargs)
         
         kwargs = {}
         kwargs['Y'] = Yho
         kwargs['X'] = Kho
-        kwargs['kernel'] = 'precomputed'
+        kwargs['kernel'] = 'PrecomputedKernel'
         dualrls_naive = RLS(**kwargs)
         
         testkm = K[np.ix_(hocompl, hoindices)]
@@ -65,6 +66,7 @@ class Test(unittest.TestCase):
         kwargs = {}
         kwargs['Y'] = Yho
         kwargs['X'] = trainX
+        kwargs["bias"] = 0.
         primalrls_naive = RLS(**kwargs)
         
         loglambdas = range(-5, 5)
@@ -81,11 +83,11 @@ class Test(unittest.TestCase):
             print(str(predho1) + ' Naive HO (dual)')
             
             dualrls.solve(regparam)
-            predho2 = dualrls.computeHO(hoindices)
+            predho2 = dualrls.holdout(hoindices)
             print(str(predho2) + ' Fast HO (dual)')
             
             dualrls.solve(regparam)
-            predho = dualrls.computeLOO()[hoindices[0]]
+            predho = dualrls.leave_one_out()[hoindices[0]]
             print(str(predho) + ' Fast LOO (dual)')
             
             primalrls_naive.solve(regparam)
@@ -93,7 +95,7 @@ class Test(unittest.TestCase):
             print(str(predho3) + ' Naive HO (primal)')
             
             primalrls.solve(regparam)
-            predho4 = primalrls.computeHO(hoindices)
+            predho4 = primalrls.holdout(hoindices)
             print(str(predho4) + ' Fast HO (primal)')
             for predho in [predho1, predho2, predho3, predho4]:
                 self.assertEqual(dumbho.shape, predho.shape)
@@ -101,7 +103,7 @@ class Test(unittest.TestCase):
                     for col in range(predho.shape[1]):
                         self.assertAlmostEqual(dumbho[row,col],predho[row,col])
             primalrls.solve(regparam)
-            predho = primalrls.computeLOO()[hoindices[0]]
+            predho = primalrls.leave_one_out()[hoindices[0]]
             print(str(predho) + ' Fast LOO (primal)')
         print()
         hoindices = range(100, 300)
@@ -117,8 +119,8 @@ class Test(unittest.TestCase):
         kwargs['Y'] = Y
         kwargs['X'] = Xtrain
         dualrls.solve(regparam)
-        predho2 = dualrls.computeHO(hoindices2)
+        predho2 = dualrls.holdout(hoindices2)
         print(str(predho2) + ' Fast HO')
-        hopred = dualrls.computePairwiseCV(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
+        hopred = dualrls.leave_pairs_out(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
         print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
         
