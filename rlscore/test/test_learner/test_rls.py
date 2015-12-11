@@ -121,6 +121,6 @@ class Test(unittest.TestCase):
         dualrls.solve(regparam)
         predho2 = dualrls.holdout(hoindices2)
         print(str(predho2) + ' Fast HO')
-        hopred = dualrls.leave_pairs_out(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
+        hopred = dualrls.leave_pair_out(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
         print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
         

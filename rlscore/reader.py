@@ -253,21 +253,6 @@ def read_qids(fname):
     f.close()
     return qids
 
-def map_qids(qids):
-    q_partition = []
-    prev = qids[0]
-    query = [0]
-    for i in range(1,len(qids)):
-        if qids[i] == prev:
-            query.append(i)
-        else:
-            q_partition.append(query)
-            prev = qids[i]
-            query = [i]
-    q_partition.append(query)
-    return q_partition
-
-
 def loadtxtint(fname):
     return loadtxt(fname, dtype=int)
 

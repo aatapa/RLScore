@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
             rpool['regparam'] = regparam
             hodualrls = GlobalRankRLS(**rpool)
             hodualrls.solve(regparam)
-            hopred = hodualrls.leave_pairs_out([hoindices[0]], [hoindices[1]], oind=oind)
+            hopred = hodualrls.leave_pair_out([hoindices[0]], [hoindices[1]], oind=oind)
             print(str(hopred[0][0]) + ' ' + str(hopred[1][0]) + ' Fast')
             hopreds.append((hopred[0][0], hopred[1][0]))
             self.assertAlmostEqual(hopreds[0][0], hopreds[1][0])

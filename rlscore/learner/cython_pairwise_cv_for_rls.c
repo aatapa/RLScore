@@ -1163,10 +1163,10 @@ static char __pyx_k_pairs_first[] = "pairs_first";
 static char __pyx_k_pairs_second[] = "pairs_second";
 static char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static char __pyx_k_results_first[] = "results_first";
+static char __pyx_k_leave_pair_out[] = "leave_pair_out";
 static char __pyx_k_results_second[] = "results_second";
 static char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static char __pyx_k_dtype_is_object[] = "dtype_is_object";
-static char __pyx_k_leave_pairs_out[] = "leave_pairs_out";
 static char __pyx_k_hatmatrixdiagonal[] = "hatmatrixdiagonal";
 static char __pyx_k_strided_and_direct[] = "<strided and direct>";
 static char __pyx_k_svecsbevalssvecsTY[] = "svecsbevalssvecsTY";
@@ -1249,7 +1249,7 @@ static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_j;
-static PyObject *__pyx_n_s_leave_pairs_out;
+static PyObject *__pyx_n_s_leave_pair_out;
 static PyObject *__pyx_n_s_lpo_i;
 static PyObject *__pyx_n_s_lpo_j;
 static PyObject *__pyx_n_s_main;
@@ -1292,7 +1292,7 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
-static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pairs_out(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second); /* proto */
+static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pair_out(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -1356,15 +1356,15 @@ static PyObject *__pyx_codeobj__15;
 /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":9
  * 
  * 
- * def leave_pairs_out(int pairslen,             # <<<<<<<<<<<<<<
+ * def leave_pair_out(int pairslen,             # <<<<<<<<<<<<<<
  *                       long [:] pairs_first,
  *                       long [:] pairs_second,
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pairs_out(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pairs_out = {"leave_pairs_out", (PyCFunction)__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pairs_out, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pairs_out(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pair_out(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pair_out = {"leave_pair_out", (PyCFunction)__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pair_out, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pair_out(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   int __pyx_v_pairslen;
   __Pyx_memviewslice __pyx_v_pairs_first = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_pairs_second = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -1382,7 +1382,7 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("leave_pairs_out (wrapper)", 0);
+  __Pyx_RefNannySetupContext("leave_pair_out (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_pairslen,&__pyx_n_s_pairs_first,&__pyx_n_s_pairs_second,&__pyx_n_s_outputlen,&__pyx_n_s_Y,&__pyx_n_s_svecs,&__pyx_n_s_bevals,&__pyx_n_s_rank,&__pyx_n_s_hatmatrixdiagonal,&__pyx_n_s_svecsbevalssvecsTY,&__pyx_n_s_results_first,&__pyx_n_s_results_second,0};
     PyObject* values[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
@@ -1413,61 +1413,61 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pairs_first)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pairs_second)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_outputlen)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_svecs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_bevals)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_rank)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  8:
         if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_hatmatrixdiagonal)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  9:
         if (likely((values[9] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_svecsbevalssvecsTY)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case 10:
         if (likely((values[10] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_first)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 10); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 10); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case 11:
         if (likely((values[11] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_results_second)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, 11); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, 11); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "leave_pairs_out") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "leave_pair_out") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 12) {
       goto __pyx_L5_argtuple_error;
@@ -1500,20 +1500,20 @@ static PyObject *__pyx_pw_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("leave_pairs_out", 1, 12, 12, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("leave_pair_out", 1, 12, 12, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("rlscore.learner.cython_pairwise_cv_for_rls.leave_pairs_out", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rlscore.learner.cython_pairwise_cv_for_rls.leave_pair_out", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pairs_out(__pyx_self, __pyx_v_pairslen, __pyx_v_pairs_first, __pyx_v_pairs_second, __pyx_v_outputlen, __pyx_v_Y, __pyx_v_svecs, __pyx_v_bevals, __pyx_v_rank, __pyx_v_hatmatrixdiagonal, __pyx_v_svecsbevalssvecsTY, __pyx_v_results_first, __pyx_v_results_second);
+  __pyx_r = __pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pair_out(__pyx_self, __pyx_v_pairslen, __pyx_v_pairs_first, __pyx_v_pairs_second, __pyx_v_outputlen, __pyx_v_Y, __pyx_v_svecs, __pyx_v_bevals, __pyx_v_rank, __pyx_v_hatmatrixdiagonal, __pyx_v_svecsbevalssvecsTY, __pyx_v_results_first, __pyx_v_results_second);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pairs_out(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second) {
+static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_pair_out(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_pairslen, __Pyx_memviewslice __pyx_v_pairs_first, __Pyx_memviewslice __pyx_v_pairs_second, int __pyx_v_outputlen, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_svecs, __Pyx_memviewslice __pyx_v_bevals, int __pyx_v_rank, __Pyx_memviewslice __pyx_v_hatmatrixdiagonal, __Pyx_memviewslice __pyx_v_svecsbevalssvecsTY, __Pyx_memviewslice __pyx_v_results_first, __Pyx_memviewslice __pyx_v_results_second) {
   int __pyx_v_i;
   int __pyx_v_j;
   int __pyx_v_pair_ind;
@@ -1570,7 +1570,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_p
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("leave_pairs_out", 0);
+  __Pyx_RefNannySetupContext("leave_pair_out", 0);
 
   /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":26
  *     cdef double RQY_i, RQY_j, a, b, d, det, ss_ii, ss_ij, ss_jj
@@ -1785,7 +1785,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_p
   /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":9
  * 
  * 
- * def leave_pairs_out(int pairslen,             # <<<<<<<<<<<<<<
+ * def leave_pair_out(int pairslen,             # <<<<<<<<<<<<<<
  *                       long [:] pairs_first,
  *                       long [:] pairs_second,
  */
@@ -1794,7 +1794,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_26cython_pairwise_cv_for_rls_leave_p
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_AddTraceback("rlscore.learner.cython_pairwise_cv_for_rls.leave_pairs_out", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rlscore.learner.cython_pairwise_cv_for_rls.leave_pair_out", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_pairs_first, 1);
@@ -14066,7 +14066,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_j, __pyx_k_j, sizeof(__pyx_k_j), 0, 0, 1, 1},
-  {&__pyx_n_s_leave_pairs_out, __pyx_k_leave_pairs_out, sizeof(__pyx_k_leave_pairs_out), 0, 0, 1, 1},
+  {&__pyx_n_s_leave_pair_out, __pyx_k_leave_pair_out, sizeof(__pyx_k_leave_pair_out), 0, 0, 1, 1},
   {&__pyx_n_s_lpo_i, __pyx_k_lpo_i, sizeof(__pyx_k_lpo_i), 0, 0, 1, 1},
   {&__pyx_n_s_lpo_j, __pyx_k_lpo_j, sizeof(__pyx_k_lpo_j), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
@@ -14278,14 +14278,14 @@ static int __Pyx_InitCachedConstants(void) {
   /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":9
  * 
  * 
- * def leave_pairs_out(int pairslen,             # <<<<<<<<<<<<<<
+ * def leave_pair_out(int pairslen,             # <<<<<<<<<<<<<<
  *                       long [:] pairs_first,
  *                       long [:] pairs_second,
  */
   __pyx_tuple__14 = PyTuple_Pack(31, __pyx_n_s_pairslen, __pyx_n_s_pairs_first, __pyx_n_s_pairs_second, __pyx_n_s_outputlen, __pyx_n_s_Y, __pyx_n_s_svecs, __pyx_n_s_bevals, __pyx_n_s_rank, __pyx_n_s_hatmatrixdiagonal, __pyx_n_s_svecsbevalssvecsTY, __pyx_n_s_results_first, __pyx_n_s_results_second, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_pair_ind, __pyx_n_s_oind, __pyx_n_s_rind, __pyx_n_s_RQY_i, __pyx_n_s_RQY_j, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_d, __pyx_n_s_det, __pyx_n_s_ss_ii, __pyx_n_s_ss_ij, __pyx_n_s_ss_jj, __pyx_n_s_ia, __pyx_n_s_ib, __pyx_n_s_id, __pyx_n_s_lpo_i, __pyx_n_s_lpo_j); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(12, 0, 31, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_ajairo_git_RLScore_rlscore, __pyx_n_s_leave_pairs_out, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(12, 0, 31, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_ajairo_git_RLScore_rlscore, __pyx_n_s_leave_pair_out, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "View.MemoryView":278
  *         return self.name
@@ -14487,13 +14487,13 @@ PyMODINIT_FUNC PyInit_cython_pairwise_cv_for_rls(void)
   /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":9
  * 
  * 
- * def leave_pairs_out(int pairslen,             # <<<<<<<<<<<<<<
+ * def leave_pair_out(int pairslen,             # <<<<<<<<<<<<<<
  *                       long [:] pairs_first,
  *                       long [:] pairs_second,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pairs_out, NULL, __pyx_n_s_rlscore_learner_cython_pairwise); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7rlscore_7learner_26cython_pairwise_cv_for_rls_1leave_pair_out, NULL, __pyx_n_s_rlscore_learner_cython_pairwise); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_leave_pairs_out, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_leave_pair_out, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "rlscore/learner/cython_pairwise_cv_for_rls.pyx":2
