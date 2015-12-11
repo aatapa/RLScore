@@ -17,7 +17,6 @@ class Test(AbstractKernelTest):
         
     def k_func(self, x1, x2, params):
         #linear kernel is simply the dot product, optionally
-        #with a bias parameter
         gamma = params["gamma"]
         degree = params["degree"]
         coef0 = params["coef0"]

@@ -11,8 +11,8 @@ class Test(AbstractKernelTest):
         
     def setParams(self):
         self.kernel = GaussianKernel
-        self.paramsets = [{"gamma":1}, {"bias":3., "gamma":1},
-                          {"gamma":100}, {"bias":0, "gamma":0.0001}]
+        self.paramsets = [{"gamma":1},
+                          {"gamma":100}, {"gamma":0.0001}]
         
     def k_func(self, x1, x2, params):
         #linear kernel is simply the dot product, optionally
