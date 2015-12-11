@@ -99,9 +99,9 @@ class CGKronRLS(PairwisePredictorInterface):
         
         def cgcb(v):
             if self.compute_risk:
-                P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds,label_col_inds)
+                P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds,label_col_inds)
                 z = (Y - P)
-                Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds)
+                Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds)
                 loss = (np.dot(z,z)+regparam*np.dot(v,Ka))
                 print "loss", 0.5*loss
                 if loss < self.bestloss:

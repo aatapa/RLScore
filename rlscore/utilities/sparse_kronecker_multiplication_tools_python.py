@@ -20,7 +20,7 @@ def sparse_mat_from_left(*args):
 def sparse_mat_from_right(*args):
     sparse_kronecker_multiplication_tools.sparse_mat_from_right(*args)
 
-def x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, row_inds_C = None, col_inds_C = None, row_inds_B = None, col_inds_B = None):
+def compute_R_times_M_kron_N_times_C_times_v(v, M, N, row_inds_C = None, col_inds_C = None, row_inds_B = None, col_inds_B = None):
     if len(M.shape) == 1:
         M = M[..., np.newaxis]
     rc_m, cc_m = M.shape
@@ -143,5 +143,5 @@ if __name__=="__main__":
     #V_replace_nans_with_zeros = (B.T * v).reshape(V_rows, V_columns, order='F')
     print 
     print (C * (N * np.mat(V_replace_nans_with_zeros * np.mat(M).T)).ravel(order = 'F').T).T
-    print x_gets_C_times_M_kron_N_times_B_times_v(v, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
+    print compute_R_times_M_kron_N_times_C_times_v(v, M, N, u_row_inds, u_col_inds, v_row_inds, v_col_inds)
 
