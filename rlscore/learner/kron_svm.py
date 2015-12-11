@@ -13,30 +13,30 @@ CALLBACK_FUNCTION = 'callback'
         
 def dual_objective(a, K1, K2, Y, rowind, colind, lamb):
     #REPLACE
-    P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
-    Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
     return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
 
 def dual_gradient(a, K1, K2, Y, rowind, colind, lamb):
-    P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     v = P[sv]-Y[sv]
-    v_after = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
     return v_after + lamb*Ka
         
 def dual_Hu(u, a, K1, K2, Y, rowind, colind, lamb):
-    P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)            
+    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)            
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
-    v = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-    v_after = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    return v_after + lamb * sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    v = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
+    v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    return v_after + lamb * sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
 
 
 def func(v, X1, X2, Y, rowind, colind, lamb):
@@ -330,9 +330,9 @@ class KronSVM(object):
         K2 = self.resource_pool['kmatrix2']
         ddim = len(rowind)
         def mv(v):
-            return sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind, colind)
+            return sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind, colind)
         def rv(v):
-            return sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind, colind)
+            return sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind, colind)
         K = LinearOperator((ddim, ddim), matvec=mv, rmatvec=rv, dtype=np.float64)
         #A = lsmr(K, P, maxiter=100)[0]
         A = qmr(K, P, maxiter=100)[0]
@@ -368,26 +368,26 @@ class KronSVM(object):
         def func(a):
             #REPLACE
             #P = np.dot(X,v)
-            P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
-            Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
         def mv(v):
             rows = rowind[sv]
             cols = colind[sv]
             p = np.zeros(len(rowind))
-            A =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rows, cols, rowind, colind)
+            A =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rows, cols, rowind, colind)
             p[sv] = A
             return p + lamb * v
         def rv(v):
             rows = rowind[sv]
             cols = colind[sv]
-            p = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v[sv], K2, K1, rowind, colind, rows, cols)
+            p = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v[sv], K2, K1, rowind, colind, rows, cols)
             return p + lamb * v
         ssize = 1.0
         for i in range(maxiter):
-            P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
@@ -486,29 +486,29 @@ class KronSVM(object):
         a = np.random.random(ddim)
         def func(a):
             #REPLACE
-            P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
-            Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
         def gradient(a):
-            P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
             v = P[sv]-Y[sv]
-            #v_after = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            v_after = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            Ka = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            #v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
             return v_after + lamb*Ka
         def hessian(u):
-            P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(a, K2, K1, rowind, colind, rowind, colind)            
+            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)            
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
-            v = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-            v_after = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            return v_after + lamb * sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            v = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
+            v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            return v_after + lamb * sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
         def mv(v):
             return hessian(v)
         ssize = 1.0
@@ -581,7 +581,7 @@ class KernelPairwisePredictor(object):
 
     def predictWithKernelMatricesAlt(self, K1pred, K2pred, row_inds = None, col_inds = None):
         #transposes wrong probably
-        P =  sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
+        P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
         return P
 
 # class LinearPairwisePredictor(object):
