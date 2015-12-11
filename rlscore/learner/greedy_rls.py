@@ -89,9 +89,6 @@ class GreedyRLS(PredictorInterface):
         self.regparam = regparam
         X = self.X
         Y = self.Y
-        
-        if not hasattr(self, "bias"):
-            self.bias = 0.
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         
         '''su = sum(X, axis = 1)
@@ -239,8 +236,6 @@ class GreedyRLS(PredictorInterface):
         X = self.X
         Y = np.mat(self.Y, dtype=floattype)
         
-        if not hasattr(self, "bias"):
-            self.bias = 0.
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]), dtype=floattype))
         
         tsize = self.size
@@ -355,8 +350,6 @@ class GreedyRLS(PredictorInterface):
         X = self.X
         Y = self.Y
         
-        if not hasattr(self, "bias"):
-            self.bias = 0.
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         
         su = sum(X, axis = 1)

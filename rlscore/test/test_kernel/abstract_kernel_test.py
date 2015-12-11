@@ -24,7 +24,7 @@ class AbstractKernelTest(unittest.TestCase):
         #self.paramsets = YYYY
         raise NotImplementedError()    
     
-    def k_func(self, x1, x2, bias=0.):
+    def k_func(self, x1, x2):
         #linear kernel is simply the dot product, optionally
         #with a bias parameter
         #return (x1.T*x2)[0,0]+bias

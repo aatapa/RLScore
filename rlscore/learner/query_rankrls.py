@@ -19,7 +19,7 @@ class QueryRankRLS(PredictorInterface):
     that is cubic either in the number of training examples, or dimensionality
     of feature space (linear kernel).
     
-    Computational shortcut for leave-query-out cross-validation: computeHO
+    Computational shortcut for leave-query-out cross-validation: holdout
     
     Computational shortcut for parameter selection: solve
     
@@ -53,7 +53,7 @@ class QueryRankRLS(PredictorInterface):
     References
     ----------
     RankRLS algorithm and the leave-query-out cross-validation method implemented in
-    the method 'computeHO' are described in [1]_.
+    the method 'holdout' are described in [1]_.
 
     .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
@@ -151,7 +151,7 @@ class QueryRankRLS(PredictorInterface):
             #Temporary variables
             ssvecs = np.multiply(self.svecs, self.svals)
             
-            #These are cached for later use in solve and computeHO functions
+            #These are cached for later use in solve and holdout functions
             ssvecsTLssvecs = (np.multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
             LRsvals, LRevecs = decomposition.decomposeKernelMatrix(ssvecsTLssvecs)
             LRevals = np.multiply(LRsvals, LRsvals)
@@ -180,7 +180,7 @@ class QueryRankRLS(PredictorInterface):
         self.predictor = self.svdad.createModel(self)
     
     
-    def computeHO(self, indices):
+    def holdout(self, indices):
         """Computes hold-out predictions for a trained RLS.
         
         Parameters
@@ -259,7 +259,7 @@ class LQOCV(object):
         predictions = []
         folds = rls.qidlist
         for fold in folds:
-            P = rls.computeHO(fold)
+            P = rls.holdout(fold)
             predictions.append(P)
             try:
                 performance = measure(Y[fold], P)

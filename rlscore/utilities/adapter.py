@@ -95,7 +95,7 @@ class LinearSvdAdapter(SvdAdapter):
         if "bias" in rpool:
             self.bias = float(rpool["bias"])
         else:
-            self.bias = 0.
+            self.bias = 1.
         if basis_vectors != None or self.X.shape[1] > self.X.shape[0]:
             #First possibility: subset of regressors has been invoked
             if basis_vectors != None:

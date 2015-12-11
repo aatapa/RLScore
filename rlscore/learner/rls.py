@@ -3,73 +3,94 @@ from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
-
 import cython_pairwise_cv_for_rls
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.measure import sqerror
+from rlscore.measure import cindex
 import numpy as np
 from rlscore.predictor import PredictorInterface
 from rlscore.utilities.cross_validation import grid_search
 
 class RLS(PredictorInterface):
-    """Regularized least-squares regression/classification.
-    
-    Implements a training algorithm that is cubic either in the
-    number of training examples, or dimensionality of feature
-    space (linear kernel).
-    
-    Computational shortcut for N-fold cross-validation: computeHO
-    
-    Computational shortcut for leave-one-out: computeLOO
-    
-    Computational shortcut for parameter selection: solve
-    
-    There are three ways to supply the training data for the learner.
-    
-    1. X: supply the data matrix directly, by default
-    RLS will use the linear kernel.
-    
-    2. kernel_obj: supply the kernel object that has been initialized
-    using the training data.
-    
-    3. kernel_matrix: supply user created kernel matrix, in this setting RLS
-    is unable to return the model, but you may compute cross-validation
-    estimates or access the learned parameters from the variable self.A
+    """Regularized least-squares regression/classification
 
     Parameters
     ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+        
     Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    regparam: float (regparam > 0)
-        regularization parameter
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix
-    kernel_obj: kernel object, optional
-        kernel object, initialized with the training set
-    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
-        kernel matrix of the training set
+        
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+        
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+        
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+        
+    Other Parameters
+    ----------------
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+        
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+        
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0) 
+               
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+        
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(md^2 +lmd): Linear Kernel, d < m
+    O(mb^2 +lmb): Sparse approximation with basis vectors 
+     
+    Basic information about RLS, and a description of the fast leave-one-out method
+    can be found in [1]_. The efficient K-fold cross-validation algorithm implemented in
+    the method holdout is based on results in [2]_ and [3]_. The leave-pair-out cross-validation
+    algorithm implemented in leave_pairs_out is a modification of the method described
+    in [4]_ , its use for AUC-estimation has been analyzed in [5]_.
     
     References
     ----------
-     
-    Basic information about RLS, and a description of the fast leave-one-out method
-    can be found in [1]_. The efficient N-fold cross-validation algorithm implemented in
-    the method computeHO is described in [2]_.
-           
-    .. [1] Ryan Rifkin, Ross Lippert.
-    Notes on Regularized Least Squares
+    .. [1] Ryan Rifkin, Ross Lippert. Notes on Regularized Least Squares
     Technical Report, MIT, 2007.
     
     .. [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
     Fast n-Fold Cross-Validation for Regularized Least-Squares.
     Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
     83-90, Otamedia Oy, 2006.
-
-    """
     
-    #def __init__(self, Y, X = None, kernel_matrix = None, kernel_obj = None, regparam=1.0):
- 
+    .. [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+    Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
+    Machine Learning, 87(3):381--407, June 2012. 
+    
+    .. [4] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+    Exact and efficient leave-pair-out cross-validation for ranking RLS.
+    In Proceedings of the 2nd International and Interdisciplinary Conference
+    on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+    Espoo, Finland, 2008.
+    
+    .. [5] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski
+    An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
+    Computational Statistics & Data Analysis, 55(4):1828-1844, April 2011.
+    """
+
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
         kwargs['X'] = X
         kwargs['kernel'] = kernel
@@ -82,17 +103,31 @@ class RLS(PredictorInterface):
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
         self.solve(self.regparam)   
-
-#    def train(self):
-#        self.solve(self.regparam)
    
     def solve(self, regparam=1.0):
-        """Trains the learning algorithm, using the given regularization parameter.
+        """Re-trains RLS for the given regparam.
                
         Parameters
         ----------
-        regparam: float (regparam > 0)
-            regularization parameter
+        regparam: float, optional
+            regularization parameter, regparam > 0 (default=1.0)
+            
+        Notes
+        -----
+    
+        Computational complexity of re-training:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+        
+        O(lm^2): basic case
+        
+        O(ld^2): Linear Kernel, d < m
+        
+        O(lb^2): Sparse approximation with basis vectors 
+        
+        See:
+        Ryan Rifkin, Ross Lippert.
+        Notes on Regularized Least Squares
+        Technical Report, MIT, 2007.        
         """
         
         if not hasattr(self, "svecsTY"):
@@ -118,18 +153,33 @@ class RLS(PredictorInterface):
         self.predictor = self.svdad.createModel(self)
     
     
-    def computeHO(self, indices):
+    def holdout(self, indices):
         """Computes hold-out predictions for a trained RLS.
         
         Parameters
         ----------
         indices: list of indices, shape = [n_hsamples]
-            list of indices of training examples belonging to the set for which the hold-out predictions are calculated. The list can not be empty.
+            list of indices of training examples belonging to the set for which the
+            hold-out predictions are calculated. The list can not be empty.
 
         Returns
         -------
         F : array, shape = [n_hsamples, n_labels]
             holdout predictions
+            
+        Notes
+        -----
+        
+        The algorithm is based on results published in:
+        
+        Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+        Fast n-Fold Cross-Validation for Regularized Least-Squares.
+        Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
+        83-90, Otamedia Oy, 2006.
+        
+        Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+        Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
+        Machine Learning, 87(3):381--407, June 2012.     
         """
         
         if len(indices) == 0:
@@ -152,13 +202,32 @@ class RLS(PredictorInterface):
         return np.array(result)
     
     
-    def computeLOO(self):
+    def leave_one_out(self):
         """Computes leave-one-out predictions for a trained RLS.
         
         Returns
         -------
         F : array, shape = [n_samples, n_labels]
             leave-one-out predictions
+
+        Notes
+        -----
+    
+        Computational complexity of leave-one-out:
+        Computational complexity of re-training:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+        
+        O(lm^2): basic case
+        
+        O(ld^2): Linear Kernel, d < m
+        
+        O(lb^2): Sparse approximation with basis vectors 
+        
+        Implements the classical leave-one-out algorithm described for example in:            
+        Ryan Rifkin, Ross Lippert.
+        Notes on Regularized Least Squares
+        Technical Report, MIT, 2007.
+
         """
         bevals = multiply(self.evals, self.newevals)
         #rightall = multiply(bevals.T, self.svecs.T * self.Y)
@@ -183,7 +252,56 @@ class RLS(PredictorInterface):
         return np.array(LOO)
     
     
-    def computePairwiseCV(self, pairs_start_inds, pairs_end_inds):
+    def leave_pairs_out(self, pairs_start_inds, pairs_end_inds):
+        
+        """Computes leave-pair-out predictions for a trained RLS.
+        
+        Parameters
+        ----------
+        pairs_start_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        pairs_end_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        
+        Returns
+        -------
+        P1 : array, shape = [n_pairs, n_labels]
+            holdout predictions for pairs_start_inds
+        P2: array, shape = [n_pairs, n_labels]
+            holdout predictions for pairs_end_inds
+            
+        Notes
+        -----
+    
+        Computes the leave-pair-out cross-validation predicitons, where each (i,j) pair with
+        i= pair_start_inds[k] and j = pairs_end_inds[k] is left out in turn.
+        
+        When estimating area under ROC curve with leave-pair-out, one should leave out all
+        positive-negative pairs, while for estimating the general ranking error one should
+        leave out all pairs with different labels.
+        
+        Computational complexity of holdout:
+        m = n_samples, l=n_labels
+        O(m^3 + lm^2) basic case
+        O(dm^2 + lm^2) linear, if d<m
+        O(bm^2 + lm^2) sparse approximation
+        
+        The algorithm is an adaptation of the method published originally in [1]_. The use of
+        leave-pair-out cross-validation for AUC estimation has been analyzed in [2]_.
+
+        References
+        ---------- 
+        
+        .. [1] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+        Exact and efficient leave-pair-out cross-validation for ranking RLS.
+        In Proceedings of the 2nd International and Interdisciplinary Conference
+        on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+        Espoo, Finland, 2008.
+        
+        .. [2] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
+        An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
+        Computational Statistics & Data Analysis, 55(4):1828--1844, April 2011.
+        """
         
         pairslen = len(pairs_start_inds)
         assert len(pairs_end_inds) == pairslen
@@ -195,7 +313,7 @@ class RLS(PredictorInterface):
         svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
-        cython_pairwise_cv_for_rls.computePairwiseCV(pairslen,
+        cython_pairwise_cv_for_rls.leave_pairs_out(pairslen,
                                                      pairs_start_inds,
                                                      pairs_end_inds,
                                                      self.Y.shape[1],
@@ -231,9 +349,65 @@ class RLS(PredictorInterface):
 
 class LeaveOneOutRLS(PredictorInterface):
     
+    """Regularized least-squares regression/classification. Wrapper code that selects
+    regularization parameter automatically based on leave-one-out cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+    regparams: {array-like}, shape = [grid_size] (optional)
+        regularization parameter values to be tested, default = [2^-15,...,2^15]
+    measure: function(Y, P) (optional)
+        a performance measure from rlscore.measure used for model selection,
+        default sqerror (squared error)
+
+        
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training (model selection is basically free due to fast leave-one-out):
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(dlm + md^2 + d^3): Linear Kernel, d < m
+    O(bml + mb^2): Sparse approximation with basis vectors 
+     
+    Basic information about RLS, and a description of the fast leave-one-out method
+    can be found in [1]_. 
+
+    References
+    ---------- 
+               
+    .. [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares
+    Technical Report, MIT, 2007.
+    """
+    
     def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, **kwargs):
         if regparams == None:
-            grid = [2**x for x in range(-15, 15)]
+            grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
         if measure == None:
@@ -245,9 +419,77 @@ class LeaveOneOutRLS(PredictorInterface):
             
 class KfoldRLS(PredictorInterface):
     
+    """Regularized least-squares regression/classification. Wrapper code that selects
+    regularization parameter automatically based on K-fold cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    folds: list of index lists, shape = [n_folds]
+        Each list within the folds list contains the indices of samples in one fold, indices
+        must be from range [0,n_samples-1]
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+    regparams: {array-like}, shape = [grid_size] (optional)
+        regularization parameter values to be tested, default = [2^-15,...,2^15]
+    measure: function(Y, P) (optional)
+        a performance measure from rlscore.measure used for model selection,
+        default sqerror (squared error)
+
+        
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training (model selection is basically free due to fast K-fold algorithm):
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(dlm + md^2 + d^3): Linear Kernel, d < m
+    O(bml + mb^2): Sparse approximation with basis vectors 
+     
+    Basic information about RLS can be found in [1]_. The K-fold algorithm is based on results published
+    in [2]_ and [3]_
+
+    References
+    ---------- 
+               
+    .. [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares
+    Technical Report, MIT, 2007.
+    
+    .. [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+    Fast n-Fold Cross-Validation for Regularized Least-Squares.
+    Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
+    83-90, Otamedia Oy, 2006.
+        
+    .. [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+    Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
+    Machine Learning, 87(3):381--407, June 2012.   
+    """
+    
     def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
         if regparams == None:
-            grid = [2**x for x in range(-15, 15)]
+            grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
         if measure == None:
@@ -256,6 +498,86 @@ class KfoldRLS(PredictorInterface):
             self.measure = measure
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = NfoldCV(learner, measure, folds)
+        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.predictor = learner.predictor
+        
+class LeavePairOutRLS(PredictorInterface):
+    
+    """Regularized least-squares regression/classification. Wrapper code that selects
+    regularization parameter automatically based on ranking accuracy (area under ROC curve
+    for binary classification tasks) in K-fold cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+    regparams: {array-like}, shape = [grid_size] (optional)
+        regularization parameter values to be tested, default = [2^-15,...,2^15]
+    measure: function(Y, P) (optional)
+        a performance measure from rlscore.measure used for model selection,
+        default sqerror (squared error)
+
+        
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training and model selection:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(lm^2 + md^2 + d^3): Linear Kernel, d < m
+    O(lm^2 + mb^2): Sparse approximation with basis vectors 
+     
+    Basic information about RLS can be found in [1]_ . The leave-pair-out algorithm
+    is an adaptation of the method published in [2]_ . The use of leave-pair-out
+    cross-validation for AUC estimation has been analyzed in [3]_.
+    
+    References
+    ----------    
+        
+    .. [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares
+    Technical Report, MIT, 2007.
+    
+    .. [2] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+    Exact and efficient leave-pair-out cross-validation for ranking RLS.
+    In Proceedings of the 2nd International and Interdisciplinary Conference
+    on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+    Espoo, Finland, 2008.
+        
+    .. [3] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
+    An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
+    Computational Statistics & Data Analysis, 55(4):1828--1844, April 2011. 
+    """
+    
+    def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, **kwargs):
+        if regparams == None:
+            grid = [2**x for x in range(-15, 16)]
+        else:
+            grid = regparams
+        learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
+        crossvalidator = LPOCV(learner)
         self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
 
@@ -269,7 +591,7 @@ class LOOCV(object):
     def cv(self, regparam):
         self.rls.solve(regparam)
         Y = self.rls.Y
-        P = self.rls.computeLOO()
+        P = self.rls.leave_one_out()
         perf = self.measure(Y, P)
         return perf, P
 
@@ -289,7 +611,7 @@ class NfoldCV(object):
         performances = []
         P_all = []
         for fold in folds:
-            P = rls.computeHO(fold)
+            P = rls.holdout(fold)
             P_all.append(P)
             try:
                 performance = measure(Y[fold], P)
@@ -303,3 +625,36 @@ class NfoldCV(object):
             raise UndefinedPerformance("Performance undefined for all folds")
         return performance, P_all
 
+class LPOCV(object):
+    
+    def __init__(self, learner):
+        self.rls = learner
+        self.measure = cindex
+
+    def cv(self, regparam):
+        rls = self.rls
+        rls.solve(regparam)
+        Y = rls.Y
+        if Y.shape[1] == 1:
+            pairs_start_inds, pairs_end_inds = [], []
+            for i in range(Y.shape[0] - 1):
+                for j in range(i + 1, Y.shape[0]):
+                    if Y[i] > Y[j]:
+                        pairs_start_inds.append(i)
+                        pairs_end_inds.append(j)
+                    elif Y[i] < Y[j]:
+                        pairs_start_inds.append(j)
+                        pairs_end_inds.append(i)
+            if len(pairs_start_inds) == 0:
+                raise UndefinedPerformance("All labels are the same")
+            pred_start, pred_end = rls.leave_pairs_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
+            auc = 0.
+            for h in range(len(pred_start)):
+                if pred_start[h] > pred_end[h]:
+                    auc += 1.
+                elif pred_start[h] == pred_end[h]:
+                    auc += 0.5
+            auc /= len(pairs_start_inds)  
+            return auc, (pred_start, pred_end)
+        else:
+            raise Exception("Model selection with LPOCV is not currently implemented with multi-output data")

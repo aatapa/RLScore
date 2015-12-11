@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
         K_Kron_train_x = np.kron(K_train2, K_train1)
         params = {}
         params["X"] = K_Kron_train_x
-        params["kernel"] = "precomputed"
+        params["kernel"] = "PrecomputedKernel"
         params["Y"] = Y_train.reshape(trainlabelcount, 1, order = 'F')
         ordrls_learner = RLS(**params)
         ordrls_learner.solve(regparam)
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         print(str(np.mean(np.abs(linear_kron_testpred - ordrls_testpred))) + ' ' + str(np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))))
         
         print('')
-        ordrls_loopred = ordrls_learner.computeLOO().reshape((train_rows, train_columns), order = 'F')
+        ordrls_loopred = ordrls_learner.leave_one_out().reshape((train_rows, train_columns), order = 'F')
         linear_kron_loopred = linear_kron_learner.in_sample_loo().reshape((train_rows, train_columns), order = 'F')
         kernel_kron_loopred = kernel_kron_learner.in_sample_loo().reshape((train_rows, train_columns), order = 'F')
         print('In-sample LOO: linear KronRLS, kernel KronRLS, ordinary RLS')
@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
         #Train an ordinary RankRLS for reference
         params = {}
         params["X"] = K_Kron_train_x
-        params["kernel"] = "precomputed"
+        params["kernel"] = "PrecomputedKernel"
         params["Y"] = Y_train.reshape((trainlabelcount, 1), order = 'F')
         qids = []
         for j in range(Y_train.shape[1]):
@@ -219,7 +219,7 @@ class Test(unittest.TestCase):
         ordrls_learner.solve(regparam)
         ordrls_model = ordrls_learner.predictor
         
-        ordrls_loopred = ordrls_learner.computeLOO().reshape(Y_train.shape[0], Y_train.shape[1])
+        ordrls_loopred = ordrls_learner.leave_one_out().reshape(Y_train.shape[0], Y_train.shape[1])
         kron_loopred = linear_kron_learner.in_sample_loo()
         print 'LOO', np.sum(np.abs(ordrls_loopred-kron_loopred))
         

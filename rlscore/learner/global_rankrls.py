@@ -11,62 +11,73 @@ from rlscore.measure import cindex
 from rlscore.learner.rls import NfoldCV
 
 class GlobalRankRLS(PredictorInterface):
-    """RankRLS algorithm for learning to rank
-    
-    Implements the learning algorithm for learning from a single
-    global ranking. For query-structured data, see LabelRankRLS.
-    Uses a training algorithm that is cubic either in the
-    number of training examples, or dimensionality of feature
-    space (linear kernel).
-    
-    Computational shortcut for N-fold cross-validation: computeHO
-    
-    Computational shortcut for leave-pair-out: computePairwiseCV
-    
-    Computational shortcut for parameter selection: solve
-    
-    There are three ways to supply the training data for the learner.
-    
-    1. X: supply the data matrix directly, by default
-    RLS will use the linear kernel.
-    
-    2. kernel_obj: supply the kernel object that has been initialized
-    using the training data.
-    
-    3. kernel_matrix: supply user created kernel matrix, in this setting RLS
-    is unable to return the model, but you may compute cross-validation
-    estimates or access the learned parameters from the variable self.A
+    """RankRLS: Regularized least-squares ranking.
+    Global ranking (see QueryRankRLS for query-structured data)
 
     Parameters
     ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
     Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    regparam: float (regparam > 0)
-        regularization parameter
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix
-    kernel_obj: kernel object, optional
-        kernel object, initialized with the training set
-    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
-        kernel matrix of the training set
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
         
-    References
-    ----------
-    RankRLS algorithm and the leave-pair-out cross-validation method implemented in
-    the method 'computePairwiseCV' are described in [1]_. For an experimental evaluation
-    on using leave-pair-out for AUC-estimation, see [2]_.
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
     
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    Computational complexity of training:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(md^2 + lmd): Linear Kernel, d < m
+    O(mb^2 +lmb): Sparse approximation with basis vectors 
+    
+     
+    RankRLS algorithm is described in [1,2]. The leave-pair-out cross-validation algorithm
+    is described in [2,3]. The use of leave-pair-out cross-validation for AUC estimation
+    is analyzed in [4].
+    
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
+    Learning to rank with pairwise regularized least-squares.
+    In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
+    SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
+    
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
     
-    .. [2] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, Tapio Salakoski.
+    [3] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+    Exact and efficient leave-pair-out cross-validation for ranking RLS.
+    In Proceedings of the 2nd International and Interdisciplinary Conference
+    on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+    Espoo, Finland, 2008.
+
+    [4] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, Tapio Salakoski.
     An Experimental Comparison of Cross-Validation Techniques for Estimating the Area Under the ROC Curve.
     Computational Statistics & Data Analysis 55(4), 1828-1844, 2011.
 
     """
     
-    #def __init__(self, svdad, Y, regparam=1.0):
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
@@ -85,13 +96,27 @@ class GlobalRankRLS(PredictorInterface):
 #        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
-        """Trains the learning algorithm, using the given regularization parameter.
-           
+        """Re-trains RankRLS for the given regparam.
+               
         Parameters
         ----------
-        regparam: float (regparam > 0)
-            regularization parameter
-        """ 
+        regparam: float, optional
+            regularization parameter, regparam > 0 (default=1.0)
+            
+        Notes
+        -----
+    
+        Computational complexity of re-training:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+        O(lm^2): basic case
+        O(ld^2): Linear Kernel, d < m
+        O(lb^2): Sparse approximation with basis vectors 
+        
+        See:
+        Ryan Rifkin, Ross Lippert.
+        Notes on Regularized Least Squares
+        Technical Report, MIT, 2007.        
+        """
         if not hasattr(self, "multiplyright"):
             
             #Eigenvalues of the kernel matrix
@@ -119,20 +144,55 @@ class GlobalRankRLS(PredictorInterface):
         self.predictor = self.svdad.createModel(self)
     
     
-    def computePairwiseCV(self, pairs_start_inds, pairs_end_inds, oind=0):
-        """Method for computing leave-pair-out predictions for a trained RankRLS.
+    def leave_pairs_out(self, pairs_start_inds, pairs_end_inds, oind=0):
+        """Computes leave-pair-out predictions for a trained RankRLS.
         
         Parameters
         ----------
-        pairs: list of index pairs, length = [n_preferences]
-            list of index pairs for which the leave-pair-out predictions are calculated
-        oind: int
-            index of the label for which the leave-pair-out predictions should be computed
+        pairs_start_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        pairs_end_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        oind: index from range [0, n_samples-1]
+            column of Y, for which pairwise cv is computed
         
         Returns
         -------
-        results : list of float pairs
-            leave-pair-out predictions
+        P1 : array, shape = [n_pairs]
+            holdout predictions for pairs_start_inds
+        P2: array, shape = [n_pairs]
+            holdout predictions for pairs_end_inds
+            
+        Notes
+        -----
+    
+        Computes the leave-pair-out cross-validation predicitons, where each (i,j) pair with
+        i= pair_start_inds[k] and j = pairs_end_inds[k] is left out in turn.
+        
+        When estimating area under ROC curve with leave-pair-out, one should leave out all
+        positive-negative pairs, while for estimating the general ranking error one should
+        leave out all pairs with different labels.
+        
+        Computational complexity of holdout:
+        m = n_samples
+        O(m^2)
+        
+        The leave-pair-out cross-validation algorithm is described in [1,2]. The use of
+        leave-pair-out cross-validation for AUC estimation has been analyzed in [3]
+        
+        [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+        An efficient algorithm for learning to rank from preference graphs.
+        Machine Learning, 75(1):129-165, 2009.
+    
+        [2] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+        Exact and efficient leave-pair-out cross-validation for ranking RLS.
+        In Proceedings of the 2nd International and Interdisciplinary Conference
+        on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+        Espoo, Finland, 2008.
+
+        [3] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, Tapio Salakoski.
+        An Experimental Comparison of Cross-Validation Techniques for Estimating the Area Under the ROC Curve.
+        Computational Statistics & Data Analysis 55(4), 1828-1844, 2011.
         """
         
         evals, svecs = self.evals, self.svecs
@@ -268,19 +328,39 @@ class GlobalRankRLS(PredictorInterface):
         return np.array(results_start), np.array(results_end)
     
     
-    def computeHO(self, indices):
+    def holdout(self, indices):
         """Computes hold-out predictions for a trained RankRLS.
         
         Parameters
         ----------
         indices: list of indices, shape = [n_hsamples]
-            list of indices of training examples belonging to the set for which the hold-out predictions are calculated. The list can not be empty.
+            list of indices of training examples belonging to the set for which the
+            hold-out predictions are calculated. The list can not be empty.
 
         Returns
         -------
-        F : matrix, shape = [n_hsamples, n_labels]
+        F : array, shape = [n_hsamples, n_labels]
             holdout predictions
+            
+        Notes
+        -----
+    
+        Computational complexity of holdout:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors, h = n_hsamples
+        TODO
+        
+        The algorithm is based on results published in:
+        
+        Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+        Fast n-Fold Cross-Validation for Regularized Least-Squares.
+        Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
+        83-90, Otamedia Oy, 2006.
+        
+        Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+        Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
+        Machine Learning, 87(3):381--407, June 2012.     
         """
+        
         if len(indices) == 0:
             raise Exception('Hold-out predictions can not be computed for an empty hold-out set.')
         
@@ -348,14 +428,27 @@ class GlobalRankRLS(PredictorInterface):
         #return results
         return F
         
-    def computeLOO(self):
+    def leave_one_out(self):
+        """Computes leave-one-out predictions for a trained RankRLS.
         
+        Returns
+        -------
+        F : array, shape = [n_samples, n_labels]
+            leave-one-out predictions
+
+        Notes
+        -----
+    
+        Provided for reference, usually you should not call this, but
+        rather use leave_pairs_out.
+
+        """        
         LOO = mat(zeros((self.size, self.ysize), dtype=float64))
         for i in range(self.size):
-            LOO[i,:] = self.computeHO([i])
+            LOO[i,:] = self.holdout([i])
         return LOO
     
-    def reference(self, pairs):
+    def _reference(self, pairs):
         
         evals, evecs = self.evals, self.svecs
         Y = self.Y
@@ -413,10 +506,61 @@ class GlobalRankRLS(PredictorInterface):
         return results
 
 class LeavePairOutRankRLS(PredictorInterface):
+    """RankRLS: Regularized least-squares ranking. Wrapper code for selecting the
+    regularization parameter automatically with leave-pair-out cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+        
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training and model selection:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(md^2 + lm^2): Linear Kernel, d < m
+    O(mb^2 +lm^2): Sparse approximation with basis vectors 
+    
+     
+    RankRLS algorithm is described in [1,2].
+    
+
+    Learning to rank with pairwise regularized least-squares.
+    In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
+    SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
+    
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    An efficient algorithm for learning to rank from preference graphs.
+    Machine Learning, 75(1):129-165, 2009.
+"""
     
     def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, **kwargs):
         if regparams == None:
-            grid = [2**x for x in range(-15, 15)]
+            grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
         learner = GlobalRankRLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
@@ -425,6 +569,60 @@ class LeavePairOutRankRLS(PredictorInterface):
         self.predictor = learner.predictor
         
 class KfoldRankRLS(PredictorInterface):
+    
+    """RankRLS: Regularized least-squares ranking. Wrapper code for selecting the
+    regularization parameter automatically with K-fold cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+    regparams: {array-like}, shape = [grid_size] (optional)
+        regularization parameter values to be tested, default = [2^-15,...,2^15]
+        
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+    degree: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training and model selection:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    O(md^2 + lmd): Linear Kernel, d < m
+    O(mb^2 +lmb): Sparse approximation with basis vectors 
+    
+     
+    RankRLS algorithm is described in [1,2]. 
+    
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
+    Learning to rank with pairwise regularized least-squares.
+    In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
+    SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
+    
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    An efficient algorithm for learning to rank from preference graphs.
+    Machine Learning, 75(1):129-165, 2009.
+"""
     
     def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
         if regparams == None:
@@ -451,7 +649,6 @@ class LPOCV(object):
         rls.solve(regparam)
         Y = rls.Y
         perfs = []
-        #special handling for concordance index / auc
         for index in range(Y.shape[1]):
             pairs_start_inds, pairs_end_inds = [], []
             for i in range(Y.shape[0] - 1):
@@ -463,7 +660,7 @@ class LPOCV(object):
                         pairs_start_inds.append(j)
                         pairs_end_inds.append(i)
             if len(pairs_start_inds) > 0:
-                pred_start, pred_end = rls.computePairwiseCV(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
+                pred_start, pred_end = rls.leave_pairs_out(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
                 auc = 0.
                 for h in range(len(pred_start)):
                     if pred_start[h] > pred_end[h]:

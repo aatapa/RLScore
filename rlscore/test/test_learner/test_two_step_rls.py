@@ -125,29 +125,29 @@ class Test(unittest.TestCase):
         params["X"] = X_train2
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F').T
         ordinary_linear_rls_first_step = RLS(**params)
-        firststeploo = ordinary_linear_rls_first_step.computeLOO().T
+        firststeploo = ordinary_linear_rls_first_step.leave_one_out().T
         params = {}
         params["regparam"] = regparam1
         params["X"] = X_train1
         params["Y"] = firststeploo.reshape((train_rows, train_columns), order = 'F')
         ordinary_linear_rls_second_step = RLS(**params)
-        secondsteploo_linear_rls = ordinary_linear_rls_second_step.computeLOO()
+        secondsteploo_linear_rls = ordinary_linear_rls_second_step.leave_one_out()
         
         #Train ordinary kernel RLS in two steps for a reference
         params = {}
         params["regparam"] = regparam2
         params["X"] = K_train2
-        params['kernel'] = 'precomputed'
+        params['kernel'] = 'PrecomputedKernel'
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F').T
         ordinary_kernel_rls_first_step = RLS(**params)
-        firststeploo = ordinary_kernel_rls_first_step.computeLOO().T
+        firststeploo = ordinary_kernel_rls_first_step.leave_one_out().T
         params = {}
         params["regparam"] = regparam1
         params["X"] = K_train1
-        params["kernel"] = "precomputed"
+        params["kernel"] = "PrecomputedKernel"
         params["Y"] = firststeploo.reshape((train_rows, train_columns), order = 'F')
         ordinary_kernel_rls_second_step = RLS(**params)
-        secondsteploo_kernel_rls = ordinary_kernel_rls_second_step.computeLOO()
+        secondsteploo_kernel_rls = ordinary_kernel_rls_second_step.leave_one_out()
         
         #Train linear two-step RLS without out-of-sample rows or columns for [0,0]
         params = {}
