@@ -140,15 +140,15 @@ class RLS(PredictorInterface):
         
         bevals = multiply(self.evals, self.newevals)
         A = self.svecs[indices]
-        right = self.svecsTY - A.T * self.Y[indices]
-        RQY = A * multiply(bevals.T, right)
+        right = self.svecsTY - A.T * self.Y[indices] #O(hrl)
+        RQY = A * multiply(bevals.T, right) #O(hrl)
         B = multiply(bevals.T, A.T)
-        if len(indices) <= A.shape[1]:
+        if len(indices) <= A.shape[1]: #h < r
             I = mat(identity(len(indices)))
-            result = la.solve(I - A * B, RQY)
-        else:
+            result = la.inv(I - A * B) * RQY #O(h^3 + h^2 * l)
+        else: #h > r
             I = mat(identity(A.shape[1]))
-            result = RQY - A * (la.inv(B * A - I) * (B * RQY))
+            result = RQY - A * (la.inv(B * A - I) * (B * RQY)) #O(r^3 + r^2 * l + h * r * l)
         return np.array(result)
     
     
