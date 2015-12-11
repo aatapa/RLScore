@@ -144,7 +144,7 @@ class GlobalRankRLS(PredictorInterface):
         self.predictor = self.svdad.createModel(self)
     
     
-    def leave_pairs_out(self, pairs_start_inds, pairs_end_inds, oind=0):
+    def leave_pair_out(self, pairs_start_inds, pairs_end_inds, oind=0):
         """Computes leave-pair-out predictions for a trained RankRLS.
         
         Parameters
@@ -440,7 +440,7 @@ class GlobalRankRLS(PredictorInterface):
         -----
     
         Provided for reference, usually you should not call this, but
-        rather use leave_pairs_out.
+        rather use leave_pair_out.
 
         """        
         LOO = mat(zeros((self.size, self.ysize), dtype=float64))
@@ -660,7 +660,7 @@ class LPOCV(object):
                         pairs_start_inds.append(j)
                         pairs_end_inds.append(i)
             if len(pairs_start_inds) > 0:
-                pred_start, pred_end = rls.leave_pairs_out(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
+                pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
                 auc = 0.
                 for h in range(len(pred_start)):
                     if pred_start[h] > pred_end[h]:

@@ -6,7 +6,7 @@ import cython
 
 
 
-def leave_pairs_out(int pairslen,
+def leave_pair_out(int pairslen,
                       long [:] pairs_first,
                       long [:] pairs_second,
                       int outputlen,

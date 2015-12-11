@@ -63,7 +63,7 @@ class RLS(PredictorInterface):
     Basic information about RLS, and a description of the fast leave-one-out method
     can be found in [1]_. The efficient K-fold cross-validation algorithm implemented in
     the method holdout is based on results in [2]_ and [3]_. The leave-pair-out cross-validation
-    algorithm implemented in leave_pairs_out is a modification of the method described
+    algorithm implemented in leave_pair_out is a modification of the method described
     in [4]_ , its use for AUC-estimation has been analyzed in [5]_.
     
     References
@@ -252,7 +252,7 @@ class RLS(PredictorInterface):
         return np.array(LOO)
     
     
-    def leave_pairs_out(self, pairs_start_inds, pairs_end_inds):
+    def leave_pair_out(self, pairs_start_inds, pairs_end_inds):
         
         """Computes leave-pair-out predictions for a trained RLS.
         
@@ -313,7 +313,7 @@ class RLS(PredictorInterface):
         svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
-        cython_pairwise_cv_for_rls.leave_pairs_out(pairslen,
+        cython_pairwise_cv_for_rls.leave_pair_out(pairslen,
                                                      pairs_start_inds,
                                                      pairs_end_inds,
                                                      self.Y.shape[1],
@@ -647,7 +647,7 @@ class LPOCV(object):
                         pairs_end_inds.append(i)
             if len(pairs_start_inds) == 0:
                 raise UndefinedPerformance("All labels are the same")
-            pred_start, pred_end = rls.leave_pairs_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
+            pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
             auc = 0.
             for h in range(len(pred_start)):
                 if pred_start[h] > pred_end[h]:

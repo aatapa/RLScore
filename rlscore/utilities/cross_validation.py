@@ -36,3 +36,17 @@ def grid_search(crossvalidator, grid):
     learner = crossvalidator.rls
     learner.solve(bestparam)
     return performances, predictions
+
+def map_ids(ids):
+    q_partition = []
+    prev = ids[0]
+    query = [0]
+    for i in range(1,len(ids)):
+        if ids[i] == prev:
+            query.append(i)
+        else:
+            q_partition.append(query)
+            prev = ids[i]
+            query = [i]
+    q_partition.append(query)
+    return q_partition
