@@ -150,13 +150,14 @@ class Test(unittest.TestCase):
         params["label_row_inds"] = rows
         params["label_col_inds"] = cols
         params["maxiter"] = 100
-        params["inneriter"] = 10
+        params["inneriter"] = 100
         params["regparam"] = regparam  
         params['callback'] = DualCallback()     
         learner = KronSVM(**params)
         rowind = learner.label_row_inds
         colind = learner.label_col_inds
         P_dual = learner.predictor.predict(K1_test, K2_test).ravel(order='F')
+        print np.max(1. - np.abs(P_linear / P_dual))
         assert np.max(1. - np.abs(P_linear / P_dual)) < 0.0001       
 
 
