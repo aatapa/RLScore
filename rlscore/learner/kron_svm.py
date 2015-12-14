@@ -3,7 +3,7 @@ import numpy as np
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import qmr
 
-from rlscore.utilities import sparse_kronecker_multiplication_tools_python
+from rlscore.utilities import sampled_kronecker_products
 from rlscore.pairwise_predictor import KernelPairwisePredictor
 from rlscore.pairwise_predictor import LinearPairwisePredictor
 
@@ -13,36 +13,36 @@ CALLBACK_FUNCTION = 'callback'
         
 def dual_objective(a, K1, K2, Y, rowind, colind, lamb):
     #REPLACE
-    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
-    Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
     return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
 
 def dual_gradient(a, K1, K2, Y, rowind, colind, lamb):
-    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     v = P[sv]-Y[sv]
-    v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+    v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
     return v_after + lamb*Ka
         
 def dual_Hu(u, a, K1, K2, Y, rowind, colind, lamb):
-    P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)            
+    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)            
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
-    v = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-    v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    return v_after + lamb * sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    v = sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
+    v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+    return v_after + lamb * sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
 
 
 def func(v, X1, X2, Y, rowind, colind, lamb):
     #REPLACE
     #P = np.dot(X,v)
-    P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
     z = (1. - Y*P)
     #print z
     z = np.where(z>0, z, 0)
@@ -53,7 +53,7 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
     #REPLACE
     #P = np.dot(X,v)
     #P = vecProd(X1, X2, v)
-    P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
@@ -61,11 +61,11 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
     rows = rowind[sv]
     cols = colind[sv]
     #A = -2*np.dot(X[sv].T, Y[sv])
-    A = - sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
+    A = - sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
     A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
-    v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
-    v_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
+    v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
+    v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
     B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     #print "FOOOBAAR"
     return A + B + lamb*v
@@ -74,15 +74,15 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
 def hessian(v, p, X1, X2, Y, rowind, colind, lamb):
     #P = np.dot(X,v)
     #P = vecProd(X1, X2, v)
-    P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     #map to rows and cols
     rows = rowind[sv]
     cols = colind[sv]
-    p_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
-    p_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
+    p_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
+    p_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
     p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     return p_after + lamb*p    
     #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
@@ -148,8 +148,8 @@ class KronSVM(object):
         #Z = X1 kron X2 
         #Z * v -> vec-trick: 
         #Z[sv] * v 
-        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
-        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
+        #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
+        #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
         #Z[sv].T * v
         #
 
@@ -163,7 +163,7 @@ class KronSVM(object):
         def func(v):
             #REPLACE
             #P = np.dot(X,v)
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             return np.dot(z,z)
@@ -172,7 +172,7 @@ class KronSVM(object):
             #REPLACE
             #P = np.dot(X,v)
             #P = vecProd(X1, X2, v)
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
@@ -180,11 +180,11 @@ class KronSVM(object):
             rows = rowind[sv]
             cols = colind[sv]
             #A = -2*np.dot(X[sv].T, Y[sv])
-            A = -2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
+            A = -2 * sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
             A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
             #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
-            v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
-            v_after = 2 * sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
+            v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
+            v_after = 2 * sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
             B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
             #print "FOOOBAAR"
             return A + B + lamb*v
@@ -192,15 +192,15 @@ class KronSVM(object):
         def hessian(v, p):
             #P = np.dot(X,v)
             #P = vecProd(X1, X2, v)
-            P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
             #map to rows and cols
             rows = rowind[sv]
             cols = colind[sv]
-            p_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
-            p_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
+            p_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
+            p_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
             p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
             return 2 * p_after + lamb*p    
             #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
@@ -258,8 +258,8 @@ class KronSVM(object):
         #Z = X1 kron X2 
         #Z * v -> vec-trick: 
         #Z[sv] * v 
-        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
-        #v_after = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
+        #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
+        #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
         #Z[sv].T * v
         #
 
@@ -300,7 +300,7 @@ class KronSVM(object):
                 break
             w = w - self.w_new
             if self.compute_risk:
-                P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+                P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
                 z = (1. - Y*P)
                 z = np.where(z>0, z, 0)
                 loss = 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
@@ -311,7 +311,7 @@ class KronSVM(object):
                 self.W = w.reshape((x1fsize, x2fsize), order='C')             
             #print "model", w
             #print i, "primal objective", func(w, X1, X2, Y, rowind, colind, lamb), "gradient norm", np.linalg.norm(g)
-            #print "predictions", sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+            #print "predictions", sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
             #self.W = w.reshape((x1fsize, x2fsize), order='C')
             if self.callbackfun != None:
                 self.callbackfun.callback(self)
@@ -324,15 +324,15 @@ class KronSVM(object):
         X2 = self.resource_pool['xmatrix2']
         rowind = np.array(self.label_row_inds, dtype = np.int32)
         colind = np.array(self.label_col_inds, dtype = np.int32)
-        P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+        P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
         #choose support vectors here?
         K1 = self.resource_pool['kmatrix1']
         K2 = self.resource_pool['kmatrix2']
         ddim = len(rowind)
         def mv(v):
-            return sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind, colind)
+            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind, colind)
         def rv(v):
-            return sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind, colind)
+            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind, colind)
         K = LinearOperator((ddim, ddim), matvec=mv, rmatvec=rv, dtype=np.float64)
         #A = lsmr(K, P, maxiter=100)[0]
         A = qmr(K, P, maxiter=100)[0]
@@ -368,26 +368,26 @@ class KronSVM(object):
         def func(a):
             #REPLACE
             #P = np.dot(X,v)
-            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
-            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
         def mv(v):
             rows = rowind[sv]
             cols = colind[sv]
             p = np.zeros(len(rowind))
-            A =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rows, cols, rowind, colind)
+            A =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rows, cols, rowind, colind)
             p[sv] = A
             return p + lamb * v
         def rv(v):
             rows = rowind[sv]
             cols = colind[sv]
-            p = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v[sv], K2, K1, rowind, colind, rows, cols)
+            p = sampled_kronecker_products.sampled_vec_trick(v[sv], K2, K1, rowind, colind, rows, cols)
             return p + lamb * v
         ssize = 1.0
         for i in range(maxiter):
-            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
@@ -431,8 +431,8 @@ class KronSVM(object):
             self.dual_model = KernelPairwisePredictor(a, rowind, colind)
             if self.callbackfun != None:
                 self.callbackfun.callback(self)
-            #w = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
-            #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
+            #w = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
+            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #z2 = (1. - Y*P)
             #z2 = np.where(z2>0, z2, 0)
             #print np.dot(z2,z2)
@@ -442,7 +442,7 @@ class KronSVM(object):
             #assert False
             #p = func(a)
             #print p[-10:]
-            #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
+            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #print "predictions 2", P2
             #print "diff", P1-P2
             #z2 = (1. - Y*P)
@@ -486,29 +486,29 @@ class KronSVM(object):
         a = np.random.random(ddim)
         def func(a):
             #REPLACE
-            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
-            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
         def gradient(a):
-            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
             v = P[sv]-Y[sv]
-            #v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            Ka = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)
+            #v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
             return v_after + lamb*Ka
         def hessian(u):
-            P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(a, K2, K1, rowind, colind, rowind, colind)            
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)            
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]
-            v = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-            v_after = sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            return v_after + lamb * sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            v = sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
+            v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+            return v_after + lamb * sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
         def mv(v):
             return hessian(v)
         ssize = 1.0
@@ -521,8 +521,8 @@ class KronSVM(object):
             a = a - a_new
             self.a = a
             self.predictor = KernelPairwisePredictor(a, rowind, colind)
-            #w = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
-            #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
+            #w = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
+            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #z2 = (1. - Y*P)
             #z2 = np.where(z2>0, z2, 0)
             #print np.dot(z2,z2)
@@ -532,7 +532,7 @@ class KronSVM(object):
             #assert False
             #p = func(a)
             #print p[-10:]
-            #P2 = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
+            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
             #print "predictions 2", P2
             #print "diff", P1-P2
             #z2 = (1. - Y*P)
@@ -575,13 +575,13 @@ class KernelPairwisePredictor(object):
         P: array, shape = [n_samples1, n_samples2]
             predictions
         """
-        P = sparse_kronecker_multiplication_tools_python.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
+        P = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
         P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
         return P
 
     def predictWithKernelMatricesAlt(self, K1pred, K2pred, row_inds = None, col_inds = None):
         #transposes wrong probably
-        P =  sparse_kronecker_multiplication_tools_python.compute_R_times_M_kron_N_times_C_times_v(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
+        P =  sampled_kronecker_products.sampled_vec_trick(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
         return P
 
 # class LinearPairwisePredictor(object):
@@ -619,7 +619,7 @@ class KernelPairwisePredictor(object):
 #             P = P.ravel()
 #             #P = P.reshape(X1pred.shape[0] * X2pred.shape[0], 1, order = 'F')
 #         else:
-#             P = sparse_kronecker_multiplication_tools_python.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
+#             P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.reshape((self.W.shape[0] * self.W.shape[1], 1), order = 'F'), X1pred, X2pred.T, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32))
 #             #P = X1pred * self.W * X2pred.T
 #         return P
 

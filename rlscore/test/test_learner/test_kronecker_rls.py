@@ -46,12 +46,12 @@ class Test(unittest.TestCase):
         X_test2, Y_test2 = self.generate_data(testpos2, testneg2, 5, 4, 6)
         
         #kernel1 = GaussianKernel.createKernel(gamma=0.01, X=X_train1)
-        kernel1 = LinearKernel(X_train1)
+        kernel1 = LinearKernel(X_train1, bias=0.0)
         K_train1 = kernel1.getKM(X_train1)
         K_test1 = kernel1.getKM(X_test1)
         
         #kernel2 = GaussianKernel.createKernel(gamma=0.01, X=X_train2)
-        kernel2 = LinearKernel(X_train2)
+        kernel2 = LinearKernel(X_train2, bias=0.0)
         K_train2 = kernel2.getKM(X_train2)
         K_test2 = kernel2.getKM(X_test2)
         
@@ -169,8 +169,8 @@ class Test(unittest.TestCase):
         K_test_x = np.kron(K_test2, K_test1)
         ordrankrls_testpred = rankrls_learner.predict(K_test_x)
         condrank_testpred = linear_kron_condrank_learner.predict(X_test1, X_test2)
-        print('')
-        print('TEST cond vs rankrls ' + str(np.mean(np.abs(condrank_testpred - ordrankrls_testpred))))
+        #print('')
+        print('\n\nMeanabsdiff: conditional ranking vs rankrls ' + str(np.mean(np.abs(condrank_testpred - ordrankrls_testpred))) + '\n')
     
     
     
