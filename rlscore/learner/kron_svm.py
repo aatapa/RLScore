@@ -11,32 +11,32 @@ from rlscore.pairwise_predictor import LinearPairwisePredictor
 TRAIN_LABELS = 'Y'
 CALLBACK_FUNCTION = 'callback'
         
-def dual_objective(a, K1, K2, Y, rowind, colind, lamb):
-    #REPLACE
-    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-    z = (1. - Y*P)
-    z = np.where(z>0, z, 0)
-    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-    return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
-
-def dual_gradient(a, K1, K2, Y, rowind, colind, lamb):
-    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-    z = (1. - Y*P)
-    z = np.where(z>0, z, 0)
-    sv = np.nonzero(z)[0]
-    v = P[sv]-Y[sv]
-    v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-    return v_after + lamb*Ka
-        
-def dual_Hu(u, a, K1, K2, Y, rowind, colind, lamb):
-    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)            
-    z = (1. - Y*P)
-    z = np.where(z>0, z, 0)
-    sv = np.nonzero(z)[0]
-    v = sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-    v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-    return v_after + lamb * sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
+# def dual_objective(a, K1, K2, Y, rowind, colind, lamb):
+#     #REPLACE
+#     P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+#     z = (1. - Y*P)
+#     z = np.where(z>0, z, 0)
+#     Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+#     return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
+# 
+# def dual_gradient(a, K1, K2, Y, rowind, colind, lamb):
+#     P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+#     z = (1. - Y*P)
+#     z = np.where(z>0, z, 0)
+#     sv = np.nonzero(z)[0]
+#     v = P[sv]-Y[sv]
+#     v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+#     Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+#     return v_after + lamb*Ka
+#         
+# def dual_Hu(u, a, K1, K2, Y, rowind, colind, lamb):
+#     P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)            
+#     z = (1. - Y*P)
+#     z = np.where(z>0, z, 0)
+#     sv = np.nonzero(z)[0]
+#     v = sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
+#     v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
+#     return v_after + lamb * sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
 
 
 def func(v, X1, X2, Y, rowind, colind, lamb):
@@ -118,114 +118,6 @@ class KronSVM(object):
             self.solve_kernel(self.regparam)
         else:
             self.solve_linear(self.regparam)
-    
-    def solve_linear2(self, regparam):
-        self.regparam = regparam
-        X1 = self.resource_pool['xmatrix1']
-        X2 = self.resource_pool['xmatrix2']
-        self.X1, self.X2 = X1, X2
-        
-        if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
-        else: maxiter = 1000
-
-        if 'inneriter' in self.resource_pool: inneriter = int(self.resource_pool['inneriter'])
-        else: inneriter = 50
-        
-        x1tsize, x1fsize = X1.shape #m, d
-        x2tsize, x2fsize = X2.shape #q, r
-        
-        
-        label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
-        label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
-        
-        
-        #def cgcb(v):
-        #    self.W = v.reshape((x1fsize, x2fsize), order = 'F')
-        #    self.callback()
-
-
-        #OPERAATIOT:
-        #Z = X1 kron X2 
-        #Z * v -> vec-trick: 
-        #Z[sv] * v 
-        #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
-        #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds)
-        #Z[sv].T * v
-        #
-
-        Y = self.Y
-        rowind = label_row_inds
-        colind = label_col_inds
-        lamb = self.regparam
-        rowind = np.array(rowind, dtype = np.int32)
-        colind = np.array(colind, dtype = np.int32)
-        fdim = X1.shape[1]*X2.shape[1]
-        def func(v):
-            #REPLACE
-            #P = np.dot(X,v)
-            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            return np.dot(z,z)
-            #return np.dot(z,z)+lamb*np.dot(v,v)
-        def gradient(v):
-            #REPLACE
-            #P = np.dot(X,v)
-            #P = vecProd(X1, X2, v)
-            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            sv = np.nonzero(z)[0]
-            #map to rows and cols
-            rows = rowind[sv]
-            cols = colind[sv]
-            #A = -2*np.dot(X[sv].T, Y[sv])
-            A = -2 * sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
-            A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
-            #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
-            v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
-            v_after = 2 * sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
-            B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
-            #print "FOOOBAAR"
-            return A + B + lamb*v
-            #return -2*np.dot(X[sv].T,Y[sv]) + 2 * np.dot(X[sv].T, np.dot(X[sv],v)) + lamb*v
-        def hessian(v, p):
-            #P = np.dot(X,v)
-            #P = vecProd(X1, X2, v)
-            P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            sv = np.nonzero(z)[0]
-            #map to rows and cols
-            rows = rowind[sv]
-            cols = colind[sv]
-            p_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
-            p_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
-            p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
-            return 2 * p_after + lamb*p    
-            #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
-        w = np.zeros(fdim)
-        #np.random.seed(1)
-        #w = np.random.random(fdim)
-        def mv(v):
-            return hessian(w, v)
-        for i in range(maxiter):
-            g = gradient(w)
-            G = LinearOperator((fdim, fdim), matvec=mv, dtype=np.float64)
-            w_new = qmr(G, g, maxiter=inneriter)[0]
-            #r = G*w_new - g
-            #e_rel = np.linalg.norm(r)/np.linalg.norm(g)
-            #print e_rel, alpha
-            print "function value", func(w)
-            w = w - w_new
-            self.W = w.reshape((x1fsize, x2fsize), order='C')
-            if self.callbackfun != None:
-                self.callbackfun.callback(self)
-            #print i
-        self.predictor = LinearPairwisePredictor(self.W)
-        print w
-        if self.callbackfun != None:
-            self.callbackfun.finished(self)
 
     def solve_linear(self, regparam):
         self.regparam = regparam
@@ -309,34 +201,9 @@ class KronSVM(object):
                     self.bestloss = loss
             else:
                 self.W = w.reshape((x1fsize, x2fsize), order='C')             
-            #print "model", w
-            #print i, "primal objective", func(w, X1, X2, Y, rowind, colind, lamb), "gradient norm", np.linalg.norm(g)
-            #print "predictions", sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
-            #self.W = w.reshape((x1fsize, x2fsize), order='C')
             if self.callbackfun != None:
                 self.callbackfun.callback(self)
         self.predictor = LinearPairwisePredictor(self.W)
-
-
-    def dual_from_primal(self):
-        w = self.W.ravel()
-        X1 = self.resource_pool['xmatrix1']
-        X2 = self.resource_pool['xmatrix2']
-        rowind = np.array(self.label_row_inds, dtype = np.int32)
-        colind = np.array(self.label_col_inds, dtype = np.int32)
-        P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
-        #choose support vectors here?
-        K1 = self.resource_pool['kmatrix1']
-        K2 = self.resource_pool['kmatrix2']
-        ddim = len(rowind)
-        def mv(v):
-            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind, colind)
-        def rv(v):
-            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind, colind)
-        K = LinearOperator((ddim, ddim), matvec=mv, rmatvec=rv, dtype=np.float64)
-        #A = lsmr(K, P, maxiter=100)[0]
-        A = qmr(K, P, maxiter=100)[0]
-        return KernelPairwisePredictor(A, rowind, colind)
 
     def solve_kernel(self, regparam):
         self.regparam = regparam
@@ -456,98 +323,6 @@ class KronSVM(object):
         #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
         if self.callbackfun != None:
             self.callbackfun.finished(self)
-
-    def solve_dual_symm(self, regparam):
-        self.regparam = regparam
-        K1 = self.resource_pool['kmatrix1']
-        K2 = self.resource_pool['kmatrix2']
-        #X1 = self.resource_pool['xmatrix1']
-        #X2 = self.resource_pool['xmatrix2']
-        #self.X1, self.X2 = X1, X2
-        #x1tsize, x1fsize = X1.shape #m, d
-        #x2tsize, x2fsize = X2.shape #q, r
-        if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
-        else: maxiter = 1000
-        if 'inneriter' in self.resource_pool: inneriter = int(self.resource_pool['inneriter'])
-        else: inneriter = 50
-        lsize = len(self.label_row_inds) #n
-        
-        label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
-        label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
-        
-        Y = self.Y
-        rowind = label_row_inds
-        colind = label_col_inds
-        lamb = self.regparam
-        rowind = np.array(rowind, dtype = np.int32)
-        colind = np.array(colind, dtype = np.int32)
-        ddim = len(rowind)
-        #a = np.zeros(ddim)
-        a = np.random.random(ddim)
-        def func(a):
-            #REPLACE
-            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-            return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
-        def gradient(a):
-            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            sv = np.nonzero(z)[0]
-            v = P[sv]-Y[sv]
-            #v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
-            return v_after + lamb*Ka
-        def hessian(u):
-            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)            
-            z = (1. - Y*P)
-            z = np.where(z>0, z, 0)
-            sv = np.nonzero(z)[0]
-            v = sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind[sv], colind[sv], rowind, colind)
-            v_after = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rowind, colind, rowind[sv], colind[sv])
-            return v_after + lamb * sampled_kronecker_products.sampled_vec_trick(u, K2, K1, rowind, colind, rowind[sv], colind[sv])
-        def mv(v):
-            return hessian(v)
-        ssize = 1.0
-        #print "Kronecker SVM"
-        for i in range(100):
-            g = gradient(a)
-            A = LinearOperator((ddim, ddim), matvec=mv, dtype=np.float64)
-            a_new = qmr(A, g, maxiter=inneriter)[0]
-            #a_new = lsqr(A, g)[0]
-            a = a - a_new
-            self.a = a
-            self.predictor = KernelPairwisePredictor(a, rowind, colind)
-            #w = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(a, X1.T, X2, rowind, colind)
-            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
-            #z2 = (1. - Y*P)
-            #z2 = np.where(z2>0, z2, 0)
-            #print np.dot(z2,z2)
-            #self.W = w.reshape((x1fsize, x2fsize), order='F')
-            #print w
-            #print self.W.ravel()
-            #assert False
-            #p = func(a)
-            #print p[-10:]
-            #P2 = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(self.W.ravel(), X2, X1.T, colind, rowind)
-            #print "predictions 2", P2
-            #print "diff", P1-P2
-            #z2 = (1. - Y*P)
-            #z2 = np.where(z2>0, z2, 0)
-            #print np.dot(z2,z2)
-            if self.callbackfun != None:
-                self.callbackfun.callback(self)
-            #print i
-        #self.predictor = LinearPairwisePredictor(self.W, X1.shape[1], X2.shape[1])
-        self.predictor = KernelPairwisePredictor(a, rowind, colind)
-        #z = np.where(a!=0, a, 0)
-        #sv = np.nonzero(z)[0]
-        #self.predictor = KernelPairwisePredictor([sv], rowind[sv], colind[sv])
-        if self.callbackfun != None:
-            self.callbackfun.finished(self)   
 
 class KernelPairwisePredictor(object):
     
