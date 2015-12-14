@@ -7,7 +7,7 @@ import numpy.linalg as la
 from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
 
-from rlscore.utilities import sparse_kronecker_multiplication_tools
+from rlscore.utilities import sampled_kronecker_products
 
 from rlscore.pairwise_predictor import LinearPairwisePredictor
 from rlscore.pairwise_predictor import KernelPairwisePredictor
@@ -205,7 +205,7 @@ class KronRLS(PairwisePredictorInterface):
             #print B_in_right_order
             #print B_in_right_order.shape, B_in_wrong_order.shape, rowcount, colcount
             B_in_right_order = np.mat(np.zeros((hosize, hosize)))
-            sparse_kronecker_multiplication_tools.cpy_reorder(B_in_right_order, B_in_wrong_order, rowcount, colcount)
+            sampled_kronecker_products.cpy_reorder(B_in_right_order, B_in_wrong_order, rowcount, colcount)
             #print B_in_right_order
             #print
             hopred = la.inv(np.mat(np.eye(hosize)) - B_in_right_order) * (P_ho.ravel().T - B_in_right_order * self.Y[np.ix_(row_inds, col_inds)].ravel().T)

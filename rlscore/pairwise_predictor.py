@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.utilities import sparse_kronecker_multiplication_tools_python
+from rlscore.utilities import sampled_kronecker_products
 
 class PairwisePredictorInterface(object):
     
@@ -39,7 +39,7 @@ class KernelPairwisePredictor(object):
         if row_inds_pred != None:
             row_inds_pred = np.array(row_inds_pred, dtype = np.int32)
             col_inds_pred = np.array(col_inds_pred, dtype = np.int32)
-            P = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(
+            P = sampled_kronecker_products.sampled_vec_trick(
                 self.A,
                 K2pred,
                 K1pred,
@@ -48,7 +48,7 @@ class KernelPairwisePredictor(object):
                 self.row_inds_training,
                 self.col_inds_training)
         else:
-            P = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(
+            P = sampled_kronecker_products.sampled_vec_trick(
                 self.A,
                 K2pred,
                 K1pred,
@@ -99,7 +99,7 @@ class LinearPairwisePredictor(object):
         if row_inds_pred == None:
             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
         else:
-            P = sparse_kronecker_multiplication_tools_python.x_gets_C_times_M_kron_N_times_B_times_v(
+            P = sampled_kronecker_products.sampled_vec_trick(
                     self.W.reshape((self.W.shape[0] * self.W.shape[1]), order = 'F'),
                     X2pred,
                     X1pred,
