@@ -7,7 +7,7 @@ ext_modules = [Extension("rlscore.utilities.swapped",["rlscore/utilities/swapped
     Extension("rlscore.learner.cython_pairwise_cv_for_rls",["rlscore/learner/cython_pairwise_cv_for_rls.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.learner.cython_mmc",["rlscore/learner/cython_mmc.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.learner.cython_greedy_rls",["rlscore/learner/cython_greedy_rls.pyx"], include_dirs=[np.get_include()]),
-    Extension("rlscore.utilities.sparse_kronecker_multiplication_tools",["rlscore/utilities/sparse_kronecker_multiplication_tools.pyx"], include_dirs=[np.get_include()])
+    Extension("rlscore.utilities._sampled_kronecker_products",["rlscore/utilities/_sampled_kronecker_products.pyx"], include_dirs=[np.get_include()])
     ]
 
 setup(
