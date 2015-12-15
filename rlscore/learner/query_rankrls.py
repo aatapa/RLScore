@@ -241,7 +241,7 @@ class LeaveQueryOutRankRLS(PredictorInterface):
             self.measure = measure
         learner = QueryRankRLS(X, Y, qids, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LQOCV(learner, measure)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions,  self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
 
 class LQOCV(object):

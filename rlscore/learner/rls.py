@@ -414,7 +414,7 @@ class LeaveOneOutRLS(PredictorInterface):
             measure = sqerror
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LOOCV(learner, measure)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
             
 class KfoldRLS(PredictorInterface):
@@ -498,7 +498,7 @@ class KfoldRLS(PredictorInterface):
             self.measure = measure
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = NfoldCV(learner, measure, folds)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
         
 class LeavePairOutRLS(PredictorInterface):
@@ -578,7 +578,7 @@ class LeavePairOutRLS(PredictorInterface):
             grid = regparams
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LPOCV(learner)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
 
 
