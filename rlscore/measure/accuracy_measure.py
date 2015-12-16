@@ -11,7 +11,7 @@ def accuracy_multitask(Y, P):
     Y = np.mat(Y)
     P = np.mat(P)
     vlen = float(Y.shape[0])
-    performances = sum(np.sign(np.multiply(Y, P)) + 1., axis = 0) / (2 * vlen)
+    performances = np.sum(np.sign(np.multiply(Y, P)) + 1., axis = 0) / (2 * vlen)
     performances = np.array(performances)[0]
     return performances
 

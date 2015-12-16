@@ -565,7 +565,7 @@ class LeavePairOutRankRLS(PredictorInterface):
             grid = regparams
         learner = GlobalRankRLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LPOCV(learner)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
         
 class KfoldRankRLS(PredictorInterface):
@@ -635,7 +635,7 @@ class KfoldRankRLS(PredictorInterface):
             self.measure = measure
         learner = GlobalRankRLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = NfoldCV(learner, measure, folds)
-        self.cv_performances, self.cv_predictions = grid_search(crossvalidator, grid)
+        self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
 
 class LPOCV(object):
