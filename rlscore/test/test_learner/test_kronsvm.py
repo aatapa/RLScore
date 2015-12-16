@@ -5,10 +5,7 @@ import random as pyrandom
 import cPickle
 import numpy as np
 from numpy import random as numpyrandom
-from rlscore.kernel import LinearKernel
 from rlscore.learner.kron_svm import KronSVM
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import KernelPairwisePredictor
 
 from rlscore.utilities import sampled_kronecker_products
 
@@ -26,19 +23,13 @@ def dual_svm_objective(a, K1, K2, Y, rowind, colind, lamb):
     Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
     return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
 
-def primal_svm_objective(w, X1, X2, Y, rowind, colind, lamb):
-    #primal form of the objective function for support vector machine
-    #w: current primal solution
-    #X1: samples x features data matrix for domain 1
-    #X2: samples x features data matrix for domain 2
-    #rowind: row indices for training pairs
-    #colind: column indices for training pairs
-    #lamb: regularization parameter
-    #P = np.dot(X,v)
-    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+def primal_svm_objective(v, X1, X2, Y, rowind, colind, lamb):
+    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, rowind, colind)
     z = (1. - Y*P)
+    #print z
     z = np.where(z>0, z, 0)
-    return 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
+    #return np.dot(z,z)
+    return 0.5*(np.dot(z,z)+lamb*np.dot(v,v))
 
 def load_data(primal=True, fold_index=0):
     fname =  "examples/data/FOLDS-nr-q4"
@@ -100,9 +91,8 @@ class Test(unittest.TestCase):
                 X2 = learner.resource_pool['xmatrix2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
-                w = learner.W.ravel()
+                w = learner.W.ravel(order='F')
                 loss = primal_svm_objective(w, X1, X2, Y_train, rowind, colind, regparam)
-                #loss = learner.bestloss
                 print "iteration", self.iter
                 print "Primal SVM loss", loss
                 self.iter += 1
@@ -120,7 +110,6 @@ class Test(unittest.TestCase):
         params['callback'] = PrimalCallback()  
         learner = KronSVM(**params)
         P_linear = learner.predictor.predict(X1_test, X2_test)
-
         pyrandom.seed(100)
         numpyrandom.seed(100)         
         K1_train, K2_train, Y_train, rows, cols, K1_test, K2_test, Y_test = load_data(primal=False)       
@@ -154,9 +143,7 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam  
         params['callback'] = DualCallback()     
         learner = KronSVM(**params)
-        rowind = learner.label_row_inds
-        colind = learner.label_col_inds
-        P_dual = learner.predictor.predict(K1_test, K2_test).ravel(order='F')
+        P_dual = learner.predictor.predict(K1_test, K2_test)
         print np.max(1. - np.abs(P_linear / P_dual))
         assert np.max(1. - np.abs(P_linear / P_dual)) < 0.0001       
 
