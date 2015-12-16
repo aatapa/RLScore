@@ -42,7 +42,8 @@ CALLBACK_FUNCTION = 'callback'
 def func(v, X1, X2, Y, rowind, colind, lamb):
     #REPLACE
     #P = np.dot(X,v)
-    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X1, X2, colind, rowind)
     z = (1. - Y*P)
     #print z
     z = np.where(z>0, z, 0)
@@ -53,7 +54,8 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
     #REPLACE
     #P = np.dot(X,v)
     #P = vecProd(X1, X2, v)
-    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X1, X2, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
@@ -61,11 +63,14 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
     rows = rowind[sv]
     cols = colind[sv]
     #A = -2*np.dot(X[sv].T, Y[sv])
-    A = - sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
+    #A = - sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(Y[sv], X1.T, X2, rows, cols)
+    A = - sampled_kronecker_products.sampled_vec_trick(Y[sv], X2.T, X1.T, None, None, rows, cols)
     A = A.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     #B = 2 * np.dot(X[sv].T, np.dot(X[sv],v))
-    v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
-    v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
+    #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, cols, rows)
+    v_after = sampled_kronecker_products.sampled_vec_trick(v, X1, X2, cols, rows)
+    #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, rows, cols)
+    v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, rows, cols)
     B = v_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     #print "FOOOBAAR"
     return A + B + lamb*v
@@ -74,15 +79,18 @@ def gradient(v, X1, X2, Y, rowind, colind, lamb):
 def hessian(v, p, X1, X2, Y, rowind, colind, lamb):
     #P = np.dot(X,v)
     #P = vecProd(X1, X2, v)
-    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X1, X2, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     #map to rows and cols
     rows = rowind[sv]
     cols = colind[sv]
-    p_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
-    p_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
+    #p_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(p, X2, X1.T, cols, rows)
+    p_after = sampled_kronecker_products.sampled_vec_trick(p, X1, X2, cols, rows)
+    #p_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(p_after, X1.T, X2, rows, cols)
+    p_after = sampled_kronecker_products.sampled_vec_trick(p_after, X2.T, X1.T, None, None, rows, cols)
     p_after = p_after.reshape(X2.shape[1], X1.shape[1]).T.ravel()
     return p_after + lamb*p    
     #return 2 * np.dot(X[sv].T, np.dot(X[sv],p)) + lamb*p
@@ -192,7 +200,8 @@ class KronSVM(object):
                 break
             w = w - self.w_new
             if self.compute_risk:
-                P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+                #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+                P = sampled_kronecker_products.sampled_vec_trick(w, X1, X2, colind, rowind)
                 z = (1. - Y*P)
                 z = np.where(z>0, z, 0)
                 loss = 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
@@ -324,40 +333,40 @@ class KronSVM(object):
         if self.callbackfun != None:
             self.callbackfun.finished(self)
 
-class KernelPairwisePredictor(object):
-    
-    def __init__(self, A, label_row_inds, label_col_inds, kernel = None):
-        """Initializes the dual model
-        @param A: dual coefficient matrix
-        @type A: numpy matrix"""
-        self.A = A
-        self.label_row_inds, self.label_col_inds = label_row_inds, label_col_inds
-        self.kernel = kernel
-    
-    
-    def predict(self, K1pred, K2pred):
-        """Computes predictions for test examples.
-
-        Parameters
-        ----------
-        K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
-            the first part of the test data matrix
-        K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
-            the second part of the test data matrix
-        
-        Returns
-        ----------
-        P: array, shape = [n_samples1, n_samples2]
-            predictions
-        """
-        P = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
-        P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
-        return P
-
-    def predictWithKernelMatricesAlt(self, K1pred, K2pred, row_inds = None, col_inds = None):
-        #transposes wrong probably
-        P =  sampled_kronecker_products.sampled_vec_trick(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
-        return P
+# class KernelPairwisePredictor(object):
+#     
+#     def __init__(self, A, label_row_inds, label_col_inds, kernel = None):
+#         """Initializes the dual model
+#         @param A: dual coefficient matrix
+#         @type A: numpy matrix"""
+#         self.A = A
+#         self.label_row_inds, self.label_col_inds = label_row_inds, label_col_inds
+#         self.kernel = kernel
+#     
+#     
+#     def predict(self, K1pred, K2pred):
+#         """Computes predictions for test examples.
+# 
+#         Parameters
+#         ----------
+#         K1pred: {array-like, sparse matrix}, shape = [n_samples1, n_basis_functions1]
+#             the first part of the test data matrix
+#         K2pred: {array-like, sparse matrix}, shape = [n_samples2, n_basis_functions2]
+#             the second part of the test data matrix
+#         
+#         Returns
+#         ----------
+#         P: array, shape = [n_samples1, n_samples2]
+#             predictions
+#         """
+#         P = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(self.A, K1pred, K2pred.T, self.label_row_inds, self.label_col_inds)
+#         P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order='F')
+#         return P
+# 
+#     def predictWithKernelMatricesAlt(self, K1pred, K2pred, row_inds = None, col_inds = None):
+#         #transposes wrong probably
+#         P =  sampled_kronecker_products.sampled_vec_trick(self.A, K2pred, K1pred, np.array(row_inds, dtype=np.int32), np.array(col_inds, dtype=np.int32), self.label_row_inds, self.label_col_inds)
+#         return P
 
 # class LinearPairwisePredictor(object):
 #     
