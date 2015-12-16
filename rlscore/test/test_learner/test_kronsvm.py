@@ -35,7 +35,8 @@ def primal_svm_objective(w, X1, X2, Y, rowind, colind, lamb):
     #colind: column indices for training pairs
     #lamb: regularization parameter
     #P = np.dot(X,v)
-    P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+    #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(w, X2, X1.T, colind, rowind)
+    P = sampled_kronecker_products.sampled_vec_trick(w, X1, X2, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     return 0.5*(np.dot(z,z)+lamb*np.dot(w,w))

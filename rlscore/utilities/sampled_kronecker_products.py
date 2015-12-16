@@ -11,13 +11,13 @@ from scipy.sparse import lil_matrix
 from rlscore.utilities import _sampled_kronecker_products
 
 
-def compute_subset_of_matprod_entries(*args):
+def _compute_subset_of_matprod_entries(*args):
     _sampled_kronecker_products.compute_subset_of_matprod_entries(*args)
 
-def sparse_mat_from_left(*args):
+def _sparse_mat_from_left(*args):
     _sampled_kronecker_products.sparse_mat_from_left(*args)
 
-def sparse_mat_from_right(*args):
+def _sparse_mat_from_right(*args):
     _sampled_kronecker_products.sparse_mat_from_right(*args)
 
 def sampled_vec_trick(v, M, N, row_inds_R = None, col_inds_R = None, row_inds_C = None, col_inds_C = None):
@@ -57,7 +57,7 @@ def sampled_vec_trick(v, M, N, row_inds_R = None, col_inds_R = None, row_inds_C 
     return x_after
 
 
-def x_gets_A_kron_B_times_sparse_v(v, M, N, row_inds, col_inds): #MVN=(N.T x M)v
+def _x_gets_A_kron_B_times_sparse_v(v, M, N, row_inds, col_inds): #MVN=(N.T x M)v
     if len(M.shape) == 1:
         M = M[..., np.newaxis]
     rc_m, cc_m = M.shape
@@ -79,7 +79,7 @@ def x_gets_A_kron_B_times_sparse_v(v, M, N, row_inds, col_inds): #MVN=(N.T x M)v
         return temp.reshape((len_c,), order = 'F')
 
 
-def x_gets_subset_of_A_kron_B_times_v(v, M, N, row_inds, col_inds):
+def _x_gets_subset_of_A_kron_B_times_v(v, M, N, row_inds, col_inds):
     if len(M.shape) == 1:
         M = M[..., np.newaxis]
     rc_m, cc_m = M.shape
