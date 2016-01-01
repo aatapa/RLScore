@@ -3,21 +3,21 @@ from rlscore.utilities import sampled_kronecker_products
 
 class PairwisePredictorInterface(object):
     
-    def predict(self, X1, X2, row_inds_pred = None, col_inds_pred = None):
-        return self.predictor.predict(X1, X2, row_inds_pred, col_inds_pred)
+    def predict(self, X1, X2, row_inds_X1pred = None, row_inds_X2pred = None):
+        return self.predictor.predict(X1, X2, row_inds_X1pred, row_inds_X2pred)
 
 class KernelPairwisePredictor(object):
     
-    def __init__(self, A, row_inds_training = None, col_inds_training = None, kernel = None):
+    def __init__(self, A, row_inds_K1training = None, row_inds_K2training = None, kernel = None):
         """Initializes the dual model
         @param A: dual coefficient matrix
         @type A: numpy matrix"""
         self.A = A
-        self.row_inds_training, self.col_inds_training = row_inds_training, col_inds_training
+        self.row_inds_K1training, self.row_inds_K2training = row_inds_K1training, row_inds_K2training
         self.kernel = kernel
     
     
-    def predict(self, K1pred, K2pred, row_inds_pred = None, col_inds_pred = None):
+    def predict(self, K1pred, K2pred, row_inds_K1pred = None, row_inds_K2pred = None):
         """Computes predictions for test examples.
 
         Parameters
@@ -36,17 +36,17 @@ class KernelPairwisePredictor(object):
             K1pred = K1pred.reshape(1, K1pred.shape[0])
         if len(K2pred.shape) == 1:
             K2pred = K2pred.reshape(1, K2pred.shape[0])
-        if row_inds_pred != None:
-            row_inds_pred = np.array(row_inds_pred, dtype = np.int32)
-            col_inds_pred = np.array(col_inds_pred, dtype = np.int32)
+        if row_inds_K1pred != None:
+            row_inds_K1pred = np.array(row_inds_K1pred, dtype = np.int32)
+            row_inds_K2pred = np.array(row_inds_K2pred, dtype = np.int32)
             P = sampled_kronecker_products.sampled_vec_trick(
                 self.A,
                 K2pred,
                 K1pred,
-                row_inds_pred,
-                col_inds_pred,
-                self.row_inds_training,
-                self.col_inds_training)
+                row_inds_K2pred,
+                row_inds_K1pred,
+                self.row_inds_K2training,
+                self.row_inds_K1training)
         else:
             P = sampled_kronecker_products.sampled_vec_trick(
                 self.A,
@@ -54,8 +54,8 @@ class KernelPairwisePredictor(object):
                 K1pred,
                 None,
                 None,
-                self.row_inds_training,
-                self.col_inds_training)
+                self.row_inds_K2training,
+                self.row_inds_K1training)
             
             #P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order = 'F')
         P = np.array(P)
@@ -71,7 +71,7 @@ class LinearPairwisePredictor(object):
         self.W = W
     
     
-    def predict(self, X1pred, X2pred, row_inds_pred = None, col_inds_pred = None):
+    def predict(self, X1pred, X2pred, row_inds_X1pred = None, row_inds_X2pred = None):
         """Computes predictions for test examples.
         
         Parameters
@@ -96,15 +96,15 @@ class LinearPairwisePredictor(object):
                 X2pred = X2pred[np.newaxis, ...]
             else:
                 X2pred = X2pred[..., np.newaxis]
-        if row_inds_pred == None:
+        if row_inds_X1pred == None:
             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
         else:
             P = sampled_kronecker_products.sampled_vec_trick(
                     self.W.reshape((self.W.shape[0] * self.W.shape[1]), order = 'F'),
                     X2pred,
                     X1pred,
-                    np.array(row_inds_pred, dtype = np.int32),
-                    np.array(col_inds_pred, dtype = np.int32),
+                    np.array(row_inds_X2pred, dtype = np.int32),
+                    np.array(row_inds_X1pred, dtype = np.int32),
                     None,
                     None)
         return P.ravel(order = 'F')

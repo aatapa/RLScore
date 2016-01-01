@@ -33,7 +33,7 @@ def testLearners():
     #from rlscore.test.test_learner.test_orthogonal_matching_pursuit import Test as omptest
     from rlscore.test.test_learner.test_kronsvm import Test as kronsvmtest
     #for test in [cgkrontest]:
-    #for test in [krontest]:
+    for test in [krontest]:
     #for test in [twosteptest]:
     #for test in [mmctest]:
     #for test in [irlsctest]:
@@ -50,7 +50,7 @@ def testLearners():
     #for test in [cgranktest]:
     #for test in [rsatest]:
     #for test in [pairwisetest]:
-    for test in [kronsvmtest]:#[cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest,krontest,twosteptest,cgkrontest,pairwisetest,mmctest,irlsctest]:
+    #for test in [kronsvmtest]:#[cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest,krontest,twosteptest,cgkrontest,pairwisetest,mmctest,irlsctest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
@@ -74,7 +74,13 @@ def testModels():
     for test in [mtest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
-    
+
+
+def testUtilities():
+    from rlscore.test.test_utility.test_sampled_kronecker_products import Test as skptest
+    for test in [skptest]:
+        suite = unittest.TestLoader().loadTestsFromTestCase(test)
+        unittest.TextTestRunner(verbosity=2).run(suite)
 
 if __name__=="__main__":
     #testModels()
@@ -82,3 +88,4 @@ if __name__=="__main__":
     #cProfile.run('testLearners()')
     testLearners()
     #testMeasures()
+    #testUtilities()

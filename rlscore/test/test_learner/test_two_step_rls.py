@@ -124,12 +124,14 @@ class Test(unittest.TestCase):
         params["regparam"] = regparam2
         params["X"] = X_train2
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F').T
+        params['bias'] = 0
         ordinary_linear_rls_first_step = RLS(**params)
         firststeploo = ordinary_linear_rls_first_step.leave_one_out().T
         params = {}
         params["regparam"] = regparam1
         params["X"] = X_train1
         params["Y"] = firststeploo.reshape((train_rows, train_columns), order = 'F')
+        params['bias'] = 0
         ordinary_linear_rls_second_step = RLS(**params)
         secondsteploo_linear_rls = ordinary_linear_rls_second_step.leave_one_out()
         
@@ -203,7 +205,11 @@ class Test(unittest.TestCase):
                          + ' ' + str(kernel_two_step_testpred_24)
                          + ' ' + str(linear_twostepoutofsampleloo[2, 4])
                          + ' ' + str(kernel_twostepoutofsampleloo[2, 4]))
-        
+        np.testing.assert_almost_equal(secondsteploo_linear_rls, secondsteploo_kernel_rls)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls, linear_twostepoutofsampleloo)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls, kernel_twostepoutofsampleloo)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls[0, 0], linear_two_step_testpred_00)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls[0, 0], kernel_two_step_testpred_00)
         
         
         #Train kernel two-step RLS with pre-computed kernel matrices and with output at position [2, 4] changed
@@ -227,6 +233,7 @@ class Test(unittest.TestCase):
         print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [2, 4]')
         print('[2, 4] ' + str(kernel_two_step_learner_inSampleLOO_24a) + ' ' + str(kernel_two_step_learner_inSampleLOO_24b))
         print kernel_two_step_learner.in_sample_loo().ravel(order = 'F')[1], kernel_two_step_learner.in_sample_loo_ref()
+        np.testing.assert_almost_equal(kernel_two_step_learner_inSampleLOO_24a, kernel_two_step_learner_inSampleLOO_24b)
         
         
         
@@ -249,6 +256,7 @@ class Test(unittest.TestCase):
         print('')
         print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [0, 0]')
         print('[0, 0] ' + str(kernel_two_step_learner_inSampleLOO_00a) + ' ' + str(kernel_two_step_learner_inSampleLOO_00b))
+        np.testing.assert_almost_equal(kernel_two_step_learner_inSampleLOO_00a, kernel_two_step_learner_inSampleLOO_00b)
         
         
         #Create symmetric data
@@ -306,6 +314,7 @@ class Test(unittest.TestCase):
         print('')
         print('Symmetric double out-of-sample LOO: Test prediction, LOO')
         print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]))
+        np.testing.assert_almost_equal(kernel_kron_testpred[0, 0], fcsho[2, 4])
         
         
 

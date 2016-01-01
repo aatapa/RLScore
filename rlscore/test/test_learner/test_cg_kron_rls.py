@@ -123,7 +123,7 @@ class Test(unittest.TestCase):
         params['callback'] = tcb
         linear_kron_learner = CGKronRLS(**params)
         linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2).reshape((test_rows, test_columns), order = 'F')
-        linear_kron_testpred_alt = linear_kron_learner.predict(X_test1, X_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
+        linear_kron_testpred_alt = linear_kron_learner.predict(X_test1, X_test2, [0, 0, 1], [0, 1, 0])
         
         #Train kernel Kronecker RLS
         params = {}
@@ -138,7 +138,7 @@ class Test(unittest.TestCase):
                 self.round = 0
             def callback(self, learner):
                 self.round = self.round + 1
-                tp = KernelPairwisePredictor(learner.A, learner.label_row_inds, learner.label_col_inds).predict(K_test1, K_test2)
+                tp = KernelPairwisePredictor(learner.A, learner.input1_inds, learner.input2_inds).predict(K_test1, K_test2)
                 print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred.ravel(order = 'F')))))
             def finished(self, learner):
                 print('finished')
@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
         params['callback'] = tcb
         kernel_kron_learner = CGKronRLS(**params)
         kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
-        kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, row_inds_pred = [0, 0, 1], col_inds_pred = [0, 1, 0])
+        kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, [0, 0, 1], [0, 1, 0])
         
         print('Predictions: Linear CgKronRLS, Kernel CgKronRLS, ordinary RLS')
         print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))#, linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]
@@ -154,6 +154,8 @@ class Test(unittest.TestCase):
         print('[1, 0]: ' + str(linear_kron_testpred[1, 0]) + ' ' + str(kernel_kron_testpred[1, 0]) + ' ' + str(ordrls_testpred[1, 0]))#, linear_kron_testpred_alt[2], kernel_kron_testpred_alt[2]
         print('Meanabsdiff: linear KronRLS - ordinary RLS, kernel KronRLS - ordinary RLS')
         print(str(np.mean(np.abs(linear_kron_testpred - ordrls_testpred))) + ' ' + str(np.mean(np.abs(kernel_kron_testpred - ordrls_testpred))))
+        np.testing.assert_almost_equal(linear_kron_testpred, ordrls_testpred, decimal=5)
+        np.testing.assert_almost_equal(kernel_kron_testpred, ordrls_testpred, decimal=5)
 
 
 if __name__=="__main__":
