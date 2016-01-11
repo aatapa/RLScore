@@ -50,7 +50,7 @@ def testLearners():
     #for test in [cgranktest]:
     #for test in [rsatest]:
     #for test in [pairwisetest]:
-    for test in [kronsvmtest]:#[cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest,krontest,twosteptest,cgkrontest,pairwisetest,mmctest,irlsctest]:
+    for test in [kronsvmtest, cgtest, cgranktest, grlstest, rlstest, apranktest, lranktest, rsatest,krontest,twosteptest,cgkrontest,pairwisetest,mmctest,irlsctest]:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
