@@ -17,14 +17,14 @@ def dual_svm_objective(a, K1, K2, Y, rowind, colind, lamb):
     #rowind: row indices for training pairs
     #colind: column indices for training pairs
     #lamb: regularization parameter
-    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
-    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
     return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
 
 def primal_svm_objective(v, X1, X2, Y, rowind, colind, lamb):
-    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, rowind, colind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
     z = (1. - Y*P)
     #print z
     z = np.where(z>0, z, 0)

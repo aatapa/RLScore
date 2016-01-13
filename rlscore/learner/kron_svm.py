@@ -13,7 +13,7 @@ CALLBACK_FUNCTION = 'callback'
         
 
 def func(v, X1, X2, Y, rowind, colind, lamb):
-    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, rowind, colind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
     z = (1. - Y*P)
     #print z
     z = np.where(z>0, z, 0)
@@ -21,25 +21,25 @@ def func(v, X1, X2, Y, rowind, colind, lamb):
     return 0.5*(np.dot(z,z)+lamb*np.dot(v,v))
 
 def gradient(v, X1, X2, Y, rowind, colind, lamb):
-    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, rowind, colind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     rows = rowind[sv]
     cols = colind[sv]
-    A = - sampled_kronecker_products.sampled_vec_trick(Y[sv], X2.T, X1.T, None, None, rows, cols)
-    B = sampled_kronecker_products.sampled_vec_trick(P[sv], X2.T, X1.T, None, None, rows, cols)
+    A = - sampled_kronecker_products.sampled_vec_trick(Y[sv], X2.T, X1.T, None, None, cols, rows)
+    B = sampled_kronecker_products.sampled_vec_trick(P[sv], X2.T, X1.T, None, None, cols, rows)
     return A + B + lamb*v
 
 def hessian(v, p, X1, X2, Y, rowind, colind, lamb):
-    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, rowind, colind)
+    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
     sv = np.nonzero(z)[0]
     rows = rowind[sv]
     cols = colind[sv]
-    p_after = sampled_kronecker_products.sampled_vec_trick(p, X2, X1, rows, cols)
-    p_after = sampled_kronecker_products.sampled_vec_trick(p_after, X2.T, X1.T, None, None, rows, cols)
+    p_after = sampled_kronecker_products.sampled_vec_trick(p, X2, X1, cols, rows)
+    p_after = sampled_kronecker_products.sampled_vec_trick(p_after, X2.T, X1.T, None, None, cols, rows)
     return p_after + lamb*p    
 
 class KronSVM(object):
@@ -117,7 +117,7 @@ class KronSVM(object):
                 break
             w = w - self.w_new
             if self.compute_risk:
-                P = sampled_kronecker_products.sampled_vec_trick(w, X1, X2, colind, rowind)
+                P = sampled_kronecker_products.sampled_vec_trick(w, X1, X2, rowind, colind)
                 z = (1. - Y*P)
                 z = np.where(z>0, z, 0)
                 loss = 0.5*(np.dot(z,z)+lamb*np.dot(w,w))
@@ -154,25 +154,25 @@ class KronSVM(object):
         def func(a):
             #REPLACE
             #P = np.dot(X,v)
-            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
-            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+            Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
             return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
         def mv(v):
             rows = rowind[sv]
             cols = colind[sv]
             p = np.zeros(len(rowind))
-            A =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, rows, cols, rowind, colind)
+            A =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, cols, rows, colind, rowind)
             p[sv] = A
             return p + lamb * v
         def rv(v):
             rows = rowind[sv]
             cols = colind[sv]
-            p = sampled_kronecker_products.sampled_vec_trick(v[sv], K2, K1, rowind, colind, rows, cols)
+            p = sampled_kronecker_products.sampled_vec_trick(v[sv], K2, K1, colind, rowind, cols, rows)
             return p + lamb * v
         for i in range(maxiter):
-            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, rowind, colind, rowind, colind)
+            P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
             z = (1. - Y*P)
             z = np.where(z>0, z, 0)
             sv = np.nonzero(z)[0]

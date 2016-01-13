@@ -16,19 +16,12 @@ CALLBACK_FUNCTION = 'callback'
 
 class CGKronRLS(PairwisePredictorInterface):
     
-    '''def __init__(self, Y, label_row_inds, label_col_inds, regparam=1.0):
-        self.Y = array_tools.as_labelmatrix(Y)
-        self.regparam = regparam
-        self.label_row_inds = label_row_inds
-        self.label_col_inds = label_col_inds
-        self.results = {}'''
-    
     
     def __init__(self, **kwargs):
         self.resource_pool = kwargs
         Y = kwargs["Y"]
-        self.label_row_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
-        self.label_col_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
+        self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
+        self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
         Y = array_tools.as_labelmatrix(Y)
         self.Y = Y
         self.trained = False
@@ -62,22 +55,19 @@ class CGKronRLS(PairwisePredictorInterface):
         if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
         else: maxiter = None
         
-        label_row_inds = self.label_row_inds
-        label_col_inds = self.label_col_inds
-        
-        Y = np.array(self.Y).ravel()
+        Y = np.array(self.Y).ravel(order = 'F')
         self.bestloss = float("inf")
         def mv(v):
-            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds) + regparam * v
+            return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds) + regparam * v
         
         def mvr(v):
             raise Exception('You should not be here!')
         
         def cgcb(v):
             if self.compute_risk:
-                P =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds)
+                P =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
                 z = (Y - P)
-                Ka = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, label_row_inds, label_col_inds, label_row_inds, label_col_inds)
+                Ka = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
                 loss = (np.dot(z,z)+regparam*np.dot(v,Ka))
                 print "loss", 0.5*loss
                 if loss < self.bestloss:
@@ -89,9 +79,9 @@ class CGKronRLS(PairwisePredictorInterface):
                 self.callbackfun.callback(self)
 
         
-        G = LinearOperator((len(self.label_row_inds), len(self.label_row_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
+        G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
         minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
-        self.predictor = KernelPairwisePredictor(self.A, self.label_row_inds, self.label_col_inds)
+        self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
     
     
     def solve_linear(self, regparam):
@@ -108,16 +98,13 @@ class CGKronRLS(PairwisePredictorInterface):
         
         kronfcount = x1fsize * x2fsize
         
-        label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
-        label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
-        #Y = np.array(self.Y).ravel(order='F')
-        Y = np.array(self.Y).ravel()
+        Y = np.array(self.Y).ravel(order = 'F')
         self.bestloss = float("inf")
         def mv(v):
             #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
-            v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, label_row_inds, label_col_inds)
+            v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
             #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds) + regparam * v
-            v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, label_row_inds, label_col_inds) + regparam * v
+            v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
             return v_after
         
         def mvr(v):
@@ -128,7 +115,7 @@ class CGKronRLS(PairwisePredictorInterface):
             #self.W = v.reshape((x1fsize, x2fsize), order = 'F')
             if self.compute_risk:
                 #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
-                P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, label_row_inds, label_col_inds)
+                P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
                 z = (Y - P)
                 loss = (np.dot(z,z)+regparam*np.dot(v,v))
                 if loss < self.bestloss:
@@ -143,7 +130,7 @@ class CGKronRLS(PairwisePredictorInterface):
         
         v_init = np.array(self.Y).reshape(self.Y.shape[0])
         #v_init = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_init, X1.T, X2, label_row_inds, label_col_inds)
-        v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, label_row_inds, label_col_inds)
+        v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
         v_init = np.array(v_init).reshape(kronfcount)
         if self.resource_pool.has_key('warm_start'):
             x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
