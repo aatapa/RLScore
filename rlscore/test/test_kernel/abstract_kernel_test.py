@@ -36,18 +36,15 @@ class AbstractKernelTest(unittest.TestCase):
         #First data matrix has more features than examples,
         for X in self.trainsets:
             #Reduced set approximation is also tested
-            for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
-                rpool = {'X' : X, 'basis_vectors': bvecs}
+            for X_tr in [X, X[self.bvecinds]]:
+                rpool = {'X' : X}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
                     k = self.kernel(**p)
                     K = k.getKM(X).T
-                    if bvecinds != None:
-                        x_indices = bvecinds
-                    else:
-                        x_indices = range(X.shape[0])
+                    x_indices = range(X.shape[0])
                     for i, x_ind in enumerate(x_indices):
                         for j in range(X.shape[0]):
                             correct = self.k_func(X[x_ind], X[j], paramset)
@@ -63,18 +60,16 @@ class AbstractKernelTest(unittest.TestCase):
         for X in self.trainsets:
             X_test = np.random.random((22,X.shape[1]))
             #Reduced set approximation is also tested
-            for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
-                rpool = {'X' : X, 'basis_vectors': bvecs}
+            #for bvecinds, bvecs in zip([None, self.bvecinds], [None, X[self.bvecinds]]):
+            for X_tr in [X, X[self.bvecinds]]:
+                rpool = {'X' : X}
                 for paramset in self.paramsets:
                     p = {}
                     p.update(rpool)
                     p.update(paramset)
                     k = self.kernel(**p)
                     K = k.getKM(X_test).T
-                    if bvecinds != None:
-                        x_indices = bvecinds
-                    else:
-                        x_indices = range(X.shape[0])
+                    x_indices = range(X.shape[0])
                     for i, x_ind in enumerate(x_indices):
                         for j in range(X_test.shape[0]):
                             correct = self.k_func(X[x_ind], X_test[j], paramset)
@@ -92,11 +87,10 @@ class AbstractKernelTest(unittest.TestCase):
         trainsets = [X, X_mat, X_sp]
         testsets = [Xt, Xt_mat, Xt_sp]
         params = self.paramsets[0]
-        for bvecs in [None, X[self.bvecinds]]:
+        for X_tr in [X, X[self.bvecinds]]:
             K_c = None
             for X in trainsets:
-                p = {'X' : X,
-                         'basis_vectors': bvecs}
+                p = {'X' : X_tr}
                 p.update(params)
                 k = self.kernel(**p)
                 for Xt in testsets:

@@ -17,16 +17,10 @@ class PolynomialKernel(object):
         Kernel parameter
     degree : float, optional (default 2)
         Kernel parameter
-    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
-        Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, X, degree=2, gamma=1.0, coef0=0, basis_vectors=None):
-        if basis_vectors != None:
-            self.train_X = basis_vectors
-        else:
-            self.train_X = X
+    def __init__(self, X, degree=2, gamma=1.0, coef0=0):
+        self.train_X = X
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0

@@ -13,16 +13,10 @@ class LinearKernel(object):
         Data matrix
     bias : float, optional (default 0.)
         Constant added to each kernel evaluation
-    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
-        Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default basis_vectors = range(n_samples).
     """
 
-    def __init__(self, X, bias=1.0, basis_vectors=None):
-        if basis_vectors != None:
-            self.train_X = basis_vectors
-        else:
-            self.train_X = X
+    def __init__(self, X, bias=1.0):
+        self.train_X = X
         self.bias = bias
 
 #    def createKernel(cls, **kwargs):

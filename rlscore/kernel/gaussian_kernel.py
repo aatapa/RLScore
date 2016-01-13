@@ -16,18 +16,12 @@ class GaussianKernel(object):
         Data matrix
     gamma : float, optional (default 1.0)
         Kernel width
-    basis_vectors : array of integers, shape = [n_bvectors] or None, optional (default None)
-        Indices for the subset of rows of X to be used as basis vectors. If set to None,
-        by default basis_vectors = range(n_samples).
     """
       
-    def __init__(self, X, gamma=1.0, basis_vectors=None):
+    def __init__(self, X, gamma=1.0):
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
-        if basis_vectors != None:
-            self.train_X = basis_vectors
-        else:
-            self.train_X = X
+        self.train_X = X
         if sp.issparse(self.train_X):
             self.train_norms = ((self.train_X.T.multiply(self.train_X.T)).sum(axis=0)).T
         else:

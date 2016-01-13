@@ -19,6 +19,8 @@ def createKernelByModuleName(**kwargs):
         if key in args:
             new_kwargs[key] = kwargs[key]
     #initialize kernel
+    if "basis_vectors" in kwargs:
+        new_kwargs['X'] = kwargs['basis_vectors']
     kernel = kernelclazz(**new_kwargs)
     return kernel
 

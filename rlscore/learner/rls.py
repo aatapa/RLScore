@@ -599,7 +599,10 @@ class NfoldCV(object):
     
     def __init__(self, learner, measure, folds):
         self.rls = learner
-        self.measure = measure
+        if measure == None:
+            self.measure = sqerror
+        else:
+            self.measure = measure
         self.folds = folds
         
     def cv(self, regparam):
