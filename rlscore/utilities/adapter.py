@@ -166,7 +166,7 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     def decompositionFromPool(self, rpool):
         K_train = rpool['kernel_matrix']
         if rpool.has_key('basis_vectors'):
-            svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train, rpool['basis_vectors'])
+            svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
         else:
             svals, rsvecs = decomposition.decomposeKernelMatrix(K_train)
             U, Z = None, None
