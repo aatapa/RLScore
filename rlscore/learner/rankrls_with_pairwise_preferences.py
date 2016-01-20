@@ -5,77 +5,20 @@ from scipy.sparse import coo_matrix
 
 from rlscore.utilities import creators
 from rlscore.utilities import decomposition
+import numpy as np
 
 class PPRankRLS(object):
-    """Conjugate gradient RankRLS.
-    
-    Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
-    large high-dimensional but sparse data.
-    
-    There are three ways to supply the pairwise preferences for the training set, depending
-    on the arguments supplied by the user.
-    
-    1. Y: pairwise preferences constructed between all data point pairs
-    
-    2. Y, qids: pairwise preferences constructed between all data
-    points belonging to the same query.
-    
-    3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
-    
-    In order to make training faster, one can use the early stopping technique by
-    supplying a separate validationset to be used for determining, when to terminate
-    optimization. In this case, training stops once validation set error has failed to
-    decrease for ten consequtive iterations. In this case, the caller should
-    provide the parameters validation_features, validation_labels and optionally, validation_qids.
-    Currently, this option is not supported when learning directly from pairwise
-    preferences. 
-
-    Parameters
-    ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-        Data matrix
-    regparam: float (regparam > 0)
-        regularization parameter
-    Y: {array-like}, shape = [n_samples] or [n_samples, 1], optional
-        Training set labels (alternative to: 'train_preferences')
-    qids: list of n_queries index lists, optional
-        Training set qids,  (can be supplied with 'Y')
-    train_preferences: {array-like}, shape = [n_preferences, 2], optional
-        Pairwise preference indices (alternative to: 'Y')
-        The array contains pairwise preferences one pair per row, i.e. the data point
-        corresponding to the first index is preferred over the data point corresponding
-        to the second index.
-    validation_features:: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix for validation set, needed if early stopping used
-    validation_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
-        Validation set labels, needed if early stopping used
-    validation_qids: list of n_queries index lists, optional, optional
-        Validation set qids, may be used with early stopping
- 
-       
-    References
-    ----------
-    
-    RankRLS algorithm is described in [1]_, using the conjugate gradient optimization
-    together with early stopping was considered in detail in [2]_.
-    
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
-    An efficient algorithm for learning to rank from preference graphs.
-    Machine Learning, 75(1):129-165, 2009.
-    
-    .. [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
-    Large Scale Training Methods for Linear RankRLS
-    ECML/PKDD-10 Workshop on Preference Learning, 2010.
+    """
     """
 
 
-    def __init__(self, X, train_preferences, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+    def __init__(self, X, pairs_start_inds, pairs_end_inds, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
         if basis_vectors != None:
             kwargs["basis_vectors"] = basis_vectors
         self.regparam = regparam
-        self.pairs = train_preferences
+        self.pairs = np.vstack([pairs_start_inds, pairs_end_inds]).T
         self.svdad = creators.createSVDAdapter(**kwargs)
         #self.Y = array_tools.as_labelmatrix(kwargs["Y"])
         #if kwargs.has_key("regparam"):
@@ -89,26 +32,6 @@ class PPRankRLS(object):
         self.bias = 0.
         self.results = {}
         self.train()
-        
-#     def __init__(self, **kwargs):
-#         if kwargs.has_key("regparam"):
-#             self.regparam = float(kwargs["regparam"])
-#         else:
-#             self.regparam = 0.
-#         self.pairs = kwargs['train_preferences']
-#         self.svdad = creators.createSVDAdapter(**kwargs)
-#         #self.Y = array_tools.as_labelmatrix(kwargs["Y"])
-#         #if kwargs.has_key("regparam"):
-#         #    self.regparam = float(kwargs["regparam"])
-#         #else:
-#         #    self.regparam = 1.
-#         self.svals = self.svdad.svals
-#         self.svecs = self.svdad.rsvecs
-#         self.results = {}
-#         X = kwargs['X']
-#         self.X = csc_matrix(X)
-#         self.bias = 0.
-#         self.results = {}
     
     
     def train(self):
@@ -164,6 +87,9 @@ class PPRankRLS(object):
         self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
         #self.results['model'] = self.getModel()
         self.predictor = self.svdad.createModel(self)
+        
+    def predict(self, X):
+        return self.predictor.predict(X)
         
     
     

@@ -36,7 +36,9 @@ class Test(unittest.TestCase):
             rpool = {}
             rpool['X'] = Xtrain
             #rpool['Y'] = Y
-            rpool['train_preferences'] = pairs
+            #rpool['train_preferences'] = pairs
+            rpool["pairs_start_inds"] = pairs[:,0]
+            rpool["pairs_end_inds"] = pairs[:,1]
             rpool['regparam'] = regparam
             rpool["bias"] = 1.0
             rpool["kernel"] = "GaussianKernel"
