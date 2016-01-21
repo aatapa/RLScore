@@ -49,6 +49,7 @@ class GreedyRLS(PredictorInterface):
         else:
             self.X = X
         self.X = self.X.T
+        self.X = self.X.astype("float64", copy=False)
         self.Y = array_tools.as_labelmatrix(Y)
         #Number of training examples
         self.size = self.Y.shape[0]
