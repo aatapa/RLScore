@@ -42,89 +42,79 @@ class TwoStepRLS(PairwisePredictorInterface):
         else:
             self.regparam2 = kwargs["regparam"]
         self.trained = False
-        self.train()
+        self.solve(self.regparam1, self.regparam2)
     
     
-    def train(self):
+    def solve(self, regparam1, regparam2):
+        self.regparam1 = regparam1
+        self.regparam2 = regparam2
         if self.kernelmode:
-            self.solve_kernel(self.regparam1, self.regparam2)
+            K1, K2 = self.K1, self.K2
+            Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
+            #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
+            if not self.trained:
+                self.trained = True
+                evals1, V  = decomposition.decomposeKernelMatrix(K1)
+                evals1 = np.mat(evals1).T
+                evals1 = np.multiply(evals1, evals1)
+                V = np.mat(V)
+                self.evals1 = evals1
+                self.V = V
+                
+                evals2, U = decomposition.decomposeKernelMatrix(K2)
+                evals2 = np.mat(evals2).T
+                evals2 = np.multiply(evals2, evals2)
+                U = np.mat(U)
+                self.evals2 = evals2
+                self.U = U
+                self.VTYU = V.T * self.Y * U
+            
+            #newevals = 1. / (self.evals1 * self.evals2.T + regparam)
+            self.newevals1 = 1. / (self.evals1 + regparam1)
+            self.newevals2 = 1. / (self.evals2 + regparam2)
+            newevals = self.newevals1 * self.newevals2.T
+            
+            self.A = np.multiply(self.VTYU, newevals)
+            self.A = self.V * self.A * self.U.T
+            self.A = np.array(self.A)
+            #self.predictor = KernelPairwisePredictor(self.A)
+            label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
+            label_row_inds = np.array(label_row_inds, dtype = np.int32)
+            label_col_inds = np.array(label_col_inds, dtype = np.int32)
+            self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
+            
+            #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
+            #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
         else:
-            self.solve_linear(self.regparam1, self.regparam2)
-    
-    
-    def solve_kernel(self, regparam1, regparam2):
-        self.regparam1 = regparam1
-        self.regparam2 = regparam2
-        K1, K2 = self.K1, self.K2
-        Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
-        #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
-        if not self.trained:
-            self.trained = True
-            evals1, V  = decomposition.decomposeKernelMatrix(K1)
-            evals1 = np.mat(evals1).T
-            evals1 = np.multiply(evals1, evals1)
-            V = np.mat(V)
-            self.evals1 = evals1
-            self.V = V
+            X1, X2 = self.X1, self.X2
+            Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
+            if not self.trained:
+                self.trained = True
+                svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
+                self.svals1 = svals1.T
+                self.evals1 = np.multiply(self.svals1, self.svals1)
+                self.V = V
+                self.rsvecs1 = np.mat(rsvecs1)
+                
+                if X1.shape == X2.shape and (X1 == X2).all():
+                    svals2, U, rsvecs2 = svals1, V, rsvecs1
+                else:
+                    svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
+                self.svals2 = svals2.T
+                self.evals2 = np.multiply(self.svals2, self.svals2)
+                self.U = U
+                self.rsvecs2 = np.mat(rsvecs2)
+                
+                self.VTYU = V.T * Y * U
             
-            evals2, U = decomposition.decomposeKernelMatrix(K2)
-            evals2 = np.mat(evals2).T
-            evals2 = np.multiply(evals2, evals2)
-            U = np.mat(U)
-            self.evals2 = evals2
-            self.U = U
-            self.VTYU = V.T * self.Y * U
-        
-        #newevals = 1. / (self.evals1 * self.evals2.T + regparam)
-        self.newevals1 = 1. / (self.evals1 + regparam1)
-        self.newevals2 = 1. / (self.evals2 + regparam2)
-        newevals = self.newevals1 * self.newevals2.T
-        
-        self.A = np.multiply(self.VTYU, newevals)
-        self.A = self.V * self.A * self.U.T
-        self.A = np.array(self.A)
-        #self.predictor = KernelPairwisePredictor(self.A)
-        label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
-        label_row_inds = np.array(label_row_inds, dtype = np.int32)
-        label_col_inds = np.array(label_col_inds, dtype = np.int32)
-        self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
-        
-        #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
-        #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
-    
-    
-    def solve_linear(self, regparam1, regparam2):
-        self.regparam1 = regparam1
-        self.regparam2 = regparam2
-        X1, X2 = self.X1, self.X2
-        Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
-        if not self.trained:
-            self.trained = True
-            svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
-            self.svals1 = svals1.T
-            self.evals1 = np.multiply(self.svals1, self.svals1)
-            self.V = V
-            self.rsvecs1 = np.mat(rsvecs1)
+            self.newevals1 = 1. / (self.evals1 + regparam1)
+            self.newevals2 = 1. / (self.evals2 + regparam2)
+            newevals = np.multiply(self.svals1, self.newevals1) * np.multiply(self.svals2, self.newevals2).T
             
-            if X1.shape == X2.shape and (X1 == X2).all():
-                svals2, U, rsvecs2 = svals1, V, rsvecs1
-            else:
-                svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
-            self.svals2 = svals2.T
-            self.evals2 = np.multiply(self.svals2, self.svals2)
-            self.U = U
-            self.rsvecs2 = np.mat(rsvecs2)
-            
-            self.VTYU = V.T * Y * U
-        
-        self.newevals1 = 1. / (self.evals1 + regparam1)
-        self.newevals2 = 1. / (self.evals2 + regparam2)
-        newevals = np.multiply(self.svals1, self.newevals1) * np.multiply(self.svals2, self.newevals2).T
-        
-        self.W = np.multiply(self.VTYU, newevals)
-        self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        #self.predictor = LinearPairwisePredictor(self.W)
-        self.predictor = LinearPairwisePredictor(np.array(self.W))
+            self.W = np.multiply(self.VTYU, newevals)
+            self.W = self.rsvecs1.T * self.W * self.rsvecs2
+            #self.predictor = LinearPairwisePredictor(self.W)
+            self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
     def in_sample_loo(self):
