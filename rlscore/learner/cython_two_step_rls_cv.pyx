@@ -5,7 +5,7 @@ import cython
 @cython.boundscheck(False)
 @cython.wraparound(False)
 
-def compute_symmetric_double_loo(double [:, :] G,
+def out_of_sample_loo_symmetric(double [:, :] G,
                                  double [:, :] Y,
                                  double [:, :] GY,
                                  double [:, :] GYG,

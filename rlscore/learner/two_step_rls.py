@@ -218,7 +218,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         return LOO_two_step.ravel(order = 'F')
     
     
-    def compute_symmetric_double_LOO(self):
+    def out_of_sample_loo_symmetric(self):
         
         #bevals_col = np.multiply(self.evals2, self.newevals2).T
         #multiplyright = self.U.T * self.Y.T
@@ -275,7 +275,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         #print HO_row.shape
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
-        cython_two_step_rls_cv.compute_symmetric_double_loo(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
+        cython_two_step_rls_cv.out_of_sample_loo_symmetric(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results.ravel(order = 'F')
 
 

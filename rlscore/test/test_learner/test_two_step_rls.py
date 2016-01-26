@@ -309,7 +309,7 @@ class Test(unittest.TestCase):
         kernel_kron_learner = TwoStepRLS(**params)
         kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')
         
-        fcsho = kernel_two_step_learner.compute_symmetric_double_LOO().reshape((train_rows, train_columns), order = 'F')
+        fcsho = kernel_two_step_learner.out_of_sample_loo_symmetric().reshape((train_rows, train_columns), order = 'F')
         
         print('')
         print('Symmetric double out-of-sample LOO: Test prediction, LOO')
