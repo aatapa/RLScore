@@ -31,11 +31,6 @@ class SpaceEfficientGreedyRLS(object):
         self.results = {}
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
-        self.train()
-    
-    
-    def train(self):
-        
         ##The current version works only with the squared error measure
         #self.measure = None
         #self.solve_bu(self.regparam)
@@ -375,10 +370,10 @@ class SpaceEfficientGreedyRLS(object):
             X_s = X[self.selected]
             
             self.looperf = []
-            sample_60 = pyrandom.sample(notselected, len(notselected))
-            sample_60 = sorted(sample_60)
-            print sample_60
-            #sample_60 = pyrandom.sample(notselected, 60)
+            #sample_60 = pyrandom.sample(notselected, len(notselected))
+            #sample_60 = sorted(sample_60)
+            #print sample_60
+            sample_60 = pyrandom.sample(notselected, 60)
             for ci in sample_60:
                 cv = X[ci]
                 GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
