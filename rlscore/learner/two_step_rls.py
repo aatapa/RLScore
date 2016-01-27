@@ -215,6 +215,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         #LOO = multiply(LOO_ek, RQY)
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO_two_step = np.multiply(LOO_ek_row, self.V * (svecsm_row.T * LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
+        LOO_two_step = np.array(LOO_two_step)
         return LOO_two_step.ravel(order = 'F')
     
     
