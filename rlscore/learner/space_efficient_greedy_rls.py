@@ -4,47 +4,44 @@ import numpy as np
 import numpy.linalg as la
 import scipy.sparse as sp
 
+from rlscore.utilities import array_tools
 from rlscore import predictor
 
 class SpaceEfficientGreedyRLS(object):
     
-    def loadResources(self):
-        """
-        Loads the resources from the previously set resource pool.
-        
-        @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
-        """
-        X = self.resource_pool['X']
+    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=1.0, measure=None, callbackfun=None, **kwargs):
+        self.callbackfun = callbackfun
+        self.regparam = regparam
         if isinstance(X, sp.base.spmatrix):
             self.X = X.todense()
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = self.resource_pool['Y']
+        self.Y = array_tools.as_labelmatrix(Y)
         #Number of training examples
         self.size = self.Y.shape[0]
-        if self.resource_pool.has_key('bias'):
-            self.bias = float(self.resource_pool['bias'])
-        else:
-            self.bias = 0.
-        if self.resource_pool.has_key('measure'):
-            self.measure = None
-        #    self.measure = self.resource_pool['measure']
-        else:
-            self.measure = None
+        #if not self.Y.shape[1] == 1:
+        #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
+        self.bias = bias
+        self.measure = measure
+        fsize = X.shape[1]
+        self.desiredfcount = subsetsize
+        if not fsize >= self.desiredfcount:
+            raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(self.desiredfcount) + ' of features to be selected.')
         self.results = {}
+        if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
+            self.callbackfun = DefaultCallback(**kwargs)
+        self.train()
     
     
     def train(self):
-        regparam = float(self.resource_pool['regparam'])
-        self.regparam = regparam
         
         ##The current version works only with the squared error measure
         #self.measure = None
-        #self.solve_weak(regparam)
+        #self.solve_bu(self.regparam)
         #return
         #if not self.Y.shape[1] == 1:
-        self.solve_bu(regparam)
+        self.solve_weak(self.regparam)
         #else:
         #    self.solve_tradeoff(regparam)
     
@@ -54,18 +51,9 @@ class SpaceEfficientGreedyRLS(object):
     
     
     def solve_bu(self, regparam):
-        """Trains RLS with the given value of the regularization parameter
         
-        @param regparam: value of the regularization parameter
-        @type regparam: float
-        """
-        
-        self.regparam = regparam
         X = self.X
         Y = self.Y
-        
-        if not hasattr(self, "bias"):
-            self.bias = 0.
         
         tsize = self.size
         fsize = X.shape[0]
@@ -75,15 +63,13 @@ class SpaceEfficientGreedyRLS(object):
         rp = regparam
         rpinv = 1. / rp
         
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
+        desiredfcount = self.desiredfcount
         if not fsize >= desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         #Biaz
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
-        cv = bias_slice
+        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
         self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
@@ -93,10 +79,6 @@ class SpaceEfficientGreedyRLS(object):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
         diagG = np.mat(diagG).T
-        
-        #listX = []
-        #for ci in range(fsize):
-        #    listX.append(X[ci])
         
         U, S, VT = la.svd(cv, full_matrices = False)
         U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
@@ -116,7 +98,6 @@ class SpaceEfficientGreedyRLS(object):
             self.looperf = []
             for ci in range(fsize):
                 if ci in self.selected: continue
-                #cv = listX[ci]
                 cv = X[ci]
                 GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
                 ca = GXT_ci * (1. / (1. + cv * GXT_ci))
@@ -136,7 +117,7 @@ class SpaceEfficientGreedyRLS(object):
                     #This default squared performance is a bit faster to compute than the one loaded separately.
                     loodiff = np.multiply(invupddiagG, updA)
                     #looperf_i = (loodiff.T * loodiff)[0, 0]
-                    looperf_i = np.mean(sum(np.multiply(loodiff, loodiff), axis = 0))
+                    looperf_i = np.mean(np.sum(np.multiply(loodiff, loodiff), axis = 0))
                     if looperf_i < bestlooperf:
                         bestcind = ci
                         bestlooperf = looperf_i
@@ -168,8 +149,6 @@ class SpaceEfficientGreedyRLS(object):
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
-            self.callback()
-            #print who(locals())
             if not self.callbackfun == None:
                 self.callbackfun.callback(self)
         if not self.callbackfun == None:
@@ -350,12 +329,8 @@ class SpaceEfficientGreedyRLS(object):
     
     def solve_weak(self, regparam):
         
-        self.regparam = regparam
         X = self.X
         Y = self.Y
-        
-        if not hasattr(self, "bias"):
-            self.bias = 0.
         
         tsize = self.size
         fsize = X.shape[0]
@@ -365,29 +340,22 @@ class SpaceEfficientGreedyRLS(object):
         rp = regparam
         rpinv = 1. / rp
         
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
+        desiredfcount = self.desiredfcount
         if not fsize >= desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         #Biaz
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
-        cv = bias_slice
+        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
         self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
-        self.F = cv.T * (cv * self.dualvec)
         
         diagG = []
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
         diagG = np.mat(diagG).T
-        
-        #listX = []
-        #for ci in range(fsize):
-        #    listX.append(X[ci])
         
         U, S, VT = la.svd(cv, full_matrices = False)
         U, S, VT = np.mat(U), np.mat(S), np.mat(VT)
@@ -410,14 +378,12 @@ class SpaceEfficientGreedyRLS(object):
             sample_60 = pyrandom.sample(notselected, len(notselected))
             sample_60 = sorted(sample_60)
             print sample_60
-            #sample_60 = pyrandom.sample(notselected, 1)
+            #sample_60 = pyrandom.sample(notselected, 60)
             for ci in sample_60:
                 cv = X[ci]
-                GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T #GXT[:, ci]
+                GXT_ci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
                 ca = GXT_ci * (1. / (1. + cv * GXT_ci))
                 updA = self.dualvec - ca * (cv * self.dualvec)
-                #updF = self.F - X_s.T * (X_s * (ca * (cv * self.dualvec))) + cv.T * (cv * updA)
-                updF = bias_slice.T * (bias_slice * updA) + X_s.T * (X_s * updA) + cv.T * (cv * updA) #PREFITTING (SLOW)
                 invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
                 if not self.measure == None:
@@ -431,13 +397,11 @@ class SpaceEfficientGreedyRLS(object):
                         bestlooperf = looperf_i
                 else:
                     #This default squared performance is a bit faster to compute than the one loaded separately.
-                    updtrainingerr = updF - self.Y
-                    updtrainingerr = np.mean(sum(np.multiply(updtrainingerr, updtrainingerr), axis = 0))
-                    looperf_i = updtrainingerr
-                    #loodiff = np.multiply(invupddiagG, updA)
-                    #looperf_i = np.mean(sum(np.multiply(loodiff, loodiff), axis = 0))
+                    loodiff = np.multiply(invupddiagG, updA)
+                    looperf_i = np.mean(np.sum(np.multiply(loodiff, loodiff), axis = 0))
                     if looperf_i < bestlooperf:
                         bestcind = ci
+                        bestlooperf = looperf_i
                         bestlooperf = looperf_i
                 self.looperf.append(looperf_i)
             self.looperf = np.mat(self.looperf)
@@ -445,15 +409,11 @@ class SpaceEfficientGreedyRLS(object):
             self.bestlooperf = bestlooperf
             print bestlooperf
             self.performances.append(bestlooperf)
-            #cv = listX[bestcind]
             cv = X[bestcind]
-            #GXT_bci = GXT[:, bestcind]
             GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
             self.dualvec = self.dualvec - ca * (cv * self.dualvec)
             diagG = diagG - np.multiply(ca, GXT_bci)
-            #self.F = self.F + cv.T * (cv * self.dualvec)
-            self.F = X_s.T * (X_s * self.dualvec) + cv.T * (cv * self.dualvec)
             #GXT = GXT - ca * (cv * GXT)
             self.selected.append(bestcind)
             notselected.remove(bestcind)
@@ -469,8 +429,11 @@ class SpaceEfficientGreedyRLS(object):
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
-            self.callback()
-        self.finished()
+            
+            if not self.callbackfun == None:
+                self.callbackfun.callback(self)
+        if not self.callbackfun == None:
+            self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
         self.results['selected_features'] = self.selected
