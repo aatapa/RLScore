@@ -1,0 +1,33 @@
+regparam 2**-15, k-fold error 0.043429
+regparam 2**-14, k-fold error 0.043416
+regparam 2**-13, k-fold error 0.043396
+regparam 2**-12, k-fold error 0.043372
+regparam 2**-11, k-fold error 0.043348
+regparam 2**-10, k-fold error 0.043327
+regparam 2**-9, k-fold error 0.043308
+regparam 2**-8, k-fold error 0.043288
+regparam 2**-7, k-fold error 0.043260
+regparam 2**-6, k-fold error 0.043216
+regparam 2**-5, k-fold error 0.043148
+regparam 2**-4, k-fold error 0.043057
+regparam 2**-3, k-fold error 0.042955
+regparam 2**-2, k-fold error 0.042862
+regparam 2**-1, k-fold error 0.042797
+regparam 2**0, k-fold error 0.042768
+regparam 2**1, k-fold error 0.042763
+regparam 2**2, k-fold error 0.042758
+regparam 2**3, k-fold error 0.042720
+regparam 2**4, k-fold error 0.042625
+regparam 2**5, k-fold error 0.042471
+regparam 2**6, k-fold error 0.042289
+regparam 2**7, k-fold error 0.042156
+regparam 2**8, k-fold error 0.042207
+regparam 2**9, k-fold error 0.042622
+regparam 2**10, k-fold error 0.043615
+regparam 2**11, k-fold error 0.045399
+regparam 2**12, k-fold error 0.048230
+regparam 2**13, k-fold error 0.052443
+regparam 2**14, k-fold error 0.058417
+regparam 2**15, k-fold error 0.066758
+best regparam 128.000000 k-fold error 0.042156
+test error 0.045575

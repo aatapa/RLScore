@@ -1,0 +1,3 @@
+best parameters gamma 0.000031 regparam 0.000244
+best leave-one-out error 21.910837
+test error 16.340877

@@ -1,0 +1,3 @@
+best parameters gamma 0.062500 regparam 0.250000
+best leave-one-out accuracy 0.850174
+test set accuracy 0.839875
