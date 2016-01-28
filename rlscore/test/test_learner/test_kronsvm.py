@@ -87,8 +87,8 @@ class Test(unittest.TestCase):
             def __init__(self):
                 self.iter = 0
             def callback(self, learner):
-                X1 = learner.resource_pool['xmatrix1']
-                X2 = learner.resource_pool['xmatrix2']
+                X1 = learner.resource_pool['X1']
+                X2 = learner.resource_pool['X2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
                 w = learner.W.ravel(order='F')
@@ -99,8 +99,8 @@ class Test(unittest.TestCase):
             def finished(self, learner):
                 pass        
         params = {}
-        params["xmatrix1"] = X1_train
-        params["xmatrix2"] = X2_train
+        params["X1"] = X1_train
+        params["X2"] = X2_train
         params["Y"] = Y_train
         params["label_row_inds"] = rows
         params["label_col_inds"] = cols
@@ -120,8 +120,8 @@ class Test(unittest.TestCase):
                 self.atol = None
     
             def callback(self, learner):
-                K1 = learner.resource_pool['kmatrix1']
-                K2 = learner.resource_pool['kmatrix2']
+                K1 = learner.resource_pool['K1']
+                K2 = learner.resource_pool['K2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
                 loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
@@ -133,8 +133,8 @@ class Test(unittest.TestCase):
             def finished(self, learner):
                 pass
         params = {}
-        params["kmatrix1"] = K1_train
-        params["kmatrix2"] = K2_train
+        params["K1"] = K1_train
+        params["K2"] = K2_train
         params["Y"] = Y_train
         params["label_row_inds"] = rows
         params["label_col_inds"] = cols

@@ -114,8 +114,8 @@ class Test(unittest.TestCase):
                 print('finished')
         params = {}
         params["regparam"] = regparam
-        params["xmatrix1"] = X_train1
-        params["xmatrix2"] = X_train2
+        params["X1"] = X_train1
+        params["X2"] = X_train2
         params["Y"] = Y_train_known_outputs
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
@@ -128,8 +128,8 @@ class Test(unittest.TestCase):
         #Train kernel Kronecker RLS
         params = {}
         params["regparam"] = regparam
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_train_known_outputs
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds

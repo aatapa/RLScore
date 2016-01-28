@@ -92,8 +92,8 @@ class Test(unittest.TestCase):
 #         #Train linear Kronecker RLS with data-matrices
 #         params = {}
 #         params["regparam"] = regparam
-#         params["xmatrix1"] = X_train1
-#         params["xmatrix2"] = X_train2
+#         params["X1"] = X_train1
+#         params["X2"] = X_train2
 #         params["Y"] = Y_train
 #         linear_kron_learner = KronRLS(**params)
 #         linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
@@ -103,8 +103,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["xmatrix1"] = X_train1
-        params["xmatrix2"] = X_train2
+        params["X1"] = X_train1
+        params["X2"] = X_train2
         params["Y"] = Y_train
         linear_two_step_learner = TwoStepRLS(**params)
         linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
@@ -113,8 +113,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_train
         kernel_two_step_learner = TwoStepRLS(**params)
         kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
@@ -155,8 +155,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["xmatrix1"] = X_train1[range(1, X_train1.shape[0])]
-        params["xmatrix2"] = X_train2[range(1, X_train2.shape[0])]
+        params["X1"] = X_train1[range(1, X_train1.shape[0])]
+        params["X2"] = X_train2[range(1, X_train2.shape[0])]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(range(1, train_rows), range(1, train_columns))].ravel(order = 'F')
         linear_two_step_learner_00 = TwoStepRLS(**params)
         linear_two_step_testpred_00 = linear_two_step_learner_00.predict(X_train1[0], X_train2[0])
@@ -165,8 +165,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["xmatrix1"] = X_train1[[0, 1] + range(3, K_train1.shape[0])]
-        params["xmatrix2"] = X_train2[[0, 1, 2, 3] + range(5, K_train2.shape[0])]
+        params["X1"] = X_train1[[0, 1] + range(3, K_train1.shape[0])]
+        params["X2"] = X_train2[[0, 1, 2, 3] + range(5, K_train2.shape[0])]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_([0, 1] + range(3, train_rows), [0, 1, 2, 3] + range(5, train_columns))].ravel(order = 'F')
         linear_two_step_learner_24 = TwoStepRLS(**params)
         linear_two_step_testpred_24 = linear_two_step_learner_24.predict(X_train1[2], X_train2[4])
@@ -175,8 +175,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1[np.ix_(range(1, K_train1.shape[0]), range(1, K_train1.shape[1]))]
-        params["kmatrix2"] = K_train2[np.ix_(range(1, K_train2.shape[0]), range(1, K_train2.shape[1]))]
+        params["K1"] = K_train1[np.ix_(range(1, K_train1.shape[0]), range(1, K_train1.shape[1]))]
+        params["K2"] = K_train2[np.ix_(range(1, K_train2.shape[0]), range(1, K_train2.shape[1]))]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(range(1, train_rows), range(1, train_columns))].ravel(order = 'F')
         kernel_two_step_learner_00 = TwoStepRLS(**params)
         kernel_two_step_testpred_00 = kernel_two_step_learner_00.predict(K_train1[range(1, K_train1.shape[0]), 0], K_train2[0, range(1, K_train2.shape[0])])
@@ -185,8 +185,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1] + range(3, K_train1.shape[0]))]
-        params["kmatrix2"] = K_train2[np.ix_([0, 1, 2, 3] + range(5, K_train2.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
+        params["K1"] = K_train1[np.ix_([0, 1] + range(3, K_train1.shape[0]), [0, 1] + range(3, K_train1.shape[0]))]
+        params["K2"] = K_train2[np.ix_([0, 1, 2, 3] + range(5, K_train2.shape[0]), [0, 1, 2, 3] + range(5, K_train2.shape[0]))]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_([0, 1] + range(3, train_rows), [0, 1, 2, 3] + range(5, train_columns))].ravel(order = 'F')
         kernel_two_step_learner_24 = TwoStepRLS(**params)
         kernel_two_step_testpred_24 = kernel_two_step_learner_24.predict(K_train1[[0, 1] + range(3, K_train1.shape[0]), 2], K_train2[4, [0, 1, 2, 3] + range(5, K_train2.shape[0])])
@@ -220,8 +220,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_24
         kernel_two_step_learner_Y_24 = TwoStepRLS(**params)
         kernel_two_step_testpred_Y_24 = kernel_two_step_learner_Y_24.predict(K_test1, K_test2)
@@ -245,8 +245,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_00
         kernel_two_step_learner_Y_00 = TwoStepRLS(**params)
         kernel_two_step_testpred_Y_00 = kernel_two_step_learner_Y_00.predict(K_test1, K_test2)
@@ -285,8 +285,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam2
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_train
         kernel_two_step_learner = TwoStepRLS(**params)
         kernel_two_step_testpred = kernel_two_step_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
@@ -303,8 +303,8 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam2
         params["regparam2"] = regparam2
-        params["kmatrix1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
-        params["kmatrix2"] = K_train2[np.ix_(traincolinds, traincolinds)]
+        params["K1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
+        params["K2"] = K_train2[np.ix_(traincolinds, traincolinds)]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(trainrowinds, traincolinds)].ravel(order = 'F')
         kernel_kron_learner = TwoStepRLS(**params)
         kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')

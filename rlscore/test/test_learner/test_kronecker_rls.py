@@ -86,8 +86,8 @@ class Test(unittest.TestCase):
         #Train linear Kronecker RLS with data-matrices
         params = {}
         params["regparam"] = regparam
-        params["xmatrix1"] = X_train1
-        params["xmatrix2"] = X_train2
+        params["X1"] = X_train1
+        params["X2"] = X_train2
         params["Y"] = Y_train
         linear_kron_learner = KronRLS(**params)
         linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2).reshape((test_rows, test_columns), order = 'F')
@@ -95,8 +95,8 @@ class Test(unittest.TestCase):
         #Train kernel Kronecker RLS with pre-computed kernel matrices
         params = {}
         params["regparam"] = regparam
-        params["kmatrix1"] = K_train1
-        params["kmatrix2"] = K_train2
+        params["K1"] = K_train1
+        params["K2"] = K_train2
         params["Y"] = Y_train
         kernel_kron_learner = KronRLS(**params)
         kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
@@ -151,8 +151,8 @@ class Test(unittest.TestCase):
         
         #Train linear Conditional Ranking Kronecker RLS
         params = {}
-        params["xmatrix1"] = X_train1
-        params["xmatrix2"] = X_train2
+        params["X1"] = X_train1
+        params["X2"] = X_train2
         params["Y"] = Y_train
         params["regparam"] = regparam
         linear_kron_condrank_learner = KronRLS(**params)
