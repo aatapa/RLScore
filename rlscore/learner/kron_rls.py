@@ -20,15 +20,15 @@ class KronRLS(PairwisePredictorInterface):
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
         Y = array_tools.as_labelmatrix(Y)
-        if kwargs.has_key('kmatrix1'):
-            K1 = np.mat(kwargs['kmatrix1'])
-            K2 = np.mat(kwargs['kmatrix2'])
+        if kwargs.has_key('K1'):
+            K1 = np.mat(kwargs['K1'])
+            K2 = np.mat(kwargs['K2'])
             Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
-            X1 = np.mat(kwargs['xmatrix1'])
-            X2 = np.mat(kwargs['xmatrix2'])
+            X1 = np.mat(kwargs['X1'])
+            X2 = np.mat(kwargs['X2'])
             Y = Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
             self.X1, self.X2 = X1, X2
             self.kernelmode = False

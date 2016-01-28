@@ -39,10 +39,10 @@ class CGKronRLS(PairwisePredictorInterface):
             self.compute_risk = False
         
         regparam = self.regparam
-        if self.resource_pool.has_key('kmatrix1'):
+        if self.resource_pool.has_key('K1'):
             
-            K1 = self.resource_pool['kmatrix1']
-            K2 = self.resource_pool['kmatrix2']
+            K1 = self.resource_pool['K1']
+            K2 = self.resource_pool['K2']
             
             if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
             else: maxiter = None
@@ -75,8 +75,8 @@ class CGKronRLS(PairwisePredictorInterface):
             minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
         else:
-            X1 = self.resource_pool['xmatrix1']
-            X2 = self.resource_pool['xmatrix2']
+            X1 = self.resource_pool['X1']
+            X2 = self.resource_pool['X2']
             self.X1, self.X2 = X1, X2
             
             if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])

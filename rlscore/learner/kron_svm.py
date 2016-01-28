@@ -67,10 +67,10 @@ class KronSVM(object):
         
         regparam = self.regparam
         
-        if not self.resource_pool.has_key('kmatrix1'):
+        if not self.resource_pool.has_key('K1'):
             self.regparam = regparam
-            X1 = self.resource_pool['xmatrix1']
-            X2 = self.resource_pool['xmatrix2']
+            X1 = self.resource_pool['X1']
+            X2 = self.resource_pool['X2']
             self.X1, self.X2 = X1, X2
             
             if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
@@ -124,8 +124,8 @@ class KronSVM(object):
                     self.callbackfun.callback(self)
             self.predictor = LinearPairwisePredictor(self.W)
         else:
-            K1 = self.resource_pool['kmatrix1']
-            K2 = self.resource_pool['kmatrix2']
+            K1 = self.resource_pool['K1']
+            K2 = self.resource_pool['K2']
             if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
             else: maxiter = 100
             if 'inneriter' in self.resource_pool: inneriter = int(self.resource_pool['inneriter'])
