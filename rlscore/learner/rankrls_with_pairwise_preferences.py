@@ -5,14 +5,70 @@ from scipy.sparse import coo_matrix
 
 from rlscore.utilities import creators
 from rlscore.utilities import decomposition
-import numpy as np
+from rlscore.predictor import PredictorInterface
 
-class PPRankRLS(object):
-    """
+class PPRankRLS(PredictorInterface):
+    """Regularized least-squares ranking (RankRLS) with pairwise preferences
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+        
+    pairs_start_inds: {array-like}, shape = [n_preferences]
+        pairwise preferences: pairs_start_inds[i] > pairs_end_inds[i]
+        
+    pairs_end_inds: {array-like}, shape = [n_preferences]
+        pairwise preferences: pairs_start_inds[i] > pairs_end_inds[i]
+        
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+        
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+        
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+        
+    Other Parameters
+    ----------------
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+        
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+               
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+        
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+                  
+    Notes
+    -----
+    
+    Computational complexity of training:
+    m = n_samples, d = n_features, l = n_preferences, b = n_bvectors
+    
+    O(m^3 + l): basic case
+    
+    O(TODO): Linear Kernel, d < m
+    
+    O(TODO): Sparse approximation with basis vectors 
+     
+    RankRLS algorithm was generalized in [1] to learning directly from pairwise preferences.
+    
+    References
+    ----------
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    An efficient algorithm for learning to rank from preference graphs.
+    Machine Learning, 75(1):129-165, 2009.
     """
 
 
     def __init__(self, X, pairs_start_inds, pairs_end_inds, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
         if basis_vectors != None:
@@ -31,28 +87,19 @@ class PPRankRLS(object):
         self.X = csc_matrix(X)
         self.bias = 0.
         self.results = {}
-        self.train()
-    
-    
-    def train(self):
-        """Trains the prediction function.
-        
-        After the learner is trained, one can call the method getModel
-        to get the trained model
-        """
-        regparam = self.regparam
         self.solve(regparam)
     
     
     def solve(self, regparam):
-        """Trains the prediction function, using the given regularization parameter.
-        
-        This implementation simply changes the regparam, and then calls the train method.
-        
+        """Re-trains RankRLS for the given regparam.
+               
         Parameters
         ----------
-        regparam: float (regparam > 0)
-            regularization parameter
+        regparam: float, optional
+            regularization parameter, regparam > 0 (default=1.0)
+            
+        Notes
+        -----   
         """
         size = self.svecs.shape[0]
         
@@ -87,9 +134,6 @@ class PPRankRLS(object):
         self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
         #self.results['model'] = self.getModel()
         self.predictor = self.svdad.createModel(self)
-        
-    def predict(self, X):
-        return self.predictor.predict(X)
         
     
     
