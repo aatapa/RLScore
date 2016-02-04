@@ -1,9 +1,0 @@
-KernelPairwisePredictor 
-=======================
-
-.. module:: rlscore.pairwise_predictor
-
-.. autoclass:: rlscore.predictor.KernelPairwisePredictor
-    :show-inheritance:
-    :members:
-    :inherited-members:

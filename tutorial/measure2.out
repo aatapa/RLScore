@@ -1,0 +1,11 @@
+My auc with all ties 0.500000
+My auc with using Y as P is 1.000000
+My auc with correctly ranked predictions is 1.000000
+Now my auc dropped to 0.833333
+
+Traceback (most recent call last):
+  File "measure2.py", line 30, in <module>
+    auc(Y2, P2)
+...
+rlscore.measure.measure_utilities.UndefinedPerformance: 'AUC undefined if both classes not present'
+

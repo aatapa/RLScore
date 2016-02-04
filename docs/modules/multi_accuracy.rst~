@@ -1,4 +1,0 @@
-ova_accuracy - one-vs-all multiclass accuracy
-===============================================
-
-.. autofunction:: rlscore.measure.multi_accuracy
