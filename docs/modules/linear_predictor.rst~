@@ -1,0 +1,9 @@
+Linear predictor 
+================
+
+.. module:: rlscore.predictor
+
+.. autoclass:: rlscore.predictor.LinearPredictor
+    :show-inheritance:
+    :members:
+    :inherited-members:

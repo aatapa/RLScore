@@ -1,0 +1,6 @@
+accuracy - Binary classification accuracy
+=========================================
+
+.. module:: rlscore.learner.kron_rls
+
+.. autofunction:: rlscore.measure.accuracy

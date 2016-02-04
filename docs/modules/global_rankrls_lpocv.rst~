@@ -1,0 +1,9 @@
+GlobalRankRLS - ranking regularized least-squares, ordinal regression
+=================================================
+
+.. module:: rlscore.learner.global_rankrls
+
+.. autoclass:: rlscore.learner.rls.GlobalRankRLS
+    :show-inheritance:
+    :members:
+    :inherited-members:
