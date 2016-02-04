@@ -149,6 +149,7 @@ module rlscore.kernel.
 
 Results are same as before.
 
+
 Tutorial 2: Setting 4, TwoStepRLS, complete data
 ************************************************
 
@@ -260,6 +261,7 @@ observed in the training set.
 .. literalinclude:: ../tutorial/cg_kron_rls4.out
 
 Now the best results are reached soon after 100 iterations, after which the model starts to overfit.
+
 
 References
 **********

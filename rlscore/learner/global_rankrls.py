@@ -39,7 +39,12 @@ class GlobalRankRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+         
     Notes
     -----
     
@@ -543,7 +548,16 @@ class LeavePairOutRankRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-pair-out performances for each grid point
+    regparam: float
+        regparam from grid with best performance
+          
     Notes
     -----
     
@@ -609,7 +623,18 @@ class KfoldRankRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        K-fold performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_folds]
+        predictions for each fold, shapes [fold_size] or [fold_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
+           
     Notes
     -----
     
@@ -621,14 +646,14 @@ class KfoldRankRLS(PredictorInterface):
     O(mb^2 +lmb): Sparse approximation with basis vectors 
     
      
-    RankRLS algorithm is described in [1,2]_. 
+    RankRLS algorithm is described in [1,2]. 
     
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
     Learning to rank with pairwise regularized least-squares.
     In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
     SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
     
-    .. [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
 """

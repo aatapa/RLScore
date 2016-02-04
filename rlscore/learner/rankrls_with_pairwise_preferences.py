@@ -44,6 +44,11 @@ class PPRankRLS(PredictorInterface):
         
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
                   
     Notes
     -----

@@ -9,9 +9,16 @@ class LinearKernel(object):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-        Data matrix
-    bias : float, optional (default 0.)
+    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    bias: float, optional (default 1.0)
+        Constant added to each kernel evaluation
+        
+    Attributes
+    ----------
+    train_X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    bias: float
         Constant added to each kernel evaluation
     """
 
@@ -19,18 +26,6 @@ class LinearKernel(object):
         self.train_X = X
         self.bias = bias
 
-#    def createKernel(cls, **kwargs):
-        """Initializes a kernel object from the arguments."""
-        #new_kwargs = {}
-        #if kwargs.has_key('basis_vectors'):
-        #    new_kwargs['basis_vectors'] = kwargs['basis_vectors']
-        #new_kwargs["train_features"] = kwargs["train_features"]
-        #if "bias" in kwargs:
-        #    new_kwargs["bias"] = float(kwargs["bias"])
-        #kernel = cls(**new_kwargs)
-#        kernel = cls(**kwargs)
-#        return kernel
-#    createKernel = classmethod(createKernel)  
     
     def getKM(self, X):
         """Returns the kernel matrix between the basis vectors and X.
@@ -41,7 +36,7 @@ class LinearKernel(object):
         
         Returns
         -------
-        K : array, shape = [n_samples, n_bvectors]
+        K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         test_X = X

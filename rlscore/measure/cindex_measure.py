@@ -67,6 +67,25 @@ def cindex_multitask(Y, P):
     return perfs
 
 def cindex(Y, P):
+    """Concordance, aka pairwise ranking accuracy. Computes the
+    relative fraction of concordant pairs, that is, Y[i] > Y[j]
+    and P[i] > P[j] (ties with P[i]=P[j] are assumed to be broken
+    randomly). Equivalent to area under ROC curve, if Y[i] belong
+    to {-1, 1}. An O(n*log(n)) implementation, based on order
+    statistic tree computations.
+    
+    Parameters
+    ----------
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Correct labels, can be any real numbers. 
+    P: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Predicted labels, can be any real numbers. 
+    
+    Returns
+    -------
+    concordance index: float
+        number between 0 and 1, around 0.5 means random performance
+    """
     Y = array_tools.as_labelmatrix(Y)
     P = array_tools.as_labelmatrix(P)
     perfs = cindex_multitask(Y,P)

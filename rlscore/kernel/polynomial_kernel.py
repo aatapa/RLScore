@@ -9,13 +9,24 @@ class PolynomialKernel(object):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-        Data matrix
-    gamma : float, optional (default 1.0)
+    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    gamma: float, optional (default 1.0)
         Kernel parameter
-    coef0 : float, optional (default 0.)
+    coef0: float, optional (default 0.)
         Kernel parameter
-    degree : float, optional (default 2)
+    degree: int, optional (default 2)
+        Kernel parameter
+        
+    Attributes
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    gamma: float
+        Kernel parameter
+    coef0: float
+        Kernel parameter
+    degree: int
         Kernel parameter
     """
 
@@ -35,7 +46,7 @@ class PolynomialKernel(object):
         
         Returns
         -------
-        K : array, shape = [n_samples, n_bvectors]
+        K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         test_X = X

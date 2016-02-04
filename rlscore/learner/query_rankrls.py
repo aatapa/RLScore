@@ -44,6 +44,14 @@ class QueryRankRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+        
+    Notes
+    -----
 
     Computational complexity of training:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
@@ -239,6 +247,20 @@ class LeaveQueryOutRankRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-query-out performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_queries]
+        predictions for each query, shapes [query_size] or [query_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
+        
+    Notes
+    -----
 
     Computational complexity of training:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors

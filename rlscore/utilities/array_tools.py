@@ -60,6 +60,7 @@ def as_labelmatrix(A):
     -------
     A : matrix
     """
+    A = np.array(A)
     shape = A.shape
     assert 0 < len(shape) < 3
     if len(A.shape) == 1:

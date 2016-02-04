@@ -35,7 +35,7 @@ def grid_search(crossvalidator, grid):
         bestparam = grid[np.argmax(performances)]
     learner = crossvalidator.rls
     learner.solve(bestparam)
-    return performances, predictions, bestparam
+    return np.array(performances), predictions, bestparam
 
 def map_ids(ids):
     q_partition = []

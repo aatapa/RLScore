@@ -28,20 +28,39 @@ class GreedyRLS(PredictorInterface):
     subsetsize: int (0 < subsetsize <= n_labels)
         number of features to be selected
     bias: float, optional
-        value of constant feature added to each data point (default 0)
+        value of constant feature added to each data point (default 1)
+        
+    Attributes
+    ----------
+    selected: list, shape = [subsetsize]
+        indices of the selected features, in the same order as they were selected
+    performances: list, shape = [subsetsize]
+        leave-one-out (mean squared) error after adding each feature
  
+    Notes
+    -----
+    
+    Greedy RLS is described in  [1,2]. The extension of the method to multi-target learning
+    was considered in [3].
+    
     References
     ----------
-    
-    Greedy RLS is described in  [1]_.
            
-    ..[1] Tapio Pahikkala, Antti Airola, and Tapio Salakoski.
+    [1] Tapio Pahikkala, Antti Airola, and Tapio Salakoski.
     Speeding up Greedy Forward Selection for Regularized Least-Squares.
     Proceedings of The Ninth International Conference on Machine Learning and Applications,
     325-330, IEEE Computer Society, 2010.
+    
+    [2] Tapio Pahikkala, Sebastian Okser, Antti Airola, Tapio Salakoski, and Tero Aittokallio.
+    Wrapper-based selection of genetic features in genome-wide association studies through fast matrix operations.
+    Algorithms for Molecular Biology, 7(1):11, 2012.
+    
+    [3] Pekka Naula, Antti Airola, Tapio Salakoski, and Tapio Pahikkala.
+    Multi-label learning under feature extraction budgets.
+    Pattern Recognition Letters, 40:56--65, April 2014. 
     """
     
-    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=1.0, measure=None, callbackfun=None, **kwargs):
+    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=1.0, callbackfun=None, **kwargs):
         self.callbackfun = callbackfun
         self.regparam = regparam
         if isinstance(X, sp.base.spmatrix):
@@ -56,7 +75,7 @@ class GreedyRLS(PredictorInterface):
         #if not self.Y.shape[1] == 1:
         #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
         self.bias = bias
-        self.measure = measure
+        self.measure = None
         fsize = X.shape[1]
         self.desiredfcount = subsetsize
         if not fsize >= self.desiredfcount:
@@ -64,29 +83,19 @@ class GreedyRLS(PredictorInterface):
         self.results = {}
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
-        self.train()
-    
-    def train(self):
-        """Trains the learning algorithm.
-        
-        After the learner is trained, one can call the method getModel
-        to get the trained predictor
-        """
-        
         #The current version works only with the squared error measure
-        self.measure = None
         
         if True:#self.Y.shape[1] > 1:
         #if False:#self.Y.shape[1] > 1:
             #self.solve_bu(regparam)
-            self.solve_cython(self.regparam)
+            self._solve_cython(self.regparam)
         else:
             #self.solve_new(regparam, float32)
-            self.solve_new(self.regparam, np.float64)
+            self._solve_new(self.regparam, np.float64)
             #self.solve_bu(regparam)
     
     
-    def solve_cython(self, regparam):
+    def _solve_cython(self, regparam):
         self.regparam = regparam
         X = self.X
         Y = self.Y
@@ -231,7 +240,7 @@ class GreedyRLS(PredictorInterface):
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
-    def solve_new(self, regparam, floattype):
+    def _solve_new(self, regparam, floattype):
         
         self.regparam = regparam
         X = self.X
@@ -346,7 +355,7 @@ class GreedyRLS(PredictorInterface):
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
-    def solve_bu(self, regparam):
+    def _solve_bu(self, regparam):
         self.regparam = regparam
         X = self.X
         Y = self.Y

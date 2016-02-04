@@ -96,40 +96,6 @@ class CGRankRLS(PredictorInterface):
         #self.solve(self.regparam)
         self.train()
     
-    
-#     def setQids(self, qids):
-#         """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
-#         
-#         @param qids: A list of qid parameters.
-#         @type qids: List of integers."""
-#         
-#         self.qidlist = [-1 for i in range(self.size)]
-#         for i in range(len(qids)):
-#             for j in qids[i]:
-#                 if j >= self.size:
-#                     raise Exception("Index %d in query out of training set index bounds" %j)
-#                 elif j < 0:
-#                     raise Exception("Negative index %d in query, query indices must be non-negative" %j)
-#                 else:
-#                     self.qidlist[j] = i
-#         if -1 in self.qidlist:
-#             raise Exception("Not all training examples were assigned a query")
-#         
-#         
-#         self.qidmap = {}
-#         for i in range(len(self.qidlist)):
-#             qid = self.qidlist[i]
-#             if self.qidmap.has_key(qid):
-#                 sameqids = self.qidmap[qid]
-#                 sameqids.append(i)
-#             else:
-#                 self.qidmap[qid] = [i]
-#         self.indslist = []
-#         for qid in self.qidmap.keys():
-#             self.indslist.append(self.qidmap[qid])
-
-    
-    
     def train(self):
         regparam = self.regparam
         #regparam = 0.

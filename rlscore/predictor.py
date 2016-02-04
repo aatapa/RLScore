@@ -5,10 +5,18 @@ import numpy as np
 from rlscore.utilities import array_tools
 
 class PredictorInterface(object):
-    """Predictor interface"""
+    """Predictor interface
+    
+    Attributes
+    ----------
+    predictor: predictor object
+        predicts outputs for new instance
+    """
+    
+
     
     def predict(self, X):
-        """Predicts outputs for new inputs.
+        """Predicts outputs for new inputs
     
         Parameters
          ----------
@@ -16,7 +24,7 @@ class PredictorInterface(object):
            input data matrix
             
         Returns
-         ----------
+        -------
         P: array, shape = [n_samples, n_tasks]
             predictions
         """
@@ -31,22 +39,22 @@ class KernelPredictor(object):
 
     Parameters
     ----------
-    A: sparse matrix, shape = [n_samples, n_tasks]
+    A: array-like, shape = [n_samples] or [n_samples, n_labels]
         dual coefficients
     kernel : kernel object
         kernel object, initialized with the basis vectors and kernel parameters
-    rpool: resource pool
+        
+    Attributes
+    ----------
+    A: array-like, shape = [n_samples] or [n_samples, n_labels]
+        dual coefficients
+    kernel: kernel object
+        kernel object, initialized with the basis vectors and kernel parameters
     """
     
     def __init__(self, A, kernel):
         self.kernel = kernel
-        #newbasis = list(set(nonz[0].tolist()))
         self.A = A
-        #if len(newbasis) != A.shape[0]:
-        #    self.A = A.todense()[newbasis]
-        #    newpool = rpool.copy()
-        #    newpool['basis_vectors'] = newbasis
-        #    self.kernel = kernel.__class__.createKernel(**newpool)
         self.A = np.squeeze(array_tools.as_array(self.A))
     
     
@@ -60,7 +68,7 @@ class KernelPredictor(object):
         
         Returns
         ----------
-        P: array, shape = [n_samples, n_tasks]
+        P: array, shape = [n_samples] or [n_samples, n_labels]
             predictions
         """
         K = self.kernel.getKM(X)
@@ -77,25 +85,23 @@ class LinearPredictor(object):
 
     Parameters
     ----------
-    W: sparse matrix, shape = [n_features, n_tasks]
+    W: array-like, shape = [n_features] or [n_features, n_labels]
         primal coefficients
-    b : array-line, shape = [n_tasks]
-        vector of bias terms
+    b : float or array-like with shape = [n_labels]
+        bias term(s)
+
+    Attributes
+    ----------
+    W: array-like, shape = [n_features] or [n_features, n_labels]
+        primal coefficients
+    b: float or array-like with shape = [n_labels]
+        bias term(s)
     """
     
     def __init__(self, W, b = 0.):
-        """Initializes a primal model
-        @param W: coefficients of the linear model, one column per task
-        @type W: numpy matrix
-        @param b: bias of the model, one column per task
-        @type b: numpy matrix
-        """
-        #self.W = array_tools.as_dense_matrix(W)
-        #print type(W), W.shape
         self.W = np.squeeze(array_tools.as_array(W))
         if self.W.ndim == 0:
             self.W = self.W.reshape(1)
-        #print type(self.W), self.W.shape
         self.b = np.squeeze(np.array(b))
     
     
@@ -109,7 +115,7 @@ class LinearPredictor(object):
         
         Returns
         ----------
-        P: array, shape = [n_samples, n_tasks]
+        P: array, shape = [n_samples, n_labels]
             predictions
         """
         W = self.W

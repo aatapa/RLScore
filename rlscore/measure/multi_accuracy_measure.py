@@ -1,3 +1,4 @@
+import numpy as np
 
 def ova_accuracy(Y, P):
     """One-vs-all classification accuracy for multi-class problems.
@@ -21,6 +22,8 @@ def ova_accuracy(Y, P):
     accuracy: float
         number between 0 and 1
     """
+    Y = np.array(Y)
+    P = np.array(P)
     assert Y.shape == P.shape
     correct = 0
     for i in range(Y.shape[0]):

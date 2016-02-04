@@ -14,15 +14,12 @@ General introductory stuff comes here
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    README
    install
-   tutorial_regression
-   tutorial_ranking
-   tutorial_fselection
-   tutorial_kronecker
-   rls
+   tutorials
+   modules
 
 
 Indices and tables

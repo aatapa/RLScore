@@ -16,6 +16,65 @@ from rlscore.pairwise_predictor import PairwisePredictorInterface
 
 class KronRLS(PairwisePredictorInterface):
     
+    """Regularized least-squares regression with
+    paired-input (dyadic) data and Kronecker kernels.
+    Closed form solution for complete data set with labels for all pairs known.
+    
+
+    Parameters
+    ----------
+    X1: {array-like}, shape = [n_samples1, n_features1] 
+        Data matrix 1 (for linear KronRLS)
+        
+    X2: {array-like}, shape = [n_samples2, n_features2] 
+        Data matrix 2 (for linear KronRLS)
+        
+    K1: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 1 (for kernel KronRLS)
+
+    K2: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 2 (for kernel KronRLS)
+        
+    Y: {array-like}, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        Y[i + j*n_samples1] (column order).
+        
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+        
+    Attributes
+    -----------
+    predictor: {LinearPairwisePredictor, KernelPairwisePredictor}
+        trained predictor
+                  
+    Notes
+    -----
+    
+    Computational complexity of training:
+
+    TODO
+     
+    KronRLS implements the closed form solution described in [1,2]. In the publications only special case
+    X1 = X2 (or equivalently K1 = K2) is considered, while this implementation also allows the two sets
+    of inputs to be from different domains. By default KronRLS trains a regression method that minimizes
+    mean-squared error.
+    
+    Currently, Kronecker RankRLS that minimizes magnitude preserving ranking error
+    can be trained with method solve_linear_conditional_ranking(...) (yes, this is a hack and no, kernels
+    are currently not supported for ranking). Inputs from domain 1 act as queries, and inputs from domain
+    2 as objects to be ranked.
+    
+    References
+    ----------
+    
+    [1] Tapio Pahikkala, Willem Waegeman, Antti Airola, Tapio Salakoski, and Bernard De Baets. Conditional ranking on relational data.
+    Machine Learning and Knowledge Discovery in Databases (ECML PKDD), 2010
+    
+    [2] Tapio Pahikkala, Antti Airola, Michiel Stock, Bernard De Baets, and Willem Waegeman.
+    Efficient regularized least-squares algorithms for conditional ranking on relational data.
+    Machine Learning, 93(2-3):321--356, 2013.
+    """
+    
     
     def __init__(self, **kwargs):
         Y = kwargs["Y"]

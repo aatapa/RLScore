@@ -15,7 +15,59 @@ from rlscore.pairwise_predictor import LinearPairwisePredictor
 from rlscore.pairwise_predictor import KernelPairwisePredictor
 
 class TwoStepRLS(PairwisePredictorInterface):
+
+    """Two-step regularized least-squares regression with paired-input (dyadic) data.
+    Closed form solution for complete data set with labels for all pairs known.
     
+
+    Parameters
+    ----------
+    X1: {array-like}, shape = [n_samples1, n_features1] 
+        Data matrix 1 (for linear TwoStepRLS)
+        
+    X2: {array-like}, shape = [n_samples2, n_features2] 
+        Data matrix 2 (for linear TwoStepRLS)
+        
+    K1: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 1 (for kernel TwoStepRLS)
+
+    K2: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 2 (for kernel TwoStepRLS)
+        
+    Y: {array-like}, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        Y[i + j*n_samples1] (column order).
+        
+    regparam1: float
+        regularization parameter 1, regparam1 > 0
+        
+    regparam2: float
+        regularization parameter 2, regparam2 > 0
+        
+    Attributes
+    -----------
+    predictor: {LinearPairwisePredictor, KernelPairwisePredictor}
+        trained predictor
+                  
+    Notes
+    -----
+    
+    Computational complexity of training:
+
+    TODO
+     
+    TwoStepRLS implements the closed form solution described in [1].
+    
+    
+    References
+    ----------
+    
+    [1] Tapio Pahikkala, Michiel Stock, Antti Airola, Tero Aittokallio, Bernard De Baets, and Willem Waegeman.
+    A two-step learning approach for solving full and almost full cold start problems in dyadic prediction.
+    Machine Learning and Knowledge Discovery in Databases (ECML PKDD 2014).
+    Volume 8725 of Lecture Notes in Computer Science, pages 517--532. Springer, 2014.
+    """
+       
     
     def __init__(self, **kwargs):
         Y = kwargs["Y"]

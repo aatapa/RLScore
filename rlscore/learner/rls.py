@@ -46,6 +46,11 @@ class RLS(PredictorInterface):
         
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
                   
     Notes
     -----
@@ -171,7 +176,7 @@ class RLS(PredictorInterface):
         Notes
         -----
         
-        The fast holdout algorithms is based on results presented in [1,2].
+        The fast holdout algorithm is based on results presented in [1,2].
             
         References
         ----------
@@ -387,6 +392,17 @@ class LeaveOneOutRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-one-out performances for each grid point
+    cv_predictions: array, shape = [grid_size, n_samples] or [grid_size, n_samples, n_labels]
+        leave-one-out predictions
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
@@ -421,6 +437,7 @@ class LeaveOneOutRLS(PredictorInterface):
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LOOCV(learner, measure)
         self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
+        self.cv_predictions = np.array(self.cv_predictions)
         self.predictor = learner.predictor
             
 class KfoldRLS(PredictorInterface):
@@ -460,6 +477,17 @@ class KfoldRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        K-fold performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_folds]
+        predictions for each fold, shapes [fold_size] or [fold_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
@@ -542,6 +570,15 @@ class LeavePairOutRLS(PredictorInterface):
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-pair-out performances for each grid point
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
@@ -644,26 +681,30 @@ class LPOCV(object):
         rls = self.rls
         rls.solve(regparam)
         Y = rls.Y
-        if Y.shape[1] == 1:
+        aucs = []
+        for k in range(Y.shape[1]):
             pairs_start_inds, pairs_end_inds = [], []
             for i in range(Y.shape[0] - 1):
                 for j in range(i + 1, Y.shape[0]):
-                    if Y[i] > Y[j]:
+                    if Y[i,k] > Y[j,k]:
                         pairs_start_inds.append(i)
                         pairs_end_inds.append(j)
-                    elif Y[i] < Y[j]:
+                    elif Y[i,k] < Y[j,k]:
                         pairs_start_inds.append(j)
                         pairs_end_inds.append(i)
             if len(pairs_start_inds) == 0:
-                raise UndefinedPerformance("All labels are the same")
+                raise UndefinedPerformance("Leave-pair-out undefined, all labels same for output %d" %k)
             pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
+            pred_start = array_tools.as_labelmatrix(pred_start)
+            pred_end = array_tools.as_labelmatrix(pred_end)
             auc = 0.
             for h in range(len(pred_start)):
-                if pred_start[h] > pred_end[h]:
+                if pred_start[h,k] > pred_end[h,k]:
                     auc += 1.
-                elif pred_start[h] == pred_end[h]:
+                elif pred_start[h,k] == pred_end[h,k]:
                     auc += 0.5
-            auc /= len(pairs_start_inds)  
-            return auc, (pred_start, pred_end)
-        else:
-            raise Exception("Model selection with LPOCV is not currently implemented with multi-output data")
+            auc /= len(pairs_start_inds)
+            aucs.append(auc)
+        auc = np.mean(aucs)
+        return auc, None
+                
