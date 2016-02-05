@@ -5,6 +5,7 @@ import numpy as np
 
 ext_modules = [Extension("rlscore.utilities.swapped",["rlscore/utilities/swapped.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.learner.cython_pairwise_cv_for_rls",["rlscore/learner/cython_pairwise_cv_for_rls.pyx"], include_dirs=[np.get_include()]),
+    Extension("rlscore.learner.cython_pairwise_cv_for_global_rankrls",["rlscore/learner/cython_pairwise_cv_for_global_rankrls.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.learner.cython_mmc",["rlscore/learner/cython_mmc.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.learner.cython_greedy_rls",["rlscore/learner/cython_greedy_rls.pyx"], include_dirs=[np.get_include()]),
     Extension("rlscore.utilities._sampled_kronecker_products",["rlscore/utilities/_sampled_kronecker_products.pyx"], include_dirs=[np.get_include()])

@@ -10,6 +10,8 @@ from rlscore.utilities.cross_validation import grid_search
 from rlscore.measure import cindex
 from rlscore.learner.rls import NfoldCV
 
+import cython_pairwise_cv_for_global_rankrls
+
 class GlobalRankRLS(PredictorInterface):
     """RankRLS: Regularized least-squares ranking.
     Global ranking (see QueryRankRLS for query-structured data)
@@ -144,7 +146,99 @@ class GlobalRankRLS(PredictorInterface):
         self.predictor = self.svdad.createModel(self)
     
     
-    def leave_pair_out(self, pairs_start_inds, pairs_end_inds, oind=0):
+    def leave_pair_out(self, pairs_start_inds, pairs_end_inds):
+        """Computes leave-pair-out predictions for a trained RankRLS.
+        
+        Parameters
+        ----------
+        pairs_start_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        pairs_end_inds: list of indices, shape = [n_pairs]
+            list of indices from range [0, n_samples-1]
+        
+        Returns
+        -------
+        P1 : array, shape = [n_pairs]
+            holdout predictions for pairs_start_inds
+        P2: array, shape = [n_pairs]
+            holdout predictions for pairs_end_inds
+            
+        Notes
+        -----
+    
+        Computes the leave-pair-out cross-validation predicitons, where each (i,j) pair with
+        i= pair_start_inds[k] and j = pairs_end_inds[k] is left out in turn.
+        
+        When estimating area under ROC curve with leave-pair-out, one should leave out all
+        positive-negative pairs, while for estimating the general ranking error one should
+        leave out all pairs with different labels.
+        
+        Computational complexity of holdout:
+        m = n_samples
+        O(m^2)
+        
+        The leave-pair-out cross-validation algorithm is described in [1,2]. The use of
+        leave-pair-out cross-validation for AUC estimation has been analyzed in [3]
+        
+        [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+        An efficient algorithm for learning to rank from preference graphs.
+        Machine Learning, 75(1):129-165, 2009.
+    
+        [2] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+        Exact and efficient leave-pair-out cross-validation for ranking RLS.
+        In Proceedings of the 2nd International and Interdisciplinary Conference
+        on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
+        Espoo, Finland, 2008.
+
+        [3] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, Tapio Salakoski.
+        An Experimental Comparison of Cross-Validation Techniques for Estimating the Area Under the ROC Curve.
+        Computational Statistics & Data Analysis 55(4), 1828-1844, 2011.
+        """
+        
+        evals, svecs = self.evals, self.svecs
+        m = self.size
+        
+        Y = self.Y
+        
+        modevals = np.squeeze(array(multiply(evals, 1. / ((m - 2.) * evals + self.regparam))))
+        GDY = (self.size - 2.) * (svecs * multiply(np.mat(modevals).T, (svecs.T * Y)))
+        GC = np.squeeze(np.array(svecs * multiply(np.mat(modevals).T, sum(svecs.T, axis=1))))
+        CTGC = sum(GC)
+        
+        pairslen = len(pairs_start_inds)
+        sm2Gdiag = zeros((self.Y.shape[0]))
+        BTY = zeros((self.Y.shape))
+        sqrtsm2GDY = zeros((self.Y.shape))
+        BTGBBTY = zeros((self.Y.shape))
+        results_first = np.zeros((pairslen, self.Y.shape[1]))
+        results_second = np.zeros((pairslen, self.Y.shape[1]))
+        
+        cython_pairwise_cv_for_global_rankrls.leave_pair_out(pairslen,
+                                                             self.Y.shape[0],
+                                                             pairs_start_inds,
+                                                             pairs_end_inds,
+                                                             self.Y.shape[1],
+                                                             Y,
+                                                             svecs,
+                                                             modevals,
+                                                             svecs.shape[1],
+                                                             zeros((self.Y.shape[0])),
+                                                             np.squeeze(array(GC)),
+                                                             sm2Gdiag,
+                                                             CTGC,
+                                                             GDY,
+                                                             BTY,
+                                                             sqrtsm2GDY,
+                                                             BTGBBTY,
+                                                             np.squeeze(array(sum(Y, axis=0))), #CTY
+                                                             np.squeeze(array(sum(GDY, axis=0))), #CTGDY
+                                                             results_first,
+                                                             results_second)        
+        
+        return np.squeeze(results_first), np.squeeze(results_second)
+    
+    
+    def leave_pair_out_python(self, pairs_start_inds, pairs_end_inds, oind=0):
         """Computes leave-pair-out predictions for a trained RankRLS.
         
         Parameters
@@ -249,6 +343,37 @@ class GlobalRankRLS(PredictorInterface):
             return GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_
         GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_ = hack()
         
+        
+        pairslen = len(pairs_start_inds)
+        sm2Gdiag = zeros((self.Y.shape[0]))
+        BTY = zeros((self.Y.shape))
+        sqrtsm2GDY = zeros((self.Y.shape))
+        BTGBBTY = zeros((self.Y.shape))
+        results_first = np.zeros((pairslen, self.Y.shape[1]))
+        results_second = np.zeros((pairslen, self.Y.shape[1]))
+        
+        cython_pairwise_cv_for_global_rankrls.leave_pair_out(pairslen,
+                                                             self.Y.shape[0],
+                                                             pairs_start_inds,
+                                                             pairs_end_inds,
+                                                             self.Y.shape[1],
+                                                             Y,
+                                                             sqrtsm2,
+                                                             G,
+                                                             np.squeeze(array(GC)),
+                                                             sm2Gdiag,
+                                                             CTGC,
+                                                             GDY,
+                                                             BTY,
+                                                             sqrtsm2GDY,
+                                                             BTGBBTY,
+                                                             np.squeeze(array(sum(Y, axis=0))), #CTY
+                                                             np.squeeze(array(sum(GDY, axis=0))), #CTGDY
+                                                             results_first,
+                                                             results_second)        
+        
+        print results_first.shape, results_second.shape, 'ggff'
+        return np.squeeze(results_first[:,oind]), np.squeeze(results_second[:,oind])
         results_start, results_end = [], []
         
         #This loops through the list of hold-out pairs.
@@ -261,7 +386,6 @@ class GlobalRankRLS(PredictorInterface):
                 Gii = Gdiag_[i]
                 Gij = G[i, j]
                 Gjj = Gdiag_[j]
-                
                 GCi = GC_[i]
                 GCj = GC_[j]
                 
@@ -287,7 +411,7 @@ class GlobalRankRLS(PredictorInterface):
                 BTGLY0 = CTGDY - (GDYi + GDYj + BTGB00 * BTY0 + BTGB01 * BTY1 + BTGB02 * BTY2)
                 BTGLY1 = sqrtsm2GDY_[i] - (BTGB01 * BTY0 + BTGBBTY_[i] + BTGB12 * BTY2)
                 BTGLY2 = sqrtsm2GDY_[j] - (BTGB02 * BTY0 + BTGB12 * BTY1 + BTGBBTY_[j])
-                
+                print CTGDY, BTGLY0
                 BTGB00m1 = BTGB00 - 1.
                 BTGB11m1 = sm2Gdiag_[i]
                 BTGB22m1 = sm2Gdiag_[j]
