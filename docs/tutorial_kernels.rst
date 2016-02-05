@@ -25,7 +25,7 @@ parameters: gamma (default = 1.0), coef0 (default = 0.), degree (default = 2)
 
 PrecomputedKernel: caller will supply their own kernel matrix for training and prediction, instead of the data matrix.
 
-Tutorial 1: basic usage
+Tutorial 1: Basic usage
 ***********************
 
 In these examples we use the RLS learner (see regression and classification tutorials).

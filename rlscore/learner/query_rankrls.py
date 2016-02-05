@@ -15,47 +15,66 @@ class QueryRankRLS(PredictorInterface):
     """RankRLS algorithm for learning to rank
     
     Implements the learning algorithm for learning from query-structured
-    data. For other settings, see AllPairsRankRLS. Uses a training algorithm
-    that is cubic either in the number of training examples, or dimensionality
-    of feature space (linear kernel).
-    
-    Computational shortcut for leave-query-out cross-validation: holdout
-    
-    Computational shortcut for parameter selection: solve
-    
-    There are three ways to supply the training data for the learner.
-    
-    1. X: supply the data matrix directly, by default
-    RLS will use the linear kernel.
-    
-    2. kernel_obj: supply the kernel object that has been initialized
-    using the training data.
-    
-    3. kernel_matrix: supply user created kernel matrix, in this setting RLS
-    is unable to return the model, but you may compute cross-validation
-    estimates or access the learned parameters from the variable self.A
+    data. 
 
     Parameters
     ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
     Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
     qids: list of n_queries index lists
         Training set qids
-    regparam: float (regparam > 0)
-        regularization parameter
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix
-    kernel_obj: kernel object, optional
-        kernel object, initialized with the training set
-    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
-        kernel matrix of the training set
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)     
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+        
+    Notes
+    -----
+
+    Computational complexity of training:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    
+    O(m^3 + lm^2): basic case
+    
+    O(md^2 + lmd): Linear Kernel, d < m
+    
+    O(mb^2 +lmb): Sparse approximation with basis vectors 
+
+    RankRLS algorithm was first introduced in [1], extended version of the work and the
+    efficient  leave-query-out cross-validation method implemented in
+    the method 'holdout' are found in [2].
         
     References
     ----------
-    RankRLS algorithm and the leave-query-out cross-validation method implemented in
-    the method 'holdout' are described in [1]_.
 
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
+    Learning to rank with pairwise regularized least-squares.
+    In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
+    SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
+    
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
     """
@@ -74,42 +93,10 @@ class QueryRankRLS(PredictorInterface):
         self.size = self.Y.shape[0]
         self.Y = array_tools.as_labelmatrix(self.Y)
         self.size = self.Y.shape[0]
-        #self.setQids(qids)
         self.qids = map_qids(qids)
         self.qidlist = qids_to_splits(self.qids)
         self.solve(self.regparam)
     
-
-    #def setQids(self, qids):
-    #    """Sets the qid parameters of the training examples. The list must have as many qids as there are training examples.
-    #    
-    #    @param qids: A list of qid parameters.
-    #    @type qids: List of integers."""
-    #    
-    #    self.qidlist = [-1 for i in range(self.size)]
-    #    for i in range(len(qids)):
-    #        for j in qids[i]:
-    #            if j >= self.size:
-    #                raise Exception("Index %d in query out of training set index bounds" %j)
-    #            elif j < 0:
-    #                raise Exception("Negative index %d in query, query indices must be non-negative" %j)
-    #            else:
-    #                self.qidlist[j] = i
-    #    if -1 in self.qidlist:
-    #        raise Exception("Not all training examples were assigned a query")
-    #    
-    #    self.qidmap = {}
-    #    for i in range(len(self.qidlist)):
-    #        qid = self.qidlist[i]
-    #        if self.qidmap.has_key(qid):
-    #            sameqids = self.qidmap[qid]
-    #            sameqids.append(i)
-    #        else:
-    #            self.qidmap[qid] = [i]
-    #    self.qids = qids
-
-#    def train(self):
-#        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
         """Trains the learning algorithm, using the given regularization parameter.
@@ -229,8 +216,79 @@ class QueryRankRLS(PredictorInterface):
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
 class LeaveQueryOutRankRLS(PredictorInterface):
+
+    """RankRLS algorithm for learning to rank with query-structured data. Selects
+    automatically regularization parameter using leave-query-out cross-validation.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+        Training set labels
+    qids: list of n_queries index lists
+        Training set qids
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+
+    Other Parameters
+    ----------------
+    Typical kernel parameters include:
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-query-out performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_queries]
+        predictions for each query, shapes [query_size] or [query_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
+        
+    Notes
+    -----
+
+    Computational complexity of training:
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
-    def __init__(self, X, Y, qids, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
+    O(m^3 + lm^2): basic case
+    
+    O(md^2 + lmd): Linear Kernel, d < m
+    
+    O(mb^2 +lmb): Sparse approximation with basis vectors 
+        
+    RankRLS algorithm was first introduced in [1], extended version of the work and the
+    efficient  leave-query-out cross-validation method implemented in
+    the method 'holdout' are found in [2].
+        
+    References
+    ----------
+
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
+    Learning to rank with pairwise regularized least-squares.
+    In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
+    SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
+    
+    [2] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    An efficient algorithm for learning to rank from preference graphs.
+    Machine Learning, 75(1):129-165, 2009.
+    """
+   
+    def __init__(self, X, Y, qids, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, **kwargs):
         if regparams == None:
             grid = [2**x for x in range(-15, 15)]
         else:

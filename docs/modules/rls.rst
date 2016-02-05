@@ -1,5 +1,5 @@
-RLS
-===
+RLS - regularized least-squares regression
+==========================================
 
 .. module:: rlscore.learner.rls
 

@@ -2,10 +2,13 @@ import numpy as np
 
 from measure_utilities import multitask
 from rlscore.utilities import array_tools
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def fscore_singletask(Y, P):
     correct = Y
     predictions = P
+    if not np.all((Y==1) + (Y==-1)):
+        raise UndefinedPerformance("fscore accepts as Y-values only 1 and -1")
     assert len(correct) == len(predictions)
     TP = 0
     FP = 0

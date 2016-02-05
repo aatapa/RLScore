@@ -34,7 +34,7 @@ The "w" and "b" coefficients store the coefficients of the learner model.
 .. literalinclude:: ../tutorial/predictor1.out
 
 Here, we have taken the predictor apart. There are 13 w-coefficients each corresponding
-to one feature, and additionally a bias feature.
+to one feature, and additionally a bias feature. 
 
 Now let us do feature selection using the greedy RLS method, and select 5 most useful
 features for the data set.
@@ -44,6 +44,9 @@ features for the data set.
 .. literalinclude:: ../tutorial/predictor2.out
 
 Now, all but 5 of the w-coefficients are set to zero by the feature selection process.
+
+If we would perform multi-target learning (i.e. Y has several columns), "W" would be
+[n_features, n_targets]- sized, and "b" of length n_targets.
 
 Tutorial 2: Non-linear predictor
 ********************************
@@ -57,14 +60,16 @@ and elements to kernel evaluations.
 .. literalinclude:: ../tutorial/predictor3.out
 
 Now there are as many dual coefficients as training examples.
+If we would perform multi-target learning (i.e. Y has several columns), "A" would be
+[n_samples, n_targets]- sized.
 
 The predictor automatically
 computes the kernel matrix between training and test examples (unless PrecomputedKernel
 option is used, in that case the caller must compute it).
 
 
-Tutorial 3: Subset of regressors
-********************************
+Tutorial 3: Reduced set approximation
+*************************************
 
 The reduced set approximation restricts the predictor of the form K_test * A,
 where the rows of K_test correspond  to test instances, columns to basis vectors,
@@ -75,6 +80,7 @@ and elements to kernel evaluations.
 .. literalinclude:: ../tutorial/predictor4.out
 
 Now the predictor needs to construct only 20 rows for the test kernel matrix.
+Again, with multi-target learning A would be of dimensions [n_bvectors, n_targets].
 
 Tutorial 4: Pairwise predictors
 *******************************

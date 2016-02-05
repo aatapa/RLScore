@@ -11,30 +11,88 @@ from rlscore.utilities import array_tools
 
 class SteepestDescentMMC(object):
     
+    """RLS-based maximum-margin clustering. Performs steepest descent search with a shaking heuristic to avoid getting stuck in
+    local minima.
+
+    Parameters
+    ----------
+    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        Data matrix
+        
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+        
+    number_of_clusters: int, optional
+        number of clusters (default = 2)
+        
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+        
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+        
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_clusters], optional
+        Initial clustering (binary or one-versus-all encoding)
+        
+    fixed_indixes: list of indices, optional
+        Instances whose clusters are prefixed (i.e. not allowed to change)
     
-    def __init__(self, **kwargs):
+    callback: callback function, optional
+        called after each pass through data
+        
+        
+    Other Parameters
+    ----------------
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+        
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+               
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+        
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    
+    Notes
+    -----
+    
+    The steepest descent variant of the algorithm is described in [1].    
+    
+    References
+    ----------
+    
+    [1] Tapio Pahikkala, Antti Airola, Fabian Gieseke, and Oliver Kramer.
+    Unsupervised multi-class regularized least-squares classification.
+    The 12th IEEE International Conference on Data Mining (ICDM 2012), pages 585--594.
+    IEEE Computer Society, December 2012
+    """
+    
+    def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
+    #    def __init__(self, **kwargs):
+        kwargs['X'] = X
+        kwargs['kernel'] = kernel
+        if basis_vectors != None:
+            kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
-        if kwargs.has_key('callback'):
-            self.callbackfun = kwargs['callback']
-        else:
-            self.callbackfun = None
-        self.regparam = float(kwargs["regparam"])
+        self.callbackfun = callback
+        self.regparam = regparam
         self.constraint = 0
-        if not kwargs.has_key('number_of_clusters'):
-            raise Exception("Parameter 'number_of_clusters' must be given.")
-        self.labelcount = int(kwargs['number_of_clusters'])
+        self.labelcount = int(number_of_clusters)
          
         if self.labelcount == 2:
             self.oneclass = True
         else:
             self.oneclass = False
-        
-        if kwargs.has_key("Y"):
-            Y = kwargs["Y"]
-        else:
-            Y = None
         if Y != None:
             #Y_orig = array_tools.as_labelmatrix(Y)
             Y_orig = array_tools.as_array(Y)
@@ -79,14 +137,11 @@ class SteepestDescentMMC(object):
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
         self.fixedindices = []
-        if kwargs.has_key("fixed_indices"):
-            self.fixedindices = kwargs["fixed_indices"]
+        if fixed_indices != None:
+            self.fixedindices = fixed_indices
         else:
             self.fixedindices = []
         self.results = {}
-    
-    
-    def train(self):
         self.solve(self.regparam)
        
     

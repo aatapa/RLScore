@@ -29,8 +29,6 @@ class SpaceEfficientGreedyRLS(object):
         if not fsize >= self.desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(self.desiredfcount) + ' of features to be selected.')
         self.results = {}
-        if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
-            self.callbackfun = DefaultCallback(**kwargs)
         ##The current version works only with the squared error measure
         #self.measure = None
         #self.solve_bu(self.regparam)

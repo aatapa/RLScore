@@ -11,38 +11,63 @@ class MMC(PredictorInterface):
     
     Performs stochastic search, that aims to find a labeling of the data such
     that would minimize the RLS-objective function.
-    
-    There are three ways to supply the training data for the learner.
-    
-    1. X: supply the data matrix directly, by default
-    MMC will use the linear kernel.
-    
-    2. kernel_obj: supply the kernel object that has been initialized
-    using the training data.
-    
-    3. kernel_matrix: supply user created kernel matrix.
 
     Parameters
     ----------
     X: {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    regparam: float (regparam > 0)
-        regularization parameter
-    number_of_clusters: int (number_of_clusters >1)
-        number of clusters to be found
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix
-    kernel_obj: kernel object, optional
-        kernel object, initialized with the training set
-    kernel_matrix: : {array-like}, shape = [n_samples, n_samples], optional
-        kernel matrix of the training set
         
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+        
+    number_of_clusters: int, optional
+        number of clusters (default = 2)
+        
+    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+        kernel function name, imported dynamically from rlscore.kernel
+        
+    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+        basis vectors (typically a randomly chosen subset of the training data)
+        
+    Y: {array-like}, shape = [n_samples] or [n_samples, n_clusters], optional
+        Initial clustering (binary or one-versus-all encoding)
+        
+    fixed_indixes: list of indices, optional
+        Instances whose clusters are prefixed (i.e. not allowed to change)
+    
+    callback: callback function, optional
+        called after each pass through data
+        
+        
+    Other Parameters
+    ----------------
+    bias: float, optional
+        LinearKernel: the model is w*x + bias*w0, (default=1.0)
+        
+    gamma: float, optional
+        GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
+               
+    coef0: float, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
+        
+    degree: int, optional
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    
+    Notes
+    -----
+    
+    The MMC algorithm is described in [1].    
+    
     References
     ----------
     
-    The MMC algorithm is described in [1]_.
-           
-    ..[1] Fabian Gieseke, Tapio Pahikkala,  and Oliver Kramer.
+    [1] Fabian Gieseke, Tapio Pahikkala,  and Oliver Kramer.
     Fast Evolutionary Maximum Margin Clustering.
     Proceedings of the 26th International Conference on Machine Learning,
     361-368, ACM, 2009.
@@ -115,11 +140,6 @@ class MMC(PredictorInterface):
         else:
             self.fixedindices = []
         self.results = {}
-        self.train()
-    
-    def train(self):
-        """Trains the learning algorithm.
-        """
         self.solve(self.regparam)
     
     

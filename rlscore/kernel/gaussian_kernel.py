@@ -12,10 +12,18 @@ class GaussianKernel(object):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
-        Data matrix
-    gamma : float, optional (default 1.0)
+    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    gamma: float, optional (default 1.0)
         Kernel width
+        
+    Attributes
+    ----------
+    train_X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+        Basis vectors
+    gamma: float
+        Kernel width
+        
     """
       
     def __init__(self, X, gamma=1.0):
@@ -38,7 +46,7 @@ class GaussianKernel(object):
         
         Returns
         -------
-        K : array, shape = [n_samples, n_bvectors]
+        K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         test_X = X 

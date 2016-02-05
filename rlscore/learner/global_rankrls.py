@@ -36,14 +36,17 @@ class GlobalRankRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+         
     Notes
     -----
     
@@ -51,13 +54,18 @@ class GlobalRankRLS(PredictorInterface):
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
     O(m^3 + lm^2): basic case
+    
     O(md^2 + lmd): Linear Kernel, d < m
+    
     O(mb^2 +lmb): Sparse approximation with basis vectors 
     
      
     RankRLS algorithm is described in [1,2]. The leave-pair-out cross-validation algorithm
     is described in [2,3]. The use of leave-pair-out cross-validation for AUC estimation
     is analyzed in [4].
+    
+    References
+    ----------
     
     [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jorma Boberg and Tapio Salakoski
     Learning to rank with pairwise regularized least-squares.
@@ -98,7 +106,7 @@ class GlobalRankRLS(PredictorInterface):
 #        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
-        """Re-trains RankRLS for the given regparam.
+        """Re-trains RankRLS for the given regparam
                
         Parameters
         ----------
@@ -110,14 +118,13 @@ class GlobalRankRLS(PredictorInterface):
     
         Computational complexity of re-training:
         m = n_samples, d = n_features, l = n_labels, b = n_bvectors
-        O(lm^2): basic case
-        O(ld^2): Linear Kernel, d < m
-        O(lb^2): Sparse approximation with basis vectors 
         
-        See:
-        Ryan Rifkin, Ross Lippert.
-        Notes on Regularized Least Squares
-        Technical Report, MIT, 2007.        
+        O(lm^2): basic case
+        
+        O(ld^2): Linear Kernel, d < m
+        
+        O(lb^2): Sparse approximation with basis vectors 
+             
         """
         if not hasattr(self, "multiplyright"):
             
@@ -166,7 +173,7 @@ class GlobalRankRLS(PredictorInterface):
         Notes
         -----
     
-        Computes the leave-pair-out cross-validation predicitons, where each (i,j) pair with
+        Computes the leave-pair-out cross-validation predictions, where each (i,j) pair with
         i= pair_start_inds[k] and j = pairs_end_inds[k] is left out in turn.
         
         When estimating area under ROC curve with leave-pair-out, one should leave out all
@@ -267,12 +274,15 @@ class GlobalRankRLS(PredictorInterface):
         positive-negative pairs, while for estimating the general ranking error one should
         leave out all pairs with different labels.
         
-        Computational complexity of holdout:
-        m = n_samples
-        O(m^2)
+        Computational complexity of holdout with most pairs left out: m = n_samples
+        
+        O(TODO)
         
         The leave-pair-out cross-validation algorithm is described in [1,2]. The use of
         leave-pair-out cross-validation for AUC estimation has been analyzed in [3]
+
+        References
+        ----------
         
         [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
         An efficient algorithm for learning to rank from preference graphs.
@@ -453,7 +463,7 @@ class GlobalRankRLS(PredictorInterface):
     
     
     def holdout(self, indices):
-        """Computes hold-out predictions for a trained RankRLS.
+        """Computes hold-out predictions for a trained RankRLS
         
         Parameters
         ----------
@@ -471,16 +481,20 @@ class GlobalRankRLS(PredictorInterface):
     
         Computational complexity of holdout:
         m = n_samples, d = n_features, l = n_labels, b = n_bvectors, h = n_hsamples
-        TODO
+        T
+        ODO
         
-        The algorithm is based on results published in:
+        The algorithm is a modification of the ones published in [1,2] for the regular RLS method.
         
-        Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+        References
+        ----------
+        
+        [1] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
         Fast n-Fold Cross-Validation for Regularized Least-Squares.
         Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
         83-90, Otamedia Oy, 2006.
         
-        Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+        [2] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
         Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
         Machine Learning, 87(3):381--407, June 2012.     
         """
@@ -553,7 +567,7 @@ class GlobalRankRLS(PredictorInterface):
         return F
         
     def leave_one_out(self):
-        """Computes leave-one-out predictions for a trained RankRLS.
+        """Computes leave-one-out predictions for a trained RankRLS
         
         Returns
         -------
@@ -643,6 +657,8 @@ class LeavePairOutRankRLS(PredictorInterface):
         kernel function name, imported dynamically from rlscore.kernel
     basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
+    regparams: {array-like}, shape = [grid_size] (optional)
+        regularization parameter values to be tested, default = [2^-15,...,2^15]
         
     Other Parameters
     ----------------
@@ -651,14 +667,21 @@ class LeavePairOutRankRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)     
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-pair-out performances for each grid point
+    regparam: float
+        regparam from grid with best performance
+          
     Notes
     -----
     
@@ -672,8 +695,10 @@ class LeavePairOutRankRLS(PredictorInterface):
      
     RankRLS algorithm is described in [1,2].
     
+    References
+    ----------
 
-    Learning to rank with pairwise regularized least-squares.
+    [1] Learning to rank with pairwise regularized least-squares.
     In Thorsten Joachims, Hang Li, Tie-Yan Liu, and ChengXiang Zhai, editors,
     SIGIR 2007 Workshop on Learning to Rank for Information Retrieval, pages 27--33, 2007.
     
@@ -717,14 +742,23 @@ class KfoldRankRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
-                  
+
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        K-fold performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_folds]
+        predictions for each fold, shapes [fold_size] or [fold_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
+           
     Notes
     -----
     

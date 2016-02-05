@@ -40,15 +40,17 @@ class RLS(PredictorInterface):
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-        
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0) 
                
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
         
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
                   
     Notes
     -----
@@ -57,36 +59,38 @@ class RLS(PredictorInterface):
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
     O(m^3 + lm^2): basic case
+    
     O(md^2 +lmd): Linear Kernel, d < m
+    
     O(mb^2 +lmb): Sparse approximation with basis vectors 
      
     Basic information about RLS, and a description of the fast leave-one-out method
-    can be found in [1]_. The efficient K-fold cross-validation algorithm implemented in
-    the method holdout is based on results in [2]_ and [3]_. The leave-pair-out cross-validation
+    can be found in [1]. The efficient K-fold cross-validation algorithm implemented in
+    the method holdout is based on results in [2] and [3]. The leave-pair-out cross-validation
     algorithm implemented in leave_pair_out is a modification of the method described
-    in [4]_ , its use for AUC-estimation has been analyzed in [5]_.
+    in [4] , its use for AUC-estimation has been analyzed in [5].
     
     References
     ----------
-    .. [1] Ryan Rifkin, Ross Lippert. Notes on Regularized Least Squares
+    [1] Ryan Rifkin, Ross Lippert. Notes on Regularized Least Squares.
     Technical Report, MIT, 2007.
     
-    .. [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+    [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
     Fast n-Fold Cross-Validation for Regularized Least-Squares.
     Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
     83-90, Otamedia Oy, 2006.
     
-    .. [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+    [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
     Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
     Machine Learning, 87(3):381--407, June 2012. 
     
-    .. [4] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+    [4] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
     Exact and efficient leave-pair-out cross-validation for ranking RLS.
     In Proceedings of the 2nd International and Interdisciplinary Conference
     on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
     Espoo, Finland, 2008.
     
-    .. [5] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski
+    [5] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski
     An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
     Computational Statistics & Data Analysis, 55(4):1828-1844, April 2011.
     """
@@ -105,7 +109,7 @@ class RLS(PredictorInterface):
         self.solve(self.regparam)   
    
     def solve(self, regparam=1.0):
-        """Re-trains RLS for the given regparam.
+        """Re-trains RLS for the given regparam
                
         Parameters
         ----------
@@ -124,9 +128,11 @@ class RLS(PredictorInterface):
         
         O(lb^2): Sparse approximation with basis vectors 
         
-        See:
-        Ryan Rifkin, Ross Lippert.
-        Notes on Regularized Least Squares
+        References
+        ----------
+        
+        [1] Ryan Rifkin, Ross Lippert.
+        Notes on Regularized Least Squares.
         Technical Report, MIT, 2007.        
         """
         
@@ -154,7 +160,7 @@ class RLS(PredictorInterface):
     
     
     def holdout(self, indices):
-        """Computes hold-out predictions for a trained RLS.
+        """Computes hold-out predictions
         
         Parameters
         ----------
@@ -170,16 +176,19 @@ class RLS(PredictorInterface):
         Notes
         -----
         
-        The algorithm is based on results published in:
+        The fast holdout algorithm is based on results presented in [1,2].
+            
+        References
+        ----------
         
-        Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+        [1] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
         Fast n-Fold Cross-Validation for Regularized Least-Squares.
         Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
         83-90, Otamedia Oy, 2006.
         
-        Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+        [2] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
         Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
-        Machine Learning, 87(3):381--407, June 2012.     
+        Machine Learning, 87(3):381--407, June 2012.
         """
         
         if len(indices) == 0:
@@ -203,7 +212,7 @@ class RLS(PredictorInterface):
     
     
     def leave_one_out(self):
-        """Computes leave-one-out predictions for a trained RLS.
+        """Computes leave-one-out predictions
         
         Returns
         -------
@@ -214,7 +223,6 @@ class RLS(PredictorInterface):
         -----
     
         Computational complexity of leave-one-out:
-        Computational complexity of re-training:
         m = n_samples, d = n_features, l = n_labels, b = n_bvectors
         
         O(lm^2): basic case
@@ -223,9 +231,13 @@ class RLS(PredictorInterface):
         
         O(lb^2): Sparse approximation with basis vectors 
         
-        Implements the classical leave-one-out algorithm described for example in:            
-        Ryan Rifkin, Ross Lippert.
-        Notes on Regularized Least Squares
+        Implements the classical leave-one-out algorithm described for example in [1].
+        
+        References
+        ----------
+                    
+        [1] Ryan Rifkin, Ross Lippert.
+        Notes on Regularized Least Squares.
         Technical Report, MIT, 2007.
 
         """
@@ -254,7 +266,7 @@ class RLS(PredictorInterface):
     
     def leave_pair_out(self, pairs_start_inds, pairs_end_inds):
         
-        """Computes leave-pair-out predictions for a trained RLS.
+        """Computes leave-pair-out predictions
         
         Parameters
         ----------
@@ -273,32 +285,31 @@ class RLS(PredictorInterface):
         Notes
         -----
     
-        Computes the leave-pair-out cross-validation predicitons, where each (i,j) pair with
+        Computes the leave-pair-out cross-validation predictions, where each (i,j) pair with
         i= pair_start_inds[k] and j = pairs_end_inds[k] is left out in turn.
         
         When estimating area under ROC curve with leave-pair-out, one should leave out all
         positive-negative pairs, while for estimating the general ranking error one should
         leave out all pairs with different labels.
         
-        Computational complexity of holdout:
+        Computational complexity of holdout with most pairs left out:
         m = n_samples, l=n_labels
-        O(m^3 + lm^2) basic case
-        O(dm^2 + lm^2) linear, if d<m
-        O(bm^2 + lm^2) sparse approximation
         
-        The algorithm is an adaptation of the method published originally in [1]_. The use of
-        leave-pair-out cross-validation for AUC estimation has been analyzed in [2]_.
+        O(TODO)
+        
+        The algorithm is an adaptation of the method published originally in [1]. The use of
+        leave-pair-out cross-validation for AUC estimation has been analyzed in [2].
 
         References
         ---------- 
         
-        .. [1] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+        [1] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
         Exact and efficient leave-pair-out cross-validation for ranking RLS.
         In Proceedings of the 2nd International and Interdisciplinary Conference
         on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
         Espoo, Finland, 2008.
         
-        .. [2] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
+        [2] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
         An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
         Computational Statistics & Data Analysis, 55(4):1828--1844, April 2011.
         """
@@ -376,32 +387,43 @@ class LeaveOneOutRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)      
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-one-out performances for each grid point
+    cv_predictions: array, shape = [grid_size, n_samples] or [grid_size, n_samples, n_labels]
+        leave-one-out predictions
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
     
-    Computational complexity of training (model selection is basically free due to fast leave-one-out):
+    Computational complexity of training (model selection is basically free due to fast regularization and leave-one-out):
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
     O(m^3 + lm^2): basic case
+    
     O(dlm + md^2 + d^3): Linear Kernel, d < m
+    
     O(bml + mb^2): Sparse approximation with basis vectors 
      
     Basic information about RLS, and a description of the fast leave-one-out method
-    can be found in [1]_. 
+    can be found in [1]. 
 
     References
     ---------- 
                
-    .. [1] Ryan Rifkin, Ross Lippert.
-    Notes on Regularized Least Squares
+    [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares.
     Technical Report, MIT, 2007.
     """
     
@@ -415,6 +437,7 @@ class LeaveOneOutRLS(PredictorInterface):
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LOOCV(learner, measure)
         self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
+        self.cv_predictions = np.array(self.cv_predictions)
         self.predictor = learner.predictor
             
 class KfoldRLS(PredictorInterface):
@@ -449,40 +472,51 @@ class KfoldRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        K-fold performances for each grid point
+    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_folds]
+        predictions for each fold, shapes [fold_size] or [fold_size, n_labels]
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
     
-    Computational complexity of training (model selection is basically free due to fast K-fold algorithm):
+    Computational complexity of training (model selection is basically free due to fast regularization and K-fold algorithms):
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
     O(m^3 + lm^2): basic case
+    
     O(dlm + md^2 + d^3): Linear Kernel, d < m
+    
     O(bml + mb^2): Sparse approximation with basis vectors 
      
-    Basic information about RLS can be found in [1]_. The K-fold algorithm is based on results published
-    in [2]_ and [3]_
+    Basic information about RLS can be found in [1]. The K-fold algorithm is based on results published
+    in [2] and [3].
 
     References
     ---------- 
                
-    .. [1] Ryan Rifkin, Ross Lippert.
-    Notes on Regularized Least Squares
+    [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares.
     Technical Report, MIT, 2007.
     
-    .. [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
+    [2] Tapio Pahikkala, Jorma Boberg, and Tapio Salakoski.
     Fast n-Fold Cross-Validation for Regularized Least-Squares.
     Proceedings of the Ninth Scandinavian Conference on Artificial Intelligence,
     83-90, Otamedia Oy, 2006.
         
-    .. [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
+    [3] Tapio Pahikkala, Hanna Suominen, and Jorma Boberg.
     Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
     Machine Learning, 87(3):381--407, June 2012.   
     """
@@ -505,7 +539,7 @@ class LeavePairOutRLS(PredictorInterface):
     
     """Regularized least-squares regression/classification. Wrapper code that selects
     regularization parameter automatically based on ranking accuracy (area under ROC curve
-    for binary classification tasks) in K-fold cross-validation.
+    for binary classification tasks) in leave-pair-out cross-validation.
 
     Parameters
     ----------
@@ -531,13 +565,20 @@ class LeavePairOutRLS(PredictorInterface):
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
     gamma: float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)
-    degree: float, optional
-        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)        
+        PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)      
     coef0: float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
     degree: int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
+        
+    Attributes
+    -----------
+    predictor: {LinearPredictor, KernelPredictor}
+        trained predictor
+    cv_performances: array, shape = [grid_size]
+        leave-pair-out performances for each grid point
+    regparam: float
+        regparam from grid with best performance
                   
     Notes
     -----
@@ -546,27 +587,29 @@ class LeavePairOutRLS(PredictorInterface):
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
     O(m^3 + lm^2): basic case
+    
     O(lm^2 + md^2 + d^3): Linear Kernel, d < m
+    
     O(lm^2 + mb^2): Sparse approximation with basis vectors 
      
-    Basic information about RLS can be found in [1]_ . The leave-pair-out algorithm
-    is an adaptation of the method published in [2]_ . The use of leave-pair-out
-    cross-validation for AUC estimation has been analyzed in [3]_.
+    Basic information about RLS can be found in [1]. The leave-pair-out algorithm
+    is an adaptation of the method published in [2]. The use of leave-pair-out
+    cross-validation for AUC estimation has been analyzed in [3].
     
     References
     ----------    
         
-    .. [1] Ryan Rifkin, Ross Lippert.
-    Notes on Regularized Least Squares
+    [1] Ryan Rifkin, Ross Lippert.
+    Notes on Regularized Least Squares.
     Technical Report, MIT, 2007.
     
-    .. [2] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
+    [2] Tapio Pahikkala, Antti Airola, Jorma Boberg, and Tapio Salakoski.
     Exact and efficient leave-pair-out cross-validation for ranking RLS.
     In Proceedings of the 2nd International and Interdisciplinary Conference
     on Adaptive Knowledge Representation and Reasoning (AKRR'08), pages 1-8,
     Espoo, Finland, 2008.
         
-    .. [3] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
+    [3] Antti Airola, Tapio Pahikkala, Willem Waegeman, Bernard De Baets, and Tapio Salakoski.
     An experimental comparison of cross-validation techniques for estimating the area under the ROC curve.
     Computational Statistics & Data Analysis, 55(4):1828--1844, April 2011. 
     """
@@ -638,26 +681,30 @@ class LPOCV(object):
         rls = self.rls
         rls.solve(regparam)
         Y = rls.Y
-        if Y.shape[1] == 1:
+        aucs = []
+        for k in range(Y.shape[1]):
             pairs_start_inds, pairs_end_inds = [], []
             for i in range(Y.shape[0] - 1):
                 for j in range(i + 1, Y.shape[0]):
-                    if Y[i] > Y[j]:
+                    if Y[i,k] > Y[j,k]:
                         pairs_start_inds.append(i)
                         pairs_end_inds.append(j)
-                    elif Y[i] < Y[j]:
+                    elif Y[i,k] < Y[j,k]:
                         pairs_start_inds.append(j)
                         pairs_end_inds.append(i)
             if len(pairs_start_inds) == 0:
-                raise UndefinedPerformance("All labels are the same")
+                raise UndefinedPerformance("Leave-pair-out undefined, all labels same for output %d" %k)
             pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
+            pred_start = array_tools.as_labelmatrix(pred_start)
+            pred_end = array_tools.as_labelmatrix(pred_end)
             auc = 0.
             for h in range(len(pred_start)):
-                if pred_start[h] > pred_end[h]:
+                if pred_start[h,k] > pred_end[h,k]:
                     auc += 1.
-                elif pred_start[h] == pred_end[h]:
+                elif pred_start[h,k] == pred_end[h,k]:
                     auc += 0.5
-            auc /= len(pairs_start_inds)  
-            return auc, (pred_start, pred_end)
-        else:
-            raise Exception("Model selection with LPOCV is not currently implemented with multi-output data")
+            auc /= len(pairs_start_inds)
+            aucs.append(auc)
+        auc = np.mean(aucs)
+        return auc, None
+                

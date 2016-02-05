@@ -1,8 +1,11 @@
 import numpy as np
 from rlscore.utilities import array_tools
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def accuracy_singletask(Y, P):
     assert Y.shape[0] == P.shape[0]
+    if not np.all((Y==1) + (Y==-1)):
+        raise UndefinedPerformance("binary classification accuracy accepts as Y-values only 1 and -1")
     vlen = float(Y.shape[0])
     perf = np.sum(np.sign(np.multiply(Y, P)) + 1.) / (2 * vlen)
     return perf
@@ -10,6 +13,8 @@ def accuracy_singletask(Y, P):
 def accuracy_multitask(Y, P):
     Y = np.mat(Y)
     P = np.mat(P)
+    if not np.all((Y==1) + (Y==-1)):
+        raise UndefinedPerformance("binary classification accuracy accepts as Y-values only 1 and -1")
     vlen = float(Y.shape[0])
     performances = np.sum(np.sign(np.multiply(Y, P)) + 1., axis = 0) / (2 * vlen)
     performances = np.array(performances)[0]

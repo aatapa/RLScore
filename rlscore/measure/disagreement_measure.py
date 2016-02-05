@@ -37,17 +37,7 @@ def disagreement_multitask(Y, P):
 
 def disagreement(Y, P):
     """Disagreement error, also known as the pairwise ranking error.
-    
-    A performance measure for ranking problems. Computes the number
-    of pairwise disagreements between the correct and predicted rankings.
-    An O(n^2)-time implementation, can be slow for large problems (loglinear
-    time implementation would be possible using search trees). For query-structured
-    data, one would typically want to compute the disagreement separately for each query,
-    and average.
-    
-    If 2-dimensional arrays are supplied as arguments, then disagreement
-    is separately computed for each column, after which the disagreements
-    are averaged.
+    Slow implementation, use cindex instead, disagreement = 1. - cindex
     
     Parameters
     ----------

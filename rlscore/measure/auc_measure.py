@@ -12,6 +12,8 @@ def auc_singletask(Y, P):
     #
     Y = np.array(Y).T[0]
     P = np.array(P).T[0]
+    if not np.all((Y==1) + (Y==-1)):
+        raise UndefinedPerformance("auc accepts as Y-values only 1 and -1")
     size = len(P)
     #form a list of prediction-label pairs
     I = np.argsort(P)

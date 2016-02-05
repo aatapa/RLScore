@@ -16,6 +16,65 @@ CALLBACK_FUNCTION = 'callback'
 
 class CGKronRLS(PairwisePredictorInterface):
     
+    """Regularized least-squares regression with
+    paired-input (dyadic) data and Kronecker kernels.
+    Iterative solver for incomplete data set.
+    
+
+    Parameters
+    ----------
+    X1: {array-like}, shape = [n_samples1, n_features1] 
+        Data matrix 1 (for linear KronRLS)
+        
+    X2: {array-like}, shape = [n_samples2, n_features2] 
+        Data matrix 2 (for linear KronRLS)
+        
+    K1: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 1 (for kernel KronRLS)
+
+    K2: {array-like}, shape = [n_samples1, n_samples1]
+        Kernel matrix 2 (for kernel KronRLS)
+        
+    Y: {array-like}, shape = [n_train_pairs]
+        Training set labels. 
+        
+    label_row_inds: list of indices, shape = [n_train_pairs]
+        row indices from X1, corresponding to labels in Y
+    
+    label_col_inds: list of indices, shape = [n_train_pairs]
+        row indices from X2, corresponding to labels in Y
+        
+    regparam: float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+    
+    maxiter: int, optional
+        maximum number of iterations (default: no upper limit)
+        
+    Attributes
+    -----------
+    predictor: {LinearPairwisePredictor, KernelPairwisePredictor}
+        trained predictor
+                  
+    Notes
+    -----
+    
+    Computational complexity of training:
+
+    TODO
+     
+    KronRLS implements the iterative algorithm described in [1], making use of an efficient
+    sampled Kronecker product algorithm.
+    
+    
+    References
+    ----------
+    
+    [1] Tapio Pahikkala. 
+    Fast gradient computation for learning with tensor product kernels and sparse training labels.
+    Structural, Syntactic, and Statistical Pattern Recognition (S+SSPR).
+    volume 8621 of Lecture Notes in Computer Science, pages 123--132. 2014.
+    """
+    
     
     def __init__(self, **kwargs):
         self.resource_pool = kwargs

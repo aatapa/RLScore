@@ -284,7 +284,7 @@ to highest leave-pair-out AUC.
  
 .. literalinclude:: ../tutorial/classification4.out
 
-Tutorial 4: reduced set approximation
+Tutorial 4: Reduced set approximation
 *************************************
 
 Once the data set size exceeds a couple of thousands of instances, maintaining the
@@ -300,7 +300,7 @@ has been done on more advanced selection strategies.
  
 .. literalinclude:: ../tutorial/classification5.out
 
-Tutorial 5: multi-target learning
+Tutorial 5: Multi-target learning
 *********************************
 
 RLS supports efficient multi-target learning. Instead of a single vector of outputs Y, one

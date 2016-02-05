@@ -1,0 +1,9 @@
+My accuracy 0.800000
+My accuracy with real-valued predictions 0.800000
+
+Traceback (most recent call last):
+  File "measure1.py", line 20, in <module>
+    accuracy(Y2, P)
+...
+rlscore.measure.measure_utilities.UndefinedPerformance: 'binary classification accuracy accepts as Y-values only 1 and -1'
+
