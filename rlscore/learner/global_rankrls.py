@@ -9,6 +9,7 @@ from rlscore.predictor import PredictorInterface
 from rlscore.utilities.cross_validation import grid_search
 from rlscore.measure import cindex
 from rlscore.learner.rls import NfoldCV
+from rlscore.learner.rls import LPOCV
 
 import cython_pairwise_cv_for_global_rankrls
 
@@ -796,42 +797,44 @@ class KfoldRankRLS(PredictorInterface):
         self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
 
-class LPOCV(object):
+# class LPOCV(object):
+#      
+#     def __init__(self, learner):
+#         self.rls = learner
+#         self.measure = cindex
+#  
+#     def cv(self, regparam):
+#         rls = self.rls
+#         rls.solve(regparam)
+#         Y = rls.Y
+#         perfs = []
+#         for index in range(Y.shape[1]):
+#             pairs_start_inds, pairs_end_inds = [], []
+#             for i in range(Y.shape[0] - 1):
+#                 for j in range(i + 1, Y.shape[0]):
+#                     if Y[i, index] > Y[j, index]:
+#                         pairs_start_inds.append(i)
+#                         pairs_end_inds.append(j)
+#                     elif Y[i, index] < Y[j, index]:
+#                         pairs_start_inds.append(j)
+#                         pairs_end_inds.append(i)
+#             if len(pairs_start_inds) > 0:
+#                 pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
+#                 auc = 0.
+#                 for h in range(len(pred_start)):
+#                     if pred_start[h] > pred_end[h]:
+#                         auc += 1.
+#                     elif pred_start[h] == pred_end[h]:
+#                         auc += 0.5
+#                 auc /= len(pairs_start_inds)
+#                 perfs.append(auc)
+#         if len(perfs) > 0:
+#             performance = np.mean(perfs)
+#         else:
+#             raise UndefinedPerformance("Performance undefined for all folds")
+#         return performance, np.array([0])
     
-    def __init__(self, learner):
-        self.rls = learner
-        self.measure = cindex
-
-    def cv(self, regparam):
-        rls = self.rls
-        rls.solve(regparam)
-        Y = rls.Y
-        perfs = []
-        for index in range(Y.shape[1]):
-            pairs_start_inds, pairs_end_inds = [], []
-            for i in range(Y.shape[0] - 1):
-                for j in range(i + 1, Y.shape[0]):
-                    if Y[i, index] > Y[j, index]:
-                        pairs_start_inds.append(i)
-                        pairs_end_inds.append(j)
-                    elif Y[i, index] < Y[j, index]:
-                        pairs_start_inds.append(j)
-                        pairs_end_inds.append(i)
-            if len(pairs_start_inds) > 0:
-                pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds), index)
-                auc = 0.
-                for h in range(len(pred_start)):
-                    if pred_start[h] > pred_end[h]:
-                        auc += 1.
-                    elif pred_start[h] == pred_end[h]:
-                        auc += 0.5
-                auc /= len(pairs_start_inds)
-                perfs.append(auc)
-        if len(perfs) > 0:
-            performance = np.mean(perfs)
-        else:
-            raise UndefinedPerformance("Performance undefined for all folds")
-        return performance, np.array([0])
+    
 
 
                 
