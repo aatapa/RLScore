@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import array, eye, float64, multiply, mat, ones, sqrt, sum, zeros
+from numpy import array, eye, float64, multiply, mat, ones, sqrt
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
@@ -207,16 +207,16 @@ class GlobalRankRLS(PredictorInterface):
         
         Y = self.Y
         
-        modevals = np.squeeze(array(multiply(evals, 1. / ((m - 2.) * evals + self.regparam))))
-        GDY = (self.size - 2.) * (svecs * multiply(np.mat(modevals).T, (svecs.T * Y)))
-        GC = np.squeeze(np.array(svecs * multiply(np.mat(modevals).T, sum(svecs.T, axis=1))))
-        CTGC = sum(GC)
+        modevals = np.squeeze(np.array(np.multiply(evals, 1. / ((m - 2.) * evals + self.regparam))))
+        GDY = (self.size - 2.) * (svecs * np.multiply(np.mat(modevals).T, (svecs.T * Y)))
+        GC = np.squeeze(np.array(svecs * np.multiply(np.mat(modevals).T, np.sum(svecs.T, axis = 1))))
+        CTGC = np.sum(GC)
         
         pairslen = len(pairs_start_inds)
-        sm2Gdiag = zeros((self.Y.shape[0]))
-        BTY = zeros((self.Y.shape))
-        sqrtsm2GDY = zeros((self.Y.shape))
-        BTGBBTY = zeros((self.Y.shape))
+        sm2Gdiag = np.zeros((self.Y.shape[0]))
+        BTY = np.zeros((self.Y.shape))
+        sqrtsm2GDY = np.zeros((self.Y.shape))
+        BTGBBTY = np.zeros((self.Y.shape))
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
         
@@ -229,16 +229,16 @@ class GlobalRankRLS(PredictorInterface):
                                                              svecs,
                                                              modevals,
                                                              svecs.shape[1],
-                                                             zeros((self.Y.shape[0])),
-                                                             np.squeeze(array(GC)),
+                                                             np.zeros((self.Y.shape[0])),
+                                                             np.squeeze(np.array(GC)),
                                                              sm2Gdiag,
                                                              CTGC,
                                                              GDY,
                                                              BTY,
                                                              sqrtsm2GDY,
                                                              BTGBBTY,
-                                                             np.squeeze(array(sum(Y, axis=0))), #CTY
-                                                             np.squeeze(array(sum(GDY, axis=0))), #CTGDY
+                                                             np.array(np.sum(Y, axis = 0))[0], #CTY
+                                                             np.array(np.sum(GDY, axis = 0))[0], #CTGDY
                                                              results_first,
                                                              results_second)        
         
@@ -353,37 +353,6 @@ class GlobalRankRLS(PredictorInterface):
             return GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_
         GDY_, sqrtsm2GDY_, GC_, Y_, BTY_, Gdiag_, sm2Gdiag_, BTGBBTY_ = hack()
         
-        
-        pairslen = len(pairs_start_inds)
-        sm2Gdiag = zeros((self.Y.shape[0]))
-        BTY = zeros((self.Y.shape))
-        sqrtsm2GDY = zeros((self.Y.shape))
-        BTGBBTY = zeros((self.Y.shape))
-        results_first = np.zeros((pairslen, self.Y.shape[1]))
-        results_second = np.zeros((pairslen, self.Y.shape[1]))
-        
-        cython_pairwise_cv_for_global_rankrls.leave_pair_out(pairslen,
-                                                             self.Y.shape[0],
-                                                             pairs_start_inds,
-                                                             pairs_end_inds,
-                                                             self.Y.shape[1],
-                                                             Y,
-                                                             sqrtsm2,
-                                                             G,
-                                                             np.squeeze(array(GC)),
-                                                             sm2Gdiag,
-                                                             CTGC,
-                                                             GDY,
-                                                             BTY,
-                                                             sqrtsm2GDY,
-                                                             BTGBBTY,
-                                                             np.squeeze(array(sum(Y, axis=0))), #CTY
-                                                             np.squeeze(array(sum(GDY, axis=0))), #CTGDY
-                                                             results_first,
-                                                             results_second)        
-        
-        print results_first.shape, results_second.shape, 'ggff'
-        return np.squeeze(results_first[:,oind]), np.squeeze(results_second[:,oind])
         results_start, results_end = [], []
         
         #This loops through the list of hold-out pairs.
@@ -512,8 +481,8 @@ class GlobalRankRLS(PredictorInterface):
         
         #results = []
         
-        C = mat(zeros((self.size, 3), dtype=float64))
-        onevec = mat(ones((self.size, 1), dtype=float64))
+        C = np.mat(np.zeros((self.size, 3), dtype = np.float64))
+        onevec = np.mat(np.ones((self.size, 1), dtype = np.float64))
         for i in range(self.size):
             C[i, 0] = 1.
         
@@ -526,7 +495,7 @@ class GlobalRankRLS(PredictorInterface):
         
         newevals = multiply(evals, 1. / ((m - holen) * evals + self.regparam))
         
-        R = mat(zeros((holen, holen + 1), dtype=float64))
+        R = np.mat(np.zeros((holen, holen + 1), dtype = np.float64))
         for i in range(len(indices)):
             R[i, 0] = -1.
             R[i, i + 1] = sqrt(self.size - float(holen))

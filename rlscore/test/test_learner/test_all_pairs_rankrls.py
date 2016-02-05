@@ -66,6 +66,27 @@ class Test(unittest.TestCase):
             hopreds.append((hopred_start[0][1], hopred_end[0][1]))
             self.assertAlmostEqual(hopreds[0][0], hopreds[1][0])
             self.assertAlmostEqual(hopreds[0][1], hopreds[1][1])
+            
+            #Test with single output just in case.
+            rpool = {}
+            rpool['Y'] = trainlabels[:, 1]
+            rpool['X'] = Xtrain
+            rpool['regparam'] = regparam
+            hodualrls = GlobalRankRLS(**rpool)
+            hodualrls.solve(regparam)
+            hopred_start, hopred_end = hodualrls.leave_pair_out(np.array([hoindices[0], 1, 1, 2]), np.array([hoindices[1], 2, 3, 3]))
+            #print(str(hopred_start[0]) + ' ' + str(hopred_end[0]) + ' Fast')
+            
+            #Test with single output just in case.
+            rpool = {}
+            rpool['Y'] = trainlabels[:, 1]
+            rpool['X'] = Xtrain
+            rpool['regparam'] = regparam
+            hodualrls = GlobalRankRLS(**rpool)
+            hodualrls.solve(regparam)
+            hopred_start, hopred_end = hodualrls.leave_pair_out(np.array([hoindices[0]]), np.array([hoindices[1]]))
+            #print(str(hopred_start) + ' ' + str(hopred_end) + ' Fast')
+            
             hopreds = []
             
             rpool = {}
