@@ -677,7 +677,7 @@ class LPOCV(object):
         self.rls = learner
         self.measure = cindex
 
-    def cv(self, regparam):
+    def cv_old(self, regparam):
         rls = self.rls
         rls.solve(regparam)
         Y = rls.Y
@@ -705,6 +705,60 @@ class LPOCV(object):
                     auc += 0.5
             auc /= len(pairs_start_inds)
             aucs.append(auc)
+        auc = np.mean(aucs)
+        return auc, None
+    
+    def cv(self, regparam):
+        rls = self.rls
+        rls.solve(regparam)
+        Y = rls.Y
+        #Union of all pairs for which predictions are needed
+        all_pairs = set([])
+        for k in range(Y.shape[1]):
+            pairs = []
+            for i in range(Y.shape[0] - 1):
+                for j in range(i + 1, Y.shape[0]):
+                    if Y[i,k] != Y[j,k]:
+                        pairs.append((i,j))
+            #If all labels for some column are same, ranking accuracy is undefined
+            if len(pairs) == 0:
+                raise UndefinedPerformance("Leave-pair-out undefined, all labels same for output %d" %k)
+            all_pairs.update(pairs)
+        all_start_inds = [x[0] for x in all_pairs]
+        all_end_inds = [x[1] for x in all_pairs]
+        #Compute leave-pair-out predictions for all pairs
+        all_start_inds = np.array(all_start_inds)
+        all_end_inds = np.array(all_end_inds)
+        pred_start, pred_end = rls.leave_pair_out(all_start_inds, all_end_inds)
+        pred_start = array_tools.as_labelmatrix(pred_start)
+        pred_end = array_tools.as_labelmatrix(pred_end)
+        pair_dict = dict(zip(all_pairs, range(pred_start.shape[0])))
+        aucs = []
+        #compute auc/ranking accuracy for each column of Y separately
+        for k in range(Y.shape[1]):
+            comparisons = []
+            #1 if the true and predicted agree, 0 if disagree, 0.5 if predictions tied
+            for i in range(Y.shape[0] - 1):
+                for j in range(i + 1, Y.shape[0]):
+                    if Y[i,k] > Y[j,k]:
+                        ind = pair_dict[(i,j)]
+                        if pred_start[ind,k] > pred_end[ind,k]:
+                            comparisons.append(1.)
+                        elif pred_start[ind,k] == pred_end[ind,k]:
+                            comparisons.append(0.5)
+                        else:
+                            comparisons.append(0.)
+                    elif Y[i,k] < Y[j,k]:
+                        ind = pair_dict[(i,j)]
+                        if pred_start[ind,k] < pred_end[ind,k]:
+                            comparisons.append(1.)
+                        elif pred_start[ind,k] == pred_end[ind,k]:
+                            comparisons.append(0.5)
+                        else:
+                            comparisons.append(0.)
+            auc = np.mean(comparisons)
+            aucs.append(auc)
+        #Take the mean of all columnwise aucs
         auc = np.mean(aucs)
         return auc, None
                 
