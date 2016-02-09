@@ -1,10 +1,9 @@
 import numpy as np
-from numpy import array, eye, float64, multiply, mat, ones, sqrt
+from numpy import array, eye, float64, multiply, mat, ones, sqrt, zeros
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
 from rlscore.utilities import creators
-from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
 from rlscore.utilities.cross_validation import grid_search
 from rlscore.measure import cindex
@@ -416,19 +415,6 @@ class GlobalRankRLS(PredictorInterface):
                 
                 results_start.append(F0), results_end.append(F1)
         looppairs(results_start, results_end)
-        #allresults.append(results)
-        # if Y.shape[1] > 1:
-            # allresultsvec = []
-            # for pairind in range(len(pairs)):
-                # F0 = mat(zeros((1, Y.shape[1]), dtype = float64))
-                # F1 = mat(zeros((1, Y.shape[1]), dtype = float64))
-                # for oind in range(Y.shape[1]):
-                    # F0[0, oind] = allresults[oind][pairind][0]
-                    # F1[0, oind] = allresults[oind][pairind][1]
-                # allresultsvec.append((F0,F1))
-            # return allresultsvec
-        # else:
-            # return allresults[0]
         return np.array(results_start), np.array(results_end)
     
     
@@ -765,45 +751,6 @@ class KfoldRankRLS(PredictorInterface):
         crossvalidator = NfoldCV(learner, measure, folds)
         self.cv_performances, self.cv_predictions, self.regparam = grid_search(crossvalidator, grid)
         self.predictor = learner.predictor
-
-# class LPOCV(object):
-#      
-#     def __init__(self, learner):
-#         self.rls = learner
-#         self.measure = cindex
-#  
-#     def cv(self, regparam):
-#         rls = self.rls
-#         rls.solve(regparam)
-#         Y = rls.Y
-#         perfs = []
-#         for index in range(Y.shape[1]):
-#             pairs_start_inds, pairs_end_inds = [], []
-#             for i in range(Y.shape[0] - 1):
-#                 for j in range(i + 1, Y.shape[0]):
-#                     if Y[i, index] > Y[j, index]:
-#                         pairs_start_inds.append(i)
-#                         pairs_end_inds.append(j)
-#                     elif Y[i, index] < Y[j, index]:
-#                         pairs_start_inds.append(j)
-#                         pairs_end_inds.append(i)
-#             if len(pairs_start_inds) > 0:
-#                 pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
-#                 auc = 0.
-#                 for h in range(len(pred_start)):
-#                     if pred_start[h] > pred_end[h]:
-#                         auc += 1.
-#                     elif pred_start[h] == pred_end[h]:
-#                         auc += 0.5
-#                 auc /= len(pairs_start_inds)
-#                 perfs.append(auc)
-#         if len(perfs) > 0:
-#             performance = np.mean(perfs)
-#         else:
-#             raise UndefinedPerformance("Performance undefined for all folds")
-#         return performance, np.array([0])
-    
-    
 
 
                 
