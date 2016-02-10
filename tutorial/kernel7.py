@@ -1,7 +1,7 @@
 import numpy as np
 from rlscore.learner.rls import RLS
 from rlscore.measure import sqerror
-from rlscore.kernel.gaussian_kernel import GaussianKernel
+from rlscore.kernel import GaussianKernel
 from housing_data import load_housing
 import random
 random.seed(55)

@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.rls import RLS
+from rlscore.learner import RLS
 from rlscore.measure import accuracy
 from rlscore.reader import read_svmlight
 

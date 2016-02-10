@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.global_rankrls import GlobalRankRLS
+from rlscore.learner import GlobalRankRLS
 from rlscore.measure import cindex
 
 from housing_data import load_housing

@@ -1,6 +1,6 @@
 import numpy as np
 from mnist import MNIST
-from rlscore.learner.greedy_rls import GreedyRLS
+from rlscore.learner import GreedyRLS
 from rlscore.measure import ova_accuracy
 
 def ova(Y):

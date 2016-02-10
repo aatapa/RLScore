@@ -1,6 +1,5 @@
 import numpy as np
 from rlscore.learner.rls import LeaveOneOutRLS
-from rlscore.measure import cindex
 
 from housing_data import load_housing
 

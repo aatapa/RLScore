@@ -1,5 +1,4 @@
 from rlscore.learner.kron_rls import KronRLS
-from rlscore.measure import cindex
 import davis_data
 
 def main():

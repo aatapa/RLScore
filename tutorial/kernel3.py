@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.rls import RLS
+from rlscore.learner import RLS
 from rlscore.measure import sqerror
 
 from housing_data import load_housing

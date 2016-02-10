@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.query_rankrls import LeaveQueryOutRankRLS
+from rlscore.learner import LeaveQueryOutRankRLS
 from rlscore.measure import cindex
 from rlscore.reader import read_sparse
 from rlscore.utilities.cross_validation import map_ids

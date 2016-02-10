@@ -1,6 +1,4 @@
-import numpy as np
-from rlscore.learner.greedy_rls import GreedyRLS
-from rlscore.measure import sqerror
+from rlscore.learner import GreedyRLS
 
 from housing_data import load_housing
 

@@ -1,4 +1,4 @@
-from rlscore.learner.cg_kron_rls import CGKronRLS
+from rlscore.learner import CGKronRLS
 from rlscore.measure import cindex
 import metz_data
 

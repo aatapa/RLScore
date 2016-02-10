@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.rls import LeavePairOutRLS
+from rlscore.learner import LeavePairOutRLS
 from rlscore.measure import auc
 from rlscore.reader import read_svmlight
 

@@ -6,8 +6,7 @@
 RLScore
 =======
 
-RLScore - regularized least-squares based machine learning algorithms for regression, classification,
-ranking, clustering, and feature selection.
+RLScore - regularized least-squares machine learning algorithms package.
 
 General introductory stuff comes here
 

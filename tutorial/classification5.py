@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.rls import LeaveOneOutRLS
+from rlscore.learner import LeaveOneOutRLS
 from rlscore.measure import accuracy
 from rlscore.reader import read_svmlight
 import random

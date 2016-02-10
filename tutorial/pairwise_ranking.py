@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.rankrls_with_pairwise_preferences import PPRankRLS
+from rlscore.learner import PPRankRLS
 from rlscore.measure import cindex
 
 from housing_data import load_housing

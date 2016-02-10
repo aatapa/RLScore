@@ -1,4 +1,4 @@
-from rlscore.learner.kron_rls import KronRLS
+from rlscore.learner import KronRLS
 from rlscore.measure import cindex
 from rlscore.kernel.gaussian_kernel import GaussianKernel
 import davis_data

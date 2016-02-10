@@ -1,4 +1,4 @@
-from rlscore.learner.two_step_rls import TwoStepRLS
+from rlscore.learner import TwoStepRLS
 from rlscore.measure import cindex
 import davis_data
 

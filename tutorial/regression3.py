@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.rls import LeaveOneOutRLS
+from rlscore.learner import LeaveOneOutRLS
 from rlscore.measure import sqerror
 
 from housing_data import load_housing

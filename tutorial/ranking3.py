@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.learner.global_rankrls import GlobalRankRLS
+from rlscore.learner import GlobalRankRLS
 from rlscore.measure import cindex
 from rlscore.utilities.cross_validation import random_folds
 

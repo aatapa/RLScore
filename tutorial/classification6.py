@@ -1,5 +1,4 @@
-import numpy as np
-from rlscore.learner.rls import LeaveOneOutRLS
+from rlscore.learner import LeaveOneOutRLS
 from rlscore.measure import ova_accuracy
 from wine_data import load_wine
 from rlscore.utilities.multiclass import to_one_vs_all
