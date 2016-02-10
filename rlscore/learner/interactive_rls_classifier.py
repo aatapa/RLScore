@@ -1,11 +1,7 @@
-
-import pyximport; pyximport.install()
-
 import cython_mmc
 
 import random as pyrandom
 pyrandom.seed(200)
-#from numpy import *
 import numpy as np
 from rlscore.utilities import creators
 
@@ -98,7 +94,7 @@ class InteractiveRlsClassifier(object):
     
     
     def updateA(self):
-        self.A = self.svecs * multiply(self.newevals.T, self.VTY)
+        self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
     
     
     def new_working_set(self, working_set):
