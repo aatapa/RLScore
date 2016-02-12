@@ -120,13 +120,6 @@ class LinearPredictor(object):
         """
         W = self.W
         assert len(X.shape) < 3
-        xfcount = X.shape[len(X.shape) - 1]
-        if xfcount > W.shape[0]:
-            #print 'Warning: the number of features ('+str(X.shape[0])+') in the data point for which the prediction is to be made is larger than the size ('+str(self.W.shape[0])+') of the predictor. Slicing the feature vector accordingly.'
-            X = X[:, range(W.shape[0])]
-        if xfcount < W.shape[0]:
-            #print 'Warning: the number of features ('+str(X.shape[0])+') in the data point for which the prediction is to be made is smaller than the size ('+str(self.W.shape[0])+') of the predictor. Slicing the predictor accordingly.'
-            W = W[range(xfcount)]
         if sp.issparse(X):
             P = X * W
         elif isinstance(X, np.matrix):
