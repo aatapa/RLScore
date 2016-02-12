@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from numpy.testing import assert_allclose
 import numpy.linalg as la
 
 from rlscore.learner import RLS
@@ -9,12 +10,57 @@ class Test(unittest.TestCase):
     
     def setUp(self):
         np.random.seed(100)
-        self.X = np.random.random((10,100))
-        #data matrix full of zeros
-        self.X_zeros = np.zeros((10,100))
-        self.testm = [self.X, self.X.T, self.X_zeros]
-        #some basis vectors
-        self.basis_vectors = [0,3,7,8]
+        m, n = 100, 50
+        self.Xtrain1 = np.random.rand(m, n)
+        self.Xtrain2 = np.random.rand(m, 120)
+        self.Ytrain1 = np.random.randn(m)
+        self.Ytrain2 = np.random.randn(m, 5)
+        self.bvectors = [0,3,5,22,44]
+        
+    def test_primal(self):
+        #Test that learning with linear kernel works correctly both
+        #with low and high-dimensional data
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                #Basic case
+                primal_rls = RLS(X, Y, regparam=1.0, bias=0.)
+                W = primal_rls.predictor.W
+                d = X.shape[1]
+                W2 = np.linalg.solve(np.dot(X.T, X) + np.eye(d), np.dot(X.T, Y))
+                assert_allclose(W, W2)
+                #Fast regularization algorithm
+                primal_rls.solve(10.)
+                W = primal_rls.predictor.W
+                W2 = np.linalg.solve(np.dot(X.T, X) + 10.*np.eye(d), np.dot(X.T, Y))
+                assert_allclose(W, W2)
+                #Bias term included
+                primal_rls = RLS(X, Y, regparam=1.0, bias=2.)
+                O = np.sqrt(2.) * np.ones((X.shape[0],1))
+                X_new = np.hstack((X, O))
+                W = primal_rls.predictor.W
+                W2 = np.linalg.solve(np.dot(X_new.T, X_new) + np.eye(d+1), np.dot(X_new.T, Y))
+                b = primal_rls.predictor.b
+                b2 = W2[-1]
+                W2 = W2[:-1]
+                assert_allclose(W, W2)
+                assert_allclose(b, np.sqrt(2) * b2)
+                #reduced set approximation
+                primal_rls = RLS(X, Y, basis_vectors = X[self.bvectors], regparam=5.0, bias=2.)
+                W = primal_rls.predictor.W
+                b = primal_rls.predictor.b
+                K = np.dot(X_new, X_new.T)
+                Kr = K[:, self.bvectors]
+                Krr = K[np.ix_(self.bvectors, self.bvectors)]
+                A = np.linalg.solve(np.dot(Kr.T, Kr)+ 5.0 * Krr, np.dot(Kr.T, Y))
+                W2 = np.dot(X_new[self.bvectors].T, A)
+                b2 = W2[-1]
+                W2 = W2[:-1]
+                assert_allclose(W, W2)
+                assert_allclose(b, np.sqrt(2) * b2)
+                
+                
+        
+        
         
     def testRLS(self):
         
