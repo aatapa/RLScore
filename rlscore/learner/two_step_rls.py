@@ -4,6 +4,7 @@ import pyximport; pyximport.install()
 import numpy as np
 import numpy.linalg as la
 
+from rlscore.learner.rls import RLS
 from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
 
@@ -196,44 +197,50 @@ class TwoStepRLS(PairwisePredictorInterface):
         return np.asarray(loopred)
     
     
-    def in_sample_loo_ref(self):
-        if not self.kernelmode:
-            X1, X2 = self.X1, self.X2
-            P = X1 * self.W * X2.T
+    def leave_column_out(self):
+        
+        VTY = self.V.T * self.Y
+        
+        filteredevals1 = self.evals1 / (self.evals1 + self.regparam1)
+        
+        foo = np.multiply(VTY, filteredevals1)
+        foo = self.V * foo
+        foo = np.array(foo)
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam2
+        rlsparams["Y"] = foo.T
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K2)
+            rlsparams['kernel'] = 'PrecomputedKernel'
         else:
-            P = self.K1 * self.A * self.K2.T
+            rlsparams["X"] = np.array(self.X2)
+        ordinary_rls_for_columns = RLS(**rlsparams)
+        lco = ordinary_rls_for_columns.leave_one_out().T
+        return lco
+    
+    
+    def leave_row_out(self):
         
-        ylen = self.Y.shape[0] * self.Y.shape[1]
-        hocompl = [0] + range(2, ylen)
-        kron = np.kron(self.K2, self.K1)
-        regkron = np.kron(self.K2 + self.regparam2 * np.eye(self.K2.shape[0]), self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
-        invregkron = la.inv(regkron)
+        YU = self.Y * self.U
         
-        weirdkron = kron - self.regparam2 * self.regparam1 * np.eye(self.K2.shape[0] * self.K1.shape[0])
-        invregweirdkron = la.inv(weirdkron + self.regparam2 * self.regparam1 * np.eye(self.K2.shape[0] * self.K1.shape[0]))
-        #invregkron = np.kron(la.inv(self.K2 + self.regparam2 * np.eye(self.K2.shape[0])), la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0])))
-        #invregkron_sampled = invregkron[hocompl][:, hocompl]
-        #regkron_sampled = regkron[hocompl][:, hocompl]
-        #invregkron_sampled = la.inv(regkron_sampled)
-        #predkron = np.kron(self.K2, self.K1)[1][:, hocompl]
-        #y_sampled = self.Y.ravel(order = 'F').T[hocompl]
-        #print self.Y, self.Y.ravel(order = 'F'), len(y_sampled)
-        YY = self.Y.ravel(order = 'F').T.copy()
-        YY[1] = 5
-        P = P.ravel(order = 'F').T
-        PP = np.dot(np.dot(kron, invregkron), YY)
-        #loopred = np.dot(predkron, np.dot(invregkron_sampled, y_sampled))
-        #loopred_a = self.Y.ravel(order = 'F').T[1] - (1. / regkron[1, 1]) * np.dot(invregkron, self.Y.ravel(order = 'F').T)[1]
-        #loopred_b = YY[1] - (1. / regkron[1, 1]) * np.dot(invregkron, YY)[1]
-        #loopred_a = self.Y.ravel(order = 'F').T[1] - (1. / invregweirdkron[1, 1]) * np.dot(invregweirdkron, self.Y.ravel(order = 'F').T)[1]
-        #loopred_b = YY[1] - (1. / invregweirdkron[1, 1]) * np.dot(invregweirdkron, YY)[1]
-        loopred_a = (1. / (1. - (weirdkron * invregweirdkron)[1, 1])) * (P[1] - (weirdkron * invregweirdkron)[1, 1] * self.Y.ravel(order = 'F').T[1])
-        loopred_b = (1. / (1. - (weirdkron * invregweirdkron)[1, 1])) * (PP[1] - (weirdkron * invregweirdkron)[1, 1] * YY[1])
-        loopred = (1. / (1. - (kron * invregkron)[1, 1])) * (P[1] - (kron * invregkron)[1, 1] * self.Y.ravel(order = 'F').T[1])
-        loopred2 = (1. / (1. - (kron * invregkron)[1, 1])) * (PP[1] - (kron * invregkron)[1, 1] * YY[1])
-        foo = np.zeros(ylen)
-        #foo[]
-        return loopred, loopred2, loopred_a, loopred_b
+        filteredevals2 = self.evals2 / (self.evals2 + self.regparam2)
+        
+        foo = np.multiply(YU, filteredevals2.T)
+        foo = foo * self.U.T
+        foo = np.array(foo)
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam1
+        rlsparams["Y"] = foo
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K1)
+            rlsparams['kernel'] = 'PrecomputedKernel'
+        else:
+            rlsparams["X"] = np.array(self.X1)
+        ordinary_rls_for_rows = RLS(**rlsparams)
+        lro = ordinary_rls_for_rows.leave_one_out()
+        return lro
     
     
     def out_of_sample_loo(self):
