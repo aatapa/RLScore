@@ -12,6 +12,7 @@ ext_modules = [
     Extension("rlscore.utilities.swapped",["rlscore/utilities/swapped"+ext]),
     Extension("rlscore.learner.cython_pairwise_cv_for_rls",["rlscore/learner/cython_pairwise_cv_for_rls"+ext]),
     Extension("rlscore.learner.cython_pairwise_cv_for_global_rankrls",["rlscore/learner/cython_pairwise_cv_for_global_rankrls"+ext]),
+    Extension("rlscore.learner.cython_two_step_rls_cv",["rlscore/learner/cython_two_step_rls_cv"+ext]),
     Extension("rlscore.learner.cython_mmc",["rlscore/learner/cython_mmc"+ext]),
     Extension("rlscore.learner.cython_greedy_rls",["rlscore/learner/cython_greedy_rls"+ext]),
     Extension("rlscore.utilities._sampled_kronecker_products",["rlscore/utilities/_sampled_kronecker_products"+ext])
