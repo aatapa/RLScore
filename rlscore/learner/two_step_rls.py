@@ -216,7 +216,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         else:
             rlsparams["X"] = np.array(self.X2)
         ordinary_rls_for_columns = RLS(**rlsparams)
-        lco = ordinary_rls_for_columns.leave_one_out().T
+        lco = ordinary_rls_for_columns.leave_one_out().T.ravel(order = 'F')
         return lco
     
     
@@ -239,7 +239,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         else:
             rlsparams["X"] = np.array(self.X1)
         ordinary_rls_for_rows = RLS(**rlsparams)
-        lro = ordinary_rls_for_rows.leave_one_out()
+        lro = ordinary_rls_for_rows.leave_one_out().ravel(order = 'F')
         return lro
     
     

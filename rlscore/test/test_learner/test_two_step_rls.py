@@ -255,11 +255,14 @@ class Test(unittest.TestCase):
         kernel_two_step_testpred_lro_0 = kernel_two_step_learner_lro_0.predict(K_train1[range(1, K_train1.shape[0]), 0], K_train2)
         print('')
         print('Leave-row-out with linear two-step RLS:')
-        print(linear_lro[0])
+        print(linear_lro.reshape((train_rows, train_columns), order = 'F')[0])
         print('Leave-row-out with kernel two-step RLS:')
-        print(kernel_lro[0])
+        print(kernel_lro.reshape((train_rows, train_columns), order = 'F')[0])
         print('Two-step RLS trained without the held-out row predictions for the row:')
         print(kernel_two_step_testpred_lro_0)
+        np.testing.assert_almost_equal(linear_lro.reshape((train_rows, train_columns), order = 'F')[0], kernel_two_step_testpred_lro_0)
+        np.testing.assert_almost_equal(kernel_lro.reshape((train_rows, train_columns), order = 'F')[0], kernel_two_step_testpred_lro_0)
+        
         
         #Train kernel two-step RLS without out-of-sample column 0
         params = {}
@@ -272,11 +275,13 @@ class Test(unittest.TestCase):
         kernel_two_step_testpred_lco_0 = kernel_two_step_learner_lco_0.predict(K_train1, K_train2[range(1, K_train2.shape[0]), 0])
         print('')
         print('Leave-column-out with linear two-step RLS:')
-        print(linear_lco[:, 0])
+        print(linear_lco[range(train_rows)])
         print('Leave-column-out with kernel two-step RLS:')
-        print(kernel_lco[:, 0])
+        print(kernel_lco[range(train_rows)])
         print('Two-step RLS trained without the held-out column predictions for the column:')
         print(kernel_two_step_testpred_lco_0)
+        np.testing.assert_almost_equal(linear_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
+        np.testing.assert_almost_equal(kernel_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
         
         print('')
         print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordinary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')
