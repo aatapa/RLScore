@@ -1,8 +1,8 @@
 
-import pyximport; pyximport.install()
+#import pyximport; pyximport.install()
 
 import numpy as np
-import numpy.linalg as la
+#import numpy.linalg as la
 
 from rlscore.learner.rls import RLS
 from rlscore.utilities import array_tools
@@ -86,14 +86,8 @@ class TwoStepRLS(PairwisePredictorInterface):
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
         self.Y = Y
-        if kwargs.has_key('regparam1'):
-            self.regparam1 = kwargs["regparam1"]
-        else:
-            self.regparam1 = kwargs["regparam"]
-        if kwargs.has_key('regparam2'):
-            self.regparam2 = kwargs["regparam2"]
-        else:
-            self.regparam2 = kwargs["regparam"]
+        self.regparam1 = kwargs["regparam1"]
+        self.regparam2 = kwargs["regparam2"]
         self.trained = False
         self.solve(self.regparam1, self.regparam2)
     
@@ -291,8 +285,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         GYG = GY * G
         #A2 = G2 * self.Y.T
         
-        i, j = 2, 4
-        inds = [i, j]
+        #i, j = 2, 4
+        #inds = [i, j]
         
         #A = self.U[inds]
         #right = multiplyright - A.T * self.Y.T[inds]
@@ -321,13 +315,13 @@ class TwoStepRLS(PairwisePredictorInterface):
         #    - la.inv(G1[np.ix_(inds, inds)]) * G1Y[np.ix_(inds, inds)] \
         #    + la.inv(G1[np.ix_(inds, inds)]) * G1YG2[np.ix_(inds, inds)] * la.inv(G2[np.ix_(inds, inds)])
         
-        invGii = la.inv(G[np.ix_(inds, inds)])
-        GYii = GY[np.ix_(inds, inds)]
-        invGiiGYii = invGii * GYii
-        HO_rowr = self.Y[np.ix_(inds, inds)] \
-            - invGiiGYii.T \
-            - invGiiGYii \
-            + invGii * GYG[np.ix_(inds, inds)] * invGii
+        #invGii = la.inv(G[np.ix_(inds, inds)])
+        #GYii = GY[np.ix_(inds, inds)]
+        #invGiiGYii = invGii * GYii
+        #HO_rowr = self.Y[np.ix_(inds, inds)] \
+        #    - invGiiGYii.T \
+        #    - invGiiGYii \
+        #    + invGii * GYG[np.ix_(inds, inds)] * invGii
         
         #II1 = np.mat(np.identity(self.Y.shape[0]))[inds]
         #II2 = np.mat(np.identity(self.Y.shape[1]))[:, inds]
