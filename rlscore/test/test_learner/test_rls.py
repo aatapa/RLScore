@@ -5,6 +5,8 @@ from numpy.testing import assert_allclose
 import numpy.linalg as la
 
 from rlscore.learner import RLS
+from rlscore.kernel import LinearKernel
+from rlscore.kernel import GaussianKernel
 
 class Test(unittest.TestCase):
     
@@ -17,7 +19,7 @@ class Test(unittest.TestCase):
         self.Ytrain2 = np.random.randn(m, 5)
         self.bvectors = [0,3,5,22,44]
         
-    def test_primal(self):
+    def test_linear(self):
         #Test that learning with linear kernel works correctly both
         #with low and high-dimensional data
         for X in [self.Xtrain1, self.Xtrain2]:
@@ -57,9 +59,42 @@ class Test(unittest.TestCase):
                 W2 = W2[:-1]
                 assert_allclose(W, W2)
                 assert_allclose(b, np.sqrt(2) * b2)
+                #Using pre-computed linear kernel matrix
+                kernel = LinearKernel(X, bias = 2.)
+                K = kernel.getKM(X)
+                dual_rls = RLS(K, Y, kernel = "PrecomputedKernel", regparam=0.01)
+                W = np.dot(X_new.T, dual_rls.predictor.W)
+                b = W[-1]
+                W = W[:-1]
+                W2 = np.linalg.solve(np.dot(X_new.T, X_new) + 0.01 * np.eye(d+1), np.dot(X_new.T, Y))
+                b2 = W2[-1]
+                W2 = W2[:-1]
+                assert_allclose(W, W2)
+                assert_allclose(b, b2)
+                #Pre-computed linear kernel, reduced set approximation
+                kernel = LinearKernel(X[self.bvectors], bias = 2.)
+                dual_rls = RLS(kernel.getKM(X), Y, kernel="PrecomputedKernel", basis_vectors = kernel.getKM(X[self.bvectors]), regparam=5.0)
+                W = np.dot(X_new[self.bvectors].T, dual_rls.predictor.W)
+                b = W[-1]
+                W = W[:-1]
+                K = np.dot(X_new, X_new.T)
+                Kr = K[:, self.bvectors]
+                Krr = K[np.ix_(self.bvectors, self.bvectors)]
+                A = np.linalg.solve(np.dot(Kr.T, Kr)+ 5.0 * Krr, np.dot(Kr.T, Y))
+                W2 = np.dot(X_new[self.bvectors].T, A)
+                b2 = W2[-1]
+                W2 = W2[:-1]
+                assert_allclose(W, W2)
+                assert_allclose(b, b2)
                 
                 
-        
+                
+                
+                
+    def test_kernel(self):
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                pass
         
         
     def testRLS(self):
