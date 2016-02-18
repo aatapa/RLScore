@@ -71,12 +71,6 @@ Support for different tasks
 
    - Kronecker RLS
 
-Download
-========
-
-Download `RLScore.zip <RLScore.zip>`_ containing the python source code of RLScore.
-
-
 Software dependencies
 =====================
 
