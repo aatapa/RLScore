@@ -6,7 +6,6 @@ Created on May 19, 2011
 import math
 
 from numpy import multiply, float64, ones
-from scipy.sparse import csr_matrix
 from math import sqrt
 import numpy as np
 
@@ -54,6 +53,8 @@ class SvdAdapter(object):
         kernel = rpool['kernel_obj']
         if rpool.has_key('basis_vectors'):
             basis_vectors = rpool['basis_vectors']
+            if not train_X.shape[1] == basis_vectors.shape[1]:
+                raise Exception("X and basis_vectors have different number of columns")
             K_r = kernel.getKM(train_X).T
             Krr = kernel.getKM(basis_vectors)
             svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
@@ -87,9 +88,11 @@ class LinearSvdAdapter(SvdAdapter):
     
     def decompositionFromPool(self, rpool):
         kernel = rpool['kernel_obj']
-        self.X = rpool['X']
+        self.X = array_tools.as_2d_array(rpool['X'], True)
         if rpool.has_key('basis_vectors'):
-            basis_vectors = rpool['basis_vectors']
+            basis_vectors = array_tools.as_2d_array(rpool['basis_vectors'], True)
+            if not self.X.shape[1] == basis_vectors.shape[1]:
+                raise Exception("X and basis_vectors have different number of columns")
         else:
             basis_vectors = None
         if "bias" in rpool:
@@ -166,6 +169,8 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     def decompositionFromPool(self, rpool):
         K_train = rpool['kernel_matrix']
         if rpool.has_key('basis_vectors'):
+            if not K_train.shape[1] == rpool["basis_vectors"].shape[1]:
+                raise Exception("When using basis vectors, both kernel matrices must contain equal number of columns")
             svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
         else:
             svals, rsvecs = decomposition.decomposeKernelMatrix(K_train)

@@ -27,6 +27,7 @@ class GaussianKernel(object):
     """
       
     def __init__(self, X, gamma=1.0):
+        X = array_tools.as_2d_array(X, True)
         if gamma <= 0.:
             raise Exception('ERROR: nonpositive kernel parameter for Gaussian kernel\n')
         self.train_X = X
@@ -49,6 +50,7 @@ class GaussianKernel(object):
         K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
+        X = array_tools.as_2d_array(X, True)
         test_X = X 
         if sp.issparse(test_X):
             test_X = array_tools.spmat_resize(test_X, self.train_X.shape[1])

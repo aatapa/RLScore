@@ -31,6 +31,7 @@ class PolynomialKernel(object):
     """
 
     def __init__(self, X, degree=2, gamma=1.0, coef0=0):
+        X = array_tools.as_2d_array(X, True)
         self.train_X = X
         self.degree = degree
         self.gamma = gamma
@@ -49,6 +50,7 @@ class PolynomialKernel(object):
         K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
+        X = array_tools.as_2d_array(X, True)
         test_X = X
         degree, coef0, gamma = self.degree, self.coef0, self.gamma
         if sp.issparse(test_X):

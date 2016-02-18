@@ -23,6 +23,7 @@ class LinearKernel(object):
     """
 
     def __init__(self, X, bias=1.0):
+        X = array_tools.as_2d_array(X, True)
         self.train_X = X
         self.bias = bias
 
@@ -39,6 +40,7 @@ class LinearKernel(object):
         K: array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
+        X = array_tools.as_2d_array(X, True)
         test_X = X
         if sp.issparse(test_X):
             test_X = array_tools.spmat_resize(test_X, self.train_X.shape[1])

@@ -1,7 +1,7 @@
 
 from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
-from rlscore.utilities import array_tools
+from rlscore.utilities import array_tools 
 from rlscore.utilities import creators
 import cython_pairwise_cv_for_rls
 
@@ -96,12 +96,17 @@ class RLS(PredictorInterface):
     """
 
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        self.Y = array_tools.as_2d_array(Y)
+        if X.shape[0] != Y.shape[0]:
+            raise Exception("First dimension of X and Y must be the same")
+        if basis_vectors != None:
+            if X.shape[1] != basis_vectors.shape[1]:
+                raise Exception("Number of columns for X and basis_vectors must be the same")
         kwargs['X'] = X
         kwargs['kernel'] = kernel
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(Y)
         self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
@@ -190,12 +195,10 @@ class RLS(PredictorInterface):
         Efficient cross-validation for kernelized least-squares regression with sparse basis expansions.
         Machine Learning, 87(3):381--407, June 2012.
         """
+        indices = array_tools.as_index_list(indices, self.Y.shape[0])
         
-        if len(indices) == 0:
-            raise Exception('Hold-out predictions can not be computed for an empty hold-out set.')
-        
-        if len(indices) != len(set(indices)):
-            raise Exception('Hold-out can have each index only once.')
+        if len(indices) != len(np.unique(indices)):
+            raise IndexError('Hold-out can have each index only once.')
         
         bevals = multiply(self.evals, self.newevals)
         A = self.svecs[indices]
@@ -208,7 +211,7 @@ class RLS(PredictorInterface):
         else: #h > r
             I = mat(identity(A.shape[1]))
             result = RQY - A * (la.inv(B * A - I) * (B * RQY)) #O(r^3 + r^2 * l + h * r * l)
-        return np.array(result)
+        return np.squeeze(np.array(result))
     
     
     def leave_one_out(self):
@@ -261,7 +264,7 @@ class RLS(PredictorInterface):
         #LOO = multiply(LOO_ek, RQY)
         #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO = multiply(LOO_ek, self.svecs * (svecsm.T * self.Y)) - multiply(LOO_ek, multiply(RQR, self.Y))
-        return np.array(LOO)
+        return np.squeeze(np.array(LOO))
     
     
     def leave_pair_out(self, pairs_start_inds, pairs_end_inds):
@@ -314,8 +317,11 @@ class RLS(PredictorInterface):
         Computational Statistics & Data Analysis, 55(4):1828--1844, April 2011.
         """
         
+        pairs_start_inds = array_tools.as_index_list(pairs_start_inds, self.Y.shape[0])
+        pairs_end_inds = array_tools.as_index_list(pairs_end_inds, self.Y.shape[0])
         pairslen = len(pairs_start_inds)
-        assert len(pairs_end_inds) == pairslen
+        if not len(pairs_start_inds) == len(pairs_end_inds):
+            raise Exception("Incorrect arguments: lengths of pairs_start_inds and pairs_end_inds do no match")
         
         bevals = multiply(self.evals, self.newevals)
         svecsbevals = multiply(self.svecs, bevals)

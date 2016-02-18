@@ -54,6 +54,7 @@ class KernelPredictor(object):
     
     def __init__(self, A, kernel):
         self.kernel = kernel
+        self.dim = kernel.train_X.shape[1]
         self.A = A
         self.A = np.squeeze(array_tools.as_array(self.A))
     
@@ -71,10 +72,17 @@ class KernelPredictor(object):
         P: array, shape = [n_samples] or [n_samples, n_labels]
             predictions
         """
+        if len(X.shape) == 1:
+            #One dimensional data
+            if self.dim == 1:
+                X = X.reshape(X.shape[0], 1)
+            else:
+                X = X.reshape(1, X.shape[0])
         K = self.kernel.getKM(X)
         if len(X.shape) < 2: #Cheap hack!
             K = np.squeeze(K)
         P = np.dot(K, self.A)
+        P = np.squeeze(P)
         return P
 
 
@@ -119,6 +127,12 @@ class LinearPredictor(object):
             predictions
         """
         W = self.W
+        if len(X.shape) == 1:
+            #One dimensional data
+            if len(W) == 1:
+                X = X.reshape(X.shape[0], 1)
+            else:
+                X = X.reshape(1, X.shape[0])
         assert len(X.shape) < 3
         if sp.issparse(X):
             P = X * W
@@ -128,6 +142,7 @@ class LinearPredictor(object):
             P = np.dot(X, W)
         P = P + self.b
         #P = array_tools.as_array(P)
+        P = np.squeeze(P)
         return P
 
 

@@ -13,6 +13,7 @@ class RsetKernel(object):
         K_r = self.base_kernel.getKM(X)
         invKrr = la.inv(Krr)
         self.predcache = np.dot(K_r, invKrr)
+        self.train_X = X
 
     
     def getKM(self, test_X):

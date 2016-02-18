@@ -1,6 +1,47 @@
 import numpy as np
 from scipy import sparse as sp
 
+
+def as_2d_array(A, allow_sparse = False):
+    #Interprets the input as 2d-array
+    if allow_sparse and sp.issparse(A):
+        s = np.sum(A.data)
+        if s == np.inf or s == -np.inf:
+            raise ValueError("Sparse matrix contains infinity")
+        elif np.isnan(s):
+            raise ValueError("Sparse matrix contains NaN")
+        return A        
+    if not allow_sparse and sp.issparse(A):
+        A = A.todense()
+    A = np.array(A, copy = False)
+    shape = A.shape
+    if not np.issubdtype(A.dtype, int) and not np.issubdtype(A.dtype, float):
+        raise ValueError("Argument array contains non-numerical data") 
+    if not 0 < len(shape) < 3:
+        raise ValueError("Argument array of incorrect shape: expected 1D or 2D array, got %d dimensions" %len(shape))
+    s = np.sum(A)
+    if s == np.inf or s == -np.inf:
+        raise ValueError("Array contains infinity")
+    elif np.isnan(s):
+        raise ValueError("Array contains NaN")
+    if len(A.shape) == 1:
+        A = A.reshape((A.shape[0], 1))
+    return A
+
+def as_index_list(I, maxind):
+    I = np.array(I, dtype=np.long, copy=False)
+    if len(I.shape) != 1:
+        raise ValueError("Index list should be one dimensional")
+    if len(I) == 0:
+        raise ValueError("Index list cannot be empty")
+    minval = np.min(I)
+    maxval = np.max(I)
+    if minval < 0 or maxval >= maxind:
+        raise IndexError("Index outside allowed range %d ... %d" %(0, maxind-1))
+    return I
+    
+    
+
 def as_dense_matrix(A):
     """Returns the input as matrix
 
