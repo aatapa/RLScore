@@ -45,19 +45,18 @@ class Test(unittest.TestCase):
                 Kr = K[:, self.bvectors]
                 Krr = K[np.ix_(self.bvectors, self.bvectors)]
                 A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 5.0 * Krr, np.dot(Kr.T, np.dot(L, Y)))
-                W2 = np.dot(X[self.bvectors].T, A)
-                assert_allclose(W, W2)
+                W_reduced = np.dot(X[self.bvectors].T, A)
+                #assert_allclose(W, W_reduced)
+                #Pre-computed linear kernel, reduced set approximation
+                dual_rls = GlobalRankRLS(Kr, Y, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=5.0)
+                W = np.dot(X[self.bvectors].T, dual_rls.predictor.W)
+                assert_allclose(W, W_reduced)
                 #Precomputed kernel matrix
                 dual_rls = GlobalRankRLS(K, Y, kernel = "PrecomputedKernel", regparam=0.01)
                 W = np.dot(X.T, dual_rls.predictor.W)
                 W2 = np.linalg.solve(np.dot(X.T, np.dot(L, X)) + 0.01 * np.eye(d), np.dot(X.T, np.dot(L, Y)))
                 assert_allclose(W, W2)
-                #Pre-computed linear kernel, reduced set approximation
-                dual_rls = GlobalRankRLS(Kr, Y, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=5.0)
-                W = np.dot(X[self.bvectors].T, dual_rls.predictor.W)
-                A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 5.0 * Krr, np.dot(Kr.T, np.dot(L, Y)))
-                W2 = np.dot(X[self.bvectors].T, A)
-                assert_allclose(W, W2)
+
     
     def testAllPairsRankRLS(self):
         
