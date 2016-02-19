@@ -89,6 +89,12 @@ class GlobalRankRLS(PredictorInterface):
     """
     
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        self.Y = array_tools.as_2d_array(Y)
+        if X.shape[0] != Y.shape[0]:
+            raise Exception("First dimension of X and Y must be the same")
+        if basis_vectors != None:
+            if X.shape[1] != basis_vectors.shape[1]:
+                raise Exception("Number of columns for X and basis_vectors must be the same")
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
         if basis_vectors != None:
@@ -100,10 +106,6 @@ class GlobalRankRLS(PredictorInterface):
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
         self.solve(self.regparam)
-
-
-#    def train(self):
-#        self.solve(self.regparam)
     
     def solve(self, regparam=1.0):
         """Re-trains RankRLS for the given regparam
@@ -201,6 +203,8 @@ class GlobalRankRLS(PredictorInterface):
         An Experimental Comparison of Cross-Validation Techniques for Estimating the Area Under the ROC Curve.
         Computational Statistics & Data Analysis 55(4), 1828-1844, 2011.
         """
+        pairs_start_inds = array_tools.as_index_list(pairs_start_inds, self.Y.shape[0])
+        pairs_end_inds = array_tools.as_index_list(pairs_end_inds, self.Y.shape[0])        
         
         evals, svecs = self.evals, self.svecs
         m = self.size
@@ -455,11 +459,10 @@ class GlobalRankRLS(PredictorInterface):
         Machine Learning, 87(3):381--407, June 2012.     
         """
         
-        if len(indices) == 0:
-            raise Exception('Hold-out predictions can not be computed for an empty hold-out set.')
+        indices = array_tools.as_index_list(indices, self.Y.shape[0])
         
-        if len(indices) != len(set(indices)):
-            raise Exception('Hold-out can have each index only once.')
+        if len(indices) != len(np.unique(indices)):
+            raise IndexError('Hold-out can have each index only once.')
         
         Y = self.Y
         m = self.size
@@ -520,6 +523,7 @@ class GlobalRankRLS(PredictorInterface):
         
         #results.append(F)
         #return results
+        F = np.squeeze(np.array(F))
         return F
         
     def leave_one_out(self):

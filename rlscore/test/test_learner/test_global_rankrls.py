@@ -4,6 +4,7 @@ import numpy as np
 import numpy.linalg as la
 
 from rlscore.learner import GlobalRankRLS
+from rlscore.kernel import GaussianKernel, PolynomialKernel
 
 class Test(unittest.TestCase):
     
@@ -56,6 +57,116 @@ class Test(unittest.TestCase):
                 W = np.dot(X.T, dual_rls.predictor.W)
                 W2 = np.linalg.solve(np.dot(X.T, np.dot(L, X)) + 0.01 * np.eye(d), np.dot(X.T, np.dot(L, Y)))
                 assert_allclose(W, W2)
+                
+    def test_kernel(self):
+        #tests that learning with kernels works
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                m = X.shape[0]
+                L = m * np.eye(m) -  np.ones((m,m))
+                #Basic case
+                dual_rls = GlobalRankRLS(X, Y, kernel= "GaussianKernel", regparam=5.0, gamma=0.01)
+                kernel = GaussianKernel(X, gamma = 0.01)
+                K = kernel.getKM(X)
+                m = K.shape[0]
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(L, K) +5.0*np.eye(m), np.dot(L, Y) )
+                assert_allclose(A, A2)
+                #Fast regularization
+                dual_rls.solve(1000)
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(L, K) + 1000 * np.eye(m), np.dot(L, Y))
+                assert_allclose(A, A2)
+                #Precomputed kernel
+                dual_rls = GlobalRankRLS(K, Y, kernel="PrecomputedKernel", regparam = 1000)
+                assert_allclose(dual_rls.predictor.W, A2)
+                #Reduced set approximation
+                kernel = PolynomialKernel(X[self.bvectors], gamma=0.5, coef0 = 1.2, degree = 2)              
+                Kr = kernel.getKM(X)
+                Krr = kernel.getKM(X[self.bvectors])
+                dual_rls = GlobalRankRLS(X, Y, kernel="PolynomialKernel", basis_vectors = X[self.bvectors], regparam = 200, gamma=0.5, coef0=1.2, degree = 2)
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 200 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+                assert_allclose(A, A2)
+                dual_rls = GlobalRankRLS(Kr, Y, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=200)
+                A = dual_rls.predictor.W
+                assert_allclose(A, A2)
+                
+    def test_holdout(self):
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                m = X.shape[0]
+                hoindices = [3, 5, 8, 10, 17, 21]
+                hocompl = list(set(range(m)) - set(hoindices))
+                #Holdout with linear kernel
+                rls1 = GlobalRankRLS(X, Y)
+                rls2 = GlobalRankRLS(X[hocompl], Y[hocompl])
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                #Holdout with bias
+                rls1 = GlobalRankRLS(X, Y, bias = 3.0)
+                rls2 = GlobalRankRLS(X[hocompl], Y[hocompl], bias = 3.0)
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                #Fast regularization
+                for i in range(-5, 5):
+                    rls1.solve(2**i)
+                    rls2.solve(2**i)
+                    P1 = rls1.holdout(hoindices)
+                    P2 = rls2.predict(X[hoindices])
+                    assert_allclose(P1, P2)
+                #Kernel holdout
+                rls1 = GlobalRankRLS(X, Y, kernel = "GaussianKernel", gamma = 0.01)
+                rls2 = GlobalRankRLS(X[hocompl], Y[hocompl], kernel = "GaussianKernel", gamma = 0.01)
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                for i in range(-15, 15):
+                    rls1.solve(2**i)
+                    rls2.solve(2**i)
+                    P1 = rls1.holdout(hoindices)
+                    P2 = rls2.predict(X[hoindices])
+                    assert_allclose(P1, P2)
+                #Incorrect indices
+                I = [0, 3, 100]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                I = [-1, 0, 2]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                I = [1,1,2]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                
+    def test_leave_pair_out(self):
+        #compares holdout and leave-pair-out
+        start = [0, 2, 3, 5]
+        end = [1, 3, 6, 8]
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                #LPO with linear kernel
+                rls1 = GlobalRankRLS(X, Y, regparam = 7.0, bias=3.0)
+                lpo_start, lpo_end = rls1.leave_pair_out(start, end)
+                ho_start, ho_end = [], []
+                for i in range(len(start)):
+                    P = rls1.holdout([start[i], end[i]])
+                    ho_start.append(P[0])
+                    ho_end.append(P[1])
+                ho_start = np.array(ho_start)
+                ho_end = np.array(ho_end)
+                assert_allclose(ho_start, lpo_start)
+                assert_allclose(ho_end, lpo_end)
+                #LPO Gaussian kernel
+                rls1 = GlobalRankRLS(X, Y, regparam = 11.0, kenerl="PolynomialKernel", coef0=1, degree=3)
+                lpo_start, lpo_end = rls1.leave_pair_out(start, end)
+                ho_start, ho_end = [], []
+                for i in range(len(start)):
+                    P = rls1.holdout([start[i], end[i]])
+                    ho_start.append(P[0])
+                    ho_end.append(P[1])
+                ho_start = np.array(ho_start)
+                ho_end = np.array(ho_end)
+                assert_allclose(ho_start, lpo_start)
+                assert_allclose(ho_end, lpo_end)
 
     
     def testAllPairsRankRLS(self):

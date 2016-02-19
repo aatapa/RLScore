@@ -93,6 +93,16 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def solve(self, regparam1, regparam2):
+        """Re-trains TwoStepRLS for the given regparams
+               
+        Parameters
+        ----------
+        regparam1: float
+            regularization parameter 1, regparam1 > 0
+        
+        regparam2: float
+            regularization parameter 2, regparam2 > 0
+        """
         self.regparam1 = regparam1
         self.regparam2 = regparam2
         if self.kernelmode:
@@ -165,6 +175,16 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def in_sample_loo(self):
+        """
+        Computes the in-sample leave-one-out cross-validation predictions. By in-sample we denote the
+        setting, where we leave out one entry of Y at a time.
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
@@ -192,6 +212,16 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def leave_column_out(self):
+        """
+        Computes the leave-column-out cross-validation predictions. Here, all instances
+        related to a single object from domain 2 are left out together at a time.
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         
         VTY = self.V.T * self.Y
         
@@ -215,6 +245,16 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def leave_row_out(self):
+        """
+        Computes the leave-row-out cross-validation predictions. Here, all instances
+        related to a single object from domain 1 are left out together at a time.
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         
         YU = self.Y * self.U
         
@@ -238,6 +278,17 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def out_of_sample_loo(self):
+        """
+        Computes the out-of-sample cross-validation predictions. By out-of-sample we denote the
+        setting, where when leaving out an entry (a,b) in Y, we also remove from training set
+        all instances of type (a,x) and (x,b).
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         
         bevals_col = np.multiply(self.evals2, self.newevals2).T
         
@@ -273,6 +324,17 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def out_of_sample_loo_symmetric(self):
+        """
+        Computes the out-of-sample cross-validation predictions. By out-of-sample we denote the
+        setting, where when leaving out an entry (a,b) in Y, we also remove from training set
+        all instances of type (a,x) and (x,b). For symmetric data, where X1 = X2 (or K1 = K2).
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         
         #bevals_col = np.multiply(self.evals2, self.newevals2).T
         #multiplyright = self.U.T * self.Y.T

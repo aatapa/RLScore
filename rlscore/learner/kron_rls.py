@@ -101,6 +101,13 @@ class KronRLS(PairwisePredictorInterface):
     
     
     def solve(self, regparam):
+        """Re-trains KronRLS for the given regparam
+               
+        Parameters
+        ----------
+        regparam: float, optional
+            regularization parameter, regparam > 0
+        """
         self.regparam = regparam
         if self.kernelmode:
             K1, K2 = self.K1, self.K2
@@ -160,6 +167,20 @@ class KronRLS(PairwisePredictorInterface):
     
     
     def solve_linear_conditional_ranking(self, regparam):
+        """Trains conditional ranking KronRLS, that ranks objects from
+        domain 2 against objects from domain 1.
+               
+        Parameters
+        ----------
+        regparam: float, optional
+            regularization parameter, regparam > 0 (default=1.0)
+            
+        Notes
+        -----
+        Minimizes RankRLS type of loss. Currently only linear kernel
+        supported. Including the code here is a hack, this should
+        probably be implemented as an independent learner.
+        """
         self.regparam = regparam
         X1, X2 = self.X1, self.X2
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
@@ -191,6 +212,16 @@ class KronRLS(PairwisePredictorInterface):
     
     
     def in_sample_loo(self):
+        """
+        Computes the in-sample leave-one-out cross-validation predictions. By in-sample we denote the
+        setting, where we leave out one entry of Y at a time.
+        
+        Returns
+        -------
+        F: array, shape = [n_samples1*n_samples2]
+        Training set labels. Label for (X1[i], X2[j]) maps to
+        F[i + j*n_samples1] (column order).
+        """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
