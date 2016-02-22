@@ -1,8 +1,11 @@
 import numpy as np
 import numpy.linalg as la
-
+from numpy.testing import assert_allclose
 import unittest
+
 from rlscore.learner import QueryRankRLS
+from rlscore.kernel import GaussianKernel, PolynomialKernel
+
 
 def mapQids(qids):
     """Maps qids to running numbering starting from zero, and partitions
@@ -23,7 +26,124 @@ def mapQids(qids):
         indslist.append(f)
     return indslist
 
+def generate_qids(m):
+    qids = []
+    qsize = m/10
+    for i in range(m / qsize):
+        qids = qids + [i]*qsize
+    qids = qids + [i+1]* (m%qsize)
+    objcount = np.max(qids)+1
+    P = np.zeros((m, objcount))
+    for i in range(m):
+        qid = qids[i]
+        P[i, qid] = 1.
+    labelcounts = np.sum(P, axis=0)
+    P = np.divide(P, np.sqrt(labelcounts))
+    D = np.ones((1, m))
+    L = np.multiply(np.eye(m), D) - np.dot(P, P.T)
+    return qids, L
+
 class Test(unittest.TestCase):
+    
+    def setUp(self):
+        np.random.seed(100)
+        m= 30
+        self.Xtrain1 = np.random.rand(m, 20)
+        self.Xtrain2 = np.random.rand(m, 40)
+        self.Ytrain1 = np.random.randn(m)
+        self.Ytrain2 = np.random.randn(m, 5)
+        self.bvectors = [0,3,5,22]
+        
+    @unittest.skip("does not work")          
+    def test_linear_subset(self):
+        X = self.Xtrain1
+        Y = self.Ytrain1
+        m = X.shape[0]
+        qids, L = generate_qids(m)
+        #reduced set approximation
+        primal_rls = QueryRankRLS(X, Y, qids, basis_vectors = X[self.bvectors], regparam=5.0)
+        W = primal_rls.predictor.W
+        K = np.dot(X, X.T)
+        Kr = K[:, self.bvectors]
+        Krr = K[np.ix_(self.bvectors, self.bvectors)]
+        A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 5.0 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+        W_reduced = np.dot(X[self.bvectors].T, A)
+        assert_allclose(W, W_reduced)
+        
+    def test_linear(self):
+        #Test that learning with linear kernel works correctly both
+        #with low and high-dimensional data
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                #Basic case
+                m = X.shape[0]
+                qids, L = generate_qids(m)
+                primal_rls = QueryRankRLS(X, Y, qids, regparam=1.0, bias=0.)
+                W = primal_rls.predictor.W
+                d = X.shape[1]
+                W2 = np.linalg.solve(np.dot(X.T, np.dot(L, X)) + np.eye(d), np.dot(X.T, np.dot(L, Y)))
+                assert_allclose(W, W2)
+                #For RankRLS, bias should have no effect
+                primal_rls = QueryRankRLS(X, Y, qids, regparam=1.0, bias=5.)
+                W2 = primal_rls.predictor.W
+                assert_allclose(W, W2)
+                #Fast regularization
+                primal_rls.solve(10)
+                W = primal_rls.predictor.W
+                W2 = np.linalg.solve(np.dot(X.T, np.dot(L, X)) + 10 * np.eye(d), np.dot(X.T, np.dot(L, Y)))
+                assert_allclose(W, W2)
+                #reduced set approximation
+                primal_rls = QueryRankRLS(X, Y, qids, basis_vectors = X[self.bvectors], regparam=5.0)
+                W = primal_rls.predictor.W
+                K = np.dot(X, X.T)
+                Kr = K[:, self.bvectors]
+                Krr = K[np.ix_(self.bvectors, self.bvectors)]
+                A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 5.0 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+                W_reduced = np.dot(X[self.bvectors].T, A)
+                #assert_allclose(W, W_reduced)
+                #Pre-computed linear kernel, reduced set approximation
+                dual_rls = QueryRankRLS(Kr, Y, qids, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=5.0)
+                W = np.dot(X[self.bvectors].T, dual_rls.predictor.W)
+                assert_allclose(W, W_reduced)
+#                 #Precomputed kernel matrix
+#                 dual_rls = GlobalRankRLS(K, Y, kernel = "PrecomputedKernel", regparam=0.01)
+#                 W = np.dot(X.T, dual_rls.predictor.W)
+#                 W2 = np.linalg.solve(np.dot(X.T, np.dot(L, X)) + 0.01 * np.eye(d), np.dot(X.T, np.dot(L, Y)))
+#                 assert_allclose(W, W2)
+
+    def test_kernel(self):
+        #tests that learning with kernels works
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                m = X.shape[0]
+                qids, L = generate_qids(m)
+                #Basic case
+                dual_rls = QueryRankRLS(X, Y, qids, kernel= "GaussianKernel", regparam=5.0, gamma=0.01)
+                kernel = GaussianKernel(X, gamma = 0.01)
+                K = kernel.getKM(X)
+                m = K.shape[0]
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(L, K) +5.0*np.eye(m), np.dot(L, Y) )
+                assert_allclose(A, A2)
+                #Fast regularization
+                dual_rls.solve(1000)
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(L, K) + 1000 * np.eye(m), np.dot(L, Y))
+                assert_allclose(A, A2)
+                #Precomputed kernel
+                dual_rls = QueryRankRLS(K, Y, qids, kernel="PrecomputedKernel", regparam = 1000)
+                assert_allclose(dual_rls.predictor.W, A2)
+                #Reduced set approximation
+                kernel = PolynomialKernel(X[self.bvectors], gamma=0.5, coef0 = 1.2, degree = 2)              
+                Kr = kernel.getKM(X)
+                Krr = kernel.getKM(X[self.bvectors])
+                dual_rls = QueryRankRLS(X, Y, qids, kernel="PolynomialKernel", basis_vectors = X[self.bvectors], regparam = 200, gamma=0.5, coef0=1.2, degree = 2)
+                A = dual_rls.predictor.A
+                A2 = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 200 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+                assert_allclose(A, A2)
+                dual_rls = QueryRankRLS(Kr, Y, qids, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=200)
+                A = dual_rls.predictor.W
+                assert_allclose(A, A2)
     
     def testLabelRankRLS(self):
         

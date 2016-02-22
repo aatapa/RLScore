@@ -23,7 +23,7 @@ class QueryRankRLS(PredictorInterface):
         Data matrix
     Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    qids: list of n_queries index lists
+    qids: list of query ids, shape = [n_samples]
         Training set qids
     regparam: float, optional
         regularization parameter, regparam > 0 (default=1.0)
@@ -226,7 +226,7 @@ class LeaveQueryOutRankRLS(PredictorInterface):
         Data matrix
     Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    qids: list of n_queries index lists
+    qids: list of query ids, shape = [n_samples]
         Training set qids
     regparam: float, optional
         regularization parameter, regparam > 0 (default=1.0)
