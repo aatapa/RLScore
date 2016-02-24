@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         self.Ytrain2 = np.random.randn(m, 5)
         self.bvectors = [0,3,5,22]
         
-    @unittest.skip("does not work")          
+    #@unittest.skip("does not work")          
     def test_linear_subset(self):
         X = self.Xtrain1
         Y = self.Ytrain1

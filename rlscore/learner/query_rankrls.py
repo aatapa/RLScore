@@ -81,6 +81,7 @@ class QueryRankRLS(PredictorInterface):
 
 
     def __init__(self, X, Y, qids, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
+        kwargs["bias"] = 0.
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
         if basis_vectors != None:

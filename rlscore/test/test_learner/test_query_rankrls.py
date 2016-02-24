@@ -54,19 +54,20 @@ class Test(unittest.TestCase):
         self.Ytrain2 = np.random.randn(m, 5)
         self.bvectors = [0,3,5,22]
         
-    @unittest.skip("does not work")          
+    #@unittest.skip("does not work")          
     def test_linear_subset(self):
         X = self.Xtrain1
         Y = self.Ytrain1
         m = X.shape[0]
         qids, L = generate_qids(m)
         #reduced set approximation
-        primal_rls = QueryRankRLS(X, Y, qids, basis_vectors = X[self.bvectors], regparam=5.0)
+        primal_rls = QueryRankRLS(X, Y, qids, basis_vectors = X[self.bvectors], regparam=0.001)
         W = primal_rls.predictor.W
         K = np.dot(X, X.T)
         Kr = K[:, self.bvectors]
         Krr = K[np.ix_(self.bvectors, self.bvectors)]
-        A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 5.0 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+        A = np.linalg.solve(np.dot(Kr.T, np.dot(L, Kr))+ 0.001 * Krr, np.dot(Kr.T, np.dot(L, Y)))
+        #W_reduced = np.dot(X[self.bvectors].T, A)
         W_reduced = np.dot(X[self.bvectors].T, A)
         assert_allclose(W, W_reduced)
         

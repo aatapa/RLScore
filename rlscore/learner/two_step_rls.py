@@ -208,7 +208,7 @@ class TwoStepRLS(PairwisePredictorInterface):
             #    #loopred[i, j] = P[i, j]
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
-        return np.asarray(loopred)
+        return np.asarray(loopred).ravel(order='F')
     
     
     def leave_column_out(self):

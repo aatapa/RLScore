@@ -62,7 +62,7 @@ for the Davis et al. data the
 `drug-target interaction affinities (Y) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-target_interaction_affinities_Kd__Davis_et_al.2011.txt>`_,
 `drug-drug 2D similarities (X1) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-drug_similarities_2D.txt>`_,
 and
-`WS normalized target-target similarities (X2) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/target-target_similarities_WS_normalized.txt>`_.
+`WS target-target similarities (X2) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/target-target_similarities_WS.txt>`_.
 In the following we will use similarity scores directly as features for the linear kernel, since the similarity matrices
 themselves are not valid positive semi-definite kernel matrices.
 
@@ -150,37 +150,50 @@ module rlscore.kernel.
 Results are same as before.
 
 
-Tutorial 2: Setting 4, TwoStepRLS, complete data
+Tutorial 2: Settings 1-4, TwoStepRLS, complete data
 ************************************************
 
 For complete data, another method that can be used in the TwoStepRLS algorithm [3]_.
 The algorithm has two different regularization parameters, one that can be used in our
-experiments to regularize the drugs, and one the targets. Here, we plot the test set
-results for some of the parameter combinations.
+experiments to regularize the drugs, and one the targets. The following experiments
+are similar to those of Kronecker RLS, but now we also make use of the efficient
+cross-validation algorithms for TwoStepRLS.
 
-Basic usage
------------
+Setting 1
+---------
+
 
 .. literalinclude:: ../tutorial/two_step1.py
 
 .. literalinclude:: ../tutorial/two_step1.out
 
-The results are similar to those of KronRLS. Again, we could use also precomputed kernel
-matrices similarly to the KronRLS example.
 
-Out-of-sample leave-one-out cross-validation
---------------------------------------------
 
-TwoStepRLS implements the out-of-sample leave-one-out cross-validation algorithm, that
-computes loo for the setting 4. When leaving (d,t) pair out, all the other pairs containing
-either d or t are also left out of training set (but not included in test set).
+Setting 2
+---------
+
 
 .. literalinclude:: ../tutorial/two_step2.py
 
 .. literalinclude:: ../tutorial/two_step2.out
 
-The leave-one-out results are quite a bit more pessimistic than the test set results.
-This may be due to variance in selecting the random training test split.
+
+Setting 3
+---------
+
+.. literalinclude:: ../tutorial/two_step3.py
+
+.. literalinclude:: ../tutorial/two_step3.out
+
+
+Setting 4
+---------
+
+
+.. literalinclude:: ../tutorial/two_step4.py
+
+.. literalinclude:: ../tutorial/two_step4.out
+
 
 Tutorial 3: Incomplete data
 ***************************

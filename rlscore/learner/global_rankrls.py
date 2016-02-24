@@ -95,6 +95,7 @@ class GlobalRankRLS(PredictorInterface):
         if basis_vectors != None:
             if X.shape[1] != basis_vectors.shape[1]:
                 raise Exception("Number of columns for X and basis_vectors must be the same")
+        kwargs["bias"] = 0.
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
         if basis_vectors != None:

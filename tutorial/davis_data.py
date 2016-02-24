@@ -4,7 +4,7 @@ import random
 def load_davis():
     Y = np.loadtxt("drug-target_interaction_affinities_Kd__Davis_et_al.2011.txt")
     XD = np.loadtxt("drug-drug_similarities_2D.txt")
-    XT = np.loadtxt("target-target_similarities_WS_normalized.txt")    
+    XT = np.loadtxt("target-target_similarities_WS.txt")    
     return XD, XT, Y
 
 def setting2_split():
