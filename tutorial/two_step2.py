@@ -13,7 +13,7 @@ def main():
             P = learner.predict(X1_test, X2_test)
             perf = cindex(Y_test, P)
             print("regparam 2**%d 2**%d, test set cindex %f" %(log_regparam1, log_regparam2, perf))
-            P = learner.leave_row_out()
+            P = learner.leave_x1_out()
             perf = cindex(Y_train, P)
             print("regparam 2**%d 2**%d, leave-row-out cindex %f" %(log_regparam1, log_regparam2, perf))
 

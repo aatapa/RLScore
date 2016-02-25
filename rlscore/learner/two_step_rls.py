@@ -211,7 +211,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         return np.asarray(loopred).ravel(order='F')
     
     
-    def leave_column_out(self):
+    def leave_x2_out(self):
         """
         Computes the leave-column-out cross-validation predictions. Here, all instances
         related to a single object from domain 2 are left out together at a time.
@@ -244,7 +244,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         return lco
     
     
-    def leave_row_out(self):
+    def leave_x1_out(self):
         """
         Computes the leave-row-out cross-validation predictions. Here, all instances
         related to a single object from domain 1 are left out together at a time.
