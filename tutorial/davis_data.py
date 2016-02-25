@@ -8,7 +8,7 @@ def load_davis():
     return XD, XT, Y
 
 def setting2_split():
-    random.seed(10)
+    random.seed(1)
     XD, XT, Y = load_davis()
     drug_ind = range(Y.shape[0])
     random.shuffle(drug_ind)
@@ -26,7 +26,7 @@ def setting2_split():
     return XD_train, XT_train, Y_train, XD_test, XT_test, Y_test   
 
 def setting3_split():
-    random.seed(10)
+    random.seed(1)
     XD, XT, Y = load_davis()
     drug_ind = range(Y.shape[0])
     target_ind = range(Y.shape[1])
@@ -45,7 +45,7 @@ def setting3_split():
     return XD_train, XT_train, Y_train, XD_test, XT_test, Y_test  
 
 def setting4_split():
-    random.seed(10)
+    random.seed(1)
     XD, XT, Y = load_davis()
     drug_ind = range(Y.shape[0])
     target_ind = range(Y.shape[1])

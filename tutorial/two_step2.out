@@ -1,40 +1,40 @@
-regparam 2**-8 2**20, test set cindex 0.713966
-regparam 2**-8 2**20, leave-row-out cindex 0.621919
-regparam 2**-8 2**21, test set cindex 0.715291
-regparam 2**-8 2**21, leave-row-out cindex 0.621595
-regparam 2**-8 2**22, test set cindex 0.716822
-regparam 2**-8 2**22, leave-row-out cindex 0.620871
-regparam 2**-8 2**23, test set cindex 0.718100
-regparam 2**-8 2**23, leave-row-out cindex 0.619588
-regparam 2**-8 2**24, test set cindex 0.718721
-regparam 2**-8 2**24, leave-row-out cindex 0.617240
-regparam 2**-7 2**20, test set cindex 0.722759
-regparam 2**-7 2**20, leave-row-out cindex 0.630003
-regparam 2**-7 2**21, test set cindex 0.724113
-regparam 2**-7 2**21, leave-row-out cindex 0.629708
-regparam 2**-7 2**22, test set cindex 0.725498
-regparam 2**-7 2**22, leave-row-out cindex 0.629001
-regparam 2**-7 2**23, test set cindex 0.726645
-regparam 2**-7 2**23, leave-row-out cindex 0.627643
-regparam 2**-7 2**24, test set cindex 0.727177
-regparam 2**-7 2**24, leave-row-out cindex 0.625181
-regparam 2**-6 2**20, test set cindex 0.729604
-regparam 2**-6 2**20, leave-row-out cindex 0.638758
-regparam 2**-6 2**21, test set cindex 0.730755
-regparam 2**-6 2**21, leave-row-out cindex 0.638436
-regparam 2**-6 2**22, test set cindex 0.731938
-regparam 2**-6 2**22, leave-row-out cindex 0.637748
-regparam 2**-6 2**23, test set cindex 0.732878
-regparam 2**-6 2**23, leave-row-out cindex 0.636294
-regparam 2**-6 2**24, test set cindex 0.733010
-regparam 2**-6 2**24, leave-row-out cindex 0.633528
-regparam 2**-5 2**20, test set cindex 0.734383
-regparam 2**-5 2**20, leave-row-out cindex 0.648798
-regparam 2**-5 2**21, test set cindex 0.735230
-regparam 2**-5 2**21, leave-row-out cindex 0.648446
-regparam 2**-5 2**22, test set cindex 0.736052
-regparam 2**-5 2**22, leave-row-out cindex 0.647606
-regparam 2**-5 2**23, test set cindex 0.736555
-regparam 2**-5 2**23, leave-row-out cindex 0.645913
-regparam 2**-5 2**24, test set cindex 0.736118
-regparam 2**-5 2**24, leave-row-out cindex 0.642810
+regparam 2**-8 2**20, test set cindex 0.675293
+regparam 2**-8 2**20, leave-row-out cindex 0.662892
+regparam 2**-8 2**21, test set cindex 0.676522
+regparam 2**-8 2**21, leave-row-out cindex 0.662971
+regparam 2**-8 2**22, test set cindex 0.677853
+regparam 2**-8 2**22, leave-row-out cindex 0.662580
+regparam 2**-8 2**23, test set cindex 0.678995
+regparam 2**-8 2**23, leave-row-out cindex 0.661425
+regparam 2**-8 2**24, test set cindex 0.679429
+regparam 2**-8 2**24, leave-row-out cindex 0.659139
+regparam 2**-7 2**20, test set cindex 0.680294
+regparam 2**-7 2**20, leave-row-out cindex 0.673871
+regparam 2**-7 2**21, test set cindex 0.681405
+regparam 2**-7 2**21, leave-row-out cindex 0.673969
+regparam 2**-7 2**22, test set cindex 0.682587
+regparam 2**-7 2**22, leave-row-out cindex 0.673506
+regparam 2**-7 2**23, test set cindex 0.683576
+regparam 2**-7 2**23, leave-row-out cindex 0.672240
+regparam 2**-7 2**24, test set cindex 0.683639
+regparam 2**-7 2**24, leave-row-out cindex 0.669781
+regparam 2**-6 2**20, test set cindex 0.684126
+regparam 2**-6 2**20, leave-row-out cindex 0.685187
+regparam 2**-6 2**21, test set cindex 0.685076
+regparam 2**-6 2**21, leave-row-out cindex 0.685189
+regparam 2**-6 2**22, test set cindex 0.686066
+regparam 2**-6 2**22, leave-row-out cindex 0.684677
+regparam 2**-6 2**23, test set cindex 0.686743
+regparam 2**-6 2**23, leave-row-out cindex 0.683327
+regparam 2**-6 2**24, test set cindex 0.686474
+regparam 2**-6 2**24, leave-row-out cindex 0.680629
+regparam 2**-5 2**20, test set cindex 0.686567
+regparam 2**-5 2**20, leave-row-out cindex 0.695839
+regparam 2**-5 2**21, test set cindex 0.687311
+regparam 2**-5 2**21, leave-row-out cindex 0.695820
+regparam 2**-5 2**22, test set cindex 0.687908
+regparam 2**-5 2**22, leave-row-out cindex 0.695249
+regparam 2**-5 2**23, test set cindex 0.688098
+regparam 2**-5 2**23, leave-row-out cindex 0.693733
+regparam 2**-5 2**24, test set cindex 0.687321
+regparam 2**-5 2**24, leave-row-out cindex 0.690681
