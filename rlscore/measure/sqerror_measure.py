@@ -2,6 +2,7 @@ from numpy import multiply, mean
 import numpy as np
 
 from rlscore.utilities import array_tools
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def sqerror_singletask(correct, predictions):
     correct = np.mat(correct)
@@ -40,8 +41,10 @@ def sqerror(Y, P):
     -------
     error: float
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     return np.mean(sqerror_multitask(Y,P))
 sqerror.iserror = True
 

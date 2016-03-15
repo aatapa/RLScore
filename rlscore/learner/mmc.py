@@ -92,7 +92,6 @@ class MMC(PredictorInterface):
             self.oneclass = False
         self.callbackfun = callback
         if Y != None:
-            #Y_orig = array_tools.as_labelmatrix(Y)
             Y_orig = array_tools.as_array(Y)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:

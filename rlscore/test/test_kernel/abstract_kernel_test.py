@@ -3,7 +3,6 @@ import unittest
 
 from scipy import sparse as sp
 import numpy as np
-import random
 
 
 class AbstractKernelTest(unittest.TestCase):

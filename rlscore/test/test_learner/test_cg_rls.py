@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
             rpool['X'] = Xtrain
             rpool['Y'] = Y
             rpool['regparam'] = regparam
-            rpool["bias"] = 1.0
+            rpool["bias"] = 2.0
             rls = RLS(**rpool)
             rls.solve(regparam)
             model = rls.predictor
@@ -33,7 +33,5 @@ class Test(unittest.TestCase):
             W2 = model.W
             b2 = model.b
             for i in range(W.shape[0]):
-                #for j in range(W.shape[1]):
-                #    self.assertAlmostEqual(W[i,j],W2[i,j],places=5)
                     self.assertAlmostEqual(W[i], W2[i], places=5)
             self.assertAlmostEqual(b, b2, places=5)

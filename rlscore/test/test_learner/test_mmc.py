@@ -1,14 +1,12 @@
 
 import pyximport; pyximport.install()
 
-from StringIO import StringIO
 import random
 random.seed(100)
 import unittest
 
 import numpy as np
 
-from rlscore import reader
 from rlscore.learner.steepest_descent_mmc import SteepestDescentMMC as MMC
 #from rlscore.learner.steepest_descent_mmc_alt import SteepestDescentMMC as MMC
 #from rlscore.learner.mmc import MMC as MMC

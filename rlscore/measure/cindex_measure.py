@@ -4,8 +4,6 @@ from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.utilities import array_tools
 
 def cindex_singletask(Y, P):
-    Y = np.array(Y).T[0]
-    P = np.array(P).T[0]
     correct = Y.astype(np.float64)
     predictions = P.astype(np.float64)
     assert len(correct) == len(predictions)
@@ -86,8 +84,10 @@ def cindex(Y, P):
     concordance index: float
         number between 0 and 1, around 0.5 means random performance
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     perfs = cindex_multitask(Y,P)
     perfs = np.array(perfs)
     perfs = perfs[np.invert(np.isnan(perfs))]

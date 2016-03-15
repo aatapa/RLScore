@@ -81,8 +81,8 @@ class CGKronRLS(PairwisePredictorInterface):
         Y = kwargs["Y"]
         self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
         self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
-        Y = array_tools.as_labelmatrix(Y)
-        self.Y = Y
+        Y = array_tools.as_2d_array(Y)
+        self.Y = np.mat(Y)
         self.trained = False
         if kwargs.has_key("regparam"):
             self.regparam = kwargs["regparam"]

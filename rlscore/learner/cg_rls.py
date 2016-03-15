@@ -47,7 +47,7 @@ class CGRLS(PredictorInterface):
     """
 
     def __init__(self, X, Y, regparam = 1.0, bias = 1.0, callbackfun = None, **kwargs):
-        self.Y = array_tools.as_labelmatrix(Y)
+        self.Y = array_tools.as_2d_array(Y)
         self.X = csc_matrix(X.T)
         self.bias = bias
         self.regparam = regparam
@@ -102,7 +102,7 @@ class EarlyStopCB(object):
     
     def __init__(self, X_valid, Y_valid, measure=sqerror, maxiter=10):
         self.X_valid = array_tools.as_matrix(X_valid)
-        self.Y_valid = array_tools.as_labelmatrix(Y_valid)
+        self.Y_valid = array_tools.as_2d_array(Y_valid)
         self.measure = measure
         self.bestperf = None
         self.bestA = None

@@ -1,4 +1,5 @@
 import numpy as np
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def ova_accuracy(Y, P):
     """One-vs-all classification accuracy for multi-class problems.
@@ -24,7 +25,8 @@ def ova_accuracy(Y, P):
     """
     Y = np.array(Y)
     P = np.array(P)
-    assert Y.shape == P.shape
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     correct = 0
     for i in range(Y.shape[0]):
         largest_pred = None

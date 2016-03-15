@@ -72,7 +72,7 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
-        Y = array_tools.as_labelmatrix(Y)
+        Y = np.mat(array_tools.as_2d_array(Y))
         if kwargs.has_key('K1'):
             K1 = np.mat(kwargs['K1'])
             K2 = np.mat(kwargs['K2'])

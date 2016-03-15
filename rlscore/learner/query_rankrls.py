@@ -87,12 +87,11 @@ class QueryRankRLS(PredictorInterface):
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(Y)
+        self.Y = np.mat(array_tools.as_2d_array(Y))
         self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
-        self.Y = array_tools.as_labelmatrix(self.Y)
         self.size = self.Y.shape[0]
         self.qids = map_qids(qids)
         self.qidlist = qids_to_splits(self.qids)
@@ -182,16 +181,15 @@ class QueryRankRLS(PredictorInterface):
         F : array, shape = [n_hsamples, n_labels]
             holdout query predictions
         """
-        
+        indices = array_tools.as_index_list(indices, self.Y.shape[0])
         if len(indices) == 0:
-            raise Exception('Hold-out predictions can not be computed for an empty hold-out set.')
-        
-        if len(indices) != len(set(indices)):
-            raise Exception('Hold-out can have each index only once.')
-        #hoqid = self.qidlist[indices[0]]
-        #for ind in indices:
-        #    if not hoqid == self.qidlist[ind]:
-        #        raise Exception('All examples in the hold-out set must have the same qid.')
+            raise IndexError('Hold-out predictions can not be computed for an empty hold-out set.')   
+        if len(indices) != len(np.unique(indices)):
+            raise IndexError('Hold-out can have each index only once.')        
+        hoqid = self.qids[indices[0]]
+        for ind in indices:
+            if not hoqid == self.qids[ind]:
+                raise IndexError('All examples in the hold-out set must have the same qid.')
         
         indlen = len(indices)
         Qleft = self.multipleleft[indices]
@@ -209,11 +207,11 @@ class QueryRankRLS(PredictorInterface):
         if sqrtQho.shape[0] <= sqrtQho.shape[1]:
             RQRTLho = sqrtQho * sqrtRQRTLho.T
             I = np.mat(np.identity(indlen))
-            return np.array((I - RQRTLho).I * RQY)
+            return np.squeeze(np.array((I - RQRTLho).I * RQY))
         else:
             RQRTLho = sqrtRQRTLho.T * sqrtQho
             I = np.mat(np.identity(sqrtQho.shape[1]))
-            return np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY)))
+            return np.squeeze(np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY))))
         #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
 class LeaveQueryOutRankRLS(PredictorInterface):

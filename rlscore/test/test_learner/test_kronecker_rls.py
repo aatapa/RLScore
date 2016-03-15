@@ -146,7 +146,6 @@ class Test(unittest.TestCase):
         trainlabelcount = train_rows * train_columns
         
         K_Kron_train_x = np.kron(K_train2, K_train1)
-        K_test_x = np.kron(K_test2, K_test1)
         
         
         #Train linear Conditional Ranking Kronecker RLS

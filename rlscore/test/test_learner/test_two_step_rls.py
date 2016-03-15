@@ -92,19 +92,8 @@ class Test(unittest.TestCase):
         Y_train = Y_train.ravel(order = 'F')
         Y_test = Y_test.ravel(order = 'F')
         train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
-        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
         #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, train_rows, train_columns
         trainlabelcount = train_rows * train_columns
-        
-#         #Train linear Kronecker RLS with data-matrices
-#         params = {}
-#         params["regparam"] = regparam
-#         params["X1"] = X_train1
-#         params["X2"] = X_train2
-#         params["Y"] = Y_train
-#         linear_kron_learner = KronRLS(**params)
-#         linear_kron_testpred = linear_kron_learner.predict(X_test1, X_test2)
-        
         
         #Train linear two-step RLS with data-matrices
         params = {}

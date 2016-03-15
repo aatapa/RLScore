@@ -145,6 +145,55 @@ class Test(unittest.TestCase):
                 dual_rls = QueryRankRLS(Kr, Y, qids, kernel="PrecomputedKernel", basis_vectors = Krr, regparam=200)
                 A = dual_rls.predictor.W
                 assert_allclose(A, A2)
+                
+    def test_holdout(self):
+        for X in [self.Xtrain1, self.Xtrain2]:
+            for Y in [self.Ytrain1, self.Ytrain2]:
+                m = X.shape[0]
+                qids, L = generate_qids(m)
+                qids = np.array(qids)
+                hoindices = np.where(qids == 1)[0]
+                hocompl = list(set(range(m)) - set(hoindices))
+                #Holdout with linear kernel
+                rls1 = QueryRankRLS(X, Y, qids)
+                rls2 = QueryRankRLS(X[hocompl], Y[hocompl], qids[hocompl])
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                #Holdout with bias
+                rls1 = QueryRankRLS(X, Y, qids, bias = 3.0)
+                rls2 = QueryRankRLS(X[hocompl], Y[hocompl], qids[hocompl], bias = 3.0)
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                #Fast regularization
+                for i in range(-5, 5):
+                    rls1.solve(2**i)
+                    rls2.solve(2**i)
+                    P1 = rls1.holdout(hoindices)
+                    P2 = rls2.predict(X[hoindices])
+                    assert_allclose(P1, P2)
+                #Kernel holdout
+                rls1 = QueryRankRLS(X, Y, qids, kernel = "GaussianKernel", gamma = 0.01)
+                rls2 = QueryRankRLS(X[hocompl], Y[hocompl], qids[hocompl], kernel = "GaussianKernel", gamma = 0.01)
+                P1 = rls1.holdout(hoindices)
+                P2 = rls2.predict(X[hoindices])
+                assert_allclose(P1, P2)
+                for i in range(-15, 15):
+                    rls1.solve(2**i)
+                    rls2.solve(2**i)
+                    P1 = rls1.holdout(hoindices)
+                    P2 = rls2.predict(X[hoindices])
+                    assert_allclose(P1, P2)
+                #Incorrect indices
+                I = [0, 3, 100]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                I = [-1, 0, 2]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                I = [1,1,2]
+                self.assertRaises(IndexError, rls1.holdout, I)
+                I = [0,4,8]
+                self.assertRaises(IndexError, rls1.holdout, I)
     
     def testLabelRankRLS(self):
         

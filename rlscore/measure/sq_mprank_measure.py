@@ -1,6 +1,7 @@
 import numpy as np
 
 from rlscore.utilities import array_tools
+from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def sqmprank_singletask(Y, P):
     correct = Y
@@ -49,7 +50,9 @@ def sqmprank(Y, P):
     -------
     error: float
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     return np.mean(sqmprank_multitask(Y, P))
 sqmprank.iserror = True

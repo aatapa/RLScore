@@ -1,8 +1,16 @@
-from rlscore.measure.multi_accuracy_measure import *
-from rlscore.test.test_measure.abstract_measure_test import AbstractMeasureTest
+import numpy as np
+import unittest
 
-class Test(AbstractMeasureTest):
+from rlscore.measure.multi_accuracy_measure import ova_accuracy
+from rlscore.utilities import multiclass
+
+class Test(unittest.TestCase):
     
-    def setUp(self):
-        AbstractMeasureTest.setUp(self)
-        self.func = ova_accuracy
+    def test(self):
+        Y = np.random.randint(1, 6, 100)
+        P = np.random.random((100, 5))
+        Y_ova = multiclass.to_one_vs_all(Y)
+        perf1 = ova_accuracy(Y_ova, P)
+        P = np.argmax(P, axis=1) + 1
+        perf2 = np.mean(Y == P)
+        self.assertAlmostEqual(perf1, perf2)

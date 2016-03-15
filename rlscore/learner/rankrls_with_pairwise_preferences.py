@@ -81,11 +81,6 @@ class PPRankRLS(PredictorInterface):
         self.regparam = regparam
         self.pairs = np.vstack([pairs_start_inds, pairs_end_inds]).T
         self.svdad = creators.createSVDAdapter(**kwargs)
-        #self.Y = array_tools.as_labelmatrix(kwargs["Y"])
-        #if kwargs.has_key("regparam"):
-        #    self.regparam = float(kwargs["regparam"])
-        #else:
-        #    self.regparam = 1.
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.results = {}

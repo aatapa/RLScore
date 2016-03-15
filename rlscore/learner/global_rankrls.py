@@ -89,7 +89,8 @@ class GlobalRankRLS(PredictorInterface):
     """
     
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
-        self.Y = array_tools.as_2d_array(Y)
+        Y = array_tools.as_2d_array(Y)
+        self.Y = np.mat(Y)
         if X.shape[0] != Y.shape[0]:
             raise Exception("First dimension of X and Y must be the same")
         if basis_vectors != None:
@@ -101,7 +102,6 @@ class GlobalRankRLS(PredictorInterface):
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = creators.createSVDAdapter(**kwargs)
-        self.Y = array_tools.as_labelmatrix(Y)
         self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs

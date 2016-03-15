@@ -1,4 +1,3 @@
-import operator
 import numpy as np
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
@@ -10,8 +9,6 @@ def auc_singletask(Y, P):
     #P: predicted labels
     #Y: true labels, y_i \in {-1,1} for each y_i \in Y
     #
-    Y = np.array(Y).T[0]
-    P = np.array(P).T[0]
     if not np.all((Y==1) + (Y==-1)):
         raise UndefinedPerformance("auc accepts as Y-values only 1 and -1")
     size = len(P)
@@ -78,7 +75,9 @@ def auc(Y, P):
     auc: float
         number between 0 and 1
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)    
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     return np.mean(auc_multitask(Y,P))
 auc.iserror = False

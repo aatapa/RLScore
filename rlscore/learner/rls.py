@@ -701,8 +701,8 @@ class LPOCV(object):
             if len(pairs_start_inds) == 0:
                 raise UndefinedPerformance("Leave-pair-out undefined, all labels same for output %d" %k)
             pred_start, pred_end = rls.leave_pair_out(np.array(pairs_start_inds), np.array(pairs_end_inds))
-            pred_start = array_tools.as_labelmatrix(pred_start)
-            pred_end = array_tools.as_labelmatrix(pred_end)
+            pred_start = array_tools.as_2d_array(pred_start)
+            pred_end = array_tools.as_2d_array(pred_end)
             auc = 0.
             for h in range(len(pred_start)):
                 if pred_start[h,k] > pred_end[h,k]:
@@ -736,8 +736,8 @@ class LPOCV(object):
         all_start_inds = np.array(all_start_inds)
         all_end_inds = np.array(all_end_inds)
         pred_start, pred_end = rls.leave_pair_out(all_start_inds, all_end_inds)
-        pred_start = array_tools.as_labelmatrix(pred_start)
-        pred_end = array_tools.as_labelmatrix(pred_end)
+        pred_start = array_tools.as_2d_array(pred_start)
+        pred_end = array_tools.as_2d_array(pred_end)
         pair_dict = dict(zip(all_pairs, range(pred_start.shape[0])))
         aucs = []
         #compute auc/ranking accuracy for each column of Y separately

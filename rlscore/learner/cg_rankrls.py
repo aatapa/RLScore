@@ -75,7 +75,7 @@ class CGRankRLS(PredictorInterface):
     def __init__(self, X, Y, regparam = 1.0, qids = None, callbackfun=None, **kwargs):
         self.regparam = regparam
         self.callbackfun = None
-        self.Y = array_tools.as_labelmatrix(Y)
+        self.Y = array_tools.as_2d_array(Y)
         #Number of training examples
         self.size = Y.shape[0]
         if self.Y.shape[1] > 1:
@@ -226,7 +226,7 @@ class EarlyStopCB(object):
     
     def __init__(self, X_valid, Y_valid, qids_valid = None, measure=sqmprank, maxiter=10):
         self.X_valid = array_tools.as_matrix(X_valid)
-        self.Y_valid = array_tools.as_labelmatrix(Y_valid)
+        self.Y_valid = array_tools.as_2d_array(Y_valid)
         self.qids_valid = qids_to_splits(qids_valid)
         self.measure = measure
         self.bestperf = None

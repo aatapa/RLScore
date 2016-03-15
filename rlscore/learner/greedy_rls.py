@@ -69,7 +69,7 @@ class GreedyRLS(PredictorInterface):
             self.X = X
         self.X = self.X.T
         self.X = self.X.astype("float64", copy=False)
-        self.Y = array_tools.as_labelmatrix(Y)
+        self.Y = np.mat(array_tools.as_2d_array(Y))
         #Number of training examples
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
@@ -226,7 +226,7 @@ class GreedyRLS(PredictorInterface):
             
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
-            self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+            self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)
             
             if not self.callbackfun == None:
@@ -234,7 +234,7 @@ class GreedyRLS(PredictorInterface):
         if not self.callbackfun == None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
-        self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+        self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
         self.predictor = predictor.LinearPredictor(self.A, self.b)

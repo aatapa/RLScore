@@ -51,8 +51,10 @@ def disagreement(Y, P):
     disagreement: float
         number between 0 and 1
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     perfs = disagreement_multitask(Y,P)
     perfs = np.array(perfs)
     perfs = perfs[np.invert(np.isnan(perfs))]

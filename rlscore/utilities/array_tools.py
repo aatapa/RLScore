@@ -17,7 +17,7 @@ def as_2d_array(A, allow_sparse = False):
     shape = A.shape
     if not np.issubdtype(A.dtype, int) and not np.issubdtype(A.dtype, float):
         raise ValueError("Argument array contains non-numerical data") 
-    if not 0 < len(shape) < 3:
+    if not len(shape) < 3:
         raise ValueError("Argument array of incorrect shape: expected 1D or 2D array, got %d dimensions" %len(shape))
     s = np.sum(A)
     if s == np.inf or s == -np.inf:
@@ -26,6 +26,8 @@ def as_2d_array(A, allow_sparse = False):
         raise ValueError("Array contains NaN")
     if len(A.shape) == 1:
         A = A.reshape((A.shape[0], 1))
+    elif len(A.shape) == 0:
+        A = A.reshape((1,1))
     return A
 
 def as_index_list(I, maxind):
@@ -88,27 +90,6 @@ def as_array(A):
     if sp.issparse(A):
         A = A.todense()
     return np.asarray(A)
-
-def as_labelmatrix(A):
-    """Returns the input as a matrix, a 1-dimensional array is treated as
-    column vector.
-
-    Parameters
-    ----------
-    A: {array-like}, shape = 1D or 2D
-    
-    Returns
-    -------
-    A : matrix
-    """
-    A = np.array(A)
-    shape = A.shape
-    assert 0 < len(shape) < 3
-    if len(A.shape) == 1:
-        A = np.mat(A).T
-    else:
-        A = np.mat(A)
-    return A
 
 def spmat_resize(A, fdim):
     """Resizes the number of columns in sparse matrix to fdim, either removing or adding columns.

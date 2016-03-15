@@ -46,7 +46,9 @@ def accuracy(Y, P):
     accuracy: float
         number between 0 and 1
     """
-    Y = array_tools.as_labelmatrix(Y)
-    P = array_tools.as_labelmatrix(P)    
+    Y = array_tools.as_2d_array(Y)
+    P = array_tools.as_2d_array(P)
+    if not Y.shape == P.shape:
+        raise UndefinedPerformance("Y and P must be of same shape")
     return np.mean(accuracy_multitask(Y, P))
 accuracy.iserror = False

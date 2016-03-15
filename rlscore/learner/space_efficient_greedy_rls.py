@@ -17,7 +17,7 @@ class SpaceEfficientGreedyRLS(object):
         else:
             self.X = X
         self.X = self.X.T
-        self.Y = array_tools.as_labelmatrix(Y)
+        self.Y = array_tools.as_2d_array(Y)
         #Number of training examples
         self.size = self.Y.shape[0]
         #if not self.Y.shape[1] == 1:
