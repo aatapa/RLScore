@@ -8,13 +8,13 @@ def train_rls():
     #Select regparam with k-fold cross-validation,
     #where instances related to a single sentence form
     #together a fold
-    X_train =  read_sparse("data/train_2000_x.txt")
-    Y_train =  np.loadtxt("data/train_2000_y.txt")
-    X_test =  read_sparse("data/test_2000_x.txt", X_train.shape[1])
-    Y_test =  np.loadtxt("data/test_2000_y.txt")
+    X_train =  read_sparse("train_2000_x.txt")
+    Y_train =  np.loadtxt("train_2000_y.txt")
+    X_test =  read_sparse("test_2000_x.txt", X_train.shape[1])
+    Y_test =  np.loadtxt("test_2000_y.txt")
     #list of sentence ids
-    qids_train =  np.loadtxt("data/train_2000_qids.txt")
-    qids_test = np.loadtxt("data/test_2000_qids.txt")
+    qids_train =  np.loadtxt("train_2000_qids.txt")
+    qids_test = np.loadtxt("test_2000_qids.txt")
     regparams = [2.**i for i in range(-10, 10)]
     learner = LeaveQueryOutRankRLS(X_train, Y_train, qids_train, regparams = regparams, measure = cindex)
     lqo_perfs = learner.cv_performances

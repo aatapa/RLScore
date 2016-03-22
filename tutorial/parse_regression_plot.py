@@ -10,12 +10,12 @@ def plot_rls():
     #Select regparam with k-fold cross-validation,
     #where instances related to a single sentence form
     #together a fold
-    X_train =  read_sparse("data/train_2000_x.txt")
-    Y_train =  np.loadtxt("data/train_2000_y.txt")
-    X_test =  read_sparse("data/test_2000_x.txt", X_train.shape[1])
-    Y_test =  np.loadtxt("data/test_2000_y.txt")
+    X_train =  read_sparse("train_2000_x.txt")
+    Y_train =  np.loadtxt("train_2000_y.txt")
+    X_test =  read_sparse("test_2000_x.txt", X_train.shape[1])
+    Y_test =  np.loadtxt("test_2000_y.txt")
     #list of sentence ids
-    ids =  np.loadtxt("data/train_2000_qids.txt")
+    ids =  np.loadtxt("train_2000_qids.txt")
     #mapped to a list of lists, where each list
     #contains indices for one fold
     folds = map_ids(ids)
