@@ -31,8 +31,6 @@ def train_rls():
     X_train, Y_train = mndata.load_training()
     X_test, Y_test = mndata.load_testing()
     X_train, X_test = np.array(X_train), np.array(X_test)
-    print X_train.shape
-    assert False
     #One-vs-all mapping
     Y_train = ova(Y_train)
     Y_test = ova(Y_test)

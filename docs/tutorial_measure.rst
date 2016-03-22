@@ -73,49 +73,5 @@ multi-class predictions.
 When doing multi-class learning, one should use the ova_accuracy function for parameter selection and computing
 the final performance.
 
-Tutorial 3: Using your own performance measure
-**********************************************
-
-It is quite simple to use your own performance measure with the automated grid search tools for fast regularization
-parameter selection.
-
-Data set
---------
-
-We consider the classical
-`Boston Housing data set <https://archive.ics.uci.edu/ml/datasets/Housing>`_
-from the UCI machine learning repository. The data consists of 506 instances,
-13 features and 1 output to be predicted.
-
-The data can be loaded from disk and split into a training set of 250, and test
-set of 256 instances using the following code.
-
-.. literalinclude:: ../tutorial/housing_data.py
-
-.. literalinclude:: ../tutorial/housing_data.out
-
-By default, LeaveOneOutRLS select the regularization parameter based on mean-squared error.
-
-.. literalinclude:: ../tutorial/regression3.py
- 
-.. literalinclude:: ../tutorial/regression3.out
-
-If I want to use cindex instead, I do it like this.
-
-.. literalinclude:: ../tutorial/measure5.py
- 
-.. literalinclude:: ../tutorial/measure5.out
-
-Mean absolute error is (as of writing) not implemented in RLScore. This is how we can implement
-it and use it for parameter selection.
-
-.. literalinclude:: ../tutorial/measure6.py
- 
-.. literalinclude:: ../tutorial/measure6.out
-
-The only special thing to note here is the property mae.iserror=True, that tells RLScore that the function
-mae is an error measure, meaning that lower value means better predictions. If this values is set to
-False, the model selection search would choose parameters that lead to highest performance.
-
 
 

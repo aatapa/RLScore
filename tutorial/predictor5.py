@@ -5,6 +5,7 @@ def main():
     X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.setting4_split()
     learner = KronRLS(X1 = X1_train, X2 = X2_train, Y = Y_train, regparam=2.**30)
     predictor = learner.predictor
+    print predictor.W
     #Predict labels for all X1_test - X2_test combinations)
     #Order: column-major: [(X1[0], X2[0]), (X1[1], X2[0])...]
     P = predictor.predict(X1_test, X2_test)

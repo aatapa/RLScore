@@ -54,7 +54,7 @@ def read_folds(fname):
 
 
 
-def read_sparse(fname):
+def read_sparse(fname, fdim=None):
     """Reads in a sparse n x m matrix from a file with n rows.
     
     Format is of the type 0:1.5 3:4.2 7:1.1 ...
@@ -66,6 +66,8 @@ def read_sparse(fname):
     ----------
     fname : string
         input file name
+    fdim: int
+        number of dimensions, if None estimated from data file
         
     Returns
     -------
@@ -95,7 +97,7 @@ def read_sparse(fname):
             try:
                 index = int(index)
                 value = float(value)
-                if value != 0.:
+                if value != 0. and (fdim == None or index < fdim): 
                     columns.append(index)
                     rows.append(linecounter-1)
                     values.append(value)
@@ -105,13 +107,17 @@ def read_sparse(fname):
                 raise Exception("Error when reading in feature file: line %d features must be in ascending order\n" % (linecounter))
             previous = index
     #That's all folks
-    X = sparse.coo_matrix((values,(rows,columns)), dtype=float64)
+    if fdim == None:
+        X = sparse.coo_matrix((values,(rows,columns)), dtype=float64)
+    else:
+        rdim = np.max(rows)+1
+        X = sparse.coo_matrix((values,(rows,columns)), (rdim, fdim), dtype=float64)
     X = X.tocsr()
     f.close()
     return X
 
 
-def read_svmlight(fname):
+def read_svmlight(fname, fdim=None):
     """ Loads examples from an SVM-light format data file. The
     file contains attributes, one label per example and optionally qids.
     
@@ -119,6 +125,8 @@ def read_svmlight(fname):
     ----------
     fname : string
         input file name
+    fdim: int
+        number of dimensions, if None estimated from data file
         
     Returns
     -------
@@ -193,7 +201,7 @@ def read_svmlight(fname):
             try:
                 index = int(index)
                 value = float(value)
-                if value != 0.:
+                if value != 0. and (fdim == None or index < fdim): 
                     #rows.append(index-1)
                     rows.append(linecounter-1)
                     #columns.append(linecounter-1)
@@ -206,6 +214,8 @@ def read_svmlight(fname):
             previous = index
             if index > feaspace_dim:
                 feaspace_dim = index
+    if fdim != None:
+        feaspace_dim = fdim
     X = sparse.coo_matrix((values,(rows,columns)),(linecounter, feaspace_dim), dtype=float64)
     X = X.tocsr()
     Y = np.array(all_outputs)

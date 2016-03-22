@@ -6,7 +6,7 @@ from rlscore.reader import read_svmlight
 
 def train_rls():
     X_train, Y_train, foo = read_svmlight("a1a.t")
-    X_test, Y_test, foo = read_svmlight("a1a")
+    X_test, Y_test, foo = read_svmlight("a1a", X_train.shape[1])
     loo_aucs = []
     test_aucs = []
     for i in range(1000):

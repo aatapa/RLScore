@@ -10,7 +10,7 @@ def train_rls():
     #together a fold
     X_train =  read_sparse("data/train_2000_x.txt")
     Y_train =  np.loadtxt("data/train_2000_y.txt")
-    X_test =  read_sparse("data/test_2000_x.txt")
+    X_test =  read_sparse("data/test_2000_x.txt", X_train.shape[1])
     Y_test =  np.loadtxt("data/test_2000_y.txt")
     #list of sentence ids
     qids_train =  np.loadtxt("data/train_2000_qids.txt")

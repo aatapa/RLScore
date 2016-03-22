@@ -9,7 +9,7 @@ def train_rls():
     #a lot of time
     X_train = X_train[:1000]
     Y_train = Y_train[:1000]
-    X_test, Y_test, foo = read_svmlight("a1a")
+    X_test, Y_test, foo = read_svmlight("a1a", X_train.shape[1])
     regparams = [2.**-5, 1., 2.**5]
     learner = LeavePairOutRLS(X_train, Y_train, regparams=regparams)
     print("best regparam %f" %learner.regparam)

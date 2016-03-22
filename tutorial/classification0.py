@@ -5,7 +5,7 @@ from rlscore.reader import read_svmlight
 
 def train_rls():
     X_train, Y_train, foo = read_svmlight("a1a.t")
-    X_test, Y_test, foo = read_svmlight("a1a")
+    X_test, Y_test, foo = read_svmlight("a1a", X_train.shape[1])
     learner = RLS(X_train, Y_train)
     best_regparam = None
     best_accuracy = 0.

@@ -127,6 +127,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 else:
                     self.A = v
                 if not self.callbackfun == None:
+                    self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
                     self.callbackfun.callback(self)
     
             
@@ -172,6 +173,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 else:
                     self.W = v.reshape((x1fsize, x2fsize), order = 'F')
                 if not self.callbackfun == None:
+                    self.predictor = LinearPairwisePredictor(self.W)
                     self.callbackfun.callback(self)
                 
             G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
