@@ -216,6 +216,7 @@ class MMC(PredictorInterface):
         #    self.giveAndTakeALT(1000/ (ii+1))
         if self.oneclass:
             self.Y = self.Y[:, 0]
+            self.A = self.A[:, 0]
         self.results['predicted_clusters_for_training_data'] = self.Y
         self.predictor = self.svdad.createModel(self)
     
