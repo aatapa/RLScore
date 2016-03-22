@@ -8,8 +8,6 @@ RLScore
 
 RLScore - regularized least-squares machine learning algorithms package.
 
-General introductory stuff comes here
-
 Contents:
 
 .. toctree::

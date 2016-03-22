@@ -10,9 +10,9 @@ RLScore - regularized least-squares machine learning algorithms package.
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
 :Homepage:        `https://github.com/aatapa/RLScore <https://github.com/aatapa/RLScore>`_
-:Version:         1.0
+:Version:         0.6
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            December 10. 2015
+:Date:            March 22. 2016
 
 .. contents::
 
@@ -67,6 +67,19 @@ Support for different tasks
        - selection of regularization parameter
        - leave-query-out cross-validation
        
--   Pairwise data and zero-shot learning
+-  Pairwise data and zero-shot learning
 
    - Kronecker RLS
+       - Closed form solution for learning from non-sparse data sets
+       - Iterative training algorithm for sparse data
+       - in-sample leave-one-out cross-validation
+   - TwoStep RLS
+       - Closed form solution for learning from non-sparse data sets
+       - in-sample leave-one-out cross-validation
+       - leave-x1-out cross-validation
+       - leave-x2-out cross-validation
+       - out-of-sample leave-one-out cross-validation
+
+-  Clustering
+
+   - Unsupervised RLS methods, based on the maximum margin clustering principle
