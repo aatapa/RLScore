@@ -18,7 +18,7 @@ LinearKernel: k(xi,xj) = <xi , xj> + bias
 parameters: bias (default = 1.0)
 
 GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>)
-paramaters: gamma (default = 1.0)
+parameters: gamma (default = 1.0)
 
 PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree
 parameters: gamma (default = 1.0), coef0 (default = 0.), degree (default = 2)
@@ -48,7 +48,7 @@ set of 256 instances using the following code.
 .. literalinclude:: ../tutorial/housing_data.out
 
 
-Default behaviour
+Default behavior
 -----------------------------------------
 
 By default, if no kernel related parameters are supplied, the
@@ -154,7 +154,7 @@ We can load the data set as follows:
 Linear Kernel
 -------------------------
 
-Default behaviour when supplying two data matrices is to use linear kernel for both domains:
+Default behavior when supplying two data matrices is to use linear kernel for both domains:
 
 .. literalinclude:: ../tutorial/kron_rls4.py
 

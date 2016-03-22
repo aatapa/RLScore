@@ -1,4 +1,4 @@
-Perormance measures
+Performance measures
 ===================
 
 RLScore implement a variety of performance measures for classification,

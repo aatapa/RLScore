@@ -114,7 +114,7 @@ Tutorial 2: K-fold cross-validation, non i.i.d. data
 Next we consider how to implement K-fold cross-validation. RLS implements computational
 shortcuts for repeated holdout, that allow implementing different cross-validation
 schemes with almost the same computational cost as training RLS only once. This can
-be used to implement regular 10-fold or 5-fold cross-validation if one preferes these
+be used to implement regular 10-fold or 5-fold cross-validation if one prefers these
 to leave-one-out, though in our opinion the main advantage is realized with non i.i.d.
 data, where leave-one-out cannot be used reliably. The computational shortcuts are
 based on further refinement of the results published in [2]_ and [3]_, the parse

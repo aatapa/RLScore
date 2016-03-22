@@ -59,7 +59,7 @@ Callback function
 GreedyRLS takes as an optional argument a callback function. This is an object that implements two
 methods: callback(learner) that is called each time a feature is selected, and finished(learner) that
 is called after the selection process has ended. The callback function can be used for example to
-follow how test set prediciton error evolves as a function of selected features.
+follow how test set prediction error evolves as a function of selected features.
 
 .. literalinclude:: ../tutorial/fselection2.py
 

@@ -70,7 +70,7 @@ Leave-pair-out cross-validation
 
 Next, we use the fast leave-pair-out cross-validation algorithm for performance
 estimation and regularization parameter selection. The LeavePairOutRankRLS module
-is a high level interace to this functionality.
+is a high level interface to this functionality.
 
 .. literalinclude:: ../tutorial/ranking2.py
 
@@ -192,7 +192,7 @@ using the efficient algorithm described in [2]_.
 Leave-query-out and model selection
 -----------------------------------
 
-Finally, we use a higher leve wrapper for the leave-query-out, and also make use of automated
+Finally, we use a higher level wrapper for the leave-query-out, and also make use of automated
 model selection at the same time.
 
 .. literalinclude:: ../tutorial/parse_ranking3.py
