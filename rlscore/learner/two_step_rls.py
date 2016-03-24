@@ -182,8 +182,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         Returns
         -------
         F: array, shape = [n_samples1*n_samples2]
-        Training set labels. Label for (X1[i], X2[j]) maps to
-        F[i + j*n_samples1] (column order).
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
@@ -219,8 +219,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         Returns
         -------
         F: array, shape = [n_samples1*n_samples2]
-        Training set labels. Label for (X1[i], X2[j]) maps to
-        F[i + j*n_samples1] (column order).
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
         """
         
         VTY = self.V.T * self.Y
@@ -252,8 +252,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         Returns
         -------
         F: array, shape = [n_samples1*n_samples2]
-        Training set labels. Label for (X1[i], X2[j]) maps to
-        F[i + j*n_samples1] (column order).
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
         """
         
         YU = self.Y * self.U
@@ -286,8 +286,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         Returns
         -------
         F: array, shape = [n_samples1*n_samples2]
-        Training set labels. Label for (X1[i], X2[j]) maps to
-        F[i + j*n_samples1] (column order).
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
         """
         
         bevals_col = np.multiply(self.evals2, self.newevals2).T
@@ -332,8 +332,8 @@ class TwoStepRLS(PairwisePredictorInterface):
         Returns
         -------
         F: array, shape = [n_samples1*n_samples2]
-        Training set labels. Label for (X1[i], X2[j]) maps to
-        F[i + j*n_samples1] (column order).
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
         """
         
         #bevals_col = np.multiply(self.evals2, self.newevals2).T

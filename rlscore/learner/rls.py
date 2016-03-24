@@ -181,7 +181,7 @@ class RLS(PredictorInterface):
         Notes
         -----
         
-        The fast holdout algorithm is based on results presented in [1,2].
+        The fast holdout algorithm is based on results presented in [1,2]. However, the removal of basis vectors decribed in [2] is currently not implemented.
             
         References
         ----------
@@ -296,9 +296,13 @@ class RLS(PredictorInterface):
         leave out all pairs with different labels.
         
         Computational complexity of holdout with most pairs left out:
-        m = n_samples, l=n_labels
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
         
-        O(TODO)
+        O(lm^2+m^3): basic case
+        
+        O(lm^2+ld^2): Linear Kernel, d < m
+        
+        O(lm^2+lb^2): Sparse approximation with basis vectors 
         
         The algorithm is an adaptation of the method published originally in [1]. The use of
         leave-pair-out cross-validation for AUC estimation has been analyzed in [2].
@@ -590,11 +594,11 @@ class LeavePairOutRLS(PredictorInterface):
     -----
     
     Computational complexity of training and model selection:
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r = grid_size
     
     O(m^3 + lm^2): basic case
     
-    O(lm^2 + md^2 + d^3): Linear Kernel, d < m
+    O(lm^2 + md^2): Linear Kernel, d < m
     
     O(lm^2 + mb^2): Sparse approximation with basis vectors 
      
