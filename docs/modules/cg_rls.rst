@@ -1,5 +1,5 @@
-CGRLS - conjugate gradient algorithm for linear RLS with sparse data matrix
-==========================================
+CGRLS - linear conjugate gradient RLS
+=====================================
 
 .. module:: rlscore.learner.cg_rls
 
