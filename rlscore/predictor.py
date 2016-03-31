@@ -9,7 +9,7 @@ class PredictorInterface(object):
     
     Attributes
     ----------
-    predictor: predictor object
+    predictor : predictor object
         predicts outputs for new instance
     """
     
@@ -20,12 +20,12 @@ class PredictorInterface(object):
     
         Parameters
          ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
            input data matrix
             
         Returns
         -------
-        P: array, shape = [n_samples, n_tasks]
+        P : array, shape = [n_samples, n_tasks]
             predictions
         """
         return self.predictor.predict(X)
@@ -39,16 +39,16 @@ class KernelPredictor(object):
 
     Parameters
     ----------
-    A: array-like, shape = [n_samples] or [n_samples, n_labels]
+    A : array-like, shape = [n_samples] or [n_samples, n_labels]
         dual coefficients
     kernel : kernel object
         kernel object, initialized with the basis vectors and kernel parameters
         
     Attributes
     ----------
-    A: array-like, shape = [n_samples] or [n_samples, n_labels]
+    A : array-like, shape = [n_samples] or [n_samples, n_labels]
         dual coefficients
-    kernel: kernel object
+    kernel : kernel object
         kernel object, initialized with the basis vectors and kernel parameters
     """
     
@@ -64,12 +64,12 @@ class KernelPredictor(object):
 
         Parameters
         ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
             test data matrix
         
         Returns
         ----------
-        P: array, shape = [n_samples] or [n_samples, n_labels]
+        P : array, shape = [n_samples] or [n_samples, n_labels]
             predictions
         """
         if len(X.shape) == 1:
@@ -93,16 +93,16 @@ class LinearPredictor(object):
 
     Parameters
     ----------
-    W: array-like, shape = [n_features] or [n_features, n_labels]
+    W : array-like, shape = [n_features] or [n_features, n_labels]
         primal coefficients
     b : float or array-like with shape = [n_labels]
         bias term(s)
 
     Attributes
     ----------
-    W: array-like, shape = [n_features] or [n_features, n_labels]
+    W : array-like, shape = [n_features] or [n_features, n_labels]
         primal coefficients
-    b: float or array-like with shape = [n_labels]
+    b : float or array-like with shape = [n_labels]
         bias term(s)
     """
     
@@ -118,12 +118,12 @@ class LinearPredictor(object):
 
         Parameters
         ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
             test data matrix
         
         Returns
         ----------
-        P: array, shape = [n_samples, n_labels]
+        P : array, shape = [n_samples, n_labels]
             predictions
         """
         W = self.W

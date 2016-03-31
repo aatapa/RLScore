@@ -32,14 +32,14 @@ def sqerror(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_tasks]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_tasks]
         Correct utility values, can be any real numbers
-    P: {array-like}, shape = [n_samples] or [n_samples, n_tasks]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_tasks]
         Predicted utility values, can be any real numbers. 
     
     Returns
     -------
-    error: float
+    error : float
     """
     Y = array_tools.as_2d_array(Y)
     P = array_tools.as_2d_array(P)

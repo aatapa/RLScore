@@ -71,7 +71,7 @@ def read_sparse(fname, fdim=None):
         
     Returns
     -------
-    X: sparse matrix (csr)
+    X : sparse matrix (csr)
     """
     #each row represents an instance, each column a feature
     f = open(fname)

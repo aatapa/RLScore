@@ -41,14 +41,14 @@ def sqmprank(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Correct utility values, can be any real numbers
-    P: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Predicted utility values, can be any real numbers. 
     
     Returns
     -------
-    error: float
+    error : float
     """
     Y = array_tools.as_2d_array(Y)
     P = array_tools.as_2d_array(P)

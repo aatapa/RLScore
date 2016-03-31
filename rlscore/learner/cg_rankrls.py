@@ -21,53 +21,29 @@ class CGRankRLS(PredictorInterface):
     Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
     large high-dimensional but sparse data.
     
-    There are three ways to supply the pairwise preferences for the training set, depending
-    on the arguments supplied by the user.
-    
-    1. Y: pairwise preferences constructed between all data point pairs
-    
-    2. Y, qids: pairwise preferences constructed between all data
-    points belonging to the same query.
-    
-    3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
-    
-    In order to make training faster, one can use the early stopping technique by
-    supplying a separate validationset to be used for determining, when to terminate
-    optimization. In this case, training stops once validation set error has failed to
-    decrease for ten consequtive iterations. In this case, the caller should
-    provide the parameters validation_features, validation_labels and optionally, validation_qids.
-    Currently, this option is not supported when learning directly from pairwise
-    preferences. 
-
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    regparam: float (regparam > 0)
+    regparam : float (regparam > 0)
         regularization parameter
-    Y: {array-like}, shape = [n_samples] or [n_samples, 1], optional
+    Y : {array-like}, shape = [n_samples] or [n_samples, 1], optional
         Training set labels (alternative to: 'train_preferences')
-    qids: list of n_queries index lists, optional
+    qids : list of n_queries index lists, optional
         Training set qids,  (can be supplied with 'Y')
-    validation_features:: {array-like, sparse matrix}, shape = [n_samples, n_features], optional
-        Data matrix for validation set, needed if early stopping used
-    validation_labels: {array-like}, shape = [n_samples] or [n_samples, 1], optional
-        Validation set labels, needed if early stopping used
-    validation_qids: list of n_queries index lists, optional, optional
-        Validation set qids, may be used with early stopping
  
        
     References
     ----------
     
-    RankRLS algorithm is described in [1]_, using the conjugate gradient optimization
-    together with early stopping was considered in detail in [2]_. 
+    RankRLS algorithm is described in [1], using the conjugate gradient optimization
+    together with early stopping was considered in detail in [2]. 
     
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
     
-    .. [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
+    [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
     Large Scale Training Methods for Linear RankRLS
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
@@ -93,10 +69,6 @@ class CGRankRLS(PredictorInterface):
             self.splits = qids_to_splits(self.qids)
         else:
             self.qids = None
-        #self.solve(self.regparam)
-        self.train()
-    
-    def train(self):
         regparam = self.regparam
         #regparam = 0.
         qids = self.qids
@@ -139,29 +111,14 @@ class PCGRankRLS(PredictorInterface):
     
     Trains linear RankRLS using the conjugate gradient training algorithm. Suitable for
     large high-dimensional but sparse data.
-    
-    There are three ways to supply the pairwise preferences for the training set, depending
-    on the arguments supplied by the user.
-    
-
-    
-    3. train_preferences: arbitrary pairwise preferences supplied directly by the user.
-    
-    In order to make training faster, one can use the early stopping technique by
-    supplying a separate validationset to be used for determining, when to terminate
-    optimization. In this case, training stops once validation set error has failed to
-    decrease for ten consequtive iterations. In this case, the caller should
-    provide the parameters validation_features, validation_labels and optionally, validation_qids.
-    Currently, this option is not supported when learning directly from pairwise
-    preferences. 
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    regparam: float (regparam > 0)
+    regparam : float (regparam > 0)
         regularization parameter
-    train_preferences: {array-like}, shape = [n_preferences, 2], optional
+    train_preferences : {array-like}, shape = [n_preferences, 2], optional
         Pairwise preference indices (alternative to: 'Y')
         The array contains pairwise preferences one pair per row, i.e. the data point
         corresponding to the first index is preferred over the data point corresponding
@@ -172,14 +129,14 @@ class PCGRankRLS(PredictorInterface):
     References
     ----------
     
-    RankRLS algorithm is described in [1]_, using the conjugate gradient optimization
-    together with early stopping was considered in detail in [2]_. 
+    RankRLS algorithm is described in [1], using the conjugate gradient optimization
+    together with early stopping was considered in detail in [2]. 
     
-    .. [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
+    [1] Tapio Pahikkala, Evgeni Tsivtsivadze, Antti Airola, Jouni Jarvinen, and Jorma Boberg.
     An efficient algorithm for learning to rank from preference graphs.
     Machine Learning, 75(1):129-165, 2009.
     
-    .. [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
+    [2] Antti Airola, Tapio Pahikkala, and Tapio Salakoski.
     Large Scale Training Methods for Linear RankRLS
     ECML/PKDD-10 Workshop on Preference Learning, 2010.
     """
@@ -189,9 +146,6 @@ class PCGRankRLS(PredictorInterface):
         self.callbackfun = None
         self.pairs = train_preferences
         self.X = csc_matrix(X.T)
-        self.train()
-    
-    def train(self):
         regparam = self.regparam
         X = self.X.tocsc()
         X_csr = X.tocsr()

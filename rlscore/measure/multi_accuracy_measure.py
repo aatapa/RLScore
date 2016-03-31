@@ -12,15 +12,15 @@ def ova_accuracy(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_classes]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_classes]
         Correct labels, must belong to set {-1,1}, with exactly
         one 1 on each row.
-    P: {array-like}, shape = [n_samples] or [n_samples, n_classes]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_classes]
         Predicted labels, can be any real numbers.
     
     Returns
     -------
-    accuracy: float
+    accuracy : float
         number between 0 and 1
     """
     Y = np.array(Y)

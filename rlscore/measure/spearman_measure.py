@@ -16,14 +16,14 @@ def spearman(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Correct labels
-    P: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Predicted labels
     
     Returns
     -------
-    correlation: float
+    correlation : float
         number between -1 and 1
     """
     Y = array_tools.as_2d_array(Y)

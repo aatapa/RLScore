@@ -23,28 +23,28 @@ class KronRLS(PairwisePredictorInterface):
 
     Parameters
     ----------
-    X1: {array-like}, shape = [n_samples1, n_features1] 
+    X1 : {array-like}, shape = [n_samples1, n_features1] 
         Data matrix 1 (for linear KronRLS)
         
-    X2: {array-like}, shape = [n_samples2, n_features2] 
+    X2 : {array-like}, shape = [n_samples2, n_features2] 
         Data matrix 2 (for linear KronRLS)
         
-    K1: {array-like}, shape = [n_samples1, n_samples1]
+    K1 : {array-like}, shape = [n_samples1, n_samples1]
         Kernel matrix 1 (for kernel KronRLS)
 
-    K2: {array-like}, shape = [n_samples1, n_samples1]
+    K2 : {array-like}, shape = [n_samples1, n_samples1]
         Kernel matrix 2 (for kernel KronRLS)
         
-    Y: {array-like}, shape = [n_samples1*n_samples2]
+    Y : {array-like}, shape = [n_samples1*n_samples2]
         Training set labels. Label for (X1[i], X2[j]) maps to
         Y[i + j*n_samples1] (column order).
         
-    regparam: float, optional
+    regparam : float, optional
         regularization parameter, regparam > 0 (default=1.0)
         
     Attributes
     -----------
-    predictor: {LinearPairwisePredictor, KernelPairwisePredictor}
+    predictor : {LinearPairwisePredictor, KernelPairwisePredictor}
         trained predictor
                   
     Notes
@@ -106,7 +106,7 @@ class KronRLS(PairwisePredictorInterface):
                
         Parameters
         ----------
-        regparam: float, optional
+        regparam : float, optional
             regularization parameter, regparam > 0
         """
         self.regparam = regparam
@@ -173,7 +173,7 @@ class KronRLS(PairwisePredictorInterface):
                
         Parameters
         ----------
-        regparam: float, optional
+        regparam : float, optional
             regularization parameter, regparam > 0 (default=1.0)
             
         Notes
@@ -219,7 +219,7 @@ class KronRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """

@@ -19,35 +19,35 @@ class QueryRankRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    qids: list of query ids, shape = [n_samples]
+    qids : list of query ids, shape = [n_samples]
         Training set qids
-    regparam: float, optional
+    regparam : float, optional
         regularization parameter, regparam > 0 (default=1.0)
-    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+    kernel : {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
         kernel function name, imported dynamically from rlscore.kernel
-    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+    basis_vectors : {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
 
     Other Parameters
     ----------------
     Typical kernel parameters include:
-    bias: float, optional
+    bias : float, optional
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
-    gamma: float, optional
+    gamma : float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)     
-    coef0: float, optional
+    coef0 : float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
-    degree: int, optional
+    degree : int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
         
     Attributes
     -----------
-    predictor: {LinearPredictor, KernelPredictor}
+    predictor : {LinearPredictor, KernelPredictor}
         trained predictor
         
     Notes
@@ -103,7 +103,7 @@ class QueryRankRLS(PredictorInterface):
                
         Parameters
         ----------
-        regparam: float (regparam > 0)
+        regparam : float (regparam > 0)
             regularization parameter
         """
         if not hasattr(self, "D"):
@@ -172,7 +172,7 @@ class QueryRankRLS(PredictorInterface):
         
         Parameters
         ----------
-        indices: list of indices, shape = [n_hsamples]
+        indices : list of indices, shape = [n_hsamples]
             list of indices of training examples belonging to the set for which the
             hold-out predictions are calculated. Should correspond to one query.
 
@@ -221,41 +221,41 @@ class LeaveQueryOutRankRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    qids: list of query ids, shape = [n_samples]
+    qids : list of query ids, shape = [n_samples]
         Training set qids
-    regparam: float, optional
+    regparam : float, optional
         regularization parameter, regparam > 0 (default=1.0)
-    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+    kernel : {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
         kernel function name, imported dynamically from rlscore.kernel
-    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+    basis_vectors : {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
 
     Other Parameters
     ----------------
     Typical kernel parameters include:
-    bias: float, optional
+    bias : float, optional
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
-    gamma: float, optional
+    gamma : float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
-    coef0: float, optional
+    coef0 : float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
-    degree: int, optional
+    degree : int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
         
     Attributes
     -----------
-    predictor: {LinearPredictor, KernelPredictor}
+    predictor : {LinearPredictor, KernelPredictor}
         trained predictor
-    cv_performances: array, shape = [grid_size]
+    cv_performances : array, shape = [grid_size]
         leave-query-out performances for each grid point
-    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_queries]
+    cv_predictions : list of 1D  or 2D arrays, shape = [grid_size, n_queries]
         predictions for each query, shapes [query_size] or [query_size, n_labels]
-    regparam: float
+    regparam : float
         regparam from grid with best performance
         
     Notes

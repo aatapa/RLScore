@@ -74,14 +74,14 @@ def cindex(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Correct labels, can be any real numbers. 
-    P: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Predicted labels, can be any real numbers. 
     
     Returns
     -------
-    concordance index: float
+    concordance index : float
         number between 0 and 1, around 0.5 means random performance
     """
     Y = array_tools.as_2d_array(Y)

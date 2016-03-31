@@ -18,33 +18,33 @@ class GlobalRankRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    regparam: float, optional
+    regparam : float, optional
         regularization parameter, regparam > 0 (default=1.0)
-    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+    kernel : {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
         kernel function name, imported dynamically from rlscore.kernel
-    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+    basis_vectors : {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
         
     Other Parameters
     ----------------
     Typical kernel parameters include:
-    bias: float, optional
+    bias : float, optional
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
-    gamma: float, optional
+    gamma : float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
-    coef0: float, optional
+    coef0 : float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
-    degree: int, optional
+    degree : int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
 
     Attributes
     -----------
-    predictor: {LinearPredictor, KernelPredictor}
+    predictor : {LinearPredictor, KernelPredictor}
         trained predictor
          
     Notes
@@ -113,7 +113,7 @@ class GlobalRankRLS(PredictorInterface):
                
         Parameters
         ----------
-        regparam: float, optional
+        regparam : float, optional
             regularization parameter, regparam > 0 (default=1.0)
             
         Notes
@@ -161,16 +161,16 @@ class GlobalRankRLS(PredictorInterface):
         
         Parameters
         ----------
-        pairs_start_inds: list of indices, shape = [n_pairs]
+        pairs_start_inds : list of indices, shape = [n_pairs]
             list of indices from range [0, n_samples-1]
-        pairs_end_inds: list of indices, shape = [n_pairs]
+        pairs_end_inds : list of indices, shape = [n_pairs]
             list of indices from range [0, n_samples-1]
         
         Returns
         -------
         P1 : array, shape = [n_pairs]
             holdout predictions for pairs_start_inds
-        P2: array, shape = [n_pairs]
+        P2 : array, shape = [n_pairs]
             holdout predictions for pairs_end_inds
             
         Notes
@@ -250,23 +250,23 @@ class GlobalRankRLS(PredictorInterface):
         return np.squeeze(results_first), np.squeeze(results_second)
     
     
-    def leave_pair_out_python(self, pairs_start_inds, pairs_end_inds, oind=0):
+    def _leave_pair_out_python(self, pairs_start_inds, pairs_end_inds, oind=0):
         """Computes leave-pair-out predictions for a trained RankRLS.
         
         Parameters
         ----------
-        pairs_start_inds: list of indices, shape = [n_pairs]
+        pairs_start_inds : list of indices, shape = [n_pairs]
             list of indices from range [0, n_samples-1]
-        pairs_end_inds: list of indices, shape = [n_pairs]
+        pairs_end_inds : list of indices, shape = [n_pairs]
             list of indices from range [0, n_samples-1]
-        oind: index from range [0, n_samples-1]
+        oind : index from range [0, n_samples-1]
             column of Y, for which pairwise cv is computed
         
         Returns
         -------
         P1 : array, shape = [n_pairs]
             holdout predictions for pairs_start_inds
-        P2: array, shape = [n_pairs]
+        P2 : array, shape = [n_pairs]
             holdout predictions for pairs_end_inds
             
         Notes
@@ -428,7 +428,7 @@ class GlobalRankRLS(PredictorInterface):
         
         Parameters
         ----------
-        indices: list of indices, shape = [n_hsamples]
+        indices : list of indices, shape = [n_hsamples]
             list of indices of training examples belonging to the set for which the
             hold-out predictions are calculated. The list can not be empty.
 
@@ -610,37 +610,37 @@ class LeavePairOutRankRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+    kernel : {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
         kernel function name, imported dynamically from rlscore.kernel
-    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+    basis_vectors : {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
-    regparams: {array-like}, shape = [grid_size] (optional)
+    regparams : {array-like}, shape = [grid_size] (optional)
         regularization parameter values to be tested, default = [2^-15,...,2^15]
         
     Other Parameters
     ----------------
     Typical kernel parameters include:
-    bias: float, optional
+    bias : float, optional
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
-    gamma: float, optional
+    gamma : float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)     
-    coef0: float, optional
+    coef0 : float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
-    degree: int, optional
+    degree : int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
 
     Attributes
     -----------
-    predictor: {LinearPredictor, KernelPredictor}
+    predictor : {LinearPredictor, KernelPredictor}
         trained predictor
-    cv_performances: array, shape = [grid_size]
+    cv_performances : array, shape = [grid_size]
         leave-pair-out performances for each grid point
-    regparam: float
+    regparam : float
         regparam from grid with best performance
           
     Notes
@@ -685,39 +685,39 @@ class KfoldRankRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Training set labels
-    kernel: {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
+    kernel : {'LinearKernel', 'GaussianKernel', 'PolynomialKernel', 'PrecomputedKernel', ...}
         kernel function name, imported dynamically from rlscore.kernel
-    basis_vectors: {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
+    basis_vectors : {array-like, sparse matrix}, shape = [n_bvectors, n_features], optional
         basis vectors (typically a randomly chosen subset of the training data)
-    regparams: {array-like}, shape = [grid_size] (optional)
+    regparams : {array-like}, shape = [grid_size] (optional)
         regularization parameter values to be tested, default = [2^-15,...,2^15]
         
     Other Parameters
     ----------------
     Typical kernel parameters include:
-    bias: float, optional
+    bias : float, optional
         LinearKernel: the model is w*x + bias*w0, (default=1.0)
-    gamma: float, optional
+    gamma : float, optional
         GaussianKernel: k(xi,xj) = e^(-gamma*<xi-xj,xi-xj>) (default=1.0)
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=1.0)       
-    coef0: float, optional
+    coef0 : float, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=0.)
-    degree: int, optional
+    degree : int, optional
         PolynomialKernel: k(xi,xj) = (gamma * <xi, xj> + coef0)**degree (default=2)
 
     Attributes
     -----------
-    predictor: {LinearPredictor, KernelPredictor}
+    predictor : {LinearPredictor, KernelPredictor}
         trained predictor
-    cv_performances: array, shape = [grid_size]
+    cv_performances : array, shape = [grid_size]
         K-fold performances for each grid point
-    cv_predictions: list of 1D  or 2D arrays, shape = [grid_size, n_folds]
+    cv_predictions : list of 1D  or 2D arrays, shape = [grid_size, n_folds]
         predictions for each fold, shapes [fold_size] or [fold_size, n_labels]
-    regparam: float
+    regparam : float
         regparam from grid with best performance
            
     Notes

@@ -9,16 +9,16 @@ class LinearKernel(object):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+    X : {array-like, sparse matrix}, shape = [n_bvectors, n_features]
         Basis vectors
-    bias: float, optional (default 1.0)
+    bias : float, optional (default 1.0)
         Constant added to each kernel evaluation
         
     Attributes
     ----------
-    train_X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+    train_X : {array-like, sparse matrix}, shape = [n_bvectors, n_features]
         Basis vectors
-    bias: float
+    bias : float
         Constant added to each kernel evaluation
     """
 
@@ -33,11 +33,11 @@ class LinearKernel(object):
         
         Parameters
         ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         
         Returns
         -------
-        K: array, shape = [n_samples, n_bvectors]
+        K : array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         X = array_tools.as_2d_array(X, True)

@@ -10,6 +10,7 @@ Regression and classification:
    modules/rls_loo
    modules/rls_kfold
    modules/rls_lpo
+   modules/cg_rls
 
 Learning to rank:
 
@@ -22,6 +23,8 @@ Learning to rank:
    modules/rankrls_lpo
    modules/rankrls_kfold
    modules/rankrls_lqo
+   modules/cg_rankrls
+   modules/pcg_rankrls
 
 Feature selection:
 

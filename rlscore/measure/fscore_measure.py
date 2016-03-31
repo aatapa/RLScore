@@ -43,15 +43,15 @@ def fscore(Y, P):
     
     Parameters
     ----------
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Correct labels, must belong to set {-1,1}
-    P: {array-like}, shape = [n_samples] or [n_samples, n_labels]
+    P : {array-like}, shape = [n_samples] or [n_samples, n_labels]
         Predicted labels, can be any real numbers. P[i]>0 is treated
         as a positive, and P[i]<=0 as a negative class prediction.
     
     Returns
     -------
-    fscore: float
+    fscore : float
         number between 0 and 1
     """
     Y = array_tools.as_2d_array(Y)

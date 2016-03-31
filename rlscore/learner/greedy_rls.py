@@ -19,22 +19,22 @@ class GreedyRLS(PredictorInterface):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    Y: {array-like}, shape = [n_samples] or [n_samples, n_labels] (if n_labels >1)
+    Y : {array-like}, shape = [n_samples] or [n_samples, n_labels] (if n_labels >1)
         Training set labels
-    regparam: float (regparam > 0)
+    regparam : float (regparam > 0)
         regularization parameter
-    subsetsize: int (0 < subsetsize <= n_labels)
+    subsetsize : int (0 < subsetsize <= n_labels)
         number of features to be selected
-    bias: float, optional
+    bias : float, optional
         value of constant feature added to each data point (default 1)
         
     Attributes
     ----------
-    selected: list, shape = [subsetsize]
+    selected : list, shape = [subsetsize]
         indices of the selected features, in the same order as they were selected
-    performances: list, shape = [subsetsize]
+    performances : list, shape = [subsetsize]
         leave-one-out (mean squared) error after adding each feature
  
     Notes

@@ -12,16 +12,16 @@ class GaussianKernel(object):
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+    X : {array-like, sparse matrix}, shape = [n_bvectors, n_features]
         Basis vectors
-    gamma: float, optional (default 1.0)
+    gamma : float, optional (default 1.0)
         Kernel width
         
     Attributes
     ----------
-    train_X: {array-like, sparse matrix}, shape = [n_bvectors, n_features]
+    train_X : {array-like, sparse matrix}, shape = [n_bvectors, n_features]
         Basis vectors
-    gamma: float
+    gamma : float
         Kernel width
         
     """
@@ -43,11 +43,11 @@ class GaussianKernel(object):
         
         Parameters
         ----------
-        X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         
         Returns
         -------
-        K: array, shape = [n_samples, n_bvectors]
+        K : array, shape = [n_samples, n_bvectors]
             kernel matrix
         """
         X = array_tools.as_2d_array(X, True)

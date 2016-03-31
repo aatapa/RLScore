@@ -17,31 +17,25 @@ class CGRLS(PredictorInterface):
     
     Trains linear RLS using the conjugate gradient training algorithm. Suitable for
     large high-dimensional but sparse data.
-    
-    In order to make training faster, one can use the early stopping technique by
-    supplying a separate validationset to be used for determining, when to terminate
-    optimization. In this case, training stops once validation set error has failed to
-    decrease for ten consecutive iterations. In this case, the caller should
-    provide the parameters validation_features and validation_labels. 
 
     Parameters
     ----------
-    X: {array-like, sparse matrix}, shape = [n_samples, n_features]
+    X : {array-like, sparse matrix}, shape = [n_samples, n_features]
         Data matrix
-    regparam: float (regparam > 0)
+    regparam : float (regparam > 0)
         regularization parameter
-    Y: {array-like}, shape = [n_samples] or [n_samples, 1]
+    Y : {array-like}, shape = [n_samples] or [n_samples, 1]
         Training set labels
-    bias: float, optional
+    bias : float, optional
         value of constant feature added to each data point (default 0)
         
     References
     ----------
     
     For an overview of regularized least-squares, and the conjugate gradient based optimization
-    scheme see  [1]_.
+    scheme see  [1].
     
-    .. [1] Ryan Rifkin
+    [1] Ryan Rifkin
     Everything old is new again : a fresh look at historical approaches in machine learning
     PhD Thesis, Massachusetts Institute of Technology, 2002
     """
@@ -57,15 +51,6 @@ class CGRLS(PredictorInterface):
         self.X_csr = self.X.tocsr()
         self.callbackfun = callbackfun
         self.results = {}
-        self.train()
-    
-    
-    def train(self):
-        """Trains the learning algorithm.
-        
-        After the learner is trained, one can call the method getModel
-        to get the trained predictor
-        """
         regparam = self.regparam
         Y = self.Y
         X = self.X
@@ -94,9 +79,6 @@ class CGRLS(PredictorInterface):
             self.A = self.A[:-1]
         #self.results['predictor'] = self.getModel()
         self.predictor = predictor.LinearPredictor(self.A, self.b)   
-
-    def predict(self, X):
-        return self.predictor.predict(X)
 
 class EarlyStopCB(object):
     

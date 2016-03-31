@@ -23,31 +23,31 @@ class TwoStepRLS(PairwisePredictorInterface):
 
     Parameters
     ----------
-    X1: {array-like}, shape = [n_samples1, n_features1] 
+    X1 : {array-like}, shape = [n_samples1, n_features1] 
         Data matrix 1 (for linear TwoStepRLS)
         
-    X2: {array-like}, shape = [n_samples2, n_features2] 
+    X2 : {array-like}, shape = [n_samples2, n_features2] 
         Data matrix 2 (for linear TwoStepRLS)
         
-    K1: {array-like}, shape = [n_samples1, n_samples1]
+    K1 : {array-like}, shape = [n_samples1, n_samples1]
         Kernel matrix 1 (for kernel TwoStepRLS)
 
-    K2: {array-like}, shape = [n_samples1, n_samples1]
+    K2 : {array-like}, shape = [n_samples1, n_samples1]
         Kernel matrix 2 (for kernel TwoStepRLS)
         
-    Y: {array-like}, shape = [n_samples1*n_samples2]
+    Y : {array-like}, shape = [n_samples1*n_samples2]
         Training set labels. Label for (X1[i], X2[j]) maps to
         Y[i + j*n_samples1] (column order).
         
-    regparam1: float
+    regparam1 : float
         regularization parameter 1, regparam1 > 0
         
-    regparam2: float
+    regparam2 : float
         regularization parameter 2, regparam2 > 0
         
     Attributes
     -----------
-    predictor: {LinearPairwisePredictor, KernelPairwisePredictor}
+    predictor : {LinearPairwisePredictor, KernelPairwisePredictor}
         trained predictor
                   
     Notes
@@ -181,7 +181,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """
@@ -218,7 +218,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """
@@ -251,7 +251,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """
@@ -285,7 +285,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """
@@ -331,7 +331,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         Returns
         -------
-        F: array, shape = [n_samples1*n_samples2]
+        F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
         """
