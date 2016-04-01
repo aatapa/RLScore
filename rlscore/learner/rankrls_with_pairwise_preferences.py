@@ -54,13 +54,13 @@ class PPRankRLS(PredictorInterface):
     -----
     
     Computational complexity of training:
-    m = n_samples, d = n_features, l = n_preferences, b = n_bvectors
+    m = n_samples, d = n_features, p = n_preferences, b = n_bvectors
     
-    O(m^3 + l): basic case
+    O(m^3 + dm^2 + p): basic case
     
-    O(TODO): Linear Kernel, d < m
+    O(dm^2 + p): Linear Kernel, d < m
     
-    O(TODO): Sparse approximation with basis vectors 
+    O(bm^2 + p): Sparse approximation with basis vectors 
      
     RankRLS algorithm was generalized in [1] to learning directly from pairwise preferences.
     

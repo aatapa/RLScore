@@ -58,7 +58,7 @@ class RLS(PredictorInterface):
     Computational complexity of training:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
-    O(m^3 + lm^2): basic case
+    O(m^3 + dm^2 + lm^2): basic case
     
     O(md^2 +lmd): Linear Kernel, d < m
     
@@ -129,9 +129,9 @@ class RLS(PredictorInterface):
         
         O(lm^2): basic case
         
-        O(ld^2): Linear Kernel, d < m
+        O(lmd): Linear Kernel, d < m
         
-        O(lb^2): Sparse approximation with basis vectors 
+        O(lmb): Sparse approximation with basis vectors 
         
         References
         ----------
@@ -180,6 +180,15 @@ class RLS(PredictorInterface):
             
         Notes
         -----
+        
+        Computational complexity of holdout:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors, h=n_hsamples
+        
+        O(h^3 + lmh): basic case
+        
+        O(min(h^3 + lh^2, d^3 + ld^2) +ldh): Linear Kernel, d < m
+        
+        O(min(h^3 + lh^2, b^3 + lb^2) +lbh): Sparse approximation with basis vectors 
         
         The fast holdout algorithm is based on results presented in [1,2]. However, the removal of basis vectors decribed in [2] is currently not implemented.
             
@@ -230,9 +239,9 @@ class RLS(PredictorInterface):
         
         O(lm^2): basic case
         
-        O(ld^2): Linear Kernel, d < m
+        O(ldm): Linear Kernel, d < m
         
-        O(lb^2): Sparse approximation with basis vectors 
+        O(lbm): Sparse approximation with basis vectors 
         
         Implements the classical leave-one-out algorithm described for example in [1].
         
@@ -295,14 +304,14 @@ class RLS(PredictorInterface):
         positive-negative pairs, while for estimating the general ranking error one should
         leave out all pairs with different labels.
         
-        Computational complexity of holdout with most pairs left out:
+        Computational complexity of leave-pair-out with most pairs left out:
         m = n_samples, d = n_features, l = n_labels, b = n_bvectors
         
         O(lm^2+m^3): basic case
         
-        O(lm^2+ld^2): Linear Kernel, d < m
+        O(lm^2+dm^2): Linear Kernel, d < m
         
-        O(lm^2+lb^2): Sparse approximation with basis vectors 
+        O(lm^2+bm^2): Sparse approximation with basis vectors 
         
         The algorithm is an adaptation of the method published originally in [1]. The use of
         leave-pair-out cross-validation for AUC estimation has been analyzed in [2].
@@ -418,13 +427,13 @@ class LeaveOneOutRLS(PredictorInterface):
     -----
     
     Computational complexity of training (model selection is basically free due to fast regularization and leave-one-out):
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r=grid_size
     
-    O(m^3 + lm^2): basic case
+    O(m^3 + dm^2 + rlm^2): basic case
     
-    O(dlm + md^2 + d^3): Linear Kernel, d < m
+    O(md^2 + rlmd): Linear Kernel, d < m
     
-    O(bml + mb^2): Sparse approximation with basis vectors 
+    O(mb^2 + rlmb): Sparse approximation with basis vectors 
      
     Basic information about RLS, and a description of the fast leave-one-out method
     can be found in [1]. 
@@ -502,15 +511,18 @@ class KfoldRLS(PredictorInterface):
     Notes
     -----
     
-    Computational complexity of training (model selection is basically free due to fast regularization and K-fold algorithms):
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    Uses fast solve and holdout algorithms, complexity depends on the sizes of the folds. Complexity
+    when using K-fold cross-validation is:
     
-    O(m^3 + lm^2): basic case
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r=grid_size, k = n_folds  
+
+    O(m^3 + dm^2 + r*(m^3/k^2 + lm^2)): basic case
     
-    O(dlm + md^2 + d^3): Linear Kernel, d < m
+    O(md^2 + r*(min(m^3/k^2 + lm^2/k, kd^3 + kld^2) + ldm)): Linear Kernel, d < m
     
-    O(bml + mb^2): Sparse approximation with basis vectors 
-     
+    O(mb^2 + r*(min(m^3/k^2 + lm^2/k, kb^3 + klb^2) + lbm)): Sparse approximation with basis vectors
+
+
     Basic information about RLS can be found in [1]. The K-fold algorithm is based on results published
     in [2] and [3].
 
@@ -596,11 +608,11 @@ class LeavePairOutRLS(PredictorInterface):
     Computational complexity of training and model selection:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r = grid_size
     
-    O(m^3 + lm^2): basic case
+    O(rlm^2 + dm^2 + rm^3): basic case
     
-    O(lm^2 + md^2): Linear Kernel, d < m
+    O(rlm^2 + rdm^2): Linear Kernel, d < m
     
-    O(lm^2 + mb^2): Sparse approximation with basis vectors 
+    O(rlm^2 + rbm^2): Sparse approximation with basis vectors 
      
     Basic information about RLS can be found in [1]. The leave-pair-out algorithm
     is an adaptation of the method published in [2]. The use of leave-pair-out

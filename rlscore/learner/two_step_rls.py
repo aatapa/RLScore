@@ -54,8 +54,11 @@ class TwoStepRLS(PairwisePredictorInterface):
     -----
     
     Computational complexity of training:
-
-    TODO
+    m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+    
+    O(mnd + mne) Linear version (assumption: d < m, e < n)
+    
+    O(m^3 + n^3) Kernel version
      
     TwoStepRLS implements the closed form solution described in [1].
     
@@ -102,6 +105,17 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         regparam2: float
             regularization parameter 2, regparam2 > 0
+            
+        Notes
+        -----    
+                
+        Computational complexity of re-training:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(ed^2 + de^2) Linear version (assumption: d < m, e < n)
+        
+        O(m^3 + n^3) Kernel version
         """
         self.regparam1 = regparam1
         self.regparam2 = regparam2
@@ -184,6 +198,17 @@ class TwoStepRLS(PairwisePredictorInterface):
         F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
+            
+        Notes
+        -----    
+                
+        Computational complexity:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(mne + mnd) Linear version (assumption: d < m, e < n)
+        
+        O(mn^2 + m^2n) Kernel version
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
@@ -288,6 +313,17 @@ class TwoStepRLS(PairwisePredictorInterface):
         F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
+            
+        Notes
+        -----    
+                
+        Computational complexity [TODO: check]:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(mne + mnd) Linear version (assumption: d < m, e < n)
+        
+        O(mn^2 + m^2n) Kernel version
         """
         
         bevals_col = np.multiply(self.evals2, self.newevals2).T

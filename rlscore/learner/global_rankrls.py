@@ -53,9 +53,9 @@ class GlobalRankRLS(PredictorInterface):
     Computational complexity of training:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
-    O(m^3 + lm^2): basic case
+    O(m^3 + dm^2 + lm^2): basic case
     
-    O(md^2 + lmd): Linear Kernel, d < m
+    O(md^2 +lmd): Linear Kernel, d < m
     
     O(mb^2 +lmb): Sparse approximation with basis vectors 
     
@@ -124,9 +124,9 @@ class GlobalRankRLS(PredictorInterface):
         
         O(lm^2): basic case
         
-        O(ld^2): Linear Kernel, d < m
+        O(lmd): Linear Kernel, d < m
         
-        O(lb^2): Sparse approximation with basis vectors 
+        O(lmb): Sparse approximation with basis vectors 
              
         """
         if not hasattr(self, "multiplyright"):
@@ -183,9 +183,14 @@ class GlobalRankRLS(PredictorInterface):
         positive-negative pairs, while for estimating the general ranking error one should
         leave out all pairs with different labels.
         
-        Computational complexity of holdout:
-        m = n_samples
-        O(m^2)
+        Computational complexity of leave-pair-out with most pairs left out:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+        
+        O(lm^2+m^3): basic case
+        
+        O(lm^2+dm^2): Linear Kernel, d < m
+        
+        O(lm^2+bm^2): Sparse approximation with basis vectors 
         
         The leave-pair-out cross-validation algorithm is described in [1,2]. The use of
         leave-pair-out cross-validation for AUC estimation has been analyzed in [3]
@@ -440,11 +445,6 @@ class GlobalRankRLS(PredictorInterface):
         Notes
         -----
     
-        Computational complexity of holdout:
-        m = n_samples, d = n_features, l = n_labels, b = n_bvectors, h = n_hsamples
-        T
-        ODO
-        
         The algorithm is a modification of the ones published in [1,2] for the regular RLS method.
         
         References
@@ -647,11 +647,13 @@ class LeavePairOutRankRLS(PredictorInterface):
     -----
     
     Computational complexity of training and model selection:
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r = grid_size
     
-    O(m^3 + lm^2): basic case
-    O(md^2 + lm^2): Linear Kernel, d < m
-    O(mb^2 +lm^2): Sparse approximation with basis vectors 
+    O(dm^2 + rlm^2 + rm^3): basic case
+    
+    O(rlm^2 + rdm^2): Linear Kernel, d < m
+    
+    O(rlm^2 + rbm^2): Sparse approximation with basis vectors 
     
      
     RankRLS algorithm is described in [1,2].
@@ -722,14 +724,6 @@ class KfoldRankRLS(PredictorInterface):
            
     Notes
     -----
-    
-    Computational complexity of training and model selection:
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
-    
-    O(m^3 + lm^2): basic case
-    O(md^2 + lmd): Linear Kernel, d < m
-    O(mb^2 +lmb): Sparse approximation with basis vectors 
-    
      
     RankRLS algorithm is described in [1,2]. 
     

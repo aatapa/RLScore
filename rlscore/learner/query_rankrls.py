@@ -56,9 +56,9 @@ class QueryRankRLS(PredictorInterface):
     Computational complexity of training:
     m = n_samples, d = n_features, l = n_labels, b = n_bvectors
     
-    O(m^3 + lm^2): basic case
+    O(m^3 + dm^2 + lm^2): basic case
     
-    O(md^2 + lmd): Linear Kernel, d < m
+    O(md^2 +lmd): Linear Kernel, d < m
     
     O(mb^2 +lmb): Sparse approximation with basis vectors 
 
@@ -105,6 +105,18 @@ class QueryRankRLS(PredictorInterface):
         ----------
         regparam : float (regparam > 0)
             regularization parameter
+            
+        Notes
+        -----
+    
+        Computational complexity of re-training:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+        
+        O(lm^2): basic case
+        
+        O(lmd): Linear Kernel, d < m
+        
+        O(lmb): Sparse approximation with basis vectors 
         """
         if not hasattr(self, "D"):
             qidlist = self.qids
@@ -180,6 +192,18 @@ class QueryRankRLS(PredictorInterface):
         -------
         F : array, shape = [n_hsamples, n_labels]
             holdout query predictions
+            
+        Notes
+        -----
+        
+        Computational complexity of holdout:
+        m = n_samples, d = n_features, l = n_labels, b = n_bvectors, h=n_hsamples
+        
+        O(h^3 + lmh): basic case
+        
+        O(min(h^3 + lh^2, d^3 + ld^2) +ldh): Linear Kernel, d < m
+        
+        O(min(h^3 + lh^2, b^3 + lb^2) +lbh): Sparse approximation with basis vectors 
         """
         indices = array_tools.as_index_list(indices, self.Y.shape[0])
         if len(indices) == 0:
@@ -261,14 +285,19 @@ class LeaveQueryOutRankRLS(PredictorInterface):
     Notes
     -----
 
-    Computational complexity of training:
-    m = n_samples, d = n_features, l = n_labels, b = n_bvectors
+    Notes
+    -----
     
-    O(m^3 + lm^2): basic case
+    Uses fast solve and holdout algorithms, complexity depends on the sizes of the queries.
+    Complexity is:
     
-    O(md^2 + lmd): Linear Kernel, d < m
+    m = n_samples, d = n_features, l = n_labels, b = n_bvectors, r=grid_size, k = n_queries  
+
+    O(m^3 + dm^2 + r*(m^3/k^2 + lm^2)): basic case
     
-    O(mb^2 +lmb): Sparse approximation with basis vectors 
+    O(md^2 + r*(min(m^3/k^2 + lm^2/k, kd^3 + kld^2) + ldm)): Linear Kernel, d < m
+    
+    O(mb^2 + r*(min(m^3/k^2 + lm^2/k, kb^3 + klb^2) + lbm)): Sparse approximation with basis vectors
         
     RankRLS algorithm was first introduced in [1], extended version of the work and the
     efficient  leave-query-out cross-validation method implemented in

@@ -40,6 +40,11 @@ class GreedyRLS(PredictorInterface):
     Notes
     -----
     
+    Computational complexity of training:
+    m = n_samples, d = n_features, k = subsetsize, l = n_labels
+    
+    O(mdkl)
+    
     Greedy RLS is described in  [1,2]. The extension of the method to multi-target learning
     was considered in [3].
     

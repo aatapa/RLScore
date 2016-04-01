@@ -51,8 +51,12 @@ class KronRLS(PairwisePredictorInterface):
     -----
     
     Computational complexity of training:
-
-    TODO
+    m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+    
+    O(mnd + mne) Linear version (assumption: d < m, e < n)
+    
+    O(m^3 + n^3) Kernel version
+    
      
     KronRLS implements the closed form solution described in [1,2]. In the publications only special case
     X1 = X2 (or equivalently K1 = K2) is considered, while this implementation also allows the two sets
@@ -108,6 +112,17 @@ class KronRLS(PairwisePredictorInterface):
         ----------
         regparam : float, optional
             regularization parameter, regparam > 0
+
+        Notes
+        -----    
+                
+        Computational complexity of re-training:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(ed^2 + de^2) Linear version (assumption: d < m, e < n)
+        
+        O(m^3 + n^3) Kernel version
         """
         self.regparam = regparam
         if self.kernelmode:
@@ -222,6 +237,17 @@ class KronRLS(PairwisePredictorInterface):
         F : array, shape = [n_samples1*n_samples2]
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
+            
+        Notes
+        -----    
+                
+        Computational complexity of leave-one-out:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(mne + mnd) Linear version (assumption: d < m, e < n)
+        
+        O(mn^2 + m^2n) Kernel version
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
