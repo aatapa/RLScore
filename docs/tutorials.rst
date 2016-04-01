@@ -11,3 +11,4 @@ Tutorials
    tutorial_kernels
    tutorial_prediction
    tutorial_measure
+   tutorial_sparse

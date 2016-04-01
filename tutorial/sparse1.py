@@ -13,7 +13,7 @@ def train_rls():
     rls = CGRLS(X_train, Y_train[:,0], regparam= 100.0)
     P = rls.predict(X_test)
     perf = auc(Y_test[:,0], P)
-    print "auc for task 1", perf 
+    print("auc for task 1 %f" %perf) 
 
 
 if __name__=="__main__":
