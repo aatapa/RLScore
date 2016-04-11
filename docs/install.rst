@@ -5,7 +5,9 @@ Installation
 Requirements
 ============
 
-Python 2.7x, NumPy and SciPy packages, and a working c-compiler for building extensions are needed for installing RLScore. `Anaconda <https://www.continuum.io/downloads>`_ is a recommended Python distribution, available for Windows, OS X and Linux, that includes all the required dependencies.
+Python 2.7x, NumPy and SciPy packages, and a working c-compiler for building extensions are needed for installing RLScore.
+
+For example `Anaconda <https://www.continuum.io/downloads>`_ is a Python distribution, available for Windows, OS X and Linux, that includes the required dependencies. For Windows, you need to also install `Microsoft Visual C++ Compiler for Python <http://www.microsoft.com/en-us/download/details.aspx?id=44266>`_.
 
 Installation
 ============

@@ -4,7 +4,7 @@ import numpy as np
 from rlscore import predictor
 from rlscore.utilities import array_tools
 #import pyximport; pyximport.install()
-import cython_greedy_rls
+from rlscore.learner import _greedy_rls
 from rlscore.predictor import PredictorInterface
 
 SELECTED_FEATURES = 'selected_features'
@@ -168,7 +168,7 @@ class GreedyRLS(PredictorInterface):
             #print Y.dtype, X.dtype, GXT.dtype, diagG.dtype, self.dualvec.dtype
             self.looperf = np.ones(fsize) * float('Inf')
             #'''
-            bestcind = cython_greedy_rls.find_optimal_feature(np.array(Y),
+            bestcind = _greedy_rls.find_optimal_feature(np.array(Y),
                                                               np.array(X),
                                                               np.array(GXT),
                                                               diagG,

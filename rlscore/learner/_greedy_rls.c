@@ -234,8 +234,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__rlscore__learner__cython_greedy_rls
-#define __PYX_HAVE_API__rlscore__learner__cython_greedy_rls
+#define __PYX_HAVE__rlscore__learner___greedy_rls
+#define __PYX_HAVE_API__rlscore__learner___greedy_rls
 #include "pythread.h"
 #include "string.h"
 #include "stdlib.h"
@@ -449,7 +449,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "rlscore/learner/cython_greedy_rls.pyx",
+  "rlscore/learner/_greedy_rls.pyx",
   "stringsource",
 };
 struct __pyx_memoryview_obj;
@@ -1057,7 +1057,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 
 /* Module declarations from 'cython' */
 
-/* Module declarations from 'rlscore.learner.cython_greedy_rls' */
+/* Module declarations from 'rlscore.learner._greedy_rls' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
@@ -1067,7 +1067,7 @@ static PyObject *strided = 0;
 static PyObject *indirect = 0;
 static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
-static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int, int, int, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static int __pyx_f_7rlscore_7learner_11_greedy_rls_find_optimal_feature(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int, int, int, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -1102,10 +1102,10 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_short = { "short", NULL, sizeof(short), { 0 }, 0, IS_UNSIGNED(short) ? 'U' : 'I', IS_UNSIGNED(short), 0 };
-#define __Pyx_MODULE_NAME "rlscore.learner.cython_greedy_rls"
-int __pyx_module_is_main_rlscore__learner__cython_greedy_rls = 0;
+#define __Pyx_MODULE_NAME "rlscore.learner._greedy_rls"
+int __pyx_module_is_main_rlscore__learner___greedy_rls = 0;
 
-/* Implementation of 'rlscore.learner.cython_greedy_rls' */
+/* Implementation of 'rlscore.learner._greedy_rls' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_MemoryError;
@@ -1270,7 +1270,7 @@ static PyObject *__pyx_n_s_tsize;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
-static PyObject *__pyx_pf_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3); /* proto */
+static PyObject *__pyx_pf_7rlscore_7learner_11_greedy_rls_find_optimal_feature(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -1329,7 +1329,7 @@ static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__17;
 static PyObject *__pyx_tuple__18;
 
-/* "rlscore/learner/cython_greedy_rls.pyx":10
+/* "rlscore/learner/_greedy_rls.pyx":10
  * 
  * 
  * cpdef int find_optimal_feature(double [:, :] Y,             # <<<<<<<<<<<<<<
@@ -1337,8 +1337,8 @@ static PyObject *__pyx_tuple__18;
  *                          double [:, :] GXT,
  */
 
-static PyObject *__pyx_pw_7rlscore_7learner_17cython_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CYTHON_UNUSED __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_7rlscore_7learner_11_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_f_7rlscore_7learner_11_greedy_rls_find_optimal_feature(CYTHON_UNUSED __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_v_inf;
   double __pyx_v_temp_d1;
   double __pyx_v_bestlooperf;
@@ -1400,7 +1400,7 @@ static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CY
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("find_optimal_feature", 0);
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":27
+  /* "rlscore/learner/_greedy_rls.pyx":27
  *     cdef int ci, bestcind, i, j
  * 
  *     inf = float('Inf')             # <<<<<<<<<<<<<<
@@ -1410,7 +1410,7 @@ static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CY
   __pyx_t_1 = __Pyx_PyObject_AsDouble(__pyx_n_s_Inf); if (unlikely(__pyx_t_1 == ((double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_inf = __pyx_t_1;
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":28
+  /* "rlscore/learner/_greedy_rls.pyx":28
  * 
  *     inf = float('Inf')
  *     bestlooperf = inf             # <<<<<<<<<<<<<<
@@ -1419,7 +1419,7 @@ static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CY
  */
   __pyx_v_bestlooperf = __pyx_v_inf;
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":30
+  /* "rlscore/learner/_greedy_rls.pyx":30
  *     bestlooperf = inf
  * 
  *     for ci in range(fsize):             # <<<<<<<<<<<<<<
@@ -1430,7 +1430,7 @@ static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CY
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_ci = __pyx_t_3;
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":31
+    /* "rlscore/learner/_greedy_rls.pyx":31
  * 
  *     for ci in range(fsize):
  *         if selected[ci] > 0: continue             # <<<<<<<<<<<<<<
@@ -1443,7 +1443,7 @@ static int __pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CY
       goto __pyx_L3_continue;
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":32
+    /* "rlscore/learner/_greedy_rls.pyx":32
  *     for ci in range(fsize):
  *         if selected[ci] > 0: continue
  *         GXT_ci = GXT[:, ci]             # <<<<<<<<<<<<<<
@@ -1476,7 +1476,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     __Pyx_XDECREF_SET(__pyx_v_GXT_ci, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":33
+    /* "rlscore/learner/_greedy_rls.pyx":33
  *         if selected[ci] > 0: continue
  *         GXT_ci = GXT[:, ci]
  *         temp_d1 = 0.             # <<<<<<<<<<<<<<
@@ -1485,7 +1485,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
  */
     __pyx_v_temp_d1 = 0.;
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":34
+    /* "rlscore/learner/_greedy_rls.pyx":34
  *         GXT_ci = GXT[:, ci]
  *         temp_d1 = 0.
  *         for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1496,7 +1496,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_i = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":35
+      /* "rlscore/learner/_greedy_rls.pyx":35
  *         temp_d1 = 0.
  *         for i in range(tsize):
  *             temp_d1 += X[ci, i] * GXT[i, ci]             # <<<<<<<<<<<<<<
@@ -1510,7 +1510,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       __pyx_v_temp_d1 = (__pyx_v_temp_d1 + ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_X.data + __pyx_t_10 * __pyx_v_X.strides[0]) ) + __pyx_t_11 * __pyx_v_X.strides[1]) ))) * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_GXT.data + __pyx_t_12 * __pyx_v_GXT.strides[0]) ) + __pyx_t_13 * __pyx_v_GXT.strides[1]) )))));
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":37
+    /* "rlscore/learner/_greedy_rls.pyx":37
  *             temp_d1 += X[ci, i] * GXT[i, ci]
  *         #print np.dot(cv, GXT_ci), temp_d1
  *         temp_d1 = 1. / (1. + temp_d1)             # <<<<<<<<<<<<<<
@@ -1524,7 +1524,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     }
     __pyx_v_temp_d1 = (1. / __pyx_t_1);
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":38
+    /* "rlscore/learner/_greedy_rls.pyx":38
  *         #print np.dot(cv, GXT_ci), temp_d1
  *         temp_d1 = 1. / (1. + temp_d1)
  *         for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1535,7 +1535,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_i = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":39
+      /* "rlscore/learner/_greedy_rls.pyx":39
  *         temp_d1 = 1. / (1. + temp_d1)
  *         for i in range(tsize):
  *             tempvec1[i] = GXT[i, ci] * temp_d1             # <<<<<<<<<<<<<<
@@ -1548,7 +1548,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       *((double *) ( /* dim=0 */ (__pyx_v_tempvec1.data + __pyx_t_16 * __pyx_v_tempvec1.strides[0]) )) = ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_GXT.data + __pyx_t_14 * __pyx_v_GXT.strides[0]) ) + __pyx_t_15 * __pyx_v_GXT.strides[1]) ))) * __pyx_v_temp_d1);
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":41
+    /* "rlscore/learner/_greedy_rls.pyx":41
  *             tempvec1[i] = GXT[i, ci] * temp_d1
  * 
  *         for j in range(lsize):             # <<<<<<<<<<<<<<
@@ -1559,7 +1559,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_j = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":42
+      /* "rlscore/learner/_greedy_rls.pyx":42
  * 
  *         for j in range(lsize):
  *             tempvec2[j] = 0.             # <<<<<<<<<<<<<<
@@ -1569,7 +1569,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       __pyx_t_17 = __pyx_v_j;
       *((double *) ( /* dim=0 */ (__pyx_v_tempvec2.data + __pyx_t_17 * __pyx_v_tempvec2.strides[0]) )) = 0.;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":43
+      /* "rlscore/learner/_greedy_rls.pyx":43
  *         for j in range(lsize):
  *             tempvec2[j] = 0.
  *             for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1580,7 +1580,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_i = __pyx_t_19;
 
-        /* "rlscore/learner/cython_greedy_rls.pyx":44
+        /* "rlscore/learner/_greedy_rls.pyx":44
  *             tempvec2[j] = 0.
  *             for i in range(tsize):
  *                 tempvec2[j] += X[ci, i] * dualvec[i, j]             # <<<<<<<<<<<<<<
@@ -1596,7 +1596,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       }
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":45
+    /* "rlscore/learner/_greedy_rls.pyx":45
  *             for i in range(tsize):
  *                 tempvec2[j] += X[ci, i] * dualvec[i, j]
  *         for j in range(lsize):             # <<<<<<<<<<<<<<
@@ -1607,7 +1607,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_j = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":46
+      /* "rlscore/learner/_greedy_rls.pyx":46
  *                 tempvec2[j] += X[ci, i] * dualvec[i, j]
  *         for j in range(lsize):
  *             for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1618,7 +1618,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_i = __pyx_t_19;
 
-        /* "rlscore/learner/cython_greedy_rls.pyx":47
+        /* "rlscore/learner/_greedy_rls.pyx":47
  *         for j in range(lsize):
  *             for i in range(tsize):
  *                 tempvec3[i, j] = dualvec[i, j] - tempvec1[i] * tempvec2[j]             # <<<<<<<<<<<<<<
@@ -1635,7 +1635,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       }
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":50
+    /* "rlscore/learner/_greedy_rls.pyx":50
  *         #updA = dualvec - np.dot(tempvec1[:, None], np.dot(cv, dualvec)[None, :])
  * 
  *         for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1646,7 +1646,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_i = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":51
+      /* "rlscore/learner/_greedy_rls.pyx":51
  * 
  *         for i in range(tsize):
  *             tempvec1[i] = 1. / (diagG[i] - tempvec1[i] * GXT[i, ci])             # <<<<<<<<<<<<<<
@@ -1666,7 +1666,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       *((double *) ( /* dim=0 */ (__pyx_v_tempvec1.data + __pyx_t_35 * __pyx_v_tempvec1.strides[0]) )) = (1. / __pyx_t_1);
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":54
+    /* "rlscore/learner/_greedy_rls.pyx":54
  *         #invupddiagG = 1. / (diagG - np.multiply(tempvec1, GXT_ci))
  * 
  *         for j in range(lsize):             # <<<<<<<<<<<<<<
@@ -1677,7 +1677,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_j = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":55
+      /* "rlscore/learner/_greedy_rls.pyx":55
  * 
  *         for j in range(lsize):
  *             for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1688,7 +1688,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_i = __pyx_t_19;
 
-        /* "rlscore/learner/cython_greedy_rls.pyx":56
+        /* "rlscore/learner/_greedy_rls.pyx":56
  *         for j in range(lsize):
  *             for i in range(tsize):
  *                 tempvec3[i, j] = tempvec1[i] * tempvec3[i, j]             # <<<<<<<<<<<<<<
@@ -1704,7 +1704,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       }
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":59
+    /* "rlscore/learner/_greedy_rls.pyx":59
  *         #loodiff = np.multiply(invupddiagG[:, None], updA)
  * 
  *         temp_d1 = 0.             # <<<<<<<<<<<<<<
@@ -1713,7 +1713,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
  */
     __pyx_v_temp_d1 = 0.;
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":60
+    /* "rlscore/learner/_greedy_rls.pyx":60
  * 
  *         temp_d1 = 0.
  *         for j in range(lsize):             # <<<<<<<<<<<<<<
@@ -1724,7 +1724,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_j = __pyx_t_9;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":61
+      /* "rlscore/learner/_greedy_rls.pyx":61
  *         temp_d1 = 0.
  *         for j in range(lsize):
  *             for i in range(tsize):             # <<<<<<<<<<<<<<
@@ -1735,7 +1735,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_i = __pyx_t_19;
 
-        /* "rlscore/learner/cython_greedy_rls.pyx":62
+        /* "rlscore/learner/_greedy_rls.pyx":62
  *         for j in range(lsize):
  *             for i in range(tsize):
  *                 temp_d1 += tempvec3[i, j] * tempvec3[i, j]             # <<<<<<<<<<<<<<
@@ -1750,7 +1750,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
       }
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":63
+    /* "rlscore/learner/_greedy_rls.pyx":63
  *             for i in range(tsize):
  *                 temp_d1 += tempvec3[i, j] * tempvec3[i, j]
  *         temp_d1 = temp_d1 / (tsize * lsize)             # <<<<<<<<<<<<<<
@@ -1764,7 +1764,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     }
     __pyx_v_temp_d1 = (__pyx_v_temp_d1 / __pyx_t_8);
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":66
+    /* "rlscore/learner/_greedy_rls.pyx":66
  *         #looperf_i = np.mean(np.multiply(loodiff, loodiff))
  * 
  *         if temp_d1 < bestlooperf:             # <<<<<<<<<<<<<<
@@ -1774,7 +1774,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     __pyx_t_5 = ((__pyx_v_temp_d1 < __pyx_v_bestlooperf) != 0);
     if (__pyx_t_5) {
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":67
+      /* "rlscore/learner/_greedy_rls.pyx":67
  * 
  *         if temp_d1 < bestlooperf:
  *             bestcind = ci             # <<<<<<<<<<<<<<
@@ -1783,7 +1783,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
  */
       __pyx_v_bestcind = __pyx_v_ci;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":68
+      /* "rlscore/learner/_greedy_rls.pyx":68
  *         if temp_d1 < bestlooperf:
  *             bestcind = ci
  *             bestlooperf = temp_d1             # <<<<<<<<<<<<<<
@@ -1792,7 +1792,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
  */
       __pyx_v_bestlooperf = __pyx_v_temp_d1;
 
-      /* "rlscore/learner/cython_greedy_rls.pyx":66
+      /* "rlscore/learner/_greedy_rls.pyx":66
  *         #looperf_i = np.mean(np.multiply(loodiff, loodiff))
  * 
  *         if temp_d1 < bestlooperf:             # <<<<<<<<<<<<<<
@@ -1801,7 +1801,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
  */
     }
 
-    /* "rlscore/learner/cython_greedy_rls.pyx":69
+    /* "rlscore/learner/_greedy_rls.pyx":69
  *             bestcind = ci
  *             bestlooperf = temp_d1
  *         looperf[ci] = temp_d1             # <<<<<<<<<<<<<<
@@ -1813,7 +1813,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
     __pyx_L3_continue:;
   }
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":70
+  /* "rlscore/learner/_greedy_rls.pyx":70
  *             bestlooperf = temp_d1
  *         looperf[ci] = temp_d1
  *     selected[bestcind] = 1             # <<<<<<<<<<<<<<
@@ -1823,7 +1823,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
   __pyx_t_46 = __pyx_v_bestcind;
   *((short *) ( /* dim=0 */ (__pyx_v_selected.data + __pyx_t_46 * __pyx_v_selected.strides[0]) )) = 1;
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":71
+  /* "rlscore/learner/_greedy_rls.pyx":71
  *         looperf[ci] = temp_d1
  *     selected[bestcind] = 1
  *     return bestcind             # <<<<<<<<<<<<<<
@@ -1833,7 +1833,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
   __pyx_r = __pyx_v_bestcind;
   goto __pyx_L0;
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":10
+  /* "rlscore/learner/_greedy_rls.pyx":10
  * 
  * 
  * cpdef int find_optimal_feature(double [:, :] Y,             # <<<<<<<<<<<<<<
@@ -1845,7 +1845,7 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
   __pyx_L1_error:;
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_WriteUnraisable("rlscore.learner.cython_greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename, 0, 0);
+  __Pyx_WriteUnraisable("rlscore.learner._greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename, 0, 0);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_GXT_ci);
@@ -1854,8 +1854,8 @@ __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __p
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7rlscore_7learner_17cython_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_7rlscore_7learner_17cython_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7rlscore_7learner_11_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7rlscore_7learner_11_greedy_rls_1find_optimal_feature(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_Y = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_X = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_GXT = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2002,18 +2002,18 @@ static PyObject *__pyx_pw_7rlscore_7learner_17cython_greedy_rls_1find_optimal_fe
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("find_optimal_feature", 1, 13, 13, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("rlscore.learner.cython_greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rlscore.learner._greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(__pyx_self, __pyx_v_Y, __pyx_v_X, __pyx_v_GXT, __pyx_v_diagG, __pyx_v_dualvec, __pyx_v_looperf, __pyx_v_fsize, __pyx_v_tsize, __pyx_v_lsize, __pyx_v_selected, __pyx_v_tempvec1, __pyx_v_tempvec2, __pyx_v_tempvec3);
+  __pyx_r = __pyx_pf_7rlscore_7learner_11_greedy_rls_find_optimal_feature(__pyx_self, __pyx_v_Y, __pyx_v_X, __pyx_v_GXT, __pyx_v_diagG, __pyx_v_dualvec, __pyx_v_looperf, __pyx_v_fsize, __pyx_v_tsize, __pyx_v_lsize, __pyx_v_selected, __pyx_v_tempvec1, __pyx_v_tempvec2, __pyx_v_tempvec3);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3) {
+static PyObject *__pyx_pf_7rlscore_7learner_11_greedy_rls_find_optimal_feature(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_Y, __Pyx_memviewslice __pyx_v_X, __Pyx_memviewslice __pyx_v_GXT, __Pyx_memviewslice __pyx_v_diagG, __Pyx_memviewslice __pyx_v_dualvec, __Pyx_memviewslice __pyx_v_looperf, int __pyx_v_fsize, int __pyx_v_tsize, int __pyx_v_lsize, __Pyx_memviewslice __pyx_v_selected, __Pyx_memviewslice __pyx_v_tempvec1, __Pyx_memviewslice __pyx_v_tempvec2, __Pyx_memviewslice __pyx_v_tempvec3) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2032,7 +2032,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_17cython_greedy_rls_find_optimal_fea
   if (unlikely(!__pyx_v_tempvec1.memview)) { __Pyx_RaiseUnboundLocalError("tempvec1"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
   if (unlikely(!__pyx_v_tempvec2.memview)) { __Pyx_RaiseUnboundLocalError("tempvec2"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
   if (unlikely(!__pyx_v_tempvec3.memview)) { __Pyx_RaiseUnboundLocalError("tempvec3"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_7rlscore_7learner_17cython_greedy_rls_find_optimal_feature(__pyx_v_Y, __pyx_v_X, __pyx_v_GXT, __pyx_v_diagG, __pyx_v_dualvec, __pyx_v_looperf, __pyx_v_fsize, __pyx_v_tsize, __pyx_v_lsize, __pyx_v_selected, __pyx_v_tempvec1, __pyx_v_tempvec2, __pyx_v_tempvec3, 0)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_7rlscore_7learner_11_greedy_rls_find_optimal_feature(__pyx_v_Y, __pyx_v_X, __pyx_v_GXT, __pyx_v_diagG, __pyx_v_dualvec, __pyx_v_looperf, __pyx_v_fsize, __pyx_v_tsize, __pyx_v_lsize, __pyx_v_selected, __pyx_v_tempvec1, __pyx_v_tempvec2, __pyx_v_tempvec3, 0)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2041,7 +2041,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_17cython_greedy_rls_find_optimal_fea
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("rlscore.learner.cython_greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rlscore.learner._greedy_rls.find_optimal_feature", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_Y, 1);
@@ -13697,7 +13697,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rlscore.learner.cython_greedy_rls.array", /*tp_name*/
+  "rlscore.learner._greedy_rls.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -13803,7 +13803,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rlscore.learner.cython_greedy_rls.Enum", /*tp_name*/
+  "rlscore.learner._greedy_rls.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -14050,7 +14050,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rlscore.learner.cython_greedy_rls.memoryview", /*tp_name*/
+  "rlscore.learner._greedy_rls.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -14175,7 +14175,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rlscore.learner.cython_greedy_rls._memoryviewslice", /*tp_name*/
+  "rlscore.learner._greedy_rls._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -14240,7 +14240,7 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
-  {"find_optimal_feature", (PyCFunction)__pyx_pw_7rlscore_7learner_17cython_greedy_rls_1find_optimal_feature, METH_VARARGS|METH_KEYWORDS, 0},
+  {"find_optimal_feature", (PyCFunction)__pyx_pw_7rlscore_7learner_11_greedy_rls_1find_optimal_feature, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -14251,7 +14251,7 @@ static struct PyModuleDef __pyx_moduledef = {
   #else
     PyModuleDef_HEAD_INIT,
   #endif
-    "cython_greedy_rls",
+    "_greedy_rls",
     0, /* m_doc */
     -1, /* m_size */
     __pyx_methods /* m_methods */,
@@ -14577,11 +14577,11 @@ static int __Pyx_InitGlobals(void) {
 }
 
 #if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC initcython_greedy_rls(void); /*proto*/
-PyMODINIT_FUNC initcython_greedy_rls(void)
+PyMODINIT_FUNC init_greedy_rls(void); /*proto*/
+PyMODINIT_FUNC init_greedy_rls(void)
 #else
-PyMODINIT_FUNC PyInit_cython_greedy_rls(void); /*proto*/
-PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
+PyMODINIT_FUNC PyInit__greedy_rls(void); /*proto*/
+PyMODINIT_FUNC PyInit__greedy_rls(void)
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
@@ -14598,7 +14598,7 @@ PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
           Py_FatalError("failed to import 'refnanny' module");
   }
   #endif
-  __Pyx_RefNannySetupContext("PyMODINIT_FUNC PyInit_cython_greedy_rls(void)", 0);
+  __Pyx_RefNannySetupContext("PyMODINIT_FUNC PyInit__greedy_rls(void)", 0);
   if (__Pyx_check_binary_version() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -14626,7 +14626,7 @@ PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
   #endif
   /*--- Module creation code ---*/
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("cython_greedy_rls", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("_greedy_rls", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -14643,14 +14643,14 @@ PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
-  if (__pyx_module_is_main_rlscore__learner__cython_greedy_rls) {
+  if (__pyx_module_is_main_rlscore__learner___greedy_rls) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    if (!PyDict_GetItemString(modules, "rlscore.learner.cython_greedy_rls")) {
-      if (unlikely(PyDict_SetItemString(modules, "rlscore.learner.cython_greedy_rls", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!PyDict_GetItemString(modules, "rlscore.learner._greedy_rls")) {
+      if (unlikely(PyDict_SetItemString(modules, "rlscore.learner._greedy_rls", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
   }
   #endif
@@ -14702,7 +14702,7 @@ PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
   if (__Pyx_patch_abc() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
 
-  /* "rlscore/learner/cython_greedy_rls.pyx":3
+  /* "rlscore/learner/_greedy_rls.pyx":3
  * 
  * 
  * import cython             # <<<<<<<<<<<<<<
@@ -14838,11 +14838,11 @@ PyMODINIT_FUNC PyInit_cython_greedy_rls(void)
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init rlscore.learner.cython_greedy_rls", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init rlscore.learner._greedy_rls", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init rlscore.learner.cython_greedy_rls");
+    PyErr_SetString(PyExc_ImportError, "init rlscore.learner._greedy_rls");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

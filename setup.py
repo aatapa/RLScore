@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 import numpy as np
-import sys
 
 USE_CYTHON = False
 ext = '.pyx' if USE_CYTHON else '.c'
@@ -13,8 +12,9 @@ ext_modules = [
     Extension("rlscore.learner.cython_pairwise_cv_for_rls",["rlscore/learner/cython_pairwise_cv_for_rls"+ext]),
     Extension("rlscore.learner.cython_pairwise_cv_for_global_rankrls",["rlscore/learner/cython_pairwise_cv_for_global_rankrls"+ext]),
     Extension("rlscore.learner.cython_two_step_rls_cv",["rlscore/learner/cython_two_step_rls_cv"+ext]),
-    Extension("rlscore.learner.cython_mmc",["rlscore/learner/cython_mmc"+ext]),
-    Extension("rlscore.learner.cython_greedy_rls",["rlscore/learner/cython_greedy_rls"+ext]),
+    Extension("rlscore.learner._steepest_descent_mmc",["rlscore/learner/_steepest_descent_mmc"+ext]),
+    Extension("rlscore.learner._interactive_rls_classifier",["rlscore/learner/_interactive_rls_classifier"+ext]),
+    Extension("rlscore.learner._greedy_rls",["rlscore/learner/_greedy_rls"+ext]),
     Extension("rlscore.utilities._sampled_kronecker_products",["rlscore/utilities/_sampled_kronecker_products"+ext])
 ]
 
@@ -23,12 +23,11 @@ if USE_CYTHON:
     ext_modules = cythonize(ext_modules)
 
 setup(
-    name = 'RLScore',
+    name = 'rlscore',
+    description = 'machine learning package',
     url = "https://github.com/aatapa/RLScore",
-    version = "0.93",
+    version = "0.931",
     license = "MIT",
-    #setup_requires=["numpy"],
-    #install_requires=["numpy", "scipy"],
     include_dirs = [np.get_include()],
     ext_modules = ext_modules,
     packages = find_packages(),
