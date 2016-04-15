@@ -427,7 +427,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         #print HO_row.shape
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
-        cython_two_step_rls_cv.out_of_sample_loo_symmetric(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
+        _two_step_rls.out_of_sample_loo_symmetric(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results.ravel(order = 'F')
 
 

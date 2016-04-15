@@ -343,7 +343,7 @@ class RLS(PredictorInterface):
         svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
-        cython_pairwise_cv_for_rls.leave_pair_out(pairslen,
+        _rls.leave_pair_out(pairslen,
                                                      pairs_start_inds,
                                                      pairs_end_inds,
                                                      self.Y.shape[1],

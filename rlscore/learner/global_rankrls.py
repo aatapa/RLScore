@@ -230,7 +230,7 @@ class GlobalRankRLS(PredictorInterface):
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
         
-        cython_pairwise_cv_for_global_rankrls.leave_pair_out(pairslen,
+        _global_rankrls.leave_pair_out(pairslen,
                                                              self.Y.shape[0],
                                                              pairs_start_inds,
                                                              pairs_end_inds,
