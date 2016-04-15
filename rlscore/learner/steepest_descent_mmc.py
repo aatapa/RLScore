@@ -1,7 +1,7 @@
 
 #import pyximport; pyximport.install()
 
-import cython_mmc
+import _steepest_descent_mmc
 import numpy as np
 import random as pyrandom
 pyrandom.seed(200)
@@ -237,7 +237,7 @@ class SteepestDescentMMC(object):
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):
         #print self.Y.shape,self.R.shape, self.RY.shape, self.Y_Schur_RY.shape, self.classFitnessRowVec.shape, self.mdiagRx2.shape, self.classcounts.shape, self.classvec.shape
-        cython_mmc.findSteepestDirRotateClasses(self.Y,
+        _steepest_descent_mmc.findSteepestDirRotateClasses(self.Y,
                                                 self.R,
                                                 self.RY,
                                                 self.Y_Schur_RY,
