@@ -9,9 +9,9 @@ ext = '.pyx' if USE_CYTHON else '.c'
 
 ext_modules = [
     Extension("rlscore.utilities.swapped",["rlscore/utilities/swapped"+ext]),
-    Extension("rlscore.learner.cython_pairwise_cv_for_rls",["rlscore/learner/cython_pairwise_cv_for_rls"+ext]),
-    Extension("rlscore.learner.cython_pairwise_cv_for_global_rankrls",["rlscore/learner/cython_pairwise_cv_for_global_rankrls"+ext]),
-    Extension("rlscore.learner.cython_two_step_rls_cv",["rlscore/learner/cython_two_step_rls_cv"+ext]),
+    Extension("rlscore.learner._rls",["rlscore/learner/_rls"+ext]),
+    Extension("rlscore.learner._global_rankrls",["rlscore/learner/_global_rankrls"+ext]),
+    Extension("rlscore.learner._two_step_rls_cv",["rlscore/learner/_two_step_rls_cv"+ext]),
     Extension("rlscore.learner._steepest_descent_mmc",["rlscore/learner/_steepest_descent_mmc"+ext]),
     Extension("rlscore.learner._interactive_rls_classifier",["rlscore/learner/_interactive_rls_classifier"+ext]),
     Extension("rlscore.learner._greedy_rls",["rlscore/learner/_greedy_rls"+ext]),

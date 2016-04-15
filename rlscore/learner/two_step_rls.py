@@ -9,7 +9,7 @@ from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
 
 
-import cython_two_step_rls_cv
+import _two_step_rls
 
 from rlscore.pairwise_predictor import PairwisePredictorInterface
 from rlscore.pairwise_predictor import LinearPairwisePredictor

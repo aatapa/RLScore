@@ -10,7 +10,7 @@ from rlscore.measure import cindex
 from rlscore.learner.rls import NfoldCV
 from rlscore.learner.rls import LPOCV
 
-import cython_pairwise_cv_for_global_rankrls
+import _global_rankrls
 
 class GlobalRankRLS(PredictorInterface):
     """RankRLS: Regularized least-squares ranking.

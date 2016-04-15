@@ -3,7 +3,7 @@ from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
 from rlscore.utilities import array_tools 
 from rlscore.utilities import creators
-import cython_pairwise_cv_for_rls
+import _rls
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.measure import sqerror
