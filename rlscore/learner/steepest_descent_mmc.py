@@ -1,10 +1,9 @@
 
-#import pyximport; pyximport.install()
-
-import _steepest_descent_mmc
 import numpy as np
 import random as pyrandom
 pyrandom.seed(200)
+
+import _steepest_descent_mmc
 
 from rlscore.utilities import creators
 from rlscore.utilities import array_tools

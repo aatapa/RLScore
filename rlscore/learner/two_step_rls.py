@@ -1,6 +1,4 @@
 
-#import pyximport; pyximport.install()
-
 import numpy as np
 #import numpy.linalg as la
 
