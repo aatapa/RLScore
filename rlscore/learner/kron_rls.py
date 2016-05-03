@@ -1,17 +1,12 @@
 
-import pyximport; pyximport.install()
-
 import numpy as np
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
 from rlscore.utilities import decomposition
-
 from rlscore.utilities import sampled_kronecker_products
-
 from rlscore.pairwise_predictor import LinearPairwisePredictor
 from rlscore.pairwise_predictor import KernelPairwisePredictor
-
 from rlscore.pairwise_predictor import PairwisePredictorInterface
 
 class KronRLS(PairwisePredictorInterface):

@@ -1,6 +1,4 @@
 
-import pyximport; pyximport.install()
-
 import random
 random.seed(100)
 import unittest

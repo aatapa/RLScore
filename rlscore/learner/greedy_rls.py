@@ -3,7 +3,6 @@ from scipy import sparse as sp
 import numpy as np
 from rlscore import predictor
 from rlscore.utilities import array_tools
-#import pyximport; pyximport.install()
 from rlscore.learner import _greedy_rls
 from rlscore.predictor import PredictorInterface
 

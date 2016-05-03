@@ -1,7 +1,4 @@
 
-
-#import pyximport; pyximport.install()
-
 import numpy as np
 
 from rlscore.utilities import _sampled_kronecker_products
