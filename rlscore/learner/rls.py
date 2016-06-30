@@ -350,7 +350,7 @@ class RLS(PredictorInterface):
                                                      self.Y,
                                                      #svecsbevalssvecsT,
                                                      self.svecs,
-                                                     np.squeeze(np.array(bevals)),
+                                                     np.atleast_1d(np.squeeze(np.array(bevals))),
                                                      self.svecs.shape[1],
                                                      hatmatrixdiagonal,
                                                      svecsbevalssvecsTY,
