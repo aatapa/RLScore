@@ -396,7 +396,7 @@ class LeaveOneOutRLS(PredictorInterface):
         regularization parameter values to be tested, default = [2^-15,...,2^15]
     measure : function(Y, P) (optional)
         a performance measure from rlscore.measure used for model selection,
-        default sqerror (squared error)
+        default sqerror (mean squared error)
 
         
     Other Parameters
