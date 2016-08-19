@@ -3,7 +3,7 @@ import _interactive_rls_classifier
 import random as pyrandom
 pyrandom.seed(200)
 import numpy as np
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 
 class InteractiveRlsClassifier(object):
     
@@ -12,7 +12,7 @@ class InteractiveRlsClassifier(object):
         kwargs['kernel'] = kernel
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.callbackfun = callback

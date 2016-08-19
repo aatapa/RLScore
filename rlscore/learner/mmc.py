@@ -2,7 +2,7 @@
 import random
 import numpy as np
 from rlscore.utilities import array_tools
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 from rlscore.predictor import PredictorInterface
 
 
@@ -78,7 +78,7 @@ class MMC(PredictorInterface):
         kwargs['kernel'] = kernel
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.regparam = regparam

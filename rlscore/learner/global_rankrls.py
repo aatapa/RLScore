@@ -3,7 +3,7 @@ from numpy import array, eye, float64, multiply, mat, ones, sqrt, zeros
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 from rlscore.predictor import PredictorInterface
 from rlscore.utilities.cross_validation import grid_search
 from rlscore.measure import cindex
@@ -101,7 +101,7 @@ class GlobalRankRLS(PredictorInterface):
         kwargs['X'] = X
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs

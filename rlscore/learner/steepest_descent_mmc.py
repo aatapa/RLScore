@@ -5,7 +5,7 @@ pyrandom.seed(200)
 
 import _steepest_descent_mmc
 
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 from rlscore.utilities import array_tools
 
 class SteepestDescentMMC(object):
@@ -80,7 +80,7 @@ class SteepestDescentMMC(object):
         kwargs['kernel'] = kernel
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.callbackfun = callback

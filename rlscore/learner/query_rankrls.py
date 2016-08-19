@@ -4,7 +4,7 @@ import scipy.sparse
 
 from rlscore.utilities import decomposition
 from rlscore.utilities import array_tools
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.predictor import PredictorInterface
 from rlscore.measure import cindex
@@ -86,7 +86,7 @@ class QueryRankRLS(PredictorInterface):
         kwargs['X'] = X
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.Y = np.mat(array_tools.as_2d_array(Y))
         self.regparam = regparam
         self.svals = self.svdad.svals

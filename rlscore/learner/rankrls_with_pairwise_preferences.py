@@ -3,7 +3,7 @@ from scipy.sparse import csc_matrix
 from scipy.sparse import coo_matrix
 
 
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 from rlscore.utilities import decomposition
 from rlscore.predictor import PredictorInterface
 
@@ -80,7 +80,7 @@ class PPRankRLS(PredictorInterface):
             kwargs["basis_vectors"] = basis_vectors
         self.regparam = regparam
         self.pairs = np.vstack([pairs_start_inds, pairs_end_inds]).T
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs
         self.results = {}

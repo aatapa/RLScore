@@ -2,7 +2,7 @@
 from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
 from rlscore.utilities import array_tools 
-from rlscore.utilities import creators
+from rlscore.utilities import adapter
 import _rls
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
@@ -106,7 +106,7 @@ class RLS(PredictorInterface):
         kwargs['kernel'] = kernel
         if basis_vectors != None:
             kwargs['basis_vectors'] = basis_vectors
-        self.svdad = creators.createSVDAdapter(**kwargs)
+        self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
         self.svals = self.svdad.svals
         self.svecs = self.svdad.rsvecs

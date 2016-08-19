@@ -12,7 +12,22 @@ import numpy as np
 from rlscore.utilities import decomposition
 from rlscore import predictor
 from rlscore.utilities import array_tools
+from rlscore.kernel import createKernelByModuleName
+from rlscore.kernel import LinearKernel
 
+def createSVDAdapter(X, kernel="LinearKernel", **kwargs):
+        kwargs["kernel"] = kernel
+        if kernel == "PrecomputedKernel":
+            kwargs["kernel_matrix"] = X
+            svdad = PreloadedKernelMatrixSvdAdapter.createAdapter(**kwargs)        
+        else:
+            kwargs['X'] = X
+            kwargs['kernel_obj'] = createKernelByModuleName(**kwargs)
+            if isinstance(kwargs['kernel_obj'], LinearKernel):
+                svdad = LinearSvdAdapter.createAdapter(**kwargs)
+            else:
+                svdad = SvdAdapter.createAdapter(**kwargs)
+        return svdad
 
 class SvdAdapter(object):
     '''
