@@ -6,6 +6,7 @@ from scipy.sparse.linalg import qmr
 from rlscore.utilities import sampled_kronecker_products
 from rlscore.pairwise_predictor import KernelPairwisePredictor
 from rlscore.pairwise_predictor import LinearPairwisePredictor
+from rlscore.pairwise_predictor import PairwisePredictorInterface
 
 
 TRAIN_LABELS = 'Y'
@@ -42,7 +43,7 @@ def hessian(v, p, X1, X2, Y, rowind, colind, lamb):
     p_after = sampled_kronecker_products.sampled_vec_trick(p_after, X2.T, X1.T, None, None, cols, rows)
     return p_after + lamb*p    
 
-class KronSVM(object):
+class KronSVM(PairwisePredictorInterface):
         
     
     def __init__(self, **kwargs):
@@ -105,7 +106,6 @@ class KronSVM(object):
                 g = gradient(w, X1, X2, Y, rowind, colind, lamb)
                 G = LinearOperator((fdim, fdim), matvec=mv, rmatvec=mv, dtype=np.float64)
                 self.best_residual = float("inf")
-                self.w_new = None
                 self.w_new = qmr(G, g, maxiter=inneriter)[0]
                 if np.all(w == w - self.w_new):
                     break
@@ -130,7 +130,6 @@ class KronSVM(object):
             else: maxiter = 100
             if 'inneriter' in self.resource_pool: inneriter = int(self.resource_pool['inneriter'])
             else: inneriter = 1000
-            
             label_row_inds = np.array(self.label_row_inds, dtype = np.int32)
             label_col_inds = np.array(self.label_col_inds, dtype = np.int32)
             
@@ -185,7 +184,7 @@ class KronSVM(object):
                         self.bestloss = loss
                 else:
                     self.A = a
-                self.dual_model = KernelPairwisePredictor(a, rowind, colind)
+                self.predictor = KernelPairwisePredictor(a, rowind, colind)
                 if self.callbackfun != None:
                     self.callbackfun.callback(self)
             self.predictor = KernelPairwisePredictor(a, rowind, colind)

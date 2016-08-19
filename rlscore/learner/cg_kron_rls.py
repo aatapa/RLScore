@@ -132,7 +132,8 @@ class CGKronRLS(PairwisePredictorInterface):
     
             
             G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
-            minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
+            #minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
+            self. A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
         else:
             X1 = self.resource_pool['X1']

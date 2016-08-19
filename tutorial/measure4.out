@@ -9,7 +9,7 @@ P, class prediction is chosen with argmax
 [[1, 0, 0], [1.2, 0.5, 0], [0, 1, -1], [1, 1.2, 0.5], [0.2, -1, -1], [0.3, -1, -2]]
 Accuracy computed with one-vs-all mapped labels and predictions: 0.666667
 original Y
-[1, 1, 2, 2, 3, 3]
+[0, 0, 1, 1, 2, 2]
 P mapped to class predictions
-[1 1 2 2 1 1]
+[0 0 1 1 0 0]
 Accuracy is the same:0.666667 
