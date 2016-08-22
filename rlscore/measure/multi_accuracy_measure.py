@@ -30,19 +30,4 @@ def ova_accuracy(Y, P):
     Y = np.argmax(Y, axis=1)
     P = np.argmax(P, axis=1)
     return np.mean(Y==P)
-    #correct = 0
-    #for i in range(Y.shape[0]):
-    #    largest_pred = None
-    #    predicted = None
-    #    true = None
-    #    for j in range(Y.shape[1]):
-    #        if Y[i,j] == 1:
-    #            true = j
-    #        if (not largest_pred) or  (P[i,j]>largest_pred):
-    #            largest_pred = P[i,j]
-    #            predicted = j
-    #    if true == predicted:
-    #        correct += 1
-    #perf = float(correct)/float(Y.shape[0])
-    return perf
 ova_accuracy.iserror = False
