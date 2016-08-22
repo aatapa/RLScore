@@ -83,7 +83,7 @@ class SpaceEfficientGreedyRLS(object):
         self.performances = []
         while currentfcount < desiredfcount:
             
-            if not self.measure == None:
+            if not self.measure is None:
                 bestlooperf = None
             else:
                 bestlooperf = float('inf')
@@ -97,10 +97,10 @@ class SpaceEfficientGreedyRLS(object):
                 updA = self.dualvec - ca * (cv * self.dualvec)
                 invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
-                if not self.measure == None:
+                if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf == None:
+                    if bestlooperf is None:
                         bestlooperf = looperf_i
                         bestcind = ci
                     if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
@@ -142,9 +142,9 @@ class SpaceEfficientGreedyRLS(object):
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec
             
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec
@@ -223,7 +223,7 @@ class SpaceEfficientGreedyRLS(object):
         self.performances = []
         while currentfcount < desiredfcount:
             
-            if not self.measure == None:
+            if not self.measure is None:
                 self.bestlooperf = None
             else:
                 self.bestlooperf = float('inf')
@@ -257,7 +257,7 @@ class SpaceEfficientGreedyRLS(object):
                 np.multiply(tempmatrix, temp2, tempmatrix)
                 
                 
-                if not self.measure == None:
+                if not self.measure is None:
                     np.subtract(Y, tempmatrix, tempmatrix)
                     np.multiply(temp2, 0, temp2)
                     np.add(temp2, Y, temp2)
@@ -268,7 +268,7 @@ class SpaceEfficientGreedyRLS(object):
                     looperf_block = sum(tempmatrix, axis = 0)
                 looperf[:, block] = looperf_block
                 
-            if not self.measure == None:
+            if not self.measure is None:
                 if self.measure.isErrorMeasure():
                     looperf[0, self.selected] = float('inf')
                     bestcind = np.argmin(looperf)
@@ -360,7 +360,7 @@ class SpaceEfficientGreedyRLS(object):
         self.performances = []
         while currentfcount < desiredfcount:
             
-            if not self.measure == None:
+            if not self.measure is None:
                 bestlooperf = None
             else:
                 bestlooperf = float('inf')
@@ -379,10 +379,10 @@ class SpaceEfficientGreedyRLS(object):
                 updA = self.dualvec - ca * (cv * self.dualvec)
                 invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
-                if not self.measure == None:
+                if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf == None:
+                    if bestlooperf is None:
                         bestlooperf = looperf_i
                         bestcind = ci
                     if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
@@ -423,9 +423,9 @@ class SpaceEfficientGreedyRLS(object):
             self.b = bias_slice * self.dualvec
             
             
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec

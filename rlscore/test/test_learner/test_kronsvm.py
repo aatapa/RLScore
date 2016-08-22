@@ -57,7 +57,7 @@ def load_data(primal=True, fold_index=0):
     K1_test = KD[np.ix_(dfold,dtraininds)]
     K2_test = KT[np.ix_(tfold,ttraininds)]
     Y_test = Y[np.ix_(dfold, tfold)]
-    ssize = Y_train.shape[0]*Y_train.shape[1]*0.25
+    ssize = int(Y_train.shape[0]*Y_train.shape[1]*0.25)
     rows = numpyrandom.random_integers(0, K1_train.shape[0]-1, ssize)
     cols = numpyrandom.random_integers(0, K2_train.shape[0]-1, ssize)
     ind = np.ravel_multi_index([rows, cols], (K1_train.shape[0], K2_train.shape[0]))

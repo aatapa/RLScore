@@ -59,7 +59,7 @@ class CGRLS(PredictorInterface):
             return X.T*(X_csr*v)+regparam*v
         G = LinearOperator((X.shape[1],X.shape[1]), matvec=mv, dtype=np.float64)
         self.AA = []
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             def cb(v):
                 self.A = np.mat(v).T
                 self.callbackfun.callback(self)
@@ -69,7 +69,7 @@ class CGRLS(PredictorInterface):
             self.A = np.mat(cg(G, Y, callback=cb)[0]).T
         except Finished:
             pass
-        if self.callbackfun != None:
+        if self.callbackfun is not None:
             self.callbackfun.finished(self)
         self.A = X_csr*self.A
         if self.bias == 0.:
@@ -105,7 +105,7 @@ class EarlyStopCB(object):
         m = predictor.LinearPredictor(A,b)
         P = m.predict(self.X_valid)
         perf = self.measure(self.Y_valid,P)
-        if self.bestperf == None or (self.measure.iserror == (perf < self.bestperf)):
+        if self.bestperf is None or (self.measure.iserror == (perf < self.bestperf)):
             self.bestperf = perf
             self.bestA = learner.A
             self.last_update = 0

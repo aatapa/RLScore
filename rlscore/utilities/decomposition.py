@@ -48,7 +48,7 @@ def decomposeKernelMatrix(K, trunc = None):
     for l in range(maxnz):
         if evals[0, l] > SMALLEST_EVAL:
             nz += 1
-    if trunc != None: nz = min(nz, trunc)
+    if trunc is not None: nz = min(nz, trunc)
     rang = range(maxnz - nz, maxnz)
     evecs = evecs[:, rang]
     evals = evals[:, rang]

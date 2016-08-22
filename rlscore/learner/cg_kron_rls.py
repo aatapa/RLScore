@@ -126,7 +126,7 @@ class CGKronRLS(PairwisePredictorInterface):
                         self.bestloss = loss
                 else:
                     self.A = v
-                if not self.callbackfun == None:
+                if not self.callbackfun is None:
                     self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
                     self.callbackfun.callback(self)
     
@@ -173,7 +173,7 @@ class CGKronRLS(PairwisePredictorInterface):
                         self.bestloss = loss
                 else:
                     self.W = v.reshape((x1fsize, x2fsize), order = 'F')
-                if not self.callbackfun == None:
+                if not self.callbackfun is None:
                     self.predictor = LinearPairwisePredictor(self.W)
                     self.callbackfun.callback(self)
                 
@@ -190,7 +190,7 @@ class CGKronRLS(PairwisePredictorInterface):
             #self.W = bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0].reshape((x1fsize, x2fsize), order='F')
             minres(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb, tol=1e-20)[0].reshape((x1fsize, x2fsize), order='F')
             self.predictor = LinearPairwisePredictor(self.W)
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                     self.callbackfun.finished(self)
 
     

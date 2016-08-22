@@ -99,12 +99,12 @@ class RLS(PredictorInterface):
         self.Y = array_tools.as_2d_array(Y)
         if X.shape[0] != Y.shape[0]:
             raise Exception("First dimension of X and Y must be the same")
-        if basis_vectors != None:
+        if basis_vectors is not None:
             if X.shape[1] != basis_vectors.shape[1]:
                 raise Exception("Number of columns for X and basis_vectors must be the same")
         kwargs['X'] = X
         kwargs['kernel'] = kernel
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
@@ -152,7 +152,7 @@ class RLS(PredictorInterface):
         self.regparam = regparam
         self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
         #self.results["model"] = self.getModel()
-        #if self.U == None:
+        #if self.U is None:
         #    pass
             #Dual RLS
             #self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
@@ -447,11 +447,11 @@ class LeaveOneOutRLS(PredictorInterface):
     """
     
     def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
-        if measure == None:
+        if measure is None:
             measure = sqerror
         learner = RLS(X, Y, grid[0], kernel, basis_vectors, **kwargs)
         crossvalidator = LOOCV(learner, measure)
@@ -544,11 +544,11 @@ class KfoldRLS(PredictorInterface):
     """
     
     def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
-        if measure == None:
+        if measure is None:
             self.measure = sqerror
         else:
             self.measure = measure
@@ -637,7 +637,7 @@ class LeavePairOutRLS(PredictorInterface):
     """
     
     def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
@@ -664,7 +664,7 @@ class NfoldCV(object):
     
     def __init__(self, learner, measure, folds):
         self.rls = learner
-        if measure == None:
+        if measure is None:
             self.measure = sqerror
         else:
             self.measure = measure

@@ -76,7 +76,7 @@ class MMC(PredictorInterface):
     def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
         kwargs['X'] = X 
         kwargs['kernel'] = kernel
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
@@ -91,7 +91,7 @@ class MMC(PredictorInterface):
         else:
             self.oneclass = False
         self.callbackfun = callback
-        if Y != None:
+        if Y is not None:
             Y_orig = array_tools.as_array(Y)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
@@ -114,7 +114,7 @@ class MMC(PredictorInterface):
         else:
             size = self.svecs.shape[0]
             ysize = self.labelcount
-            if self.labelcount == None: self.labelcount = 2
+            if self.labelcount is None: self.labelcount = 2
             self.Y = RandomLabelSource(size, ysize).readLabels()
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
@@ -134,7 +134,7 @@ class MMC(PredictorInterface):
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
         self.fixedindices = []
-        if fixed_indices != None:
+        if fixed_indices is not None:
             self.fixedindices = fixed_indices
         else:
             self.fixedindices = []
@@ -202,13 +202,13 @@ class MMC(PredictorInterface):
         
         converged = False
         print self.classcounts.T
-        if self.callbackfun != None:
+        if self.callbackfun is not None:
             self.callbackfun.callback(self)
         while True:
             
             converged = self.roundRobin()
             print self.classcounts.T
-            if self.callbackfun != None:
+            if self.callbackfun is not None:
                 self.callbackfun.callback(self)
             if converged: break
         
@@ -262,9 +262,9 @@ class MMC(PredictorInterface):
         self.classcounts[newclassind] += 1
         self.classvec[flipindex] = newclassind
         
-        if DVTY_new_currentclass == None:
+        if DVTY_new_currentclass is None:
             DVTY_new_currentclass = self.DVTY_list[currentclassind] - 2 * self.Dsvecs_list[flipindex]
-        if DVTY_new_newclass == None:
+        if DVTY_new_newclass is None:
             DVTY_new_newclass = self.DVTY_list[newclassind] + 2 * self.Dsvecs_list[flipindex]
         
         self.DVTY_list[currentclassind] = DVTY_new_currentclass
@@ -311,7 +311,7 @@ class MMC(PredictorInterface):
         
         #print 'BFD', bestfitnessdiff
         
-        if bestclassind != None:
+        if bestclassind is not None:
             if self.classcounts[currentclassind] > self.constraint:
                 
                 self.Y[flipindex, currentclassind] = -1.
@@ -381,7 +381,7 @@ class MMC(PredictorInterface):
                 DVTY_new_bestclass = DVTY_new_newclass
                 #fitness_new_bestclass = fitness_new_newclass
         
-        if bestclassind != None:
+        if bestclassind is not None:
             if self.classcounts[currentclassind] > self.constraint:
                 
                 self.Y[flipindex, currentclassind] = -1.
@@ -402,7 +402,7 @@ class MMC(PredictorInterface):
     
     def updateA(self):
         self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
-        #if self.U == None:
+        #if self.U is None:
         #    self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
         #else:
         #    bevals = np.multiply(self.svals, self.newevals)
@@ -459,7 +459,7 @@ class MMC(PredictorInterface):
                         ffit2 = self.computeFlipFitnessForSingleClass(flipindex, newclassind)
                         #flipfit = self.computeFlipFitness(flipindex, newclassind)
                         flipfit = ffit1 + ffit2
-                        if bestfit == None or bestfit > flipfit:
+                        if bestfit is None or bestfit > flipfit:
                             bestfit = flipfit
                             bestclass = newclassind
                     givelist.append((bestfit,bestclass,flipindex))
@@ -519,7 +519,7 @@ class MMC(PredictorInterface):
                         ffit2 = self.computeFlipFitnessForSingleClass(flipindex, newclassind)
                         #flipfit = self.computeFlipFitness(flipindex, newclassind)
                         flipfit = ffit1 + ffit2
-                        if bestfit == None or bestfit > flipfit:
+                        if bestfit is None or bestfit > flipfit:
                             bestfit = flipfit
                             bestclass = newclassind
                     givelist.append((ffit1, bestclass, flipindex))

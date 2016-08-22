@@ -12,7 +12,7 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selection=F
     for key in files:
         if key in readers:
             code.append("from rlscore.reader import %s" %readers[key])
-    if measure != None:
+    if measure is not None:
         code.append("from rlscore.measure import %s" %measure)
     for key in files:
         if key in readers:
@@ -20,7 +20,7 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selection=F
         else:
             code.append('%s = np.loadtxt("%s")' %(key, files[key])) 
     code.append("kwargs = {}")
-    if measure != None and selection:
+    if measure is not None and selection:
         code.append("kwargs['measure']=%s" %measure)
     if selection:
         code.append("kwargs['regparams'] = [2**i for i in range(-10,11)]")
@@ -43,7 +43,7 @@ def generate(learner, lpath, lparams, lfparams, files, measure=None, selection=F
         code.append('    print "parameter %f cv_performance %f" %(grid[i], perfs[i])')
     if "test_features" in files.keys():
         code.append("P = learner.predict(test_features)")
-        if measure != None and "test_labels" in files.keys():
+        if measure is not None and "test_labels" in files.keys():
             if "test_qids" in files.keys():
                 code.append("from rlscore.measure.measure_utilities import UndefinedPerformance")
                 code.append("from rlscore.measure.measure_utilities import qids_to_splits")

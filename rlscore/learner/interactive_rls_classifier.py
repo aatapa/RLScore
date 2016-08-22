@@ -10,7 +10,7 @@ class InteractiveRlsClassifier(object):
     def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
         kwargs['X'] = X 
         kwargs['kernel'] = kernel
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
@@ -25,8 +25,8 @@ class InteractiveRlsClassifier(object):
         #else:
         #    self.oneclass = False
         
-        if Y == None:
-            self.classvec = np.zeros(self.size)
+        if Y is None:
+            self.classvec = np.zeros(self.size, np.int)
         else:
             self.classvec = Y
         #self.size = self.classvec.shape[0]
@@ -38,7 +38,7 @@ class InteractiveRlsClassifier(object):
             self.classcounts[clazzind] = self.classcounts[clazzind] + 1
         
         self.fixedindices = []
-        if fixed_indices != None:
+        if fixed_indices is not None:
             self.fixedindices = fixed_indices
         self.train()
     
@@ -82,7 +82,7 @@ class InteractiveRlsClassifier(object):
             self.classFitnessList.append(fitness_i[0, 0])
         self.classFitnessRowVec = np.array(self.classFitnessList)
         
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.callback(self)
     
     
@@ -186,7 +186,7 @@ class InteractiveRlsClassifier(object):
     
     def cyclic_descent_in_working_set(self, maxbalancechange = None):
         fitvec = np.zeros(self.labelcount)
-        if maxbalancechange == None:
+        if maxbalancechange is None:
             maxbalancechange = self.size_ws
         changecount = _interactive_rls_classifier.cyclic_desccent(self.Y_ws,
                      self.classcounts_ws,

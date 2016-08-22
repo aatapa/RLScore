@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
                 for Xt in testsets:
                     K = k.getKM(Xt).T
                     self.assertTrue(type(K)==np.ndarray)
-                    if K_c == None:
+                    if K_c is None:
                         K_c = K
                     else:
                         self.assertTrue(np.allclose(K_c, K))

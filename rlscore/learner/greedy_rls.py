@@ -158,7 +158,7 @@ class GreedyRLS(PredictorInterface):
         tempvec1, tempvec2, tempvec3 = np.zeros(tsize), np.zeros(Y.shape[1]), np.zeros((tsize, Y.shape[1]))
         while currentfcount < self.desiredfcount:
             
-            if not self.measure == None:
+            if not self.measure is None:
                 bestlooperf = None
             else:
                 bestlooperf = 9999999999.
@@ -192,10 +192,10 @@ class GreedyRLS(PredictorInterface):
                 updA = self.dualvec - ca * (cv * self.dualvec)
                 invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
-                if not self.measure == None:
+                if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf == None:
+                    if bestlooperf is None:
                         bestlooperf = looperf_i
                         bestcind = ci
                     if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
@@ -233,9 +233,9 @@ class GreedyRLS(PredictorInterface):
             self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)
             
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
@@ -304,7 +304,7 @@ class GreedyRLS(PredictorInterface):
             np.multiply(tempmatrix, temp2, tempmatrix)
             
             
-            if not self.measure == None:
+            if not self.measure is None:
                 np.subtract(Y, tempmatrix, tempmatrix)
                 np.multiply(temp2, 0, temp2)
                 np.add(temp2, Y, temp2)
@@ -347,9 +347,9 @@ class GreedyRLS(PredictorInterface):
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)
             
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
@@ -415,7 +415,7 @@ class GreedyRLS(PredictorInterface):
         self.performances = []
         while currentfcount < self.desiredfcount:
             
-            if not self.measure == None:
+            if not self.measure is None:
                 bestlooperf = None
             else:
                 bestlooperf = 9999999999.
@@ -431,10 +431,10 @@ class GreedyRLS(PredictorInterface):
                 updA = self.dualvec - ca * (cv * self.dualvec)
                 invupddiagG = 1. / (diagG - np.multiply(ca, GXT_ci))
                 
-                if not self.measure == None:
+                if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf == None:
+                    if bestlooperf is None:
                         bestlooperf = looperf_i
                         bestcind = ci
                     if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
@@ -467,9 +467,9 @@ class GreedyRLS(PredictorInterface):
             self.A[self.selected] = X[self.selected] * self.dualvec
             self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)            
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
         self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
@@ -509,10 +509,10 @@ class DefaultCallback(object):
         print
         print 'LOOCV mean squared error', learner.bestlooperf
         print 'The indices of selected features', learner.selected
-        if not self.test_features == None:
+        if not self.test_features is None:
             mod = learner.predictor
             tpreds = mod.predict(self.test_features)
-            if not self.test_measure == None:
+            if not self.test_measure is None:
                 test_perf = self.test_measure(self.test_labels, tpreds)
             else:
                 testdiff = self.test_labels - tpreds

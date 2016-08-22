@@ -187,7 +187,7 @@ class GreedyNFoldRLS(object):
         self.performances = []
         while currentfcount < desiredfcount:
             
-            #if not self.measure == None:
+            #if not self.measure is None:
             #    bestlqocvperf = None
             #else:
             bestlqocvperf = float('inf')
@@ -217,10 +217,10 @@ class GreedyNFoldRLS(object):
                     bestlqocvperf = lqocvperf
                 
                 '''
-                if not self.measure == None:
+                if not self.measure is None:
                     loopred = Y - multiply(invupddiagG, updA)
                     looperf = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf == None:
+                    if bestlooperf is None:
                         bestlooperf = looperf
                         bestcind = ci
                     if self.measure.comparePerformances(looperf, bestlooperf) > 0:
@@ -279,9 +279,9 @@ class GreedyNFoldRLS(object):
                 testX_biased = np.vstack([self.testX,bias_slice])
                 #print testX_biased.T.shape, W.shape
                 self.Y_predicted = testX_biased.T * W
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.finished(self)
         
         bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,X.shape[1]),dtype=np.float64))

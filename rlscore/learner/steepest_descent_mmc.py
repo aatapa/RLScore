@@ -78,7 +78,7 @@ class SteepestDescentMMC(object):
     #    def __init__(self, **kwargs):
         kwargs['X'] = X
         kwargs['kernel'] = kernel
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.svals = self.svdad.svals
@@ -92,7 +92,7 @@ class SteepestDescentMMC(object):
             self.oneclass = True
         else:
             self.oneclass = False
-        if Y != None:
+        if Y is not None:
             Y_orig = array_tools.as_array(Y)
             #if Y_orig.shape[1] == 1:
             if len(Y_orig.shape) == 1:
@@ -115,7 +115,7 @@ class SteepestDescentMMC(object):
         else:
             size = self.svecs.shape[0]
             ysize = self.labelcount
-            if self.labelcount == None: self.labelcount = 2
+            if self.labelcount is None: self.labelcount = 2
             self.Y = RandomLabelSource(size, ysize).readLabels()
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
@@ -135,7 +135,7 @@ class SteepestDescentMMC(object):
         for i in range(self.size):
             self.svecs_list.append(self.svecs[i].T)
         self.fixedindices = []
-        if fixed_indices != None:
+        if fixed_indices is not None:
             self.fixedindices = fixed_indices
         else:
             self.fixedindices = []
@@ -191,7 +191,7 @@ class SteepestDescentMMC(object):
         
         converged = False
         #print self.classcounts.T
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             self.callbackfun.callback(self)
         '''while True:
             
@@ -213,7 +213,7 @@ class SteepestDescentMMC(object):
             converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
             #converged = self.findSteepestDirRotateClasses(1000)
             #print self.classcounts.T
-            if not self.callbackfun == None:
+            if not self.callbackfun is None:
                 self.callbackfun.callback(self)
             if converged: break
         
