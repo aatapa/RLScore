@@ -8,6 +8,7 @@ import math
 from numpy import multiply, float64, ones
 from math import sqrt
 import numpy as np
+import numpy.linalg as la
 
 from rlscore.utilities import decomposition
 from rlscore import predictor
@@ -123,13 +124,17 @@ class LinearSvdAdapter(SvdAdapter):
             #Second possibility: dual mode if more attributes than examples
             else:
                 K = kernel.getKM(self.X).T
-                svals, evecs = decomposition.decomposeKernelMatrix(K)
+                #svals, evecs = decomposition.decomposeKernelMatrix(K)
+                evals, evecs = la.eigh(K)
+                evals, evecs = np.mat(evals), np.mat(evecs)
+                svals = np.sqrt(evals)
                 U, Z = None, None
         #Third possibility, primal decomposition
         else:
             #Invoking getPrimalDataMatrix adds the bias feature
             X = getPrimalDataMatrix(self.X,self.bias)
-            svals, evecs, U = decomposition.decomposeDataMatrix(X.T)
+            evecs, svals, U = la.svd(X, full_matrices = 0)
+            svals, evecs = np.mat(svals), np.mat(evecs)
             U, Z = None, None
         return svals, evecs, U, Z
     
