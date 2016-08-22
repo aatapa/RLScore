@@ -33,11 +33,11 @@ class Test(unittest.TestCase):
             rc_m, cc_m = M.shape
             rc_n, cc_n = N.shape
     
-            if row_inds_N == None:
+            if row_inds_N is None:
                 u_len = rc_m * rc_n
             else:
                 u_len = len(row_inds_N)
-            if col_inds_N == None:
+            if col_inds_N is None:
                 v_len = cc_m * cc_n
             else:
                 v_len = len(col_inds_N)
@@ -46,16 +46,16 @@ class Test(unittest.TestCase):
             
             if rc_m * v_len + cc_n * u_len < rc_n * v_len + cc_m * u_len:
                 ss += 'rc_m * v_len + cc_n * u_len < rc_n * v_len + cc_m * u_len\n'
-                if col_inds_N == None:
-                    ss += 'col_inds_N == None\n'
-                if row_inds_N == None:
-                    ss += 'row_inds_N == None\n'
+                if col_inds_N is None:
+                    ss += 'col_inds_N is None\n'
+                if row_inds_N is None:
+                    ss += 'row_inds_N is None\n'
             else:
                 ss += 'rc_m * v_len + cc_n * u_len >= rc_n * v_len + cc_m * u_len\n'
-                if col_inds_N == None:
-                    ss += 'col_inds_N == None\n'
-                if row_inds_N == None:
-                    ss += 'row_inds_N == None\n'
+                if col_inds_N is None:
+                    ss += 'col_inds_N is None\n'
+                if row_inds_N is None:
+                    ss += 'row_inds_N is None\n'
             print(ss)
             return sampled_kronecker_products.sampled_vec_trick(v, M, N, row_inds_N, row_inds_M, col_inds_N, col_inds_M)
         

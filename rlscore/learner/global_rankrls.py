@@ -93,13 +93,13 @@ class GlobalRankRLS(PredictorInterface):
         self.Y = np.mat(Y)
         if X.shape[0] != Y.shape[0]:
             raise Exception("First dimension of X and Y must be the same")
-        if basis_vectors != None:
+        if basis_vectors is not None:
             if X.shape[1] != basis_vectors.shape[1]:
                 raise Exception("Number of columns for X and basis_vectors must be the same")
         kwargs["bias"] = 0.
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
@@ -671,7 +671,7 @@ class LeavePairOutRankRLS(PredictorInterface):
 """
     
     def __init__(self, X, Y, kernel='LinearKernel', basis_vectors = None, regparams=None, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 16)]
         else:
             grid = regparams
@@ -738,11 +738,11 @@ class KfoldRankRLS(PredictorInterface):
 """
     
     def __init__(self, X, Y, folds, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, save_predictions = False, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 15)]
         else:
             grid = regparams
-        if measure == None:
+        if measure is None:
             self.measure = cindex
         else:
             self.measure = measure

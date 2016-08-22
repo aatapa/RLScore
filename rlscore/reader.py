@@ -97,7 +97,7 @@ def read_sparse(fname, fdim=None):
             try:
                 index = int(index)
                 value = float(value)
-                if value != 0. and (fdim == None or index < fdim): 
+                if value != 0. and (fdim is None or index < fdim): 
                     columns.append(index)
                     rows.append(linecounter-1)
                     values.append(value)
@@ -107,7 +107,7 @@ def read_sparse(fname, fdim=None):
                 raise Exception("Error when reading in feature file: line %d features must be in ascending order\n" % (linecounter))
             previous = index
     #That's all folks
-    if fdim == None:
+    if fdim is None:
         X = sparse.coo_matrix((values,(rows,columns)), dtype=float64)
     else:
         rdim = np.max(rows)+1
@@ -161,7 +161,7 @@ def read_svmlight(fname, fdim=None):
         labels = line.pop(0)
         if line[0].startswith("qid:"):
             qid = line.pop(0)[4:]
-            if qids == None:
+            if qids is None:
                 if linecounter > 1:
                     raise Exception("Error when reading in SVMLight file: Line %d has a qid, previous lines did not have qids defined" % (linenumber))   
                 else:
@@ -169,13 +169,13 @@ def read_svmlight(fname, fdim=None):
             else:
                 qids.append(qid)
         else:
-            if qids != None:
+            if qids is not None:
                 raise Exception("Error when reading in SVMLight file: Line %d has no qid, previous lines had qids defined" % (linenumber))
         attributes = line
         #Multiple labels are allowed, but each instance must have the
         #same amount of them. Labels must be real numbers.
         labels = labels.split("|")
-        if labelcount == None:
+        if labelcount is None:
             labelcount = len(labels)
         #Check that the number of labels is the same for all instances
         #and that the labels are real valued numbers.
@@ -201,7 +201,7 @@ def read_svmlight(fname, fdim=None):
             try:
                 index = int(index)
                 value = float(value)
-                if value != 0. and (fdim == None or index < fdim): 
+                if value != 0. and (fdim is None or index < fdim): 
                     #rows.append(index-1)
                     rows.append(linecounter-1)
                     #columns.append(linecounter-1)
@@ -214,7 +214,7 @@ def read_svmlight(fname, fdim=None):
             previous = index
             if index > feaspace_dim:
                 feaspace_dim = index
-    if fdim != None:
+    if fdim is not None:
         feaspace_dim = fdim
     X = sparse.coo_matrix((values,(rows,columns)),(linecounter, feaspace_dim), dtype=float64)
     X = X.tocsr()

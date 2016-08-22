@@ -59,12 +59,12 @@ class CGRankRLS(PredictorInterface):
         self.learn_from_labels = True
         self.callbackfun = callbackfun
         self.X = csc_matrix(X.T)
-        #if qids != None:
+        #if qids is not None:
         #    self.setQids(qids)
         #else:
         #    self.qidmap = None
         #self.train()
-        if qids != None:
+        if qids is not None:
             self.qids = map_qids(qids)
             self.splits = qids_to_splits(self.qids)
         else:
@@ -72,7 +72,7 @@ class CGRankRLS(PredictorInterface):
         regparam = self.regparam
         #regparam = 0.
         qids = self.qids
-        if qids != None:
+        if qids is not None:
             P = sp.lil_matrix((self.size, len(set(qids))))
             for qidind in range(len(self.splits)):
                 inds = self.splits[qidind]
@@ -91,7 +91,7 @@ class CGRankRLS(PredictorInterface):
             return X_csr*(X.T*v)-X_csr*(P*(PT*(X.T*v)))+regparam*v
         G = LinearOperator((X.shape[0],X.shape[0]), matvec=mv, dtype=np.float64)
         Y = self.Y
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             def cb(v):
                 self.A = np.mat(v).T
                 self.b = np.mat(np.zeros((1,1)))
@@ -162,7 +162,7 @@ class PCGRankRLS(PredictorInterface):
         G = LinearOperator((X.shape[0], X.shape[0]), matvec=mv, dtype=np.float64)
         self.As = []
         M = np.mat(np.ones((self.pairs.shape[0], 1)))
-        if not self.callbackfun == None:
+        if not self.callbackfun is None:
             def cb(v):
                 self.A = np.mat(v).T
                 self.b = np.mat(np.zeros((1,1)))
@@ -203,7 +203,7 @@ class EarlyStopCB(object):
             perf = np.mean(perfs)
         else:
             perf = self.measure(self.Y_valid,P)
-        if self.bestperf == None or (self.measure.iserror == (perf < self.bestperf)):
+        if self.bestperf is None or (self.measure.iserror == (perf < self.bestperf)):
             self.bestperf = perf
             self.bestA = learner.A
             self.last_update = 0

@@ -120,7 +120,7 @@ class KronSVM(PairwisePredictorInterface):
                         self.bestloss = loss
                 else:
                     self.W = w.reshape((x1fsize, x2fsize), order='F')             
-                if self.callbackfun != None:
+                if self.callbackfun is not None:
                     self.callbackfun.callback(self)
             self.predictor = LinearPairwisePredictor(self.W)
         else:
@@ -185,8 +185,8 @@ class KronSVM(PairwisePredictorInterface):
                 else:
                     self.A = a
                 self.predictor = KernelPairwisePredictor(a, rowind, colind)
-                if self.callbackfun != None:
+                if self.callbackfun is not None:
                     self.callbackfun.callback(self)
             self.predictor = KernelPairwisePredictor(a, rowind, colind)
-            if self.callbackfun != None:
+            if self.callbackfun is not None:
                 self.callbackfun.finished(self)

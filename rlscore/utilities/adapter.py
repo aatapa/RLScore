@@ -81,7 +81,7 @@ class SvdAdapter(object):
     
     
     def reducedSetTransformation(self, A):
-        if self.Z != None:
+        if self.Z is not None:
             #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
             A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
             return A_red
@@ -114,9 +114,9 @@ class LinearSvdAdapter(SvdAdapter):
             self.bias = float(rpool["bias"])
         else:
             self.bias = 1.
-        if basis_vectors != None or self.X.shape[1] > self.X.shape[0]:
+        if basis_vectors is not None or self.X.shape[1] > self.X.shape[0]:
             #First possibility: subset of regressors has been invoked
-            if basis_vectors != None:
+            if basis_vectors is not None:
                 K_r = kernel.getKM(self.X).T
                 Krr = kernel.getKM(basis_vectors)
                 svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
@@ -138,7 +138,7 @@ class LinearSvdAdapter(SvdAdapter):
         A = svdlearner.A
         A = self.reducedSetTransformation(A)
         fs = self.X
-        if self.basis_vectors != None:
+        if self.basis_vectors is not None:
             fs = self.basis_vectors
         bias = self.bias
         X = getPrimalDataMatrix(fs, bias)

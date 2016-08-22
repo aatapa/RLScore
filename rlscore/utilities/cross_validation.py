@@ -3,7 +3,7 @@ import numpy as np
 
 def random_folds(ssize, k, seed = None):
     #returns indices from 0...ssize-1 split to k random folds
-    if seed != None:
+    if seed is not None:
         myrandom = random.Random(seed)
     else:
         myrandom = random

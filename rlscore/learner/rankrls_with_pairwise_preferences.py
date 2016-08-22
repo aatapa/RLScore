@@ -76,7 +76,7 @@ class PPRankRLS(PredictorInterface):
         
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs["basis_vectors"] = basis_vectors
         self.regparam = regparam
         self.pairs = np.vstack([pairs_start_inds, pairs_end_inds]).T

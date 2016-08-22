@@ -77,7 +77,7 @@ class KernelPairwisePredictor(object):
             K1pred = K1pred.reshape(1, K1pred.shape[0])
         if len(K2pred.shape) == 1:
             K2pred = K2pred.reshape(1, K2pred.shape[0])
-        if row_inds_K1pred != None:
+        if row_inds_K1pred is not None:
             row_inds_K1pred = np.array(row_inds_K1pred, dtype = np.int32)
             row_inds_K2pred = np.array(row_inds_K2pred, dtype = np.int32)
             P = sampled_kronecker_products.sampled_vec_trick(
@@ -153,7 +153,7 @@ class LinearPairwisePredictor(object):
                 X2pred = X2pred[np.newaxis, ...]
             else:
                 X2pred = X2pred[..., np.newaxis]
-        if row_inds_X1pred == None:
+        if row_inds_X1pred is None:
             P = np.dot(np.dot(X1pred, self.W), X2pred.T)
         else:
             P = sampled_kronecker_products.sampled_vec_trick(

@@ -11,7 +11,7 @@ from rlscore.learner.interactive_rls_classifier import InteractiveRlsClassifier
 def generate_2d_gaussian_clusters(num, mux, muy, var, seed=None):
     Y = []
     X = []
-    if seed != None:
+    if seed is not None:
         random.seed(seed)
     for j in range(len(num)):
         for i in range(num[j]):

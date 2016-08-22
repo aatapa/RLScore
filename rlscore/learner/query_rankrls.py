@@ -84,7 +84,7 @@ class QueryRankRLS(PredictorInterface):
         kwargs["bias"] = 0.
         kwargs['kernel'] =  kernel
         kwargs['X'] = X
-        if basis_vectors != None:
+        if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.Y = np.mat(array_tools.as_2d_array(Y))
@@ -167,7 +167,7 @@ class QueryRankRLS(PredictorInterface):
         #Compute the eigenvalues determined by the given regularization parameter
         self.neweigvals = 1. / (self.LRevals + regparam)
         self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
-        #if self.U == None:
+        #if self.U is None:
             #Dual RLS
         #    pass
             #self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
@@ -317,11 +317,11 @@ class LeaveQueryOutRankRLS(PredictorInterface):
     """
    
     def __init__(self, X, Y, qids, kernel='LinearKernel', basis_vectors = None, regparams=None, measure=None, **kwargs):
-        if regparams == None:
+        if regparams is None:
             grid = [2**x for x in range(-15, 15)]
         else:
             grid = regparams
-        if measure == None:
+        if measure is None:
             self.measure = cindex
         else:
             self.measure = measure
