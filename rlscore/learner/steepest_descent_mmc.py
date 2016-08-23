@@ -7,8 +7,9 @@ import _steepest_descent_mmc
 
 from rlscore.utilities import adapter
 from rlscore.utilities import array_tools
+from rlscore.predictor import PredictorInterface
 
-class SteepestDescentMMC(object):
+class SteepestDescentMMC(PredictorInterface):
     
     """RLS-based maximum-margin clustering. Performs steepest descent search with a shaking heuristic to avoid getting stuck in
     local minima.
@@ -75,14 +76,13 @@ class SteepestDescentMMC(object):
     """
     
     def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
-    #    def __init__(self, **kwargs):
         kwargs['X'] = X
         kwargs['kernel'] = kernel
         if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.svals = self.svdad.svals
-        self.svecs = self.svdad.rsvecs
+        self.svals = np.mat(self.svdad.svals)
+        self.svecs = np.mat(self.svdad.rsvecs)
         self.callbackfun = callback
         self.regparam = regparam
         self.constraint = 0
@@ -219,8 +219,10 @@ class SteepestDescentMMC(object):
         
         if self.oneclass:
             self.Y = self.Y[:, 0]
+            self.A = self.A[:, 0]
         self.results = {}
         self.results['predicted_clusters_for_training_data'] = self.Y
+        self.predictor = self.svdad.createModel(self)
     
     
     def computeGlobalFitness(self):

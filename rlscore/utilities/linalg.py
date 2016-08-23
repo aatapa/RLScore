@@ -17,8 +17,7 @@ def svd_economy_sized(X):
     evecs = evecs[:, svals > 0]
     svals = svals[svals > 0]
     U = U[svals > 0]
-    svals = np.mat(svals)
-    return svals, evecs, U
+    return evecs, svals, U
 
 
 def eig_psd(K):
@@ -39,28 +38,5 @@ def eig_psd(K):
     evals, evecs = np.mat(evals), np.mat(evecs)
     svals = np.sqrt(evals)
     return svals, evecs
-
-
-#def decomposeSubsetKM(K_r, basis_vectors):
-def decomposeSubsetKM(K_r, K_rr):
-    """decomposes r*m kernel matrix, where r is the number of basis vectors and m the
-    number of training examples
-    
-    @param K_r: r*m kernel matrix, where only the lines corresponding to basis vectors are present
-    @type K_r: numpy matrix
-    @param basis_vectors: the indices of the basis vectors
-    @type basis_vectors: list of integers
-    @return svals, evecs, U, C_T_inv
-    @rtype tuple of numpy matrices"""
-    try:
-        C = la.cholesky(K_rr)
-    except LinAlgError:
-        print "Warning: chosen basis vectors not linearly independent"
-        print "Shifting the diagonal of kernel matrix"
-        C = la.cholesky(K_rr+0.000000001 * np.eye(K_rr.shape[0]))
-    C_T_inv = la.inv(C.T)
-    H = np.dot(K_r.T, C_T_inv)
-    svals, evecs, U = svd_economy_sized(H)
-    return svals, evecs, U, C_T_inv
   
 

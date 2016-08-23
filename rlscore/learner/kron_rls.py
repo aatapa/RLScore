@@ -152,7 +152,8 @@ class KronRLS(PairwisePredictorInterface):
             Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
             if not self.trained:
                 self.trained = True
-                svals1, V, rsvecs1 = linalg.svd_economy_sized(X1)
+                V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
+                svals1 = np.mat(svals1)
                 self.svals1 = svals1.T
                 self.evals1 = np.multiply(self.svals1, self.svals1)
                 self.V = V
@@ -161,7 +162,8 @@ class KronRLS(PairwisePredictorInterface):
                 if X1.shape == X2.shape and (X1 == X2).all():
                     svals2, U, rsvecs2 = svals1, V, rsvecs1
                 else:
-                    svals2, U, rsvecs2 = linalg.svd_economy_sized(X2)
+                    U, svals2, rsvecs2 = linalg.svd_economy_sized(X2)
+                    svals2 = np.mat(svals2)
                 self.svals2 = svals2.T
                 self.evals2 = np.multiply(self.svals2, self.svals2)
                 self.U = U
@@ -196,7 +198,8 @@ class KronRLS(PairwisePredictorInterface):
         X1, X2 = self.X1, self.X2
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
         
-        svals1, V, rsvecs1 = linalg.svd_economy_sized(X1)
+        V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
+        svals1 = np.mat(svals1)
         self.svals1 = svals1.T
         self.evals1 = np.multiply(self.svals1, self.svals1)
         self.V = V
@@ -206,7 +209,8 @@ class KronRLS(PairwisePredictorInterface):
         onevec = (1. / np.math.sqrt(qlen)) * np.mat(np.ones((qlen, 1)))
         C = np.mat(np.eye(qlen)) - onevec * onevec.T
         
-        svals2, U, rsvecs2 = linalg.svd_economy_sized(C * X2)
+        U, svals2, rsvecs2 = linalg.svd_economy_sized(C * X2)
+        svals2 = np.mat(svals2)
         self.svals2 = svals2.T
         self.evals2 = np.multiply(self.svals2, self.svals2)
         self.U = U

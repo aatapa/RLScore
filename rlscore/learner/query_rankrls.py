@@ -89,7 +89,7 @@ class QueryRankRLS(PredictorInterface):
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.Y = np.mat(array_tools.as_2d_array(Y))
         self.regparam = regparam
-        self.svals = self.svdad.svals
+        self.svals = np.mat(self.svdad.svals)
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
         self.size = self.Y.shape[0]

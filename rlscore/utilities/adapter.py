@@ -9,6 +9,7 @@ from numpy import multiply, float64, ones
 from math import sqrt
 import numpy as np
 import numpy.linalg as la
+from numpy.linalg.linalg import LinAlgError
 
 from rlscore.utilities import linalg
 from rlscore import predictor
@@ -73,7 +74,7 @@ class SvdAdapter(object):
                 raise Exception("X and basis_vectors have different number of columns")
             K_r = kernel.getKM(train_X).T
             Krr = kernel.getKM(basis_vectors)
-            svals, evecs, U, Z = linalg.decomposeSubsetKM(K_r, Krr)
+            svals, evecs, U, Z = decomposeSubsetKM(K_r, Krr)
         else:
             K = kernel.getKM(train_X).T
             svals, evecs = linalg.eig_psd(K)
@@ -120,7 +121,7 @@ class LinearSvdAdapter(SvdAdapter):
             if basis_vectors is not None:
                 K_r = kernel.getKM(self.X).T
                 Krr = kernel.getKM(basis_vectors)
-                svals, evecs, U, Z = linalg.decomposeSubsetKM(K_r, Krr)
+                svals, evecs, U, Z = decomposeSubsetKM(K_r, Krr)
             #Second possibility: dual mode if more attributes than examples
             else:
                 K = kernel.getKM(self.X).T
@@ -130,8 +131,7 @@ class LinearSvdAdapter(SvdAdapter):
         else:
             #Invoking getPrimalDataMatrix adds the bias feature
             X = getPrimalDataMatrix(self.X, self.bias)
-            evecs, svals, U = la.svd(X, full_matrices = 0)
-            svals, evecs = np.mat(svals), np.mat(evecs)
+            evecs, svals, U = linalg.svd_economy_sized(X)
             U, Z = None, None
         return svals, evecs, U, Z
     
@@ -188,7 +188,7 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
         if rpool.has_key('basis_vectors'):
             if not K_train.shape[1] == rpool["basis_vectors"].shape[1]:
                 raise Exception("When using basis vectors, both kernel matrices must contain equal number of columns")
-            svals, rsvecs, U, Z = linalg.decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
+            svals, rsvecs, U, Z = decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
         else:
             svals, rsvecs = linalg.eig_psd(K_train)
             U, Z = None, None
@@ -201,3 +201,25 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
         mod = predictor.LinearPredictor(A, 0.)
         return mod
 
+
+
+def decomposeSubsetKM(K_r, K_rr):
+    """decomposes r*m kernel matrix, where r is the number of basis vectors and m the
+    number of training examples
+    
+    @param K_r: r*m kernel matrix, where only the lines corresponding to basis vectors are present
+    @type K_r: numpy matrix
+    @param basis_vectors: the indices of the basis vectors
+    @type basis_vectors: list of integers
+    @return svals, evecs, U, C_T_inv
+    @rtype tuple of numpy matrices"""
+    try:
+        C = la.cholesky(K_rr)
+    except LinAlgError:
+        print "Warning: chosen basis vectors not linearly independent"
+        print "Shifting the diagonal of kernel matrix"
+        C = la.cholesky(K_rr+0.000000001 * np.eye(K_rr.shape[0]))
+    C_T_inv = la.inv(C.T)
+    H = np.dot(K_r.T, C_T_inv)
+    evecs, svals, U = linalg.svd_economy_sized(H)
+    return svals, evecs, U, C_T_inv
