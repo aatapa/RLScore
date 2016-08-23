@@ -4,7 +4,7 @@ from scipy.sparse import coo_matrix
 
 
 from rlscore.utilities import adapter
-from rlscore.utilities import decomposition
+from rlscore.utilities import linalg
 from rlscore.predictor import PredictorInterface
 
 class PPRankRLS(PredictorInterface):
@@ -118,7 +118,7 @@ class PPRankRLS(PredictorInterface):
             
             #These are cached for later use in solve and computeHO functions
             ssvecsTLssvecs = ssvecs.T * self.L * ssvecs
-            LRsvals, LRevecs = decomposition.decomposeKernelMatrix(ssvecsTLssvecs)
+            LRsvals, LRevecs = linalg.eig_psd(ssvecsTLssvecs)
             LRevals = np.multiply(LRsvals, LRsvals)
             LY = coo.T * np.mat(np.ones((self.pairs.shape[0], 1)))
             self.multipleright = LRevecs.T * (ssvecs.T * LY)

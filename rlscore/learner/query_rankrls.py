@@ -2,7 +2,7 @@
 import numpy as np
 import scipy.sparse
 
-from rlscore.utilities import decomposition
+from rlscore.utilities import linalg
 from rlscore.utilities import array_tools
 from rlscore.utilities import adapter
 from rlscore.measure.measure_utilities import UndefinedPerformance
@@ -152,7 +152,7 @@ class QueryRankRLS(PredictorInterface):
             
             #These are cached for later use in solve and holdout functions
             ssvecsTLssvecs = (np.multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
-            LRsvals, LRevecs = decomposition.decomposeKernelMatrix(ssvecsTLssvecs)
+            LRsvals, LRevecs = linalg.eig_psd(ssvecsTLssvecs)
             LRevals = np.multiply(LRsvals, LRsvals)
             LY = np.multiply(D.T, self.Y) - P_csr * (P_csc.T * self.Y)
             self.multipleright = LRevecs.T * (ssvecs.T * LY)

@@ -4,7 +4,7 @@ import numpy as np
 
 from rlscore.learner.rls import RLS
 from rlscore.utilities import array_tools
-from rlscore.utilities import decomposition
+from rlscore.utilities import linalg
 
 
 import _two_step_rls
@@ -123,14 +123,14 @@ class TwoStepRLS(PairwisePredictorInterface):
             #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
             if not self.trained:
                 self.trained = True
-                evals1, V  = decomposition.decomposeKernelMatrix(K1)
+                evals1, V  = linalg.eig_psd(K1)
                 evals1 = np.mat(evals1).T
                 evals1 = np.multiply(evals1, evals1)
                 V = np.mat(V)
                 self.evals1 = evals1
                 self.V = V
                 
-                evals2, U = decomposition.decomposeKernelMatrix(K2)
+                evals2, U = linalg.eig_psd(K2)
                 evals2 = np.mat(evals2).T
                 evals2 = np.multiply(evals2, evals2)
                 U = np.mat(U)
@@ -159,7 +159,7 @@ class TwoStepRLS(PairwisePredictorInterface):
             Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
             if not self.trained:
                 self.trained = True
-                svals1, V, rsvecs1 = decomposition.decomposeDataMatrix(X1.T)
+                svals1, V, rsvecs1 = linalg.svd_economy_sized(X1)
                 self.svals1 = svals1.T
                 self.evals1 = np.multiply(self.svals1, self.svals1)
                 self.V = V
@@ -168,7 +168,7 @@ class TwoStepRLS(PairwisePredictorInterface):
                 if X1.shape == X2.shape and (X1 == X2).all():
                     svals2, U, rsvecs2 = svals1, V, rsvecs1
                 else:
-                    svals2, U, rsvecs2 = decomposition.decomposeDataMatrix(X2.T)
+                    svals2, U, rsvecs2 = linalg.svd_economy_sized(X2)
                 self.svals2 = svals2.T
                 self.evals2 = np.multiply(self.svals2, self.svals2)
                 self.U = U

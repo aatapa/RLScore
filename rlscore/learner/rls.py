@@ -108,8 +108,8 @@ class RLS(PredictorInterface):
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
-        self.svals = self.svdad.svals
-        self.svecs = self.svdad.rsvecs
+        self.svals = np.mat(self.svdad.svals)
+        self.svecs = np.mat(self.svdad.rsvecs)
         self.size = self.Y.shape[0]
         self.solve(self.regparam)   
    

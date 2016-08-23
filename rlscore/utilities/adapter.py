@@ -10,7 +10,7 @@ from math import sqrt
 import numpy as np
 import numpy.linalg as la
 
-from rlscore.utilities import decomposition
+from rlscore.utilities import linalg
 from rlscore import predictor
 from rlscore.utilities import array_tools
 from rlscore.kernel import createKernelByModuleName
@@ -73,10 +73,10 @@ class SvdAdapter(object):
                 raise Exception("X and basis_vectors have different number of columns")
             K_r = kernel.getKM(train_X).T
             Krr = kernel.getKM(basis_vectors)
-            svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
+            svals, evecs, U, Z = linalg.decomposeSubsetKM(K_r, Krr)
         else:
             K = kernel.getKM(train_X).T
-            svals, evecs = decomposition.decomposeKernelMatrix(K)
+            svals, evecs = linalg.eig_psd(K)
             U, Z = None, None
         return svals, evecs, U, Z
     
@@ -84,7 +84,7 @@ class SvdAdapter(object):
     def reducedSetTransformation(self, A):
         if self.Z is not None:
             #Maybe we could somehow guarantee that Z is always coupled with basis_vectors?
-            A_red = self.Z * (self.U.T * multiply(self.svals.T,  self.rsvecs.T * A))
+            A_red = np.dot(self.Z, np.dot(self.U.T, multiply(self.svals,  np.dot(self.rsvecs.T, A).T).T))
             return A_red
         else:
             return A
@@ -120,19 +120,16 @@ class LinearSvdAdapter(SvdAdapter):
             if basis_vectors is not None:
                 K_r = kernel.getKM(self.X).T
                 Krr = kernel.getKM(basis_vectors)
-                svals, evecs, U, Z = decomposition.decomposeSubsetKM(K_r, Krr)
+                svals, evecs, U, Z = linalg.decomposeSubsetKM(K_r, Krr)
             #Second possibility: dual mode if more attributes than examples
             else:
                 K = kernel.getKM(self.X).T
-                #svals, evecs = decomposition.decomposeKernelMatrix(K)
-                evals, evecs = la.eigh(K)
-                evals, evecs = np.mat(evals), np.mat(evecs)
-                svals = np.sqrt(evals)
+                svals, evecs = linalg.eig_psd(K)
                 U, Z = None, None
         #Third possibility, primal decomposition
         else:
             #Invoking getPrimalDataMatrix adds the bias feature
-            X = getPrimalDataMatrix(self.X,self.bias)
+            X = getPrimalDataMatrix(self.X, self.bias)
             evecs, svals, U = la.svd(X, full_matrices = 0)
             svals, evecs = np.mat(svals), np.mat(evecs)
             U, Z = None, None
@@ -148,7 +145,7 @@ class LinearSvdAdapter(SvdAdapter):
         bias = self.bias
         X = getPrimalDataMatrix(fs, bias)
         #The hyperplane is a linear combination of the feature vectors of the basis examples
-        W = X.T * A
+        W = np.dot(X.T, A)
         if bias != 0:
             W_biaz = W[W.shape[0]-1] * math.sqrt(bias)
             W_features = W[range(W.shape[0]-1)]
@@ -175,9 +172,9 @@ def getPrimalDataMatrix(X, bias):
     #if sp.issparse(X):
     #    X = X.todense()
     X = array_tools.as_dense_matrix(X)
-    if bias!=0:
-        bias_slice = sqrt(bias)*ones((X.shape[0],1),dtype=float64)
-        X = np.hstack([X,bias_slice])
+    if bias != 0:
+        bias_slice = sqrt(bias) * ones((X.shape[0], 1), dtype = float64)
+        X = np.hstack([X, bias_slice])
     return X
 
 class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
@@ -191,9 +188,9 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
         if rpool.has_key('basis_vectors'):
             if not K_train.shape[1] == rpool["basis_vectors"].shape[1]:
                 raise Exception("When using basis vectors, both kernel matrices must contain equal number of columns")
-            svals, rsvecs, U, Z = decomposition.decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
+            svals, rsvecs, U, Z = linalg.decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
         else:
-            svals, rsvecs = decomposition.decomposeKernelMatrix(K_train)
+            svals, rsvecs = linalg.eig_psd(K_train)
             U, Z = None, None
         return svals, rsvecs, U, Z
     
@@ -203,3 +200,4 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
         A = self.reducedSetTransformation(A)
         mod = predictor.LinearPredictor(A, 0.)
         return mod
+
