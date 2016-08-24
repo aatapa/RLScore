@@ -35,7 +35,6 @@ def eig_psd(K):
         evals, evecs = la.eigh(K)
     evecs = evecs[:, evals > 0.]
     evals = evals[evals > 0.]
-    evals, evecs = np.mat(evals), np.mat(evecs)
     svals = np.sqrt(evals)
     return svals, evecs
   

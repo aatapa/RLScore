@@ -153,6 +153,7 @@ class QueryRankRLS(PredictorInterface):
             #These are cached for later use in solve and holdout functions
             ssvecsTLssvecs = (np.multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
             LRsvals, LRevecs = linalg.eig_psd(ssvecsTLssvecs)
+            LRsvals = np.mat(LRsvals)
             LRevals = np.multiply(LRsvals, LRsvals)
             LY = np.multiply(D.T, self.Y) - P_csr * (P_csc.T * self.Y)
             self.multipleright = LRevecs.T * (ssvecs.T * LY)
