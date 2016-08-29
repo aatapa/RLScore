@@ -159,9 +159,9 @@ class GreedyRLS(PredictorInterface):
         while currentfcount < self.desiredfcount:
             
             if not self.measure is None:
-                bestlooperf = None
+                self.bestlooperf = None
             else:
-                bestlooperf = 9999999999.
+                self.bestlooperf = 9999999999.
             
             #for ci in range(fsize):
             #print Y.dtype, X.dtype, GXT.dtype, diagG.dtype, self.dualvec.dtype
@@ -195,27 +195,27 @@ class GreedyRLS(PredictorInterface):
                 if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
                     looperf_i = self.measure.multiOutputPerformance(Y, loopred)
-                    if bestlooperf is None:
-                        bestlooperf = looperf_i
+                    if self.bestlooperf is None:
+                        self.bestlooperf = looperf_i
                         bestcind = ci
-                    if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
+                    if self.measure.comparePerformances(looperf_i, self.bestlooperf) > 0:
                         bestcind = ci
-                        bestlooperf = looperf_i
+                        self.bestlooperf = looperf_i
                 else:
                     #This default squared performance is a bit faster to compute than the one loaded separately.
                     loodiff = np.multiply(invupddiagG, updA)
                     print loodiff
                     foo
                     looperf_i = mean(np.multiply(loodiff, loodiff))
-                    if looperf_i < bestlooperf:
+                    if looperf_i < self.bestlooperf:
                         bestcind = ci
-                        bestlooperf = looperf_i
+                        self.bestlooperf = looperf_i
                 self.looperf[ci] = looperf_i
             '''
             #'''
             self.bestlooperf = self.looperf[bestcind]#bestlooperf
             self.looperf = np.mat(self.looperf)
-            self.performances.append(bestlooperf)
+            self.performances.append(self.bestlooperf)
             ci_mapped = bestcind#indsmap[bestcind]
             cv = listX[ci_mapped]
             GXT_bci = GXT[:, ci_mapped]
@@ -225,7 +225,7 @@ class GreedyRLS(PredictorInterface):
             GXT = GXT - ca * (cv * GXT)
             self.selected.append(bestcind)
             #print self.selected
-            #print bestlooperf
+            #print self.bestlooperf
             currentfcount += 1
             
             #Linear predictor with bias
