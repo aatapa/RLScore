@@ -1,5 +1,5 @@
 import numpy as np
-from rlscore.reader import read_sparse
+from rlscore.utilities.reader import read_sparse
 from rlscore.utilities.cross_validation import map_ids
 
 def print_stats():

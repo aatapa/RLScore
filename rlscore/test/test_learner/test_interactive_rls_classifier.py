@@ -32,7 +32,6 @@ def dotesting(ppc = 400):
         Y, X = generate_2d_gaussian_clusters([ppc, ppc, ppc], [10, 10, 20], [10, 20, 15], [2, 2, 2])
         X = np.array(X)
         print X.shape
-        #idata = reader.read_sparse('/home/aatapa/repository/RLScore/trunk/src/RLScore/examples/data/class_train.features')
         
 
         class TestCallback(object):

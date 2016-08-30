@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from rlscore.learner import RLS
 from rlscore.measure import sqerror
 from rlscore.utilities.cross_validation import map_ids
-from rlscore.reader import read_sparse
+from rlscore.utilities.reader import read_sparse
 
 
 def plot_rls():

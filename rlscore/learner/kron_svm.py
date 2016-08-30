@@ -4,9 +4,9 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import qmr
 
 from rlscore.utilities import sampled_kronecker_products
-from rlscore.pairwise_predictor import KernelPairwisePredictor
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import PairwisePredictorInterface
+from rlscore.predictor import KernelPairwisePredictor
+from rlscore.predictor import LinearPairwisePredictor
+from rlscore.predictor import PairwisePredictorInterface
 
 
 TRAIN_LABELS = 'Y'

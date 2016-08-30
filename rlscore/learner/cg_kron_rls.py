@@ -1,15 +1,14 @@
 
-# from numpy import *
 import numpy as np
 
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import minres
 
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import KernelPairwisePredictor
+from rlscore.predictor import LinearPairwisePredictor
+from rlscore.predictor import KernelPairwisePredictor
 from rlscore.utilities import array_tools
 from rlscore.utilities import sampled_kronecker_products
-from rlscore.pairwise_predictor import PairwisePredictorInterface
+from rlscore.predictor import PairwisePredictorInterface
 
 CALLBACK_FUNCTION = 'callback'
 

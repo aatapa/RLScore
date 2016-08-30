@@ -1,4 +1,4 @@
-from rlscore.reader import read_svmlight
+from rlscore.utilities.reader import read_svmlight
 
 def print_stats():
     X_train, Y_train, foo = read_svmlight("a1a.t")

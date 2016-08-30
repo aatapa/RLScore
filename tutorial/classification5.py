@@ -1,7 +1,7 @@
 import numpy as np
 from rlscore.learner import LeaveOneOutRLS
 from rlscore.measure import accuracy
-from rlscore.reader import read_svmlight
+from rlscore.utilities.reader import read_svmlight
 import random
 random.seed(10)
 

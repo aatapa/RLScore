@@ -5,8 +5,8 @@ pyrandom.seed(100)
 import numpy as np
 from rlscore.kernel import LinearKernel
 from rlscore.learner.cg_kron_rls import CGKronRLS
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import KernelPairwisePredictor
+from rlscore.predictor import LinearPairwisePredictor
+from rlscore.predictor import KernelPairwisePredictor
 from rlscore.learner.rls import RLS
 
 

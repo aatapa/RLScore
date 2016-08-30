@@ -6,7 +6,6 @@ from scipy.sparse import coo_matrix
 
 from rlscore.learner import CGRankRLS
 from rlscore.learner.cg_rankrls import PCGRankRLS
-from rlscore.kernel import LinearKernel
 from rlscore.learner import QueryRankRLS
 
 
