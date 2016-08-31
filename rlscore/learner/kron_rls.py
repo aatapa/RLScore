@@ -5,9 +5,9 @@ import numpy.linalg as la
 from rlscore.utilities import array_tools
 from rlscore.utilities import linalg
 from rlscore.utilities import sampled_kronecker_products
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import KernelPairwisePredictor
-from rlscore.pairwise_predictor import PairwisePredictorInterface
+from rlscore.predictor import LinearPairwisePredictor
+from rlscore.predictor import KernelPairwisePredictor
+from rlscore.predictor import PairwisePredictorInterface
 
 class KronRLS(PairwisePredictorInterface):
     

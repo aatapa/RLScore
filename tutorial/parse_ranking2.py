@@ -1,7 +1,7 @@
 import numpy as np
 from rlscore.learner import QueryRankRLS
 from rlscore.measure import cindex
-from rlscore.reader import read_sparse
+from rlscore.utilities.reader import read_sparse
 from rlscore.utilities.cross_validation import map_ids
 
 def train_rls():

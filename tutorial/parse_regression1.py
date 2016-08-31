@@ -2,7 +2,7 @@ import numpy as np
 from rlscore.learner import RLS
 from rlscore.measure import sqerror
 
-from rlscore.reader import read_sparse
+from rlscore.utilities.reader import read_sparse
 
 
 def train_rls():

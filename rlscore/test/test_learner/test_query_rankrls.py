@@ -11,7 +11,6 @@ def mapQids(qids):
     """Maps qids to running numbering starting from zero, and partitions
     the training data indices so that each partition corresponds to one
     query"""
-    #Used in FileReader, rls_predict
     qid_dict = {}
     folds = {}
     counter = 0

@@ -9,9 +9,9 @@ from rlscore.utilities import linalg
 
 import _two_step_rls
 
-from rlscore.pairwise_predictor import PairwisePredictorInterface
-from rlscore.pairwise_predictor import LinearPairwisePredictor
-from rlscore.pairwise_predictor import KernelPairwisePredictor
+from rlscore.predictor import PairwisePredictorInterface
+from rlscore.predictor import LinearPairwisePredictor
+from rlscore.predictor import KernelPairwisePredictor
 
 class TwoStepRLS(PairwisePredictorInterface):
 

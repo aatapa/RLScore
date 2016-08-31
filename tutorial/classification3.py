@@ -1,7 +1,7 @@
 import numpy as np
 from rlscore.learner import RLS
 from rlscore.measure import auc
-from rlscore.reader import read_svmlight
+from rlscore.utilities.reader import read_svmlight
 
 
 def train_rls():
