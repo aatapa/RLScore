@@ -76,8 +76,6 @@ class GreedyRLS(PredictorInterface):
         self.Y = np.mat(array_tools.as_2d_array(Y))
         #Number of training examples
         self.size = self.Y.shape[0]
-        #if not self.Y.shape[1] == 1:
-        #    raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
         self.bias = bias
         self.measure = None
         fsize = X.shape[1]
@@ -89,14 +87,9 @@ class GreedyRLS(PredictorInterface):
             self.callbackfun = DefaultCallback(**kwargs)
         #The current version works only with the squared error measure
         
-        if True:#self.Y.shape[1] > 1:
-        #if False:#self.Y.shape[1] > 1:
-            #self.solve_bu(regparam)
-            self._solve_cython(self.regparam)
-        else:
-            #self.solve_new(regparam, float32)
-            self._solve_new(self.regparam, np.float64)
-            #self.solve_bu(regparam)
+        self._solve_cython(self.regparam)
+        #self._solve_bu(regparam)
+        #self._solve_new(regparam, np.float64)
     
     
     def _solve_cython(self, regparam):
@@ -105,36 +98,17 @@ class GreedyRLS(PredictorInterface):
         Y = self.Y
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         
-        '''su = sum(X, axis = 1)
-        cc = 0
-        indsmap = {}
-        allinds = []
-        for ci in range(X.shape[0]):
-            if su[ci] == 0:
-                pass
-            else:
-                allinds.append(ci)
-                indsmap[ci] = cc
-                cc += 1
-        #print len(allinds)
-        
-        X = X[allinds]'''
-        
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        #self.A = np.mat(np.zeros((fsize,1)))
         self.A = np.mat(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
         
-        
-        
         #Biaz
         cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
-        
         
         self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
         
@@ -163,8 +137,6 @@ class GreedyRLS(PredictorInterface):
             else:
                 self.bestlooperf = 9999999999.
             
-            #for ci in range(fsize):
-            #print Y.dtype, X.dtype, GXT.dtype, diagG.dtype, self.dualvec.dtype
             self.looperf = np.ones(fsize) * float('Inf')
             #'''
             bestcind = _greedy_rls.find_optimal_feature(np.array(Y),
@@ -180,7 +152,7 @@ class GreedyRLS(PredictorInterface):
                                                               tempvec1,
                                                               tempvec2,
                                                               tempvec3)
-            #foo
+            #Reference code
             '''
             diagG = np.mat(diagG).T
             for ci in allinds:
@@ -213,10 +185,10 @@ class GreedyRLS(PredictorInterface):
                 self.looperf[ci] = looperf_i
             '''
             #'''
-            self.bestlooperf = self.looperf[bestcind]#bestlooperf
+            self.bestlooperf = self.looperf[bestcind]
             self.looperf = np.mat(self.looperf)
             self.performances.append(self.bestlooperf)
-            ci_mapped = bestcind#indsmap[bestcind]
+            ci_mapped = bestcind
             cv = listX[ci_mapped]
             GXT_bci = GXT[:, ci_mapped]
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
@@ -224,8 +196,6 @@ class GreedyRLS(PredictorInterface):
             diagG = diagG - np.array(np.multiply(ca, GXT_bci)).reshape((self.size))
             GXT = GXT - ca * (cv * GXT)
             self.selected.append(bestcind)
-            #print self.selected
-            #print self.bestlooperf
             currentfcount += 1
             
             #Linear predictor with bias
@@ -246,6 +216,10 @@ class GreedyRLS(PredictorInterface):
     
     def _solve_new(self, regparam, floattype):
         
+        #Legacy code. Works only with a single output but can work with given performance measures and is faster than _solve_bu
+        
+        if not self.Y.shape[1] == 1:
+            raise Exception('This variation of GreedyRLS supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
         self.regparam = regparam
         X = self.X
         Y = np.mat(self.Y, dtype=floattype)
@@ -289,7 +263,7 @@ class GreedyRLS(PredictorInterface):
         while currentfcount < self.desiredfcount:
             
             np.multiply(X.T, GXT, tempmatrix)
-            XGXTdiag = sum(tempmatrix, axis = 0)
+            XGXTdiag = np.sum(tempmatrix, axis = 0)
             
             XGXTdiag = 1. / (1. + XGXTdiag)
             np.multiply(GXT, XGXTdiag, tempmatrix)
@@ -310,7 +284,7 @@ class GreedyRLS(PredictorInterface):
                 np.add(temp2, Y, temp2)
                 looperf = self.measure.multiTaskPerformance(temp2, tempmatrix)
                 looperf = np.mat(looperf, dtype=floattype)
-                if self.measure.isErrorMeasure():
+                if self.measure.iserror:
                     looperf[0, self.selected] = float('inf')
                     bestcind = np.argmin(looperf)
                     self.bestlooperf = np.amin(looperf)
@@ -320,7 +294,7 @@ class GreedyRLS(PredictorInterface):
                     self.bestlooperf = np.amax(looperf)
             else:
                 np.multiply(tempmatrix, tempmatrix, temp2)
-                looperf = sum(temp2, axis = 0)
+                looperf = np.sum(temp2, axis = 0)
                 looperf[0, self.selected] = float('inf')
                 bestcind = np.argmin(looperf)
                 self.bestlooperf = np.amin(looperf)
@@ -344,7 +318,7 @@ class GreedyRLS(PredictorInterface):
             
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
-            self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+            self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)
             
             if not self.callbackfun is None:
@@ -352,7 +326,7 @@ class GreedyRLS(PredictorInterface):
         if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
-        self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+        self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
         #self.results['predictor'] = self.getModel()
@@ -366,7 +340,7 @@ class GreedyRLS(PredictorInterface):
         
         bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
         
-        su = sum(X, axis = 1)
+        su = np.sum(X, axis = 1)
         cc = 0
         indsmap = {}
         allinds = []
@@ -377,14 +351,12 @@ class GreedyRLS(PredictorInterface):
                 allinds.append(ci)
                 indsmap[ci] = cc
                 cc += 1
-        #print len(allinds)
         
         X = X[allinds]
         
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        #self.A = np.mat(np.zeros((fsize,1)))
         self.A = np.mat(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
@@ -465,24 +437,16 @@ class GreedyRLS(PredictorInterface):
             
             #Linear predictor with bias
             self.A[self.selected] = X[self.selected] * self.dualvec
-            self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+            self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
             self.predictor = predictor.LinearPredictor(self.A, self.b)            
             if not self.callbackfun is None:
                 self.callbackfun.callback(self)
         if not self.callbackfun is None:
             self.callbackfun.finished(self)
         self.A[self.selected] = X[self.selected] * self.dualvec
-        self.b = bias_slice * self.dualvec# * np.sqrt(self.bias)
+        self.b = bias_slice * self.dualvec * np.sqrt(self.bias)
         self.results[SELECTED_FEATURES] = self.selected
         self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
-#            self.callback()
-#        self.finished()
-#        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
-#        X_biased = vstack([X,bias_slice])
-#        selected_plus_bias = self.selected+[fsize]
-#        #self.A = np.mat(eye(fsize+1))[:,selected_plus_bias]*(X_biased[selected_plus_bias]*self.dualvec)
-#        self.results[SELECTED_FEATURES] = self.selected
-#        self.results[GREEDYRLS_LOO_PERFORMANCES] = self.performances
         self.predictor = predictor.LinearPredictor(self.A, self.b)
 
 
