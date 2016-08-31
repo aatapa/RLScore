@@ -21,9 +21,9 @@ from the UCI machine learning repository. The data consists of 506 instances,
 The data can be loaded from disk and split into a training set of 250, and test
 set of 256 instances using the following code.
 
-.. literalinclude:: ../tutorial/housing_data.py
+.. literalinclude:: src/housing_data.py
 
-.. literalinclude:: ../tutorial/housing_data.out
+.. literalinclude:: src/housing_data.out
 
 
 Linear regression with default parameters
@@ -37,11 +37,11 @@ In order to check that the resulting model is better than a trivial baseline,
 we compare the results to a predictor, that always predicts the mean
 of training outputs.
 
-.. literalinclude:: ../tutorial/regression1.py
+.. literalinclude:: src/regression1.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/regression1.out
+.. literalinclude:: src/regression1.out
 
 Clearly the model works much better than the trivial baseline. Still, since we used
 default parameters there is no guarantee that the regularization parameter would
@@ -57,9 +57,9 @@ implemented the whole procedure is almost as fast as training RLS once (though o
 small data set the running times would yet not be an issue even for brute force algorithms
 that need re-training for each tested parameter and round of cross-validation).
 
-.. literalinclude:: ../tutorial/regression2.py
+.. literalinclude:: src/regression2.py
  
-.. literalinclude:: ../tutorial/regression2.out
+.. literalinclude:: src/regression2.out
 
 Compared to previous case, we were able to slightly lower the error,
 though it turns out in this case the default parameter was already close to optimal.
@@ -68,9 +68,9 @@ Usually one cannot expect to be so lucky.
 For convenience, the procedure of training RLS and simultaneously selecting the
 regularization parameter with leave-one-out is implemented in class LeaveOneOutRLS.
 
-.. literalinclude:: ../tutorial/regression3.py
+.. literalinclude:: src/regression3.py
  
-.. literalinclude:: ../tutorial/regression3.out
+.. literalinclude:: src/regression3.out
 
 Learning nonlinear predictors using kernels
 -------------------------------------------
@@ -81,9 +81,9 @@ We implement a nested loop, where gamma is selected in the outer loop, and regpa
 in the inner. The ordering is important, as it allows us to make use of the fast
 algorithm for re-training RLS with different regularization parameter values.
 
-.. literalinclude:: ../tutorial/regression4.py
+.. literalinclude:: src/regression4.py
  
-.. literalinclude:: ../tutorial/regression4.out
+.. literalinclude:: src/regression4.out
 
 Clearly there is a non-linear relationship between the features and the output,
 that the Gaussian kernel allows us to model better than the linear kernel. For
@@ -91,9 +91,9 @@ simpler implementation, the inner loop could be replaced with training LeaveOneO
 supplying the grid as a parameter, the results and running time are the same.
 
 
-.. literalinclude:: ../tutorial/regression5.py
+.. literalinclude:: src/regression5.py
  
-.. literalinclude:: ../tutorial/regression5.out
+.. literalinclude:: src/regression5.out
 
 Using a custom kernel
 ---------------------
@@ -103,9 +103,9 @@ allows the user to directly give a precomputed kernel matrix for training (and l
 for prediction). Revisiting the first example, we again train a regressor on the Housing
 data:
 
-.. literalinclude:: ../tutorial/regression6.py
+.. literalinclude:: src/regression6.py
 
-.. literalinclude:: ../tutorial/regression6.out
+.. literalinclude:: src/regression6.out
 
 
 Tutorial 2: K-fold cross-validation, non i.i.d. data
@@ -151,9 +151,9 @@ The data set
 
 First, we load the training set in and examine its properties
 
-.. literalinclude:: ../tutorial/parse_data.py
+.. literalinclude:: src/parse_data.py
  
-.. literalinclude:: ../tutorial/parse_data.out
+.. literalinclude:: src/parse_data.out
 
 As is common in natural language applications the data is very high dimensional. In
 addition to the data we load a list of sentence ids, denoting to which sentence each
@@ -168,9 +168,9 @@ Incorrect analysis using leave-one-out
 As before, we select the regularization parameter using leave-one-out.
 
 
-.. literalinclude:: ../tutorial/parse_regression1.py
+.. literalinclude:: src/parse_regression1.py
  
-.. literalinclude:: ../tutorial/parse_regression1.out
+.. literalinclude:: src/parse_regression1.out
 
 It can be seen that something has gone wrong, the test error is almost 50 times higher than
 the leave-one-out error! The problem is that in leave-one-out when a parse is left out of 
@@ -184,9 +184,9 @@ This time, we perform k-fold cross-validation, where each fold contains instance
 to a single sentence (k=117).
 
 
-.. literalinclude:: ../tutorial/parse_regression2.py
+.. literalinclude:: src/parse_regression2.py
  
-.. literalinclude:: ../tutorial/parse_regression2.out
+.. literalinclude:: src/parse_regression2.out
 
 This time everything works out better than before, the cross-validation estimate and test
 error are much closer. Interestingly, the regularization parameter chosen based on
@@ -199,9 +199,9 @@ K-fold vs. leave-one-out
 Finally, we plot the difference between the leave-sentence-out k-fold,
 leave-one-out and test set errors.
 
-.. literalinclude:: ../tutorial/parse_regression_plot.py
+.. literalinclude:: src/parse_regression_plot.py
 
-.. image:: ../tutorial/parse_plot.png
+.. image:: src/parse_plot.png
 
 The moral of the story is, that if your data is not identically distributed, but rather sampled
 in groups, this should be taken into account when designing training/test split and/or the
@@ -224,9 +224,9 @@ We model this as a regression problem, where +1 encodes the positive class,
 and -1 the negative one. This is the standard encoding assumed by the
 performance measures within the RLScore package.
 
-.. literalinclude:: ../tutorial/adult_data.py
+.. literalinclude:: src/adult_data.py
  
-.. literalinclude:: ../tutorial/adult_data.out
+.. literalinclude:: src/adult_data.out
 
 Binary classification
 ---------------------
@@ -235,9 +235,9 @@ We can train RLS and select the regularization parameter as before, by
 simply using (binary) classification accuracy instead of squared error as the
 performance measure.
 
-.. literalinclude:: ../tutorial/classification0.py
+.. literalinclude:: src/classification0.py
  
-.. literalinclude:: ../tutorial/classification0.out
+.. literalinclude:: src/classification0.out
 
 Area under ROC curve (AUC) and cross-validation
 -----------------------------------------------
@@ -246,17 +246,17 @@ A common approach in machine learning is to measure performance with area under 
 rather than classification accuracy. Here, we combine the leave-one-out shortcuts, with using AUC
 for parameter selection and performance estimation.
 
-.. literalinclude:: ../tutorial/classification1.py
+.. literalinclude:: src/classification1.py
  
-.. literalinclude:: ../tutorial/classification1.out
+.. literalinclude:: src/classification1.out
 
 However, as shown for example in [4]_, especially for small data sets leave-one-out can have substantial
 bias for AUC-estimation. In this experiment, we split the Adult data set to 1000 separate training sets
 of 30 samples, and compare the leave-one-out AUC and test set AUC.
 
-.. literalinclude:: ../tutorial/classification2.py
+.. literalinclude:: src/classification2.py
  
-.. literalinclude:: ../tutorial/classification2.out
+.. literalinclude:: src/classification2.out
 
 As can be seen, there is a systematic negative bias meaning that the leave-one-out AUCs tend to be
 smaller than the AUC on the (quite large) test set. The results are similar to those obtained in
@@ -268,9 +268,9 @@ where y_i = +1 and y_j = -1 are left out in turn. The leave-pair-out AUC is the 
 such pairs, where the f(x_i) > f(x_j), with ties assumed to be broken randomly (see [4]_ for further
 discussion).
 
-.. literalinclude:: ../tutorial/classification3.py
+.. literalinclude:: src/classification3.py
  
-.. literalinclude:: ../tutorial/classification3.out
+.. literalinclude:: src/classification3.out
 
 As can be seen, the negative bias is now almost completely eliminated. 
 
@@ -280,9 +280,9 @@ equivalent higher level interface. In the following experiment, we train RLS on 
 for regularization parameter values 2^-5, 1 and 2^5, and select the predictor corresponding
 to highest leave-pair-out AUC.
 
-.. literalinclude:: ../tutorial/classification4.py
+.. literalinclude:: src/classification4.py
  
-.. literalinclude:: ../tutorial/classification4.out
+.. literalinclude:: src/classification4.out
 
 Tutorial 4: Reduced set approximation
 *************************************
@@ -296,9 +296,9 @@ select a couple of hundred of training instances as basis vectors. A lot of rese
 has been done on more advanced selection strategies.
 
 
-.. literalinclude:: ../tutorial/classification5.py
+.. literalinclude:: src/classification5.py
  
-.. literalinclude:: ../tutorial/classification5.out
+.. literalinclude:: src/classification5.out
 
 Tutorial 5: Multi-target learning
 *********************************
@@ -316,17 +316,17 @@ learning.
 We demonstrate multi-class learning with a simple toy example, utilizing the `Wine data
 set <https://archive.ics.uci.edu/ml/datasets/Housing>`_ from the UCI repository 
 
-.. literalinclude:: ../tutorial/wine_data.py
+.. literalinclude:: src/wine_data.py
 
-.. literalinclude:: ../tutorial/wine_data.out
+.. literalinclude:: src/wine_data.out
 
 We implement the training and testing, using two additional helper functions, one which
 transforms class labels to one-vs-all encoding, another that computes classification accuracy
 for matrices using one-vs-all encoding.
 
-.. literalinclude:: ../tutorial/classification6.py
+.. literalinclude:: src/classification6.py
  
-.. literalinclude:: ../tutorial/classification6.out
+.. literalinclude:: src/classification6.out
 
 The wine data turns out to be really easy to learn. Similarly, we could implement multi-target
 regression, or multi-label classification. RLScore does not currently implement a wide variety

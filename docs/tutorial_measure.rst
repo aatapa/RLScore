@@ -30,18 +30,18 @@ computing the performance.
 
 This is how one can compute simple binary classification accuracy.
 
-.. literalinclude:: ../tutorial/measure1.py
+.. literalinclude:: src/measure1.py
 
-.. literalinclude:: ../tutorial/measure1.out
+.. literalinclude:: src/measure1.out
 
 Four out of five instances are correctly classified, so classification accuracy is 0.8.
 Giving as input Y-values outside {-1, 1} causes an exception to be raised.
 
 Next, we compute the area under ROC curve.
 
-.. literalinclude:: ../tutorial/measure2.py
+.. literalinclude:: src/measure2.py
 
-.. literalinclude:: ../tutorial/measure2.out
+.. literalinclude:: src/measure2.out
 
 Everything works as one would expect, until we pass Y full of ones to auc. UndefinedPerformance
 is raised, because AUC is not defined for problems, where only one class is present in the true
@@ -50,9 +50,9 @@ class labels.
 Finally, we test cindex, a pairwise ranking measure that computes how many of the pairs where
 Y[i] > Y[j] also have P[i] > P[j]. The measure is a generalization of the AUC.
 
-.. literalinclude:: ../tutorial/measure3.py
+.. literalinclude:: src/measure3.py
 
-.. literalinclude:: ../tutorial/measure3.out
+.. literalinclude:: src/measure3.out
 
 We also observe, that when given Y and P with multiple columns, the performance measure is computed
 separately for each column, and then averaged. This is what happens when using some performance
@@ -66,9 +66,9 @@ RLScore contains some tools for converting multi-class learning problems to seve
 binary classification problems, and for converting vector valued multi-target predictions back to
 multi-class predictions.
 
-.. literalinclude:: ../tutorial/measure4.py
+.. literalinclude:: src/measure4.py
 
-.. literalinclude:: ../tutorial/measure4.out
+.. literalinclude:: src/measure4.out
 
 When doing multi-class learning, one should use the ova_accuracy function for parameter selection and computing
 the final performance.

@@ -38,18 +38,18 @@ from the UCI machine learning repository. The data consists of 506 instances,
 The data can be loaded from disk and split into a training set of 250, and test
 set of 256 instances using the following code.
 
-.. literalinclude:: ../tutorial/housing_data.py
+.. literalinclude:: src/housing_data.py
 
-.. literalinclude:: ../tutorial/housing_data.out
+.. literalinclude:: src/housing_data.out
 
 Selecting k features
 --------------------
 
 First, we test selecting 5 features.
 
-.. literalinclude:: ../tutorial/fselection1.py
+.. literalinclude:: src/fselection1.py
 
-.. literalinclude:: ../tutorial/fselection1.out
+.. literalinclude:: src/fselection1.out
 
 The feature indices range from 0 to fcount-1.
 
@@ -61,9 +61,9 @@ methods: callback(learner) that is called each time a feature is selected, and f
 is called after the selection process has ended. The callback function can be used for example to
 follow how test set prediction error evolves as a function of selected features.
 
-.. literalinclude:: ../tutorial/fselection2.py
+.. literalinclude:: src/fselection2.py
 
-.. literalinclude:: ../tutorial/fselection2.out
+.. literalinclude:: src/fselection2.out
 
 Running GreedyRLS on all the features produces a ranking of the features: the most important,
 the second most important given the already selected one, etc. The final model is exactly the
@@ -82,9 +82,9 @@ select such common features that allow jointly predicting all the 10 classes as 
 classes are not linearly separable, with no pre-processing done the best a linear classifier can achieve
 with all the features is around 0.88 accuracy.
 
-.. literalinclude:: ../tutorial/greedy_mnist.py
+.. literalinclude:: src/greedy_mnist.py
 
-.. literalinclude:: ../tutorial/greedy_mnist.out
+.. literalinclude:: src/greedy_mnist.out
 
 On this data using 50 selected features we achieve classification accuracy of 0.82, better accuracy could
 still be gained by continuing the selection process further.

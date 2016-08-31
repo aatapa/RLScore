@@ -19,9 +19,9 @@ from the UCI machine learning repository. The data consists of 506 instances,
 The data can be loaded from disk and split into a training set of 250, and test
 set of 256 instances using the following code.
 
-.. literalinclude:: ../tutorial/housing_data.py
+.. literalinclude:: src/housing_data.py
 
-.. literalinclude:: ../tutorial/housing_data.out
+.. literalinclude:: src/housing_data.out
 
 The linear predictor is of the form w.T*x + b. The predictor takes as input
 the n_samples x features - data matrix, and computes predictions.
@@ -29,9 +29,9 @@ the n_samples x features - data matrix, and computes predictions.
 The predictor is stored in the "predictor" -variable of the trained learner.
 The "w" and "b" coefficients store the coefficients of the learner model.
 
-.. literalinclude:: ../tutorial/predictor1.py
+.. literalinclude:: src/predictor1.py
 
-.. literalinclude:: ../tutorial/predictor1.out
+.. literalinclude:: src/predictor1.out
 
 Here, we have taken the predictor apart. There are 13 w-coefficients each corresponding
 to one feature, and additionally a bias feature. 
@@ -39,9 +39,9 @@ to one feature, and additionally a bias feature.
 Now let us do feature selection using the greedy RLS method, and select 5 most useful
 features for the data set.
 
-.. literalinclude:: ../tutorial/predictor2.py
+.. literalinclude:: src/predictor2.py
 
-.. literalinclude:: ../tutorial/predictor2.out
+.. literalinclude:: src/predictor2.out
 
 Now, all but 5 of the w-coefficients are set to zero by the feature selection process.
 
@@ -55,9 +55,9 @@ Non-linear predictors are of the form K_test * A,
 where the rows of K_test correspond  to test instances, columns to training instances,
 and elements to kernel evaluations.
 
-.. literalinclude:: ../tutorial/predictor3.py
+.. literalinclude:: src/predictor3.py
 
-.. literalinclude:: ../tutorial/predictor3.out
+.. literalinclude:: src/predictor3.out
 
 Now there are as many dual coefficients as training examples.
 If we would perform multi-target learning (i.e. Y has several columns), "A" would be
@@ -75,9 +75,9 @@ The reduced set approximation restricts the predictor of the form K_test * A,
 where the rows of K_test correspond  to test instances, columns to basis vectors,
 and elements to kernel evaluations.
 
-.. literalinclude:: ../tutorial/predictor4.py
+.. literalinclude:: src/predictor4.py
 
-.. literalinclude:: ../tutorial/predictor4.out
+.. literalinclude:: src/predictor4.out
 
 Now the predictor needs to construct only 20 rows for the test kernel matrix.
 Again, with multi-target learning A would be of dimensions [n_bvectors, n_targets].
@@ -99,9 +99,9 @@ For these experiments, we need to download from the drug-target binding affinity
 
 We can load the data set as follows:
 
-.. literalinclude:: ../tutorial/davis_data.py
+.. literalinclude:: src/davis_data.py
 
-.. literalinclude:: ../tutorial/davis_data.out
+.. literalinclude:: src/davis_data.out
 
 Linear pairwise model
 ---------------------
@@ -110,9 +110,9 @@ In this example, we compute predictions first for all combinations of rows from
 X1_test and X2_test, and then only for three pairs. The number of coefficients
 in the linear model is the product of the number of features in X1 and X2.
 
-.. literalinclude:: ../tutorial/predictor5.py
+.. literalinclude:: src/predictor5.py
 
-.. literalinclude:: ../tutorial/predictor5.out
+.. literalinclude:: src/predictor5.out
 
 Kernel pairwise model
 ---------------------
@@ -123,9 +123,9 @@ in the dual model is the product of the number of training examples (rows /colum
 in K1_train and K2_train. For sparse data, the number of dual coefficients would
 correspond to number of training pairs with known labels.
 
-.. literalinclude:: ../tutorial/predictor6.py
+.. literalinclude:: src/predictor6.py
 
-.. literalinclude:: ../tutorial/predictor6.out
+.. literalinclude:: src/predictor6.out
 
 Saving the predictor
 ********************

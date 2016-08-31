@@ -68,9 +68,9 @@ themselves are not valid positive semi-definite kernel matrices.
 
 We can load the data set as follows:
 
-.. literalinclude:: ../tutorial/davis_data.py
+.. literalinclude:: src/davis_data.py
 
-.. literalinclude:: ../tutorial/davis_data.out
+.. literalinclude:: src/davis_data.out
 
 There are 68 drugs, 442 targets and 30056 drug-target pairs. The benefit of using KronRLS or TwoStepRLS is that they operate
 only on these small matrices, rather than explicitly forming the Kronecker product matrices whose sizes correspond to the
@@ -86,9 +86,9 @@ leave-one-out predictions: if the label of one (d,t) pair is left out of Y, how 
 data? In practice the fast leave-one-out algorithm could be used to impute missing values for example by first replacing
 them with mean values, and then computing more accurate estimates via the leave-one-out.
 
-.. literalinclude:: ../tutorial/kron_rls1.py
+.. literalinclude:: src/kron_rls1.py
 
-.. literalinclude:: ../tutorial/kron_rls1.out
+.. literalinclude:: src/kron_rls1.out
 
 The best results are for regparam 2**21, with concordance index (e.g. pairwise ranking accuracy, generalization of AUC
 for real-valued data) around 0.90.
@@ -98,9 +98,9 @@ Setting 2
 
 Next, we consider setting 2, generalizing to predictions for new drugs that were not observed in the training set.
 
-.. literalinclude:: ../tutorial/kron_rls2.py
+.. literalinclude:: src/kron_rls2.py
 
-.. literalinclude:: ../tutorial/kron_rls2.out
+.. literalinclude:: src/kron_rls2.out
 
 The results show that this problem is really quite different from setting 1: the best results are now around
 0.75 c-index, a significant drop from setting 1. Also, the required amount of regularization is quite different
@@ -112,9 +112,9 @@ Setting 3
 
 Next, we consider setting 3, generalizing to predictions for new targets that were not observed in the training set.
 
-.. literalinclude:: ../tutorial/kron_rls3.py
+.. literalinclude:: src/kron_rls3.py
 
-.. literalinclude:: ../tutorial/kron_rls3.out
+.. literalinclude:: src/kron_rls3.out
 
 Again quite different results. Best results 0.87 c-index aroung regparam 2**22.
 
@@ -124,9 +124,9 @@ Setting 4
 Finally we consider the most demanding setting 4, generalizing to new (d,t,) pairs such that neither have been
 observed in the training set.
 
-.. literalinclude:: ../tutorial/kron_rls4.py
+.. literalinclude:: src/kron_rls4.py
 
-.. literalinclude:: ../tutorial/kron_rls4.out
+.. literalinclude:: src/kron_rls4.out
 
 Now the best results are around c-index 0.71, with regparam 2**29. The results are noticeably lower than for
 any other setting, yet still much better than the random baseline 0.5 meaning that the model still has
@@ -143,9 +143,9 @@ often have different types of kernel functions. Some very basic kernel functions
 module rlscore.kernel.
 
 
-.. literalinclude:: ../tutorial/kron_rls5.py
+.. literalinclude:: src/kron_rls5.py
 
-.. literalinclude:: ../tutorial/kron_rls5.out
+.. literalinclude:: src/kron_rls5.out
 
 Results are same as before.
 
@@ -163,9 +163,9 @@ Setting 1
 ---------
 
 
-.. literalinclude:: ../tutorial/two_step1.py
+.. literalinclude:: src/two_step1.py
 
-.. literalinclude:: ../tutorial/two_step1.out
+.. literalinclude:: src/two_step1.out
 
 
 
@@ -173,26 +173,26 @@ Setting 2
 ---------
 
 
-.. literalinclude:: ../tutorial/two_step2.py
+.. literalinclude:: src/two_step2.py
 
-.. literalinclude:: ../tutorial/two_step2.out
+.. literalinclude:: src/two_step2.out
 
 
 Setting 3
 ---------
 
-.. literalinclude:: ../tutorial/two_step3.py
+.. literalinclude:: src/two_step3.py
 
-.. literalinclude:: ../tutorial/two_step3.out
+.. literalinclude:: src/two_step3.out
 
 
 Setting 4
 ---------
 
 
-.. literalinclude:: ../tutorial/two_step4.py
+.. literalinclude:: src/two_step4.py
 
-.. literalinclude:: ../tutorial/two_step4.out
+.. literalinclude:: src/two_step4.out
 
 
 Tutorial 3: Incomplete data
@@ -222,9 +222,9 @@ themselves are not valid positive semi-definite kernel matrices.
 
 We can load the data set as follows:
 
-.. literalinclude:: ../tutorial/metz_data.py
+.. literalinclude:: src/metz_data.py
 
-.. literalinclude:: ../tutorial/metz_data.out
+.. literalinclude:: src/metz_data.out
 
 The code includes four functions to split the data into a training and test set according to the four different settings.
 
@@ -233,9 +233,9 @@ Setting 1
 
 First, we consider setting 1, imputing missing values inside the Y-matrix. 
 
-.. literalinclude:: ../tutorial/cg_kron_rls1.py
+.. literalinclude:: src/cg_kron_rls1.py
 
-.. literalinclude:: ../tutorial/cg_kron_rls1.out
+.. literalinclude:: src/cg_kron_rls1.out
 
 Even at 1000 iterations the test set cindex is still slowly increasing, it might be beneficial to continue optimization
 even further.
@@ -245,9 +245,9 @@ Setting 2
 
 Next, we consider setting 2, generalizing to predictions for new drugs that were not observed in the training set.
 
-.. literalinclude:: ../tutorial/cg_kron_rls2.py
+.. literalinclude:: src/cg_kron_rls2.py
 
-.. literalinclude:: ../tutorial/cg_kron_rls2.out
+.. literalinclude:: src/cg_kron_rls2.out
 
 Now the performance peaks between hundred and two hundred iterations, and starts slowly decreasing. In this setting,
 regularization by early stopping seems to be beneficial.
@@ -257,9 +257,9 @@ Setting 3
 
 Next, we consider setting 3, generalizing to predictions for new targets that were not observed in the training set.
 
-.. literalinclude:: ../tutorial/cg_kron_rls3.py
+.. literalinclude:: src/cg_kron_rls3.py
 
-.. literalinclude:: ../tutorial/cg_kron_rls3.out
+.. literalinclude:: src/cg_kron_rls3.out
 
 Behaviour is similar as in setting 1, the performance is still slowly increasing when optimization is terminated.
 
@@ -269,9 +269,9 @@ Setting 4
 Finally we consider the most demanding setting 4, generalizing to new (d,t,) pairs such that neither have been
 observed in the training set.
 
-.. literalinclude:: ../tutorial/cg_kron_rls4.py
+.. literalinclude:: src/cg_kron_rls4.py
 
-.. literalinclude:: ../tutorial/cg_kron_rls4.out
+.. literalinclude:: src/cg_kron_rls4.out
 
 Now the best results are reached soon after 100 iterations, after which the model starts to overfit.
 

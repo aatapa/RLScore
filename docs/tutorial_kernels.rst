@@ -43,9 +43,9 @@ from the UCI machine learning repository. The data consists of 506 instances,
 The data can be loaded from disk and split into a training set of 250, and test
 set of 256 instances using the following code.
 
-.. literalinclude:: ../tutorial/housing_data.py
+.. literalinclude:: src/housing_data.py
 
-.. literalinclude:: ../tutorial/housing_data.out
+.. literalinclude:: src/housing_data.out
 
 
 Default behavior
@@ -55,11 +55,11 @@ By default, if no kernel related parameters are supplied, the
 learners use linear kernel with bias=1.0. 
 
 
-.. literalinclude:: ../tutorial/regression1.py
+.. literalinclude:: src/regression1.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/regression1.out
+.. literalinclude:: src/regression1.out
 
 Different kernels
 -----------------------------------------
@@ -68,9 +68,9 @@ Alternatively, we can use the kernels implemented in RLScore.
 
 First, let us try Gaussian kernel with the default parameters.
 
-.. literalinclude:: ../tutorial/kernel4.py
+.. literalinclude:: src/kernel4.py
  
-.. literalinclude:: ../tutorial/kernel4.out
+.. literalinclude:: src/kernel4.out
 
 Oops, the results are horribly bad. Clearly, the default parameters are far from optimal.
 
@@ -80,30 +80,30 @@ can be used to automatically select the regularization and kernel parameters.
 
 Linear kernel:
 
-.. literalinclude:: ../tutorial/kernel1.py
+.. literalinclude:: src/kernel1.py
  
-.. literalinclude:: ../tutorial/kernel1.out
+.. literalinclude:: src/kernel1.out
 
 Gaussian kernel:
 
-.. literalinclude:: ../tutorial/kernel2.py
+.. literalinclude:: src/kernel2.py
  
-.. literalinclude:: ../tutorial/kernel2.out
+.. literalinclude:: src/kernel2.out
 
 Polynomial kernel:
 
-.. literalinclude:: ../tutorial/kernel3.py
+.. literalinclude:: src/kernel3.py
  
-.. literalinclude:: ../tutorial/kernel3.out
+.. literalinclude:: src/kernel3.out
 
 Reduced set approximation
 -----------------------------------------
 
 Once the data set size exceeds a couple of thousands of instances, maintaining the whole kernel matrix in memory is no longer feasible. Instead of using all the training data to represent the learned model, one can instead restrict the model to a subset of the data, resulting in the so-called reduced set approximation (aka ‘subset of regressors’, also closely related to Nyström approximation). As a starting point one can randomly select a couple of hundred of training instances as basis vectors. A lot of research has been done on more advanced selection strategies.
 
-.. literalinclude:: ../tutorial/kernel5.py
+.. literalinclude:: src/kernel5.py
  
-.. literalinclude:: ../tutorial/kernel5.out
+.. literalinclude:: src/kernel5.out
 
 Compared to previous example on using Gaussian kernel, the accuracy of the model slightly degrades due to approximation. Training is now faster and uses less memory (though you will not notice the difference yet on this data), and restricting the model to 100 basis vectors instead of all 250 training examples makes prediction roughly 2.5 time faster.
 
@@ -119,9 +119,9 @@ In the basic case, one needs to supply a n_samples x n_samples -sized (valid pos
 For prediction, we compute a n_test_samples x n_samples -sized matrix containing kernel evaluations between test and training data.
 In this example, we generate the kernel matrices using the Gaussian kernel implementation in RLScore.
 
-.. literalinclude:: ../tutorial/kernel6.py
+.. literalinclude:: src/kernel6.py
  
-.. literalinclude:: ../tutorial/kernel6.out
+.. literalinclude:: src/kernel6.out
 
 Reduced set approximation
 -------------------------
@@ -131,9 +131,9 @@ supply the n_samples x n_bvectors -slice of full kernel matrix instead of data m
 instead of basis vectors. In testing, supply n_test_samples x n_samples -sized matrix containing kernel evaluations between test examples
 and basis vectors.
 
-.. literalinclude:: ../tutorial/kernel7.py
+.. literalinclude:: src/kernel7.py
  
-.. literalinclude:: ../tutorial/kernel7.out
+.. literalinclude:: src/kernel7.out
 
 The results are exactly the same, as with previous subset of regressors example.
 
@@ -147,18 +147,18 @@ For these experiments, we need to download from the drug-target binding affinity
 
 We can load the data set as follows:
 
-.. literalinclude:: ../tutorial/davis_data.py
+.. literalinclude:: src/davis_data.py
 
-.. literalinclude:: ../tutorial/davis_data.out
+.. literalinclude:: src/davis_data.out
 
 Linear Kernel
 -------------------------
 
 Default behavior when supplying two data matrices is to use linear kernel for both domains:
 
-.. literalinclude:: ../tutorial/kron_rls4.py
+.. literalinclude:: src/kron_rls4.py
 
-.. literalinclude:: ../tutorial/kron_rls4.out
+.. literalinclude:: src/kron_rls4.out
 
 Precomputed kernels
 -------------------------
@@ -166,6 +166,6 @@ Precomputed kernels
 Alternatively, pre-computed kernel matrices may be supplied. The two kernels for the different
 domains need not be the same.
 
-.. literalinclude:: ../tutorial/kron_rls6.py
+.. literalinclude:: src/kron_rls6.py
 
-.. literalinclude:: ../tutorial/kron_rls6.out
+.. literalinclude:: src/kron_rls6.out

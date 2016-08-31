@@ -27,9 +27,9 @@ the preprocessed files in sparse matrix format contained in the archive
 file 20news-bydate-matlab.tgz. The data can be processed using the following
 code.
 
-.. literalinclude:: ../tutorial/newsgroups_data.py
+.. literalinclude:: src/newsgroups_data.py
 
-.. literalinclude:: ../tutorial/newsgroups_data.out
+.. literalinclude:: src/newsgroups_data.out
 
 Experiments
 -----------
@@ -41,17 +41,17 @@ a document belongs to Newsgroup number 1, or not. Multi-class classification
 could be implemented by training one one-vs-all predictor for each class,
 and assigning each test instance to the class with the highest prediction.
 
-.. literalinclude:: ../tutorial/sparse1.py
+.. literalinclude:: src/sparse1.py
 
-.. literalinclude:: ../tutorial/sparse1.out
+.. literalinclude:: src/sparse1.out
 
 And the same for RankRLS, with similar results. The CGRankRLS learner supports
 also query-structured data, and the learner PCGRankRLS can be used for learning
 from pairwise preferences with sparse data.
 
-.. literalinclude:: ../tutorial/sparse2.py
+.. literalinclude:: src/sparse2.py
 
-.. literalinclude:: ../tutorial/sparse2.out
+.. literalinclude:: src/sparse2.out
 
 References
 **********

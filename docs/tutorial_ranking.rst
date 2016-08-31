@@ -46,9 +46,9 @@ from the UCI machine learning repository. The data consists of 506 instances,
 The data can be loaded from disk and split into a training set of 250, and test
 set of 256 instances using the following code.
 
-.. literalinclude:: ../tutorial/housing_data.py
+.. literalinclude:: src/housing_data.py
 
-.. literalinclude:: ../tutorial/housing_data.out
+.. literalinclude:: src/housing_data.out
 
 Linear ranking model with default parameters
 --------------------------------------------
@@ -56,11 +56,11 @@ Linear ranking model with default parameters
 First, we train RankRLS with default parameters (linear kernel, regparam=1.0)
 and compute the concordance for the test set.
 
-.. literalinclude:: ../tutorial/ranking1.py
+.. literalinclude:: src/ranking1.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/ranking1.out
+.. literalinclude:: src/ranking1.out
 
 Clearly the model works much better than the trivial baseline or 0.5.
 
@@ -72,11 +72,11 @@ Next, we use the fast leave-pair-out cross-validation algorithm for performance
 estimation and regularization parameter selection. The LeavePairOutRankRLS module
 is a high level interface to this functionality.
 
-.. literalinclude:: ../tutorial/ranking2.py
+.. literalinclude:: src/ranking2.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/ranking2.out
+.. literalinclude:: src/ranking2.out
 
 We notice two things. First, the leave-pair-out estimates are very close to 
 the cindex computed on the test set. Second, on this data set the ranking
@@ -91,21 +91,21 @@ becomes impractical and unnecessary once training set size grows beyond
 couple of hundreds of instances. Instead, fast holdout method may be
 used to compute k-fold cross-validation estimates for RankRLS as follows.
 
-.. literalinclude:: ../tutorial/ranking3.py
+.. literalinclude:: src/ranking3.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/ranking3.out
+.. literalinclude:: src/ranking3.out
 
 Again, we may also use higher level wrapper code, that can be also used
 to select regularization parameter.
 
 
-.. literalinclude:: ../tutorial/ranking4.py
+.. literalinclude:: src/ranking4.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/ranking4.out
+.. literalinclude:: src/ranking4.out
 
 Kernel parameter selection
 --------------------------
@@ -114,11 +114,11 @@ Finally, we consider how to select together regularization parameter and
 kernel parameters using k-fold cross-validation (alternatively, leave-pair-out
 could also be used here).
 
-.. literalinclude:: ../tutorial/ranking5.py
+.. literalinclude:: src/ranking5.py
 
 The resulting output is as follows.
  
-.. literalinclude:: ../tutorial/ranking5.out
+.. literalinclude:: src/ranking5.out
 
 The results are quite similar as before, the Gaussian kernel does not
 allow us to outperform the linear one.
@@ -156,9 +156,9 @@ The data set
 
 First, we load the training set in and examine its properties
 
-.. literalinclude:: ../tutorial/parse_data.py
+.. literalinclude:: src/parse_data.py
  
-.. literalinclude:: ../tutorial/parse_data.out
+.. literalinclude:: src/parse_data.out
 
 As is common in natural language applications the data is very high dimensional. In
 addition to the data we load a list of sentence ids, denoting to which sentence each
@@ -174,9 +174,9 @@ First, we learn a ranking function. The main difference to learning global ranki
 how the queries are handled. When computing the cindex for test set, we compute the
 cindex for each test query separately, and finally take the mean.
 
-.. literalinclude:: ../tutorial/parse_ranking1.py
+.. literalinclude:: src/parse_ranking1.py
  
-.. literalinclude:: ../tutorial/parse_ranking1.out
+.. literalinclude:: src/parse_ranking1.out
 
 Leave-query-out cross-validation
 ------------------------------
@@ -185,9 +185,9 @@ Next, we estimate the ranking accuracy on training set using leave-query-out cro
 where each query is in turn left out of the training set as holdout set. This is implemented
 using the efficient algorithm described in [2]_.
 
-.. literalinclude:: ../tutorial/parse_ranking2.py
+.. literalinclude:: src/parse_ranking2.py
  
-.. literalinclude:: ../tutorial/parse_ranking2.out
+.. literalinclude:: src/parse_ranking2.out
 
 Leave-query-out and model selection
 -----------------------------------
@@ -195,9 +195,9 @@ Leave-query-out and model selection
 Finally, we use a higher level wrapper for the leave-query-out, and also make use of automated
 model selection at the same time.
 
-.. literalinclude:: ../tutorial/parse_ranking3.py
+.. literalinclude:: src/parse_ranking3.py
  
-.. literalinclude:: ../tutorial/parse_ranking3.out
+.. literalinclude:: src/parse_ranking3.out
 
 Tutorial 3: Learning from pairwise preferences
 **********************************************
@@ -207,9 +207,9 @@ instance A is preferred to instance B. In the next example, we generate a set of
 preferences sampled from the Housing data training set, train a model and test to see how well
 the model predicts on independent test data.
 
-.. literalinclude:: ../tutorial/pairwise_ranking.py
+.. literalinclude:: src/pairwise_ranking.py
  
-.. literalinclude:: ../tutorial/pairwise_ranking.out
+.. literalinclude:: src/pairwise_ranking.out
 
 With a sample of 1000 training pairs, the model works as well as the one trained on the y-scores
 directly. 
