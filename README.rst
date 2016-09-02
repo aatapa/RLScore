@@ -67,9 +67,17 @@ Support for different tasks
        - selection of regularization parameter
        - leave-query-out cross-validation
        
--   Pairwise data and zero-shot learning
+-   Pair-input data and zero-shot learning
 
    - Kronecker RLS
+       - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS)
+       - Four different types of leave-one-out cross-validation algorithms for pair-input data (TwoStepRLS)
+       - Iterative training algorithm for pair-input data, where only a subset of pairwise labels are known (CGKronRLS)
+
+-  Clustering
+
+   - Unsupervised RLS methods, based on the maximum margin clustering principle
+
 
 Software dependencies
 =====================
