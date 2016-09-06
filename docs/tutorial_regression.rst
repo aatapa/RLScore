@@ -149,6 +149,10 @@ series data) etc.
 The data set
 ------------
 
+The parse ranking data set can be downloaded from 
+`here <http://staff.cs.utu.fi/~aatapa/data/parse.zip>`_.
+
+
 First, we load the training set in and examine its properties
 
 .. literalinclude:: src/parse_data.py
