@@ -67,7 +67,7 @@ Support for different tasks
        - selection of regularization parameter
        - leave-query-out cross-validation
        
--   Pair-input data and zero-shot learning
+-  Pair-input data and zero-shot learning
 
    - Kronecker RLS
        - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS)
