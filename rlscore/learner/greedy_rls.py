@@ -110,10 +110,7 @@ class GreedyRLS(PredictorInterface):
         if 'use_default_callback' in kwargs and bool(kwargs['use_default_callback']):
             self.callbackfun = DefaultCallback(**kwargs)
         #The current version works only with the squared error measure
-        
         self._solve_cython(self.regparam)
-        #self._solve_bu(regparam)
-        #self._solve_new(regparam, np.float64)
     
     
     def _solve_cython(self, regparam):

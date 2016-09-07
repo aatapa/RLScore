@@ -135,14 +135,3 @@ def leave_pair_out(int pairslen,
             
             results_first[pair_ind, col] = F0
             results_second[pair_ind, col] = F1
-            
-            
-            #ss_ii = hatmatrixdiagonal[i]
-            #ss_ij = 0.
-            #ss_jj = hatmatrixdiagonal[j]
-            #for rind in range(rank):
-            #    ss_ij += bevals[rind] * svecs[i, rind] * svecs[j, rind]
-            
-            
-            
-

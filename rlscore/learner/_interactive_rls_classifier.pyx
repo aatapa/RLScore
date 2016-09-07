@@ -94,7 +94,6 @@ def cyclic_desccent(double [:, :] Y,
                     temp_double = DVTY[j, candclazz] + sqrtRx2[i, j]
                     temp_fitness_nc -= temp_double * temp_double
                 if temp_fitness_oc + temp_fitness_nc < fitvec[oldclazz] + fitvec[candclazz]:
-                    #print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[candclazz]
                     Y[i, oldclazz] = -1.
                     Y[i, candclazz] = 1.
                     classvec[i] = candclazz
@@ -141,17 +140,12 @@ def compute_gradient(double [:, :] Y,
     cdef double inf, foo, steepness
     
     inf = float('Inf')
-    #steepness = inf
-    #for clazzind in range(tempveclen):
-        #tempvec[clazzind] = 2 * globalsize
-        #for j in range(rank_R):
-        #    tempvec[clazzind] += DVTY[j, newclazz] * DVTY[j, newclazz] + DVTY[j, clazzind] * DVTY[j, clazzind]
     for i in range(size):
         oldclazz = classvec[i]
         if oldclazz == newclazz:
             gradient_vec[i] = inf
             continue
-        steepness = 2 * globalsize#tempvec[oldclazz]
+        steepness = 2 * globalsize
         for j in range(rank_R):
             foo = DVTY[j, newclazz] + sqrtRx2[i, j]
             steepness -= foo * foo

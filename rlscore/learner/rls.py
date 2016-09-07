@@ -175,16 +175,6 @@ class RLS(PredictorInterface):
         self.newevals = 1. / (self.evals + regparam)
         self.regparam = regparam
         self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
-        #self.results["model"] = self.getModel()
-        #if self.U is None:
-        #    pass
-            #Dual RLS
-            #self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
-        #else:
-            #Primal RLS
-            #bevals = multiply(self.svals, self.newevals)
-            #self.A = self.U.T * multiply(bevals.T, self.svecsTY)
-        #    self.A = self.U.T * multiply(self.svals.T, self.svecs.T * self.A)
         self.predictor = self.svdad.createModel(self)
     
     

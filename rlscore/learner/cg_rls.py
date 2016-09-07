@@ -137,7 +137,6 @@ class EarlyStopCB(object):
         else:
             self.iter += 1
             self.last_update += 1
-        #print self.iter,  self.last_update, perf
         if self.last_update == self.maxiter:
             learner.A = np.mat(self.bestA)
             raise Finished("Done")

@@ -192,15 +192,6 @@ class QueryRankRLS(PredictorInterface):
         #Compute the eigenvalues determined by the given regularization parameter
         self.neweigvals = 1. / (self.LRevals + regparam)
         self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
-        #if self.U is None:
-            #Dual RLS
-        #    pass
-            #self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
-        #else:
-            #Primal RLS
-            #self.A = self.U.T * (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright))
-            #self.A = self.U.T * np.multiply(self.svals.T,  self.svecs.T * self.A)
-        #self.results['model'] = self.getModel()
         self.predictor = self.svdad.createModel(self)
     
     
@@ -244,14 +235,11 @@ class QueryRankRLS(PredictorInterface):
         Qleft = self.multipleleft[indices]
         sqrtQho = np.multiply(Qleft, np.sqrt(self.neweigvals))
         Qho = sqrtQho * sqrtQho.T
-        #Qho = Qleft * np.multiply(self.neweigvals.T, Qleft.T)
         Pho = np.mat(np.ones((len(indices),1))) / np.sqrt(len(indices))
         Yho = self.Y[indices]
         Dho = self.D[:, indices]
         LhoYho = np.multiply(Dho.T, Yho) - Pho * (Pho.T * Yho)
         RQY = Qleft * np.multiply(self.neweigvals.T, self.multipleright) - Qho * LhoYho
-        #RQRTLho = np.multiply(Qho, Dho) - (Qho * Pho) * Pho.T
-        #print Dho.shape, sqrtQho.shape, Pho.shape
         sqrtRQRTLho = np.multiply(Dho.T, sqrtQho) - Pho * (Pho.T * sqrtQho)
         if sqrtQho.shape[0] <= sqrtQho.shape[1]:
             RQRTLho = sqrtQho * sqrtRQRTLho.T
@@ -261,7 +249,6 @@ class QueryRankRLS(PredictorInterface):
             RQRTLho = sqrtRQRTLho.T * sqrtQho
             I = np.mat(np.identity(sqrtQho.shape[1]))
             return np.squeeze(np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY))))
-        #return RQY - RQRTLho * la.inv(-I + RQRTLho) * RQY
 
 class LeaveQueryOutRankRLS(PredictorInterface):
 
@@ -377,7 +364,6 @@ class LQOCV(object):
                 performances.append(performance)
             except UndefinedPerformance:
                 pass
-            #performance = measure_utilities.aggregate(performances)
         if len(performances) > 0:
             performance = np.mean(performances)
         else:

@@ -84,18 +84,12 @@ class CGRankRLS(PredictorInterface):
         self.learn_from_labels = True
         self.callbackfun = callbackfun
         self.X = csc_matrix(X.T)
-        #if qids is not None:
-        #    self.setQids(qids)
-        #else:
-        #    self.qidmap = None
-        #self.train()
         if qids is not None:
             self.qids = map_qids(qids)
             self.splits = qids_to_splits(self.qids)
         else:
             self.qids = None
         regparam = self.regparam
-        #regparam = 0.
         qids = self.qids
         if qids is not None:
             P = sp.lil_matrix((self.size, len(set(qids))))

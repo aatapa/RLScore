@@ -56,7 +56,6 @@ cpdef int find_optimal_feature(double [:, :] Y,
         temp_d1 = 0.
         for i in range(tsize):
             temp_d1 += X[ci, i] * GXT[i, ci]
-        #print np.dot(cv, GXT_ci), temp_d1
         temp_d1 = 1. / (1. + temp_d1)
         for i in range(tsize):
             tempvec1[i] = GXT[i, ci] * temp_d1
@@ -68,23 +67,19 @@ cpdef int find_optimal_feature(double [:, :] Y,
         for j in range(lsize):
             for i in range(tsize):
                 tempvec3[i, j] = dualvec[i, j] - tempvec1[i] * tempvec2[j]
-        #updA = dualvec - np.dot(tempvec1[:, None], np.dot(cv, dualvec)[None, :])
         
         for i in range(tsize):
             tempvec1[i] = 1. / (diagG[i] - tempvec1[i] * GXT[i, ci])
-        #invupddiagG = 1. / (diagG - np.multiply(tempvec1, GXT_ci))
         
         for j in range(lsize):
             for i in range(tsize):
                 tempvec3[i, j] = tempvec1[i] * tempvec3[i, j]
-        #loodiff = np.multiply(invupddiagG[:, None], updA)
         
         temp_d1 = 0.
         for j in range(lsize):
             for i in range(tsize):
                 temp_d1 += tempvec3[i, j] * tempvec3[i, j]
         temp_d1 = temp_d1 / (tsize * lsize)
-        #looperf_i = np.mean(np.multiply(loodiff, loodiff))
         
         if temp_d1 < bestlooperf:
             bestcind = ci

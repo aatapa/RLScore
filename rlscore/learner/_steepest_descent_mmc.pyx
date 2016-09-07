@@ -60,11 +60,9 @@ def findSteepestDirRotateClasses_(double [:, :] Y,
             for i in range(size):
                 oldclazz = classvec[i]
                 if oldclazz == newclazz: continue
-                #dirsnegdiff_i = minus_diagRx2[i] + 4 * Y[i, oldclazz] * RY[i, oldclazz] + minus_diagRx2[i] + 4 * Y[i, newclazz] * RY[i, newclazz]
-                #dirsnegdiff_i = minus_diagRx2[i] + Y[i, oldclazz] * RY[i, oldclazz] + Y[i, newclazz] * RY[i, newclazz]
                 dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
                 if dirsnegdiff_i < steepness:
-                    steepness = dirsnegdiff_i # * 4
+                    steepness = dirsnegdiff_i
                     steepestdir = i
             oldclazz = classvec[steepestdir]
              
@@ -122,7 +120,7 @@ def findSteepestDirRotateClasses(double [:, :] Y,
         
         for h in range(takenum):
             
-            claim_a_point(Y, R, RY, Y_Schur_RY, minus_diagRx2, classcounts, classvec, size, 1, None, None, rank_R, newclazz, None, 0)#sqrtR, rank_R, newclazz)
+            claim_a_point(Y, R, RY, Y_Schur_RY, minus_diagRx2, classcounts, classvec, size, 1, None, None, rank_R, newclazz, None, 0)
     
     #Book keeping stuff
     for newclazz in range(labelcount):
@@ -163,29 +161,22 @@ def claim_a_point(double [:, :] Y,
         for i in range(size):
             oldclazz = classvec[i]
             if oldclazz == newclazz: continue
-            #dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
             dirsnegdiff_i = tempvec[oldclazz]
             for j in range(rank_R):
                 foo = DVTY[j, newclazz] + sqrtRx2[i, j]
                 dirsnegdiff_i -= foo * foo
                 foo = DVTY[j, oldclazz] - sqrtRx2[i, j]
                 dirsnegdiff_i -= foo * foo
-            #print minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz], dirsnegdiff_i / 4. #, minus_diagRx2[i] + Y[i, oldclazz] * RY[i, oldclazz] + Y[i, newclazz] * RY[i, newclazz]
-            #dirsnegdiff_i = minus_diagRx2[i] + Y[i, oldclazz] * RY[i, oldclazz] + Y[i, newclazz] * RY[i, newclazz]
             if dirsnegdiff_i < steepness:
-                steepness = dirsnegdiff_i # * 4
+                steepness = dirsnegdiff_i
                 steepestdir = i
     else:
         for i in range(size):
             oldclazz = classvec[i]
             if oldclazz == newclazz: continue
-            #dirsnegdiff_i = minus_diagRx2[i] + 4 * Y[i, oldclazz] * RY[i, oldclazz] + minus_diagRx2[i] + 4 * Y[i, newclazz] * RY[i, newclazz]
-            #dirsnegdiff_i = minus_diagRx2[i] + Y[i, oldclazz] * RY[i, oldclazz] + Y[i, newclazz] * RY[i, newclazz]
             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
-            #if dirsnegdiff_i == steepness:
-            #    print 'Found two equally steep directions'
             if dirsnegdiff_i < steepness:
-                steepness = dirsnegdiff_i # * 4
+                steepness = dirsnegdiff_i
                 steepestdir = i
     oldclazz = classvec[steepestdir]
     
@@ -199,20 +190,6 @@ def claim_a_point(double [:, :] Y,
         for j in range(rank_R):
             DVTY[j, newclazz] += sqrtRx2[steepestdir, j]
             DVTY[j, oldclazz] -= sqrtRx2[steepestdir, j]
-#         for i in range(size):
-#             #R_is_x2 = 2 * R[i, steepestdir]
-#             
-#             #Space efficient variation
-#             R_is_x2 = 0
-#             for j in range(rank_R):
-#                 R_is_x2 += sqrtR[i, j] * sqrtR[steepestdir, j]
-#             R_is_x2 *= 2
-#             
-#             #RY[i, oldclazz] -= R_is_x2
-#             #RY[i, newclazz] += R_is_x2
-#             
-#             Y_Schur_RY[i, oldclazz] -= Y[i, oldclazz] * R_is_x2
-#             Y_Schur_RY[i, newclazz] += Y[i, newclazz] * R_is_x2
     else:
         Y_Schur_RY[steepestdir, oldclazz] *= -1
         Y_Schur_RY[steepestdir, newclazz] *= -1

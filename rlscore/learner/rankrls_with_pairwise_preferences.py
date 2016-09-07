@@ -158,7 +158,6 @@ class PPRankRLS(PredictorInterface):
         #Compute the eigenvalues determined by the given regularization parameter
         self.neweigvals = 1. / (self.LRevals + regparam)
         self.A = self.svecs * np.multiply(1. / self.svals.T, (self.LRevecs * np.multiply(self.neweigvals.T, self.multipleright)))
-        #self.results['model'] = self.getModel()
         self.predictor = self.svdad.createModel(self)
         
     

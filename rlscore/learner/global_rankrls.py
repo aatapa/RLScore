@@ -534,7 +534,6 @@ class GlobalRankRLS(PredictorInterface):
         BTGB[0, 0] += CTGC[0, 0]
         
         BTY = R.T * Y[indices]
-        #BTY[0, 0] += CTY[0, 0]
         BTY[0] = BTY[0] + CTY[0]
         
         GDYho = Vhov * (self.size - holen) * VTY
@@ -542,7 +541,6 @@ class GlobalRankRLS(PredictorInterface):
         
         CTGDY = multiply(VTC.T, newevals) * (self.size - holen) * VTY
         BTGLY = R.T * GDYho - BTGB * BTY
-        #BTGLY[0, 0] += CTGDY[0, 0]
         BTGLY[0] = BTGLY[0] + CTGDY[0]
         
         F = GLYho - GBho * la.inv(-mat(eye(holen + 1)) + BTGB) * BTGLY
@@ -598,7 +596,6 @@ class GlobalRankRLS(PredictorInterface):
         CT = C.T
         CTGC = CT * GC
         CTY = CT * Y
-        #GCCTY = (G * C) * (C.T * Y)
         CTGDY = CT * GDY
         
         minusI3 = -mat(eye(3))
@@ -610,7 +607,6 @@ class GlobalRankRLS(PredictorInterface):
             R[1, 0] = -1.
             R[0, 1] = sqrt(self.size - 2.)
             R[1, 2] = sqrt(self.size - 2.)
-            #RT = R.T
             
             GBho = GC[hoinds] + G[np.ix_(hoinds, hoinds)] * R
             
