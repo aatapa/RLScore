@@ -1,7 +1,29 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2014 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import numpy as np
-#import numpy.linalg as la
-
 from rlscore.learner.rls import RLS
 from rlscore.utilities import array_tools
 from rlscore.utilities import linalg
@@ -120,7 +142,6 @@ class TwoStepRLS(PairwisePredictorInterface):
         if self.kernelmode:
             K1, K2 = self.K1, self.K2
             Y = self.Y.reshape((K1.shape[0], K2.shape[0]), order='F')
-            #assert self.Y.shape == (self.K1.shape[0], self.K2.shape[0]), 'Y.shape!=(K1.shape[0],K2.shape[0]). Y.shape=='+str(Y.shape)+', K1.shape=='+str(self.K1.shape)+', K2.shape=='+str(self.K2.shape)
             if not self.trained:
                 self.trained = True
                 evals1, V  = linalg.eig_psd(K1)
@@ -138,7 +159,6 @@ class TwoStepRLS(PairwisePredictorInterface):
                 self.U = U
                 self.VTYU = V.T * self.Y * U
             
-            #newevals = 1. / (self.evals1 * self.evals2.T + regparam)
             self.newevals1 = 1. / (self.evals1 + regparam1)
             self.newevals2 = 1. / (self.evals2 + regparam2)
             newevals = self.newevals1 * self.newevals2.T
@@ -146,14 +166,11 @@ class TwoStepRLS(PairwisePredictorInterface):
             self.A = np.multiply(self.VTYU, newevals)
             self.A = self.V * self.A * self.U.T
             self.A = np.array(self.A)
-            #self.predictor = KernelPairwisePredictor(self.A)
             label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
             label_row_inds = np.array(label_row_inds, dtype = np.int32)
             label_col_inds = np.array(label_col_inds, dtype = np.int32)
             self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
             
-            #self.dsikm1 = la.inv(K1 + regparam1 * (np.mat(np.eye(K1.shape[0]))))
-            #self.dsikm2 = la.inv(K2 + regparam2 * (np.mat(np.eye(K2.shape[0]))))
         else:
             X1, X2 = self.X1, self.X2
             Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order='F')
@@ -217,20 +234,8 @@ class TwoStepRLS(PairwisePredictorInterface):
             P = self.K1 * self.A * self.K2.T
         
         newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
-        #newevals = np.multiply(self.evals2 * self.evals1.T + self.regparam1 * self.evals2 + self.regparam2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
-        #P = np.multiply(self.VTYU, newevals)
-        #P = self.V * P * self.U.T
-        #P = np.array(P)
         Vsqr = np.multiply(self.V, self.V)
         Usqr = np.multiply(self.U, self.U)
-        #loopred = mat(zeros((self.V.shape[0], self.U.shape[0])))
-        #print self.U.shape[0], self.V.shape[0], self.Y.shape, loopred.shape, P.shape
-        #for i in range(self.V.shape[0]):
-            #cache = Vsqr[i] * newevals.T
-            #for j in range(self.U.shape[0]):
-            #    ccc = (cache * Usqr[j].T)[0, 0]
-            #    loopred[i, j] = (1. / (1. - ccc)) * (P[i, j] - ccc * self.Y[i, j])
-            #    #loopred[i, j] = P[i, j]
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred).ravel(order='F')
@@ -329,31 +334,16 @@ class TwoStepRLS(PairwisePredictorInterface):
         bevals_col = np.multiply(self.evals2, self.newevals2).T
         
         svecsm_col = np.multiply(bevals_col, self.U)
-        #print rightall.shape, svecsm.shape, self.Y.shape
-        #right = svecsm.T * self.Y - multiply(svecsm, self.Y).T
         RQR_col = np.sum(np.multiply(self.U, svecsm_col), axis = 1)
-        #RQY = sum(multiply(self.svecs.T, right), axis = 0)
-        #RQY = sum(multiply(self.svecs.T, svecsm.T * self.Y), axis = 0) - sum(multiply(RQRT.T, self.Y), axis = 1).T
-        #RQY = self.svecs * (svecsm.T * self.Y) - sum(multiply(RQR, self.Y), axis = 1)
         LOO_ek_col = (1. / (1. - RQR_col))
-        #LOO = multiply(LOO_ek, RQY)
-        #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO_col = (np.multiply(LOO_ek_col, self.U * (svecsm_col.T * self.Y.T)) - np.multiply(LOO_ek_col, np.multiply(RQR_col, self.Y.T))).T
-        #print 'LOO_col', LOO_col
         
         
         bevals_row = np.multiply(self.evals1, self.newevals1).T
         
         svecsm_row = np.multiply(bevals_row, self.V)
-        #print rightall.shape, svecsm.shape, self.Y.shape
-        #right = svecsm.T * self.Y - multiply(svecsm, self.Y).T
         RQR_row = np.sum(np.multiply(self.V, svecsm_row), axis = 1)
-        #RQY = sum(multiply(self.svecs.T, right), axis = 0)
-        #RQY = sum(multiply(self.svecs.T, svecsm.T * self.Y), axis = 0) - sum(multiply(RQRT.T, self.Y), axis = 1).T
-        #RQY = self.svecs * (svecsm.T * self.Y) - sum(multiply(RQR, self.Y), axis = 1)
         LOO_ek_row = (1. / (1. - RQR_row))
-        #LOO = multiply(LOO_ek, RQY)
-        #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO_two_step = np.multiply(LOO_ek_row, self.V * (svecsm_row.T * LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
         LOO_two_step = np.array(LOO_two_step)
         return LOO_two_step.ravel(order = 'F')
@@ -372,60 +362,11 @@ class TwoStepRLS(PairwisePredictorInterface):
             F[i + j*n_samples1] (column order).
         """
         
-        #bevals_col = np.multiply(self.evals2, self.newevals2).T
-        #multiplyright = self.U.T * self.Y.T
-        #I = np.mat(np.identity(2))
         
         G = np.multiply((self.newevals1.T-(1./self.regparam1)), self.V) * self.V.T + (1./self.regparam1) * np.mat(np.identity(self.K1.shape[0]))
-        #G2 = np.multiply((self.newevals2.T-(1./self.regparam)), self.U) * self.U.T + (1./self.regparam) * np.mat(np.identity(self.K2.shape[0]))
         GY = G * self.Y
-        #YG2 = self.Y * G2
         GYG = GY * G
-        #A2 = G2 * self.Y.T
         
-        #i, j = 2, 4
-        #inds = [i, j]
-        
-        #A = self.U[inds]
-        #right = multiplyright - A.T * self.Y.T[inds]
-        #RQY = A * np.multiply(bevals_col.T, right)
-        #B = np.multiply(bevals_col.T, A.T)
-        #HO_col = (la.inv(I - A * B) * RQY).T
-        
-        #HO_col = (self.Y.T[inds]-la.inv(G2[np.ix_(inds, inds)]) * A2[inds]).T
-        #print HO_col.shape
-        
-        
-        #bevals_row = np.multiply(self.evals1, self.newevals1).T
-        #multiplyright = self.V.T * HO_col
-        
-        #A = self.V[inds]
-        #right = multiplyright - A.T * HO_col[inds]
-        #RQY = A * np.multiply(bevals_row.T, right)
-        #B = np.multiply(bevals_col.T, A.T)
-        #HO_row = la.inv(I - A * B) * RQY
-        
-        #A1 = G1[inds] * HO_col
-        #HO_row = HO_col[inds]-la.inv(G1[np.ix_(inds, inds)]) * A1
-        
-        #HO_rowr = self.Y[np.ix_(inds, inds)] \
-        #    - YG2[np.ix_(inds, inds)] * la.inv(G2[np.ix_(inds, inds)]) \
-        #    - la.inv(G1[np.ix_(inds, inds)]) * G1Y[np.ix_(inds, inds)] \
-        #    + la.inv(G1[np.ix_(inds, inds)]) * G1YG2[np.ix_(inds, inds)] * la.inv(G2[np.ix_(inds, inds)])
-        
-        #invGii = la.inv(G[np.ix_(inds, inds)])
-        #GYii = GY[np.ix_(inds, inds)]
-        #invGiiGYii = invGii * GYii
-        #HO_rowr = self.Y[np.ix_(inds, inds)] \
-        #    - invGiiGYii.T \
-        #    - invGiiGYii \
-        #    + invGii * GYG[np.ix_(inds, inds)] * invGii
-        
-        #II1 = np.mat(np.identity(self.Y.shape[0]))[inds]
-        #II2 = np.mat(np.identity(self.Y.shape[1]))[:, inds]
-        #HO_rowr = (II1 - la.inv(G1[np.ix_(inds, inds)]) * G1[inds]) * self.Y * (II2 - G2[:, inds] * la.inv(G2[np.ix_(inds, inds)]))
-        
-        #print HO_row.shape
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
         _two_step_rls.out_of_sample_loo_symmetric(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results.ravel(order = 'F')

@@ -1,3 +1,14 @@
-best parameters gamma 0.062500 regparam 0.250000
-best leave-one-out accuracy 0.850174
-test set accuracy 0.839875
+gamma 0.000977, regparam 0.031250, accuracy 0.844069
+gamma 0.001953, regparam 0.125000, accuracy 0.844198
+gamma 0.003906, regparam 0.000031, accuracy 0.844263
+gamma 0.007812, regparam 0.000488, accuracy 0.844586
+gamma 0.015625, regparam 0.000031, accuracy 0.844586
+gamma 0.031250, regparam 0.062500, accuracy 0.844295
+gamma 0.062500, regparam 0.015625, accuracy 0.844392
+gamma 0.125000, regparam 0.000031, accuracy 0.842325
+gamma 0.250000, regparam 0.500000, accuracy 0.838060
+gamma 0.500000, regparam 0.000031, accuracy 0.826011
+gamma 1.000000, regparam 4.000000, accuracy 0.814382
+best parameters gamma 0.007812 regparam 0.000488
+best leave-one-out accuracy 0.844586
+test set accuracy 0.836137

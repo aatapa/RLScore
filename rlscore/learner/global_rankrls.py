@@ -1,3 +1,28 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2008 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
 import numpy as np
 from numpy import array, eye, float64, multiply, mat, ones, sqrt, zeros
 import numpy.linalg as la
@@ -509,7 +534,6 @@ class GlobalRankRLS(PredictorInterface):
         BTGB[0, 0] += CTGC[0, 0]
         
         BTY = R.T * Y[indices]
-        #BTY[0, 0] += CTY[0, 0]
         BTY[0] = BTY[0] + CTY[0]
         
         GDYho = Vhov * (self.size - holen) * VTY
@@ -517,7 +541,6 @@ class GlobalRankRLS(PredictorInterface):
         
         CTGDY = multiply(VTC.T, newevals) * (self.size - holen) * VTY
         BTGLY = R.T * GDYho - BTGB * BTY
-        #BTGLY[0, 0] += CTGDY[0, 0]
         BTGLY[0] = BTGLY[0] + CTGDY[0]
         
         F = GLYho - GBho * la.inv(-mat(eye(holen + 1)) + BTGB) * BTGLY
@@ -573,7 +596,6 @@ class GlobalRankRLS(PredictorInterface):
         CT = C.T
         CTGC = CT * GC
         CTY = CT * Y
-        #GCCTY = (G * C) * (C.T * Y)
         CTGDY = CT * GDY
         
         minusI3 = -mat(eye(3))
@@ -585,7 +607,6 @@ class GlobalRankRLS(PredictorInterface):
             R[1, 0] = -1.
             R[0, 1] = sqrt(self.size - 2.)
             R[1, 2] = sqrt(self.size - 2.)
-            #RT = R.T
             
             GBho = GC[hoinds] + G[np.ix_(hoinds, hoinds)] * R
             

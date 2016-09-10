@@ -1,3 +1,27 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2012 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import numpy as np
 import numpy.linalg as la
@@ -257,14 +281,6 @@ class KronRLS(PairwisePredictorInterface):
         newevals = np.multiply(self.evals2 * self.evals1.T, 1. / (self.evals2 * self.evals1.T + self.regparam))
         Vsqr = np.multiply(self.V, self.V)
         Usqr = np.multiply(self.U, self.U)
-        #loopred = mat(zeros((self.V.shape[0], self.U.shape[0])))
-        #print self.U.shape[0], self.V.shape[0], self.Y.shape, loopred.shape, P.shape
-        #for i in range(self.V.shape[0]):
-            #cache = Vsqr[i] * newevals.T
-            #for j in range(self.U.shape[0]):
-            #    ccc = (cache * Usqr[j].T)[0, 0]
-            #    loopred[i, j] = (1. / (1. - ccc)) * (P[i, j] - ccc * self.Y[i, j])
-            #    #loopred[i, j] = P[i, j]
         ccc = Vsqr * newevals.T * Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred).ravel(order = 'F')
@@ -298,26 +314,12 @@ class KronRLS(PairwisePredictorInterface):
                     UU[j * colcount + k] = np.multiply(jth_col, self.U[col_inds[k]])
         
         def baz():
-            #print VV.shape, newevals.shape, UU.T.shape
             B_in_wrong_order = VV * newevals.T * UU.T
-            
-            #B_in_right_order = mat(zeros((hosize, hosize)))
-            
-            #for i in range(len(row_inds)):
-            #    for j in range(len(col_inds)):
-            #        for h in range(len(row_inds)):
-            #            for k in range(len(col_inds)):
-            #                B_in_right_order[i * colcount + j, h * colcount + k] = B_in_wrong_order[i * rowcount + h, j * colcount + k]
-            
-            #print B_in_right_order
-            #print B_in_right_order.shape, B_in_wrong_order.shape, rowcount, colcount
+
             B_in_right_order = np.mat(np.zeros((hosize, hosize)))
             sampled_kronecker_products.cpy_reorder(B_in_right_order, B_in_wrong_order, rowcount, colcount)
-            #print B_in_right_order
-            #print
             hopred = la.inv(np.mat(np.eye(hosize)) - B_in_right_order) * (P_ho.ravel().T - B_in_right_order * self.Y[np.ix_(row_inds, col_inds)].ravel().T)
             return hopred
         bar()
         hopred = baz()
-        #print rowcount, colcount, hosize, hopred.shape
         return np.asarray(hopred.reshape(rowcount, colcount))

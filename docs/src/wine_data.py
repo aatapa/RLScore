@@ -5,7 +5,7 @@ def load_wine():
     D = np.loadtxt("wine.data", delimiter=",")
     np.random.shuffle(D)  
     X = D[:,1:]
-    Y = D[:,0]
+    Y = D[:,0].astype(int)
     X_train = X[:100]
     Y_train = Y[:100]
     X_test = X[100:]

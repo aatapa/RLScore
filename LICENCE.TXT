@@ -4,7 +4,7 @@ The RLScore package is covered by the MIT license.
 
 The MIT License
 
-Copyright (c) 2012 Tapio Pahikkala, Antti Airola
+Copyright (c) 2008 - 2016 Tapio Pahikkala, Antti Airola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

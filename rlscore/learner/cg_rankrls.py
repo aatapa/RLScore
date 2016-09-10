@@ -1,3 +1,28 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2012 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
 from math import sqrt
 
 import numpy as np
@@ -59,18 +84,12 @@ class CGRankRLS(PredictorInterface):
         self.learn_from_labels = True
         self.callbackfun = callbackfun
         self.X = csc_matrix(X.T)
-        #if qids is not None:
-        #    self.setQids(qids)
-        #else:
-        #    self.qidmap = None
-        #self.train()
         if qids is not None:
             self.qids = map_qids(qids)
             self.splits = qids_to_splits(self.qids)
         else:
             self.qids = None
         regparam = self.regparam
-        #regparam = 0.
         qids = self.qids
         if qids is not None:
             P = sp.lil_matrix((self.size, len(set(qids))))

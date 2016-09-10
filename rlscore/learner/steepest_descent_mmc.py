@@ -1,3 +1,27 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2013 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import numpy as np
 import random as pyrandom
@@ -152,12 +176,8 @@ class SteepestDescentMMC(PredictorInterface):
         self.newevals = 1. / (self.evals + self.regparam)
         newevalslamtilde = np.multiply(self.evals, self.newevals)
         self.D = np.sqrt(newevalslamtilde)
-        #self.D = -newevalslamtilde
         
         self.VTY = self.svecs.T * self.Y
-        #DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
-        
-        #self.R = self.svecs * np.multiply(newevalslamtilde.T, self.svecs.T)
         
         self.sqrtR = np.multiply(np.sqrt(newevalslamtilde), self.svecs)
         self.R = self.sqrtR * self.sqrtR.T
@@ -172,14 +192,9 @@ class SteepestDescentMMC(PredictorInterface):
         self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
         self.Y_Schur_RY = np.multiply(self.Y, self.RY)
         
-        #Using lists in order to avoid unnecessary matrix slicings
-        #self.DVTY_list = []
-        #self.YTVDDVTY_list = []
         self.YTRY_list = []
         self.classFitnessList = []
         for i in range(self.labelcount):
-            #DVTY_i = DVTY[:,i]
-            #self.DVTY_list.append(DVTY_i)
             YTRY_i = self.Y[:,i].T * self.RY[:,i]
             self.YTRY_list.append(YTRY_i)
             fitness_i = self.size - YTRY_i
@@ -203,16 +218,8 @@ class SteepestDescentMMC(PredictorInterface):
         '''
         
         cons = self.size / self.labelcount
-        #self.focusset = self.findNewFocusSet()
         for i in range(20):
-            #self.focusset = self.findNewFocusSet()
-            #self.focusset = pyrandom.sample(range(self.size),50)
-            #print self.focusset
-            #cons = len(self.focusset) / self.labelcount
-            #converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
             converged = self.findSteepestDirRotateClasses(cons / (2. ** i))
-            #converged = self.findSteepestDirRotateClasses(1000)
-            #print self.classcounts.T
             if not self.callbackfun is None:
                 self.callbackfun.callback(self)
             if converged: break
@@ -237,7 +244,6 @@ class SteepestDescentMMC(PredictorInterface):
     
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):
-        #print self.Y.shape,self.R.shape, self.RY.shape, self.Y_Schur_RY.shape, self.classFitnessRowVec.shape, self.mdiagRx2.shape, self.classcounts.shape, self.classvec.shape
         _steepest_descent_mmc.findSteepestDirRotateClasses(self.Y,
                                                 self.R,
                                                 self.RY,
@@ -292,8 +298,6 @@ class SteepestDescentMMC(PredictorInterface):
         focusrange = np.mat(np.arange(self.size)).T
         
         for j in range(self.labelcount):
-            #maxtake = self.size / self.labelcount
-            #maxtake = int(np.sqrt(self.size))
             #!!!!!!!!!!!!!!!
             takenum = (self.size / self.labelcount) - self.classcounts[j] + int(howmany)
             #takenum = min([maxtake, (self.size / self.labelcount) - self.classcounts[j] + int(howmany)])

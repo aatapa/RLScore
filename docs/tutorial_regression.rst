@@ -149,6 +149,10 @@ series data) etc.
 The data set
 ------------
 
+The parse ranking data set can be downloaded from 
+`here <http://staff.cs.utu.fi/~aatapa/data/parse.zip>`_.
+
+
 First, we load the training set in and examine its properties
 
 .. literalinclude:: src/parse_data.py
@@ -314,7 +318,7 @@ All the cross-validation and fast regularization algorithms are compatible with 
 learning.
 
 We demonstrate multi-class learning with a simple toy example, utilizing the `Wine data
-set <https://archive.ics.uci.edu/ml/datasets/Housing>`_ from the UCI repository 
+set <https://archive.ics.uci.edu/ml/datasets/Wine>`_ from the UCI repository 
 
 .. literalinclude:: src/wine_data.py
 

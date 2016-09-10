@@ -9,10 +9,10 @@ RLScore - regularized least-squares machine learning algorithms package.
 :Authors:         `Tapio Pahikkala <http://staff.cs.utu.fi/~aatapa/>`_,
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
-:Homepage:        `https://github.com/aatapa/RLScore <https://github.com/aatapa/RLScore>`_
+:Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
 :Version:         0.6
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            March 22. 2016
+:Date:            February 16. 2016
 
 .. contents::
 
@@ -31,6 +31,8 @@ strategies, single- and multi-target feature selection, multi-task and zero-shot
 learning with Kronecker kernels, ranking, stochastic hill climbing based
 clustering etc. The majority of the implemented methods are such that are not
 available in any other software package.
+
+For documentation, see project `home page <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_.
 
 
 Support for different tasks
@@ -67,19 +69,109 @@ Support for different tasks
        - selection of regularization parameter
        - leave-query-out cross-validation
        
--  Pairwise data and zero-shot learning
+-  Pair-input data and zero-shot learning
 
    - Kronecker RLS
-       - Closed form solution for learning from non-sparse data sets
-       - Iterative training algorithm for sparse data
-       - in-sample leave-one-out cross-validation
-   - TwoStep RLS
-       - Closed form solution for learning from non-sparse data sets
-       - in-sample leave-one-out cross-validation
-       - leave-x1-out cross-validation
-       - leave-x2-out cross-validation
-       - out-of-sample leave-one-out cross-validation
+       - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS)
+       - Four different types of leave-one-out cross-validation algorithms for pair-input data (TwoStepRLS)
+       - Iterative training algorithm for pair-input data, where only a subset of pairwise labels are known (CGKronRLS)
 
 -  Clustering
 
    - Unsupervised RLS methods, based on the maximum margin clustering principle
+
+
+Software dependencies
+=====================
+
+RLScore is written in Python and thus requires a working
+installation of Python 2.7.x. The package is also dependent on
+the `NumPy <http://numpy.scipy.org/>`_ package for matrix
+operations, and `SciPy <http://www.scipy.org/>`_ package for sparse
+matrix implementations.
+
+
+
+
+History
+=======
+
+Version 0.6 (2016.02.18)
+------------------------
+- Major overhaul of learner interface, leaners now trained directly when initialized
+- TwoStep-learning method, better Kronecker learners
+- Cythonization of leave-pair-out cross-validation
+- Automated regularization parameter selection via cross-validation for RLS and RankRLS added
+- Old documentation removed as out-of-date, new documentation and tutorials in preparation
+
+Version 0.5.1 (2014.07.31)
+------------------------
+- This is a work in progress version maintained in a github repository.
+- The command line functionality is dropped and the main focus is shifted towards the library interface.
+- The interface has been considerably simplified to ease the use of the library.
+- Learning with tensor (Kronecker) product kernels considerably extended.
+- Many learners now implemented with cython to improve speed.
+- Support for a new type of interactive classification usable for image segmentation and various other tasks.
+- Numerous internal changes in the software.
+
+Version 0.5 (2012.06.19)
+------------------------
+- CGRLS and CGRankRLS learners for conjugate gradient -based training of RLS/RankRLS on large and high-dimensional, but sparse data.
+- CGRankRLS supports learning from pairwise preferences between data points in addition to learning from utility values.
+- Library interface for Python. Code examples for almost all included learning algorithms.
+- Support for learning with Kronecker kernels.
+- Numerous internal changes in the software.
+
+Version 0.4 (2010.04.14)
+------------------------
+
+- A linear time greedy forward feature selection with leave-one-out criterion for RLS (greedy RLS) included.
+- Example data and codes for basic use cases included in the distribution.
+- Fixed a bug causing problems when reading/writing binary files in Windows.
+- Modifications to the configuration file format.
+- All command line interfaces other than rls_core.py removed.
+
+
+Version 0.3 (2009.12.03)
+------------------------
+
+- Major restructuring of the code to make the software more modular.
+- Configuration files introduced for more flexible use of software.
+- Evolutionary maximum-margin clustering included.
+- Model file format changed.
+
+Version 0.2.1 (2009.06.24)
+--------------------------
+
+- Fixed a bug causing one of the features to get ignored.
+
+Version 0.2 (2009.03.13)
+------------------------
+
+- Major overhaul of the file formats.
+- RLScore now supports learning multiple tasks simultaneously.
+- Reduced set approximation included for large scale learning.
+
+Version 0.1.1 (2009.01.11)
+--------------------------
+
+- Fixed a bug causing a memory leak after training with sparse data and linear kernel.
+
+Version 0.1 (2008.10.18)
+------------------------
+
+- First public release.
+
+Credits
+=======
+
+:Former Contributors: `Evgeni Tsivtsivadze <http://learning-machines.com/>`_ -
+                      participated in designing the version 0.1 and co-authored some
+                      of the articles in which the implemented methods were proposed.
+
+
+
+
+
+
+

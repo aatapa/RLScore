@@ -1,4 +1,27 @@
-
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2014 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import cython
 
@@ -71,7 +94,6 @@ def cyclic_desccent(double [:, :] Y,
                     temp_double = DVTY[j, candclazz] + sqrtRx2[i, j]
                     temp_fitness_nc -= temp_double * temp_double
                 if temp_fitness_oc + temp_fitness_nc < fitvec[oldclazz] + fitvec[candclazz]:
-                    #print temp_fitness_oc + temp_fitness_nc, fitvec[oldclazz] + fitvec[candclazz]
                     Y[i, oldclazz] = -1.
                     Y[i, candclazz] = 1.
                     classvec[i] = candclazz
@@ -118,17 +140,12 @@ def compute_gradient(double [:, :] Y,
     cdef double inf, foo, steepness
     
     inf = float('Inf')
-    #steepness = inf
-    #for clazzind in range(tempveclen):
-        #tempvec[clazzind] = 2 * globalsize
-        #for j in range(rank_R):
-        #    tempvec[clazzind] += DVTY[j, newclazz] * DVTY[j, newclazz] + DVTY[j, clazzind] * DVTY[j, clazzind]
     for i in range(size):
         oldclazz = classvec[i]
         if oldclazz == newclazz:
             gradient_vec[i] = inf
             continue
-        steepness = 2 * globalsize#tempvec[oldclazz]
+        steepness = 2 * globalsize
         for j in range(rank_R):
             foo = DVTY[j, newclazz] + sqrtRx2[i, j]
             steepness -= foo * foo

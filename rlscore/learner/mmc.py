@@ -1,3 +1,27 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2012 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import random
 import numpy as np
@@ -156,18 +180,7 @@ class MMC(PredictorInterface):
         self.stepcounter = 0
         self.flipcounter = 0
         self.nochangecounter = 0
-        
-        '''
-        #Cached results
-        self.evals = np.multiply(self.svals, self.svals)
-        self.newevals = 1. / (self.evals + regparam)
-        newevalslamtilde = np.multiply(self.evals, self.newevals)
-        A1 = np.multiply(newevalslamtilde, newevalslamtilde)
-        A2 = - 2 * newevalslamtilde
-        A3 = self.regparam * np.multiply(newevalslamtilde, self.newevals)
-        self.D = A1 + A2 + A3
-        '''
-        
+              
         #Cached results
         self.evals = np.multiply(self.svals, self.svals)
         self.newevals = 1. / (self.evals + self.regparam)
@@ -212,8 +225,6 @@ class MMC(PredictorInterface):
                 self.callbackfun.callback(self)
             if converged: break
         
-        #for ii in range(5):
-        #    self.giveAndTakeALT(1000/ (ii+1))
         if self.oneclass:
             self.Y = self.Y[:, 0]
             self.A = self.A[:, 0]
@@ -235,21 +246,10 @@ class MMC(PredictorInterface):
         if currentclassind != classind:
             coef = 2
         
-        #DVTY_new = DVTY_old + coef * self.Dsvecs_list[flipindex]
-        #self.size - DVTY_new.T * DVTY_new
-        
-        #self.size - (DVTY_old + coef * self.Dsvecs_list[flipindex]).T * (DVTY_old + coef * self.Dsvecs_list[flipindex])
-        #self.size - (DVTY_old.T*DVTY_old + 2 * coef * DVTY_old.T * self.Dsvecs_list[flipindex] + 4 * self.Dsvecs_list[flipindex].T * self.Dsvecs_list[flipindex])
         
         DVTY_old = self.DVTY_list[classind]
-        #DVTY_new = DVTY_old + coef * self.Dsvecs_list[flipindex]
         fitness_old = self.classFitnessList[classind]
-        #fitness_new = self.size - DVTY_new.T * DVTY_new
         fitness_new = self.size - (self.YTVDDVTY_list[classind] + 2 * coef * DVTY_old.T * self.Dsvecs_list[flipindex] + 4 * self.svecsDDsvecs_list[flipindex])
-        #print fitness_new
-        #print self.size - (DVTY_old.T*DVTY_old + 2 * coef * DVTY_old.T * self.Dsvecs_list[flipindex] + 4 * self.Dsvecs_list[flipindex].T * self.Dsvecs_list[flipindex])
-        #print self.size - (self.YTVDDVTY_list[classind] + 2 * coef * DVTY_old.T * self.Dsvecs_list[flipindex] + 4 * self.svecsDDsvecs_list[flipindex])
-        #sys.exit()
         fitnessdiff = fitness_new - fitness_old
         return fitnessdiff
 
@@ -338,15 +338,12 @@ class MMC(PredictorInterface):
         currentclassind = self.classvec[flipindex]
         
         DVTY_old_currentclass = self.DVTY_list[currentclassind]
-        #fitness_old_currentclass = self.classFitnessList[currentclassind]
         DVTY_new_currentclass = DVTY_old_currentclass - 2 * self.Dsvecs_list[flipindex]
-        #fitness_new_currentclass = self.size + VTY_new_currentclass.T * np.multiply(self.D.T, VTY_new_currentclass)
-        #fitnessdiff_currentclass = fitness_new_currentclass - fitness_old_currentclass
+
             
         bevals = np.multiply(self.evals, self.newevals)
         RV = self.Dsvecs_list[flipindex]
         right = DVTY_old_currentclass - RV * (-1.)
-        #print RV.shape, bevals.shape, right.shape
         RQY = RV.T * np.multiply(bevals.T, right)
         RQRT = RV.T * np.multiply(bevals.T, RV)
         result = 1. / (1. - RQRT) * RQY
@@ -392,8 +389,7 @@ class MMC(PredictorInterface):
                 
                 self.DVTY_list[currentclassind] = DVTY_new_currentclass
                 self.DVTY_list[bestclassind] = DVTY_new_bestclass
-                #self.classFitnessList[currentclassind] = fitness_new_currentclass
-                #self.classFitnessList[bestclassind] = fitness_new_bestclass
+
                 
                 changed = True
         
@@ -402,11 +398,7 @@ class MMC(PredictorInterface):
     
     def updateA(self):
         self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
-        #if self.U is None:
-        #    self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
-        #else:
-        #    bevals = np.multiply(self.svals, self.newevals)
-        #    self.A = self.U.T * np.multiply(bevals.T, self.VTY)
+
     
     
     def roundRobin(self, LOO = False):
@@ -457,7 +449,6 @@ class MMC(PredictorInterface):
                     for newclassind in range(self.labelcount):
                         if newclassind == clazz: continue
                         ffit2 = self.computeFlipFitnessForSingleClass(flipindex, newclassind)
-                        #flipfit = self.computeFlipFitness(flipindex, newclassind)
                         flipfit = ffit1 + ffit2
                         if bestfit is None or bestfit > flipfit:
                             bestfit = flipfit
@@ -475,7 +466,6 @@ class MMC(PredictorInterface):
                     ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex])
                     ffit2 = self.computeFlipFitnessForSingleClass(flipindex, clazz)
                     flipfit = ffit1 + ffit2
-                    #fflipfit = self.computeFlipFitness(flipindex, clazz)
                     takelist.append((flipfit,flipindex))
             takelist.sort()
             
@@ -517,7 +507,6 @@ class MMC(PredictorInterface):
                     for newclassind in range(self.labelcount):
                         if newclassind == clazz: continue
                         ffit2 = self.computeFlipFitnessForSingleClass(flipindex, newclassind)
-                        #flipfit = self.computeFlipFitness(flipindex, newclassind)
                         flipfit = ffit1 + ffit2
                         if bestfit is None or bestfit > flipfit:
                             bestfit = flipfit
@@ -532,10 +521,7 @@ class MMC(PredictorInterface):
             takelist = []
             for flipindex in allinds:
                 if self.classvec[flipindex] != clazz:
-                    #ffit1 = self.computeFlipFitnessForSingleClass(flipindex, self.classvec[flipindex])
                     ffit2 = self.computeFlipFitnessForSingleClass(flipindex, clazz)
-                    #flipfit = ffit1 + ffit2
-                    #fflipfit = self.computeFlipFitness(flipindex, clazz)
                     takelist.append((ffit2,flipindex))
             takelist.sort()
             
@@ -549,10 +535,6 @@ class MMC(PredictorInterface):
                     takecount += 1
                     if takecount >= min(howmany, len(takelist)): break
                 takeind += 1
-        
-        #for clazz in range(self.labelcount):
-        #    print self.computeFitnessForOneClass(self.VTY[:,clazz])
-
         self.updateA()
 
 

@@ -1,4 +1,27 @@
-
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2014 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import cython
 
@@ -33,7 +56,6 @@ cpdef int find_optimal_feature(double [:, :] Y,
         temp_d1 = 0.
         for i in range(tsize):
             temp_d1 += X[ci, i] * GXT[i, ci]
-        #print np.dot(cv, GXT_ci), temp_d1
         temp_d1 = 1. / (1. + temp_d1)
         for i in range(tsize):
             tempvec1[i] = GXT[i, ci] * temp_d1
@@ -45,23 +67,19 @@ cpdef int find_optimal_feature(double [:, :] Y,
         for j in range(lsize):
             for i in range(tsize):
                 tempvec3[i, j] = dualvec[i, j] - tempvec1[i] * tempvec2[j]
-        #updA = dualvec - np.dot(tempvec1[:, None], np.dot(cv, dualvec)[None, :])
         
         for i in range(tsize):
             tempvec1[i] = 1. / (diagG[i] - tempvec1[i] * GXT[i, ci])
-        #invupddiagG = 1. / (diagG - np.multiply(tempvec1, GXT_ci))
         
         for j in range(lsize):
             for i in range(tsize):
                 tempvec3[i, j] = tempvec1[i] * tempvec3[i, j]
-        #loodiff = np.multiply(invupddiagG[:, None], updA)
         
         temp_d1 = 0.
         for j in range(lsize):
             for i in range(tsize):
                 temp_d1 += tempvec3[i, j] * tempvec3[i, j]
         temp_d1 = temp_d1 / (tsize * lsize)
-        #looperf_i = np.mean(np.multiply(loodiff, loodiff))
         
         if temp_d1 < bestlooperf:
             bestcind = ci

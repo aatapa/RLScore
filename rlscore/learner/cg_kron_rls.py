@@ -1,3 +1,27 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2013 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import numpy as np
 
@@ -131,7 +155,6 @@ class CGKronRLS(PairwisePredictorInterface):
     
             
             G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
-            #minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self. A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
         else:
@@ -150,9 +173,7 @@ class CGKronRLS(PairwisePredictorInterface):
             Y = np.array(self.Y).ravel(order = 'F')
             self.bestloss = float("inf")
             def mv(v):
-                #v_after = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
                 v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
-                #v_after = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_after, X1.T, X2, label_row_inds, label_col_inds) + regparam * v
                 v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
                 return v_after
             
@@ -161,9 +182,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 return None
             
             def cgcb(v):
-                #self.W = v.reshape((x1fsize, x2fsize), order = 'F')
                 if self.compute_risk:
-                    #P = sampled_kronecker_products.x_gets_subset_of_A_kron_B_times_v(v, X1, X2.T, label_row_inds, label_col_inds)
                     P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
                     z = (Y - P)
                     loss = (np.dot(z,z)+regparam*np.dot(v,v))
@@ -179,14 +198,12 @@ class CGKronRLS(PairwisePredictorInterface):
             G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
             
             v_init = np.array(self.Y).reshape(self.Y.shape[0])
-            #v_init = sampled_kronecker_products.x_gets_A_kron_B_times_sparse_v(v_init, X1.T, X2, label_row_inds, label_col_inds)
             v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
             v_init = np.array(v_init).reshape(kronfcount)
             if self.resource_pool.has_key('warm_start'):
                 x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
             else:
                 x0 = None
-            #self.W = bicgstab(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb)[0].reshape((x1fsize, x2fsize), order='F')
             minres(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb, tol=1e-20)[0].reshape((x1fsize, x2fsize), order='F')
             self.predictor = LinearPairwisePredictor(self.W)
             if not self.callbackfun is None:

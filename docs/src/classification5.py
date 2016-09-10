@@ -8,12 +8,12 @@ random.seed(10)
 def train_rls():
     X_train, Y_train, foo = read_svmlight("a1a.t")
     X_test, Y_test, foo = read_svmlight("a1a")
-    #select randomly 500 basis vectors
+    #select randomly 100 basis vectors
     indices = range(X_train.shape[0])
-    indices = random.sample(indices, 500)
+    indices = random.sample(indices, 100)
     basis_vectors = X_train[indices]
     regparams = [2.**i for i in range(-15, 16)]
-    gammas = regparams
+    gammas = [2**i for i in range(-10,1)]
     best_regparam = None
     best_gamma = None
     best_acc = 0.
@@ -22,6 +22,7 @@ def train_rls():
         #New RLS is initialized for each kernel parameter
         learner = LeaveOneOutRLS(X_train, Y_train, basis_vectors= basis_vectors, kernel="GaussianKernel", gamma=gamma, regparams=regparams, measure=accuracy)
         acc = np.max(learner.cv_performances)
+        print("gamma %f, regparam %f, accuracy %f" %(gamma, learner.regparam, acc))
         if acc > best_acc:
             best_acc = acc
             best_regparam = learner.regparam

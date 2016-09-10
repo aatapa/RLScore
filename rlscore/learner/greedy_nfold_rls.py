@@ -1,3 +1,27 @@
+#
+# The MIT License (MIT)
+#
+# This file is part of RLScore 
+#
+# Copyright (c) 2014 - 2016 Tapio Pahikkala, Antti Airola
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
 import scipy
 import scipy.sparse as sp
@@ -157,22 +181,13 @@ class GreedyNFoldRLS(object):
         
         XT = X.T
         GXT = rpinv * XT - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * ((cv * rpinv) * XT)
-        #diagG = []
-        #invdiagG = []
         yac = []
         yyac = []
         
-        #for qid in self.qidmap.keys():
         for inds in self.indslist:
-            #inds = self.qidmap[key]
-            #diagGqid = rpinv * mat(eye(len(inds))) - cv.T[inds, 0] * ca[0, inds]
             u = cv.T[inds, 0]
             v = ca[0, inds]
-            #M = rp * mat(eye(len(inds)))
-            #invdiagGqid = M - rp * rp * u * (1. / (-1. + rp * v * u)) * v
-            #invdiagGqid = la.inv(diagGqid)
             temp = rp * GXT[inds] - rp * rp * u * (1. / (-1. + rp * v * u)) * (v * GXT[inds])
-            #yac.append(invdiagGqid * GXT[inds])
             yac.append(temp)
             temp = rp * self.A[inds] - rp * rp * u * (1. / (-1. + rp * v * u)) * (v * self.A[inds])
             yyac.append(temp)
@@ -187,9 +202,6 @@ class GreedyNFoldRLS(object):
         self.performances = []
         while currentfcount < desiredfcount:
             
-            #if not self.measure is None:
-            #    bestlqocvperf = None
-            #else:
             bestlqocvperf = float('inf')
             
             for ci in range(fsize):
@@ -197,11 +209,8 @@ class GreedyNFoldRLS(object):
                 cv = listX[ci]
                 GXT_ci = GXT[:, ci]
                 const = 1. / (1. + cv * GXT_ci)[0, 0]
-                #ca = GXT_ci * (1. / (1. + cv * GXT_ci))
-                #ca = GXT_ci * const
                 cvA = (const * (cv * self.A))[0, 0]
                 updA = self.A - GXT_ci * cvA
-                #invupddiagG = 1. / (diagG - multiply(ca, GXT_ci))
                 lqocvperf = 0.
                 for qi in range(len(self.indslist)):
                     inds = self.indslist[qi]
@@ -211,7 +220,6 @@ class GreedyNFoldRLS(object):
                     lqodiff = yyac[qi] - cvA * MVT - gamma * MVT * (MVT.T * updA[inds])
                     lqocvperf += (lqodiff.T * lqodiff)[0, 0]
                 
-                #print lqocvperf,'barb'
                 if lqocvperf < bestlqocvperf:
                     bestcind = ci
                     bestlqocvperf = lqocvperf
@@ -240,30 +248,17 @@ class GreedyNFoldRLS(object):
             cv = listX[bestcind]
             GXT_ci = GXT[:, bestcind]
             const = (1. / (1. + cv * GXT_ci))[0, 0]
-            #ca = GXT_ci
             cvA = const * cv * self.A
             self.A = self.A - GXT_ci * cvA
             cvGXT = const * cv * GXT
             GXT = GXT - GXT_ci * cvGXT
             for qi in range(len(self.indslist)):
                 inds = self.indslist[qi]
-                #diagGqid = diagG[qi]
-                #upddiagGqid = diagGqid - const * GXT_ci[inds] * GXT_ci[inds].T
-                #diagG[qi] = upddiagGqid
-                #invdiagGqid = invdiagG[qi]
-                #M = invdiagG[qi]
                 V = GXT_ci[inds].T
                 MVT = yac[qi][:, bestcind]
                 gammaMVT = MVT * (1. / (-const ** -1. + V * MVT))
-                #invupddiagGqid = M - const * MVT * (1. / (-1. + const * V * MVT)) * MVT.T
-                #invupddiagGqid = invdiagGqid - invdiagGqid * const * GXT_ci[inds] * (1. / (-1. + GXT_ci[inds].T * invdiagGqid * const * GXT_ci[inds])) * GXT_ci[inds].T * invdiagGqid
-                #invdiagG[qi] = invupddiagGqid
-                #yac[qi] = invupddiagGqid * GXT[inds]
-                #yac[qi] = yac[qi] - const * MVT * cvGXT - const * MVT * (1. / (-1. + const * V * MVT)) * (MVT.T * GXT[inds])
-                #yyac[qi] = invupddiagGqid * A[inds]
                 yyac[qi] = yyac[qi] - MVT * cvA - gammaMVT * (MVT.T * self.A[inds])
                 yac[qi] = yac[qi] - MVT * cvGXT - gammaMVT * (MVT.T * GXT[inds])
-            #diagG = diagG - multiply(ca, GXT_ci)
             self.selected.append(bestcind)
             currentfcount += 1
             
@@ -277,7 +272,6 @@ class GreedyNFoldRLS(object):
                 W = cutdiag * (X_biased[selected_plus_bias] * self.A)
                 bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,self.testX.shape[1]),dtype=np.float64))
                 testX_biased = np.vstack([self.testX,bias_slice])
-                #print testX_biased.T.shape, W.shape
                 self.Y_predicted = testX_biased.T * W
             if not self.callbackfun is None:
                 self.callbackfun.callback(self)

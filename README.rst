@@ -9,7 +9,7 @@ RLScore - regularized least-squares machine learning algorithms package.
 :Authors:         `Tapio Pahikkala <http://staff.cs.utu.fi/~aatapa/>`_,
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
-:Homepage:        `https://github.com/aatapa/RLScore <https://github.com/aatapa/RLScore>`_
+:Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
 :Version:         0.6
 :License:         `The MIT License <LICENCE.TXT>`_
 :Date:            February 16. 2016
@@ -31,6 +31,8 @@ strategies, single- and multi-target feature selection, multi-task and zero-shot
 learning with Kronecker kernels, ranking, stochastic hill climbing based
 clustering etc. The majority of the implemented methods are such that are not
 available in any other software package.
+
+For documentation, see project `home page <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_.
 
 
 Support for different tasks
@@ -67,9 +69,17 @@ Support for different tasks
        - selection of regularization parameter
        - leave-query-out cross-validation
        
--   Pairwise data and zero-shot learning
+-  Pair-input data and zero-shot learning
 
    - Kronecker RLS
+       - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS)
+       - Four different types of leave-one-out cross-validation algorithms for pair-input data (TwoStepRLS)
+       - Iterative training algorithm for pair-input data, where only a subset of pairwise labels are known (CGKronRLS)
+
+-  Clustering
+
+   - Unsupervised RLS methods, based on the maximum margin clustering principle
+
 
 Software dependencies
 =====================
