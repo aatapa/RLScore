@@ -142,7 +142,6 @@ class RLS(PredictorInterface):
         """
         
         if not hasattr(self, "svecsTY"):
-            #print self.svals.shape
             self.svecsTY = self.svecs.T * self.Y
         
             #Eigenvalues of the kernel matrix
@@ -151,16 +150,6 @@ class RLS(PredictorInterface):
         self.newevals = 1. / (self.evals + regparam)
         self.regparam = regparam
         self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
-        #self.results["model"] = self.getModel()
-        #if self.U is None:
-        #    pass
-            #Dual RLS
-            #self.A = self.svecs * multiply(self.newevals.T, self.svecsTY)
-        #else:
-            #Primal RLS
-            #bevals = multiply(self.svals, self.newevals)
-            #self.A = self.U.T * multiply(bevals.T, self.svecsTY)
-        #    self.A = self.U.T * multiply(self.svals.T, self.svecs.T * self.A)
         self.predictor = self.svdad.createModel(self)
     
     
@@ -254,24 +243,9 @@ class RLS(PredictorInterface):
 
         """
         bevals = multiply(self.evals, self.newevals)
-        #rightall = multiply(bevals.T, self.svecs.T * self.Y)
-        '''for i in range(self.size):
-            RV = self.svecs[i]
-            RVm = multiply(bevals, RV)
-            right = rightall - RVm.T * self.Y[i]
-            RQY = RV * right
-            RQRT = RV * RVm.T
-            LOO[i] = (1. / (1. - RQRT)) * RQY'''
         svecsm = multiply(bevals, self.svecs)
-        #print rightall.shape, svecsm.shape, self.Y.shape
-        #right = svecsm.T * self.Y - multiply(svecsm, self.Y).T
         RQR = sum(multiply(self.svecs, svecsm), axis = 1)
-        #RQY = sum(multiply(self.svecs.T, right), axis = 0)
-        #RQY = sum(multiply(self.svecs.T, svecsm.T * self.Y), axis = 0) - sum(multiply(RQRT.T, self.Y), axis = 1).T
-        #RQY = self.svecs * (svecsm.T * self.Y) - sum(multiply(RQR, self.Y), axis = 1)
         LOO_ek = (1. / (1. - RQR))
-        #LOO = multiply(LOO_ek, RQY)
-        #print LOO_ek.shape, (self.svecs * (svecsm.T * self.Y)).shape, RQR.shape, self.Y.shape
         LOO = multiply(LOO_ek, self.svecs * (svecsm.T * self.Y)) - multiply(LOO_ek, multiply(RQR, self.Y))
         return np.squeeze(np.array(LOO))
     
@@ -339,7 +313,6 @@ class RLS(PredictorInterface):
         bevals = multiply(self.evals, self.newevals)
         svecsbevals = multiply(self.svecs, bevals)
         hatmatrixdiagonal = np.squeeze(np.array(np.sum(np.multiply(self.svecs, svecsbevals), axis = 1)))
-        #svecsbevalssvecsT = svecsbevals * self.svecs.T
         svecsbevalssvecsTY = svecsbevals * self.svecsTY
         results_first = np.zeros((pairslen, self.Y.shape[1]))
         results_second = np.zeros((pairslen, self.Y.shape[1]))
@@ -348,7 +321,6 @@ class RLS(PredictorInterface):
                                                      pairs_end_inds,
                                                      self.Y.shape[1],
                                                      self.Y,
-                                                     #svecsbevalssvecsT,
                                                      self.svecs,
                                                      np.atleast_1d(np.squeeze(np.array(bevals))),
                                                      self.svecs.shape[1],
@@ -357,24 +329,6 @@ class RLS(PredictorInterface):
                                                      results_first,
                                                      results_second)
         return np.squeeze(results_first), np.squeeze(results_second)
-        
-        '''
-        results = []
-        
-        for i, j in pairs:
-            indices = [i, j]
-            RQY = svecsbevalssvecsTY[indices] - svecsbevalssvecsT[np.ix_(indices, indices)] * self.Y[indices]
-            
-            #Invert a symmetric 2x2 matrix
-            a, b, d = 1. - svecsbevalssvecsT[i, i], - svecsbevalssvecsT[i, j], 1. - svecsbevalssvecsT[j, j]
-            det = 1. / (a * d - b * b)
-            ia, ib, id = det * d, - det * b, det * a
-            
-            lpo_i = ia * RQY[0] + ib * RQY[1]
-            lpo_j = ib * RQY[0] + id * RQY[1]
-            #result = la.solve(I - A * B, RQY)
-            results.append([lpo_i, lpo_j])
-        return np.array(results)'''
 
 
 class LeaveOneOutRLS(PredictorInterface):
