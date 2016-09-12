@@ -6,8 +6,8 @@ from rlscore.utilities.multiclass import to_one_vs_all
 def train_rls():
     X_train, Y_train, X_test, Y_test = load_wine()
     #Map labels from set {1,2,3} to one-vs-all encoding
-    Y_train = to_one_vs_all(Y_train)
-    Y_test = to_one_vs_all(Y_test)
+    Y_train = to_one_vs_all(Y_train, False)
+    Y_test = to_one_vs_all(Y_test, False)
     regparams = [2.**i for i in range(-15, 16)]
     learner = LeaveOneOutRLS(X_train, Y_train, regparams=regparams, measure=ova_accuracy)
     P_test = learner.predict(X_test)

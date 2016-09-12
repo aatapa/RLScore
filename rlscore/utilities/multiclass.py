@@ -25,8 +25,9 @@
 
 import numpy as np
 
-def to_one_vs_all(Y):
-    #maps vector of class labels from range {0,..,classcount} to matrix,
+def to_one_vs_all(Y, startzero=True):
+    #maps vector of class labels from range {0,..,classcount-1} if startzero=True,
+    #or range {1,...,classcount} if startzero=False to matrix,
     #of size ssize x classes
     Y = np.array(Y)
     Y_ova = -1. * np.ones((Y.shape[0], np.max(Y+1)))
@@ -34,6 +35,10 @@ def to_one_vs_all(Y):
         Y_ova[i, Y[i]] = 1
     return Y_ova
 
-def from_one_vs_all(Y):
-    #maps one-vs-all encoding or predictions to classes ranging 1...classcount
-    return np.argmax(Y, axis=1)
+def from_one_vs_all(Y, startzero=True):
+    #maps one-vs-all encoding or predictions to classes ranging {0...classcount-1}
+    #if fromzero=True, or {1...classcount} if startzero=False
+    if startzero:
+        return np.argmax(Y, axis=1)
+    else:
+        return np.argmax(Y, axis=1)+1
