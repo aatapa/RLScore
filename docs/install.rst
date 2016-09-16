@@ -12,7 +12,7 @@ For example `Anaconda <https://www.continuum.io/downloads>`_ is a Python distrib
 Installation
 ============
 
-Easiest way to install RLScore is to use pip (TO BE IMPLEMENTED) ::
+Easiest way to install RLScore is to use pip ::
 
     pip install rlscore 
 
