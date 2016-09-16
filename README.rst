@@ -10,9 +10,9 @@ RLScore - regularized least-squares machine learning algorithms package.
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
 :Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
-:Version:         0.6
+:Version:         0.7
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            February 16. 2016
+:Date:            September 16. 2016
 
 .. contents::
 
@@ -95,6 +95,14 @@ matrix implementations.
 
 History
 =======
+
+Version 0.7 (2016.09.16)
+------------------------
+- Tutorials available
+- API documentation finished
+- TwoStep-learning cross-validation methods available
+- Unit testing extended
+- Simplified internal structure of the package
 
 Version 0.6 (2016.02.18)
 ------------------------
