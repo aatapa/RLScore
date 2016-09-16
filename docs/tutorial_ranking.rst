@@ -149,7 +149,7 @@ of the parse for the sentence. Each sentence corresponds to a query, and the par
 of that sentence are objects that should be ranked.
 
 QueryRankRLS minimizes the magnitude preserving ranking error within each training
-query, but does not compare instances belonging to different queries.
+query, but does not compare instances associated with different queries.
 
 The data set
 ------------
@@ -166,10 +166,9 @@ First, we load the training set in and examine its properties
 
 As is common in natural language applications the data is very high dimensional. In
 addition to the data we load a list of sentence ids, denoting to which sentence each
-instance belongs to. Finally, based on the ids we map the data to fold indices, where
+instance is associated with. Finally, based on the ids we map the data to fold indices with teh map\_ids function, where
 each fold contains the indices of all training instances associated with a given sentence.
-Altogether there are 117 folds each corresponding to a sentence, the
-ids for two first folds are printed on screen.
+Altogether there are 117 folds each corresponding to a sentence.
 
 Learning a ranking function
 ---------------------------

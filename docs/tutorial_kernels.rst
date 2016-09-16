@@ -117,7 +117,7 @@ Basic usage
 
 In the basic case, one needs to supply a n_samples x n_samples -sized (valid positive semi-definite) kernel matrix for training.
 For prediction, we compute a n_test_samples x n_samples -sized matrix containing kernel evaluations between test and training data.
-In this example, we generate the kernel matrices using the Gaussian kernel implementation in RLScore.
+In this example, we generate the kernel matrices using the Gaussian kernel implementation in RLScore. Note that one first initializes a GaussianKernel object with a set of training data. All subsequent calls of the getKM method return a kernel matrix consisting of all kernel evaluations between the training data and a set of data points provided as an argument. For example, the call getKM(X\_test) provides a kernel matrix between the training and test data.
 
 .. literalinclude:: src/kernel6.py
  
@@ -126,16 +126,16 @@ In this example, we generate the kernel matrices using the Gaussian kernel imple
 Reduced set approximation
 -------------------------
 
-Precomputed kernel can also be combined with subset of regressors approximation. In this case, use "PrecomputedKernel"-option. For training
+Precomputed kernel can also be combined with reduced set approximation. In this case, use "PrecomputedKernel"-option. For training
 supply the n_samples x n_bvectors -slice of full kernel matrix instead of data matrix, and n_bvectors x n_bvectors -slice of kernel matrix
-instead of basis vectors. In testing, supply n_test_samples x n_samples -sized matrix containing kernel evaluations between test examples
+instead of basis vectors. In testing, supply n_test_samples x n_bvectors -sized matrix containing kernel evaluations between test examples
 and basis vectors.
 
 .. literalinclude:: src/kernel7.py
  
 .. literalinclude:: src/kernel7.out
 
-The results are exactly the same, as with previous subset of regressors example.
+The results are exactly the same, as with previous reduced set example.
 
 Tutorial 3 Kronecker learners
 *****************************

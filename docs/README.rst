@@ -24,7 +24,7 @@ focusing especially on Regularized Least-Squares (RLS) based methods. The main
 advantage of the RLS family of methods is that they admit a closed form solution, expressed as a system of linear equations.
 This allows deriving highly efficient algorithms for RLS methods, based on matrix
 algebraic optimization. Classical results include computational short-cuts for
-multi-target learning, regularization parameter selection and leave-one-out
+multi-target learning, fast regularization path and leave-one-out
 cross-validation. RLScore takes these results further by implementing a wide
 variety of additional computational shortcuts for different types of cross-validation
 strategies, single- and multi-target feature selection, multi-task and zero-shot
@@ -43,10 +43,10 @@ Support for different tasks
    
    - Regularized least-squares (RLS)
        - multi-target learning
-       - selection of regularization parameter
+       - regularization path
        - leave-one-out cross-validation
        - leave-pair-out cross-validation
-       - k-fold cross-validation
+       - fast cross-validation with arbitrary hold-out sets
    
 -  Feature selection for regression and classification
 
@@ -59,20 +59,20 @@ Support for different tasks
    - Regularized least-squares ranking (GlobalRankRLS)
        - minimizes magnitude preserving ranking error
        - multi-target learning
-       - selection of regularization parameter
+       - regularization path
        - leave-pair-out cross-validation
-       - k-fold cross-validation
+       - cross-validation with arbitrary hold-out sets
 
    - Regularized least-squares ranking for query-structured data (QueryRankRLS)
        - minimizes magnitude preserving ranking error, computed for each query separately
        - multi-target learning
-       - selection of regularization parameter
+       - regularization path
        - leave-query-out cross-validation
        
 -  Pair-input data and zero-shot learning
 
-   - Kronecker RLS
-       - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS)
+   - Learning with Kronecker product kernels
+       - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS, TwoStepRLS)
        - Four different types of leave-one-out cross-validation algorithms for pair-input data (TwoStepRLS)
        - Iterative training algorithm for pair-input data, where only a subset of pairwise labels are known (CGKronRLS)
 

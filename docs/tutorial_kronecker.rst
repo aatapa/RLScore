@@ -15,7 +15,7 @@ Four settings are commonly recognized. Let us assume making a prediction for a n
 4. Neither t nor d occur in any training input
 
 1 is the standard setting of matrix completion, that has been considered especially in the context of
-recommender systems and matrix factorization methods. 2 and 3 are examples of multi-task learning
+recommender systems and matrix factorization methods. 2 and 3 are examples of multi-target learning
 problems, that can also be solved by using the regular RLS. The focus of this tutorial is on setting
 4, while the considered methods can also be used in the other settings. This can be seen as an example
 of the zero-shot learning problem, where we need to generalize from related learning tasks to a new

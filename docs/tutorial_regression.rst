@@ -45,7 +45,7 @@ The resulting output is as follows.
 
 Clearly the model works much better than the trivial baseline. Still, since we used
 default parameters there is no guarantee that the regularization parameter would
-have close to optimal value.
+be close to optimal value.
 
 Choosing regularization parameter with leave-one-out
 ----------------------------------------------------
@@ -55,7 +55,7 @@ grid. We select the parameter that leads to lowest leave-one-out cross-validatio
 error (measured with mean square error). Due to the computational short-cuts
 implemented the whole procedure is almost as fast as training RLS once (though on this
 small data set the running times would yet not be an issue even for brute force algorithms
-that need re-training for each tested parameter and round of cross-validation).
+that require re-training for each tested parameter and round of cross-validation).
 
 .. literalinclude:: src/regression2.py
  
@@ -161,10 +161,9 @@ First, we load the training set in and examine its properties
 
 As is common in natural language applications the data is very high dimensional. In
 addition to the data we load a list of sentence ids, denoting to which sentence each
-instance belongs to. Finally, based on the ids we map the data to fold indices, where
+instance is associated with. Finally, with the map\_ids function, based on the ids we map the data to fold indices, where
 each fold contains the indices of all training instances associated with a given sentence.
-Altogether there are 117 folds each corresponding to a sentence, the
-ids for two first folds are printed on screen.
+Altogether there are 117 folds each corresponding to a sentence.
 
 Incorrect analysis using leave-one-out
 --------------------------------------
@@ -210,7 +209,7 @@ leave-one-out and test set errors.
 The moral of the story is, that if your data is not identically distributed, but rather sampled
 in groups, this should be taken into account when designing training/test split and/or the
 cross-validation folds. Cross-validation using such custom fold-partition can be implemented
-efficiently using the holdout-method implemented in the RLS module. 
+efficiently using the hold-out method implemented in the RLS module. 
 
 Note: One issue with this data set is that even though there is signal present in the data, even the
 best results are quite bad in terms of MSE. We cannot really accurately predict the
