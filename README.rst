@@ -12,7 +12,7 @@ RLScore - regularized least-squares machine learning algorithms package.
 :Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
 :Version:         0.7
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            September 16. 2016
+:Date:            September 19. 2016
 
 .. contents::
 
