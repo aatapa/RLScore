@@ -1,9 +1,9 @@
 KernelPredictor 
 ===============
 
-.. module:: rlscore.predictor
+.. module:: rlscore.predictor.predictor
 
-.. autoclass:: rlscore.predictor.KernelPredictor
+.. autoclass:: rlscore.predictor.predictor.KernelPredictor
     :show-inheritance:
     :members:
     :inherited-members:
