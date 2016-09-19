@@ -222,7 +222,8 @@ Tutorial 3: Binary classification and Area under ROC curve
 Adult data set
 --------------
 
-In this experiment, we build a binary classifier on the Adult data set.
+In this experiment, we build a binary classifier on the 
+`Adult data set https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html`_.
 We model this as a regression problem, where +1 encodes the positive class,
 and -1 the negative one. This is the standard encoding assumed by the
 performance measures within the RLScore package.

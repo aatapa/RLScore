@@ -95,7 +95,15 @@ alternatively supply as argument to the predictor two lists of indices, first co
 of X1 / K1, and the second corresponding to rows of X2 / K2. In this case, predictions are computed only
 for these pairs.
 
-For these experiments, we need to download from the drug-target binding affinity data sets page for the Davis et al. data the drug-target interaction affinities (Y), drug-drug 2D similarities (X1), and WS normalized target-target similarities (X2). In the following we will use similarity scores directly as features for the linear kernel, since the similarity matrices themselves are not valid positive semi-definite kernel matrices.
+For these experiments, we need to download
+from the `drug-target binding affinity data sets <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/>`_ page
+for the Davis et al. data the
+`drug-target interaction affinities (Y) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-target_interaction_affinities_Kd__Davis_et_al.2011.txt>`_,
+`drug-drug 2D similarities (X1) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-drug_similarities_2D.txt>`_,
+and
+`WS target-target similarities (X2) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/target-target_similarities_WS.txt>`_.
+In the following we will use similarity scores directly as features for the linear kernel, since the similarity matrices
+themselves are not valid positive semi-definite kernel matrices.
 
 We can load the data set as follows:
 
