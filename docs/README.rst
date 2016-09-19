@@ -96,7 +96,7 @@ matrix implementations.
 History
 =======
 
-Version 0.7 (2016.09.16)
+Version 0.7 (2016.09.19)
 ------------------------
 - Tutorials available
 - API documentation finished
