@@ -29,7 +29,9 @@ def to_one_vs_all(Y, startzero=True):
     #maps vector of class labels from range {0,..,classcount-1} if startzero=True,
     #or range {1,...,classcount} if startzero=False to matrix,
     #of size ssize x classes
-    Y = np.array(Y)
+    Y = np.array(Y, dtype=int)
+    if not startzero:
+        Y = Y - 1
     Y_ova = -1. * np.ones((Y.shape[0], np.max(Y+1)))
     for i in range(len(Y)):
         Y_ova[i, Y[i]] = 1
