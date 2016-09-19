@@ -20,10 +20,10 @@ def load_newsgroups():
     X_test = X_test.tocsc()
     #X_test has additional features not present in X_train
     X_test = X_test[:,:X_train.shape[1]]
-    Y_train = np.loadtxt("train.label")
-    Y_train = multiclass.to_one_vs_all(Y_train)
-    Y_test = np.loadtxt("test.label")
-    Y_test = multiclass.to_one_vs_all(Y_test)
+    Y_train = np.loadtxt("train.label", dtype=int)
+    Y_train = multiclass.to_one_vs_all(Y_train, False)
+    Y_test = np.loadtxt("test.label", dtype=int)
+    Y_test = multiclass.to_one_vs_all(Y_test, False)
     return X_train, Y_train, X_test, Y_test
 
 def print_stats():

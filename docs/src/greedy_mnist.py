@@ -34,7 +34,7 @@ def train_rls():
     #One-vs-all mapping
     Y_train = ova(Y_train)
     Y_test = ova(Y_test)
-    #Train greedy RLS, select 10 features
+    #Train greedy RLS, select 50 features
     cb = Callback(X_test, Y_test)
     learner = GreedyRLS(X_train, Y_train, 50, callbackfun=cb)
     print("Selected features " +str(learner.selected))
