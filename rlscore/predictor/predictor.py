@@ -134,6 +134,9 @@ class LinearPredictor(object):
         self.W = np.squeeze(array_tools.as_array(W))
         if self.W.ndim == 0:
             self.W = self.W.reshape(1)
+        #special case: 1-dimensional multi-task predictor
+        if W.shape[0] == 1 and W.shape[1] > 0:
+            self.W = self.W.reshape(W.shape[0], W.shape[1])
         self.b = np.squeeze(np.array(b))
     
     
