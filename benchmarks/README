@@ -1,0 +1,4 @@
+This folder contains a number of benchmark codes, that compare
+the fast RLS algorithms implemented with RLScore to equivalent
+implementations based on the scikit-learn Ridge, KernelRidge,
+and RidgeCV modules.
