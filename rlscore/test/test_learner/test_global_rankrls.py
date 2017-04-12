@@ -144,7 +144,7 @@ class Test(unittest.TestCase):
                     rls2.solve(2**i)
                     P1 = rls1.holdout(hoindices)
                     P2 = rls2.predict(X[hoindices])
-                    assert_allclose(P1, P2)
+                    assert_allclose(P1, P2, rtol=1e-06)
                 #Incorrect indices
                 I = [0, 3, 100]
                 self.assertRaises(IndexError, rls1.holdout, I)
