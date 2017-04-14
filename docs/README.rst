@@ -90,7 +90,12 @@ the `NumPy <http://numpy.scipy.org/>`_ package for matrix
 operations, and `SciPy <http://www.scipy.org/>`_ package for sparse
 matrix implementations.
 
+Citing RLScore
+==============
 
+RLScore is described in the following article:
+
+`Rlscore: Regularized least-squares learners <http://jmlr.org/papers/v17/16-470.html>`_, Tapio Pahikkala and Antti Airola. Journal of Machine Learning Research, 17(221):1-5, 2016. BibTeX entry can be found `here <http://jmlr.org/papers/v17/16-470.bib>`_.
 
 
 History
