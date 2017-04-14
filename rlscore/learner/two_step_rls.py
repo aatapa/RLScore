@@ -29,7 +29,7 @@ from rlscore.utilities import array_tools
 from rlscore.utilities import linalg
 
 
-import _two_step_rls
+from . import _two_step_rls
 
 from rlscore.predictor import PairwisePredictorInterface
 from rlscore.predictor import LinearPairwisePredictor
@@ -96,7 +96,7 @@ class TwoStepRLS(PairwisePredictorInterface):
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
         Y = np.mat(array_tools.as_2d_array(Y))
-        if kwargs.has_key('K1'):
+        if 'K1' in kwargs:
             K1 = np.mat(kwargs['K1'])
             K2 = np.mat(kwargs['K2'])
             Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')

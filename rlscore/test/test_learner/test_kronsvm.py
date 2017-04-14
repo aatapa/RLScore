@@ -2,7 +2,6 @@ import unittest
 import random as pyrandom
 
 
-import cPickle
 import numpy as np
 from numpy import random as numpyrandom
 from rlscore.learner.kron_svm import KronSVM
@@ -32,16 +31,6 @@ def primal_svm_objective(v, X1, X2, Y, rowind, colind, lamb):
     return 0.5*(np.dot(z,z)+lamb*np.dot(v,v))
 
 def load_data(primal=True, fold_index=0):
-    #fname =  "legacy_tests/data/FOLDS-nr-q4"
-    #f = open(fname)
-    #dfolds, tfolds = cPickle.load(f)
-    #dfold = dfolds[fold_index / 3]
-    #tfold = tfolds[fold_index % 3]
-    #Y = np.loadtxt('legacy_tests/data/nr_admat_dgc.txt')
-    #Y = np.where(Y>=0.5, 1., -1.)
-
-    #X1 = np.loadtxt('legacy_tests/data/nr_simmat_dc.txt')
-    #X2 = np.loadtxt('legacy_tests/data/nr_simmat_dg.txt')
     X1 = np.random.rand(20, 300)
     X2 = np.random.rand(10, 200)
     dfold = [1,2,4,5]
@@ -100,8 +89,8 @@ class Test(unittest.TestCase):
                 colind = learner.label_col_inds
                 w = learner.W.ravel(order='F')
                 loss = primal_svm_objective(w, X1, X2, Y_train, rowind, colind, regparam)
-                print "iteration", self.iter
-                print "Primal SVM loss", loss
+                print("iteration", self.iter)
+                print("Primal SVM loss", loss)
                 self.iter += 1
             def finished(self, learner):
                 pass        
@@ -133,8 +122,8 @@ class Test(unittest.TestCase):
                 colind = learner.label_col_inds
                 loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
                 #loss = learner.bestloss
-                print "iteration", self.iter
-                print "Dual SVM loss", loss
+                print("iteration", self.iter)
+                print("Dual SVM loss", loss)
                 #model = learner.predictor
                 self.iter += 1
             def finished(self, learner):
@@ -151,7 +140,7 @@ class Test(unittest.TestCase):
         params['callback'] = DualCallback()     
         learner = KronSVM(**params)
         P_dual = learner.predictor.predict(K1_test, K2_test)
-        print np.max(1. - np.abs(P_linear / P_dual))
+        print(np.max(1. - np.abs(P_linear / P_dual)))
         assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001       
 
 

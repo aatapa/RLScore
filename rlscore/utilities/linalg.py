@@ -54,8 +54,8 @@ def eig_psd(K):
     @rtype: a tuple of two numpy matrices"""
     try:
         evals, evecs = la.eigh(K)
-    except LinAlgError, e:
-        print 'Warning, caught a LinAlgError while eigen decomposing: ' + str(e)
+    except LinAlgError as e:
+        print('Warning, caught a LinAlgError while eigen decomposing: ' + str(e))
         K = K + np.eye(K.shape[0]) * 0.0000000001
         evals, evecs = la.eigh(K)
     evecs = evecs[:, evals > 0.]

@@ -214,13 +214,13 @@ class MMC(PredictorInterface):
         
         
         converged = False
-        print self.classcounts.T
+        print(self.classcounts.T)
         if self.callbackfun is not None:
             self.callbackfun.callback(self)
         while True:
             
             converged = self.roundRobin()
-            print self.classcounts.T
+            print(self.classcounts.T)
             if self.callbackfun is not None:
                 self.callbackfun.callback(self)
             if converged: break
@@ -309,7 +309,6 @@ class MMC(PredictorInterface):
                 DVTY_new_bestclass = DVTY_new_newclass
                 fitness_new_bestclass = fitness_new_newclass
         
-        #print 'BFD', bestfitnessdiff
         
         if bestclassind is not None:
             if self.classcounts[currentclassind] > self.constraint:
@@ -480,9 +479,6 @@ class MMC(PredictorInterface):
                     if takecount >= min(howmany, len(takelist)): break
                 takeind += 1
         
-        #for clazz in range(self.labelcount):
-        #    print self.computeFitnessForOneClass(self.VTY[:,clazz])
-
         self.updateA()
     
     

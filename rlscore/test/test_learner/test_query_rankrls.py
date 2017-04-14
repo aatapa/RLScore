@@ -27,10 +27,10 @@ def mapQids(qids):
 
 def generate_qids(m):
     qids = []
-    qsize = m/10
-    for i in range(m / qsize):
-        qids = qids + [i]*qsize
-    qids = qids + [i+1]* (m%qsize)
+    qsize = int(m / 10)
+    for i in range(int(m / qsize)):
+        qids = qids + [i] * qsize
+    qids = qids + [i + 1] * (m % qsize)
     objcount = np.max(qids)+1
     P = np.zeros((m, objcount))
     for i in range(m):

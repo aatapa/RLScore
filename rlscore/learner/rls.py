@@ -27,7 +27,7 @@ from numpy import identity, multiply, mat, sum
 import numpy.linalg as la
 from rlscore.utilities import array_tools 
 from rlscore.utilities import adapter
-import _rls
+from . import _rls
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.measure import sqerror
@@ -662,8 +662,8 @@ class NfoldCV(object):
             try:
                 performance = measure(Y[fold], P)
                 performances.append(performance)
-            except UndefinedPerformance, e:
-                pass
+            except UndefinedPerformance as e:
+                pass #No warning printed
             #performance = measure_utilities.aggregate(performances)
         if len(performances) > 0:
             performance = np.mean(performances)
@@ -732,7 +732,7 @@ class LPOCV(object):
         pred_start, pred_end = rls.leave_pair_out(all_start_inds, all_end_inds)
         pred_start = array_tools.as_2d_array(pred_start)
         pred_end = array_tools.as_2d_array(pred_end)
-        pair_dict = dict(zip(all_pairs, range(pred_start.shape[0])))
+        pair_dict = dict(zip(all_pairs, list(range(pred_start.shape[0]))))
         aucs = []
         #compute auc/ranking accuracy for each column of Y separately
         for k in range(Y.shape[1]):

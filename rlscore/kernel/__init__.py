@@ -1,12 +1,12 @@
-from gaussian_kernel import GaussianKernel
-from linear_kernel import LinearKernel
-from polynomial_kernel import PolynomialKernel
-from rset_kernel import RsetKernel
+from .gaussian_kernel import GaussianKernel
+from .linear_kernel import LinearKernel
+from .polynomial_kernel import PolynomialKernel
+from .rset_kernel import RsetKernel
 
 def createKernelByModuleName(**kwargs):
     import inspect
     kname = kwargs["kernel"]
-    exec "from ..kernel import " + kname
+    exec("from ..kernel import " + kname)
     kernelclazz = eval(kname)
     #get kernel arguments
     args = inspect.getargspec(kernelclazz.__init__)[0]

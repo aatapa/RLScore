@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import _interactive_rls_classifier
+from . import _interactive_rls_classifier
 
 import random as pyrandom
 pyrandom.seed(200)

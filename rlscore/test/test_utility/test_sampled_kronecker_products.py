@@ -61,14 +61,14 @@ class Test(unittest.TestCase):
         
         def dd(M_rows, M_columns, N_rows, N_columns):
             #V is a sparse matrix and v is a vector containing the known entries of V in an arbitrary order
-            v_len = N_columns * M_columns / 5
+            v_len = int(N_columns * M_columns / 5)
             v = np.random.rand(v_len)
             v_incinds = pyrandom.sample(range(N_columns * M_columns), v_len)
             v_row_inds, v_col_inds, C = create_ind_vecs(N_columns, M_columns, v_incinds)
             V = float('nan') * np.zeros((N_columns, M_columns))
             V[v_row_inds, v_col_inds] = v
             
-            u_len = N_rows * M_rows / 5
+            u_len = int(N_rows * M_rows / 5)
             u_incinds = pyrandom.sample(range(N_rows * M_rows), u_len)
             u_row_inds, u_col_inds, R = create_ind_vecs(N_rows, M_rows, u_incinds)
             

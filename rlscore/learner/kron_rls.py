@@ -103,7 +103,7 @@ class KronRLS(PairwisePredictorInterface):
         Y = kwargs["Y"]
         Y = array_tools.as_2d_array(Y)
         Y = np.mat(Y)
-        if kwargs.has_key('K1'):
+        if 'K1' in kwargs:
             K1 = np.mat(kwargs['K1'])
             K2 = np.mat(kwargs['K2'])
             Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
@@ -116,7 +116,7 @@ class KronRLS(PairwisePredictorInterface):
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
         self.Y = Y
-        if kwargs.has_key("regparam"):
+        if "regparam" in kwargs:
             self.regparam = kwargs["regparam"]
         else:
             self.regparam = 1.

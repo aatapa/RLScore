@@ -25,7 +25,7 @@
 
 import numpy as np
 
-from measure_utilities import multitask
+from .measure_utilities import multitask
 from rlscore.utilities import array_tools
 from rlscore.measure.measure_utilities import UndefinedPerformance
 

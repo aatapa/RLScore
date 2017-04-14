@@ -26,7 +26,7 @@
 import numpy as np
 
 from rlscore.measure.measure_utilities import UndefinedPerformance
-from measure_utilities import multitask
+from .measure_utilities import multitask
 from rlscore.utilities import array_tools
 
 def auc_singletask(Y, P):

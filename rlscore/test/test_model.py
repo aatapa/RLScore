@@ -56,25 +56,25 @@ class Test(unittest.TestCase):
         print
         test_features = np.random.random((10,100))
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = np.random.random((1,100))
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = np.random.random((100))
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = np.mat(np.random.random((10,100)))
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = np.mat(np.random.random((1,100)))
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = sparse.coo_matrix(([1,2,3,1,1,3], ([0, 1, 2, 3, 4, 6], [0,1,2,3,5,6])), (10, 100), dtype = np.float64)
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
         test_features = sparse.coo_matrix(([1,2,3,1,1,3], ([0, 0, 0, 0, 0, 0], [0, 1, 2, 3, 5, 6])), (1, 100), dtype = np.float64)
         P = model.predict(test_features)
-        print type(test_features), type(P), test_features.shape, P.shape
+        print(type(test_features), type(P), test_features.shape, P.shape)
 
 
 if __name__=="__main__":

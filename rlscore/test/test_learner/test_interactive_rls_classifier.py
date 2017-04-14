@@ -31,7 +31,7 @@ def dotesting(ppc = 400):
         #Y,X = gen.generate([ppc,ppc],[10,10], [10,20],[2,2])
         Y, X = generate_2d_gaussian_clusters([ppc, ppc, ppc], [10, 10, 20], [10, 20, 15], [2, 2, 2])
         X = np.array(X)
-        print X.shape
+        print(X.shape)
         
 
         class TestCallback(object):
@@ -68,7 +68,7 @@ def dotesting(ppc = 400):
             def callback(self, learner):
                 #vis.plotResultsMultiClassMMC2D(plt, Xmat, learner.Y, fixedindices = None)
                 #time.sleep(1)
-                print learner.classcounts
+                print(learner.classcounts)
         
         tcb = TestCallback()
         kwargs['callback'] = tcb

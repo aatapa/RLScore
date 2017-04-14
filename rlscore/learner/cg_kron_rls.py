@@ -107,21 +107,21 @@ class CGKronRLS(PairwisePredictorInterface):
         Y = array_tools.as_2d_array(Y)
         self.Y = np.mat(Y)
         self.trained = False
-        if kwargs.has_key("regparam"):
+        if "regparam" in kwargs:
             self.regparam = kwargs["regparam"]
         else:
             self.regparam = 0.
-        if kwargs.has_key(CALLBACK_FUNCTION):
+        if CALLBACK_FUNCTION in kwargs:
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
-        if kwargs.has_key("compute_risk"):
+        if "compute_risk" in kwargs:
             self.compute_risk = kwargs["compute_risk"]
         else:
             self.compute_risk = False
         
         regparam = self.regparam
-        if self.resource_pool.has_key('K1'):
+        if 'K1' in self.resource_pool:
             
             K1 = self.resource_pool['K1']
             K2 = self.resource_pool['K2']
@@ -143,7 +143,7 @@ class CGKronRLS(PairwisePredictorInterface):
                     z = (Y - P)
                     Ka = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
                     loss = (np.dot(z,z)+regparam*np.dot(v,Ka))
-                    print "loss", 0.5*loss
+                    print("loss", 0.5*loss)
                     if loss < self.bestloss:
                         self.A = v.copy()
                         self.bestloss = loss
@@ -200,7 +200,7 @@ class CGKronRLS(PairwisePredictorInterface):
             v_init = np.array(self.Y).reshape(self.Y.shape[0])
             v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
             v_init = np.array(v_init).reshape(kronfcount)
-            if self.resource_pool.has_key('warm_start'):
+            if 'warm_start' in self.resource_pool:
                 x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
             else:
                 x0 = None

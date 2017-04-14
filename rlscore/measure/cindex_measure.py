@@ -75,7 +75,7 @@ def cindex_singletask_SLOW(Y, P):
 
 try:
     from rlscore.utilities import swapped
-except Exception, e:
+except Exception as e:
     print(e)
     print('Warning: could not import the fast cython implementation of the concordance index measure. Using a slow python-based one instead.')
     cindex_singletask = cindex_singletask_SLOW

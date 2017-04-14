@@ -177,7 +177,6 @@ class GreedyRLS(PredictorInterface):
             '''
             diagG = np.mat(diagG).T
             for ci in allinds:
-                ci_mapped = indsmap[ci]
                 if ci in self.selected: continue
                 cv = listX[ci_mapped]
                 GXT_ci = GXT[:, ci_mapped]
@@ -235,7 +234,7 @@ class GreedyRLS(PredictorInterface):
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
     
-    def _solve_new(self, regparam, floattype):
+    def _solve_new(self, regparam, floattype = np.float64):
         
         #Legacy code. Works only with a single output but can work with given performance measures and is faster than _solve_bu
         
@@ -363,17 +362,6 @@ class GreedyRLS(PredictorInterface):
         
         su = np.sum(X, axis = 1)
         cc = 0
-        indsmap = {}
-        allinds = []
-        for ci in range(X.shape[0]):
-            if su[ci] == 0:
-                pass
-            else:
-                allinds.append(ci)
-                indsmap[ci] = cc
-                cc += 1
-        
-        X = X[allinds]
         
         tsize = self.size
         fsize = X.shape[0]
@@ -414,9 +402,8 @@ class GreedyRLS(PredictorInterface):
                 bestlooperf = 9999999999.
             
             self.looperf = []
-            #for ci in range(fsize):
-            for ci in allinds:
-                ci_mapped = indsmap[ci]
+            for ci in range(fsize):
+                ci_mapped = ci
                 if ci in self.selected: continue
                 cv = listX[ci_mapped]
                 GXT_ci = GXT[:, ci_mapped]
@@ -426,11 +413,11 @@ class GreedyRLS(PredictorInterface):
                 
                 if not self.measure is None:
                     loopred = Y - np.multiply(invupddiagG, updA)
-                    looperf_i = self.measure.multiOutputPerformance(Y, loopred)
+                    looperf_i = self.measure(Y, loopred)
                     if bestlooperf is None:
                         bestlooperf = looperf_i
                         bestcind = ci
-                    if self.measure.comparePerformances(looperf_i, bestlooperf) > 0:
+                    if looperf_i < bestlooperf:
                         bestcind = ci
                         bestlooperf = looperf_i
                 else:
@@ -444,7 +431,7 @@ class GreedyRLS(PredictorInterface):
             self.looperf = np.mat(self.looperf)
             self.bestlooperf = bestlooperf
             self.performances.append(bestlooperf)
-            ci_mapped = indsmap[bestcind]
+            ci_mapped = bestcind
             cv = listX[ci_mapped]
             GXT_bci = GXT[:, ci_mapped]
             ca = GXT_bci * (1. / (1. + cv * GXT_bci))
@@ -482,8 +469,8 @@ class DefaultCallback(object):
             if 'test_measure' in kwargs:
                 self.test_measure = kwargs['test_measure']
                 if isinstance(self.test_measure, str):
-                    exec "from rlscore.measure import " + self.test_measure
-                    exec "self.test_measure = " + self.test_measure
+                    exec("from rlscore.measure import " + self.test_measure)
+                    exec("self.test_measure = " + self.test_measure)
             else:
                 self.test_measure = None
         else:
@@ -491,9 +478,9 @@ class DefaultCallback(object):
     
     
     def callback(self, learner):
-        print
-        print 'LOOCV mean squared error', learner.bestlooperf
-        print 'The indices of selected features', learner.selected
+        print()
+        print('LOOCV mean squared error', learner.bestlooperf)
+        print('The indices of selected features', learner.selected)
         if not self.test_features is None:
             mod = learner.predictor
             tpreds = mod.predict(self.test_features)
@@ -502,7 +489,7 @@ class DefaultCallback(object):
             else:
                 testdiff = self.test_labels - tpreds
                 test_perf = np.mean(np.multiply(testdiff, testdiff))
-            print 'Test performance', test_perf
+            print('Test performance', test_perf)
     
     def finished(self, learner):
         pass

@@ -13,28 +13,16 @@ class Test(unittest.TestCase):
     
     def testRLS(self):
         
-        print
-        print
-        print
-        print
-        print "Testing the cross-validation routines of the RLS module."
-        print
-        print
+        print("\n\n\n\nTesting the cross-validation routines of the RLS module.\n\n")
         
         m, n = 100, 300
         Xtrain = random.rand(m, n)
         Y = mat(random.rand(m, 1))
         basis_vectors = [0,3,7,8]
         
-        def complement(indices, m):
-            compl = range(m)
-            for ind in indices:
-                compl.remove(ind)
-            return compl
-        
         #hoindices = [45, 50, 55]
         hoindices = [0, 1, 2]
-        hocompl = complement(hoindices, m)
+        hocompl = list(set(range(m)) - set(hoindices))
         
         bk = GaussianKernel(**{'X':Xtrain[basis_vectors], 'gamma':0.001})
         
@@ -73,15 +61,14 @@ class Test(unittest.TestCase):
         loglambdas = range(-5, 5)
         for j in range(0, len(loglambdas)):
             regparam = 2. ** loglambdas[j]
-            print
-            print "Regparam 2^%1d" % loglambdas[j]
+            print("\nRegparam 2^%1d" % loglambdas[j])
             
-            print (rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho).T, 'Dumb HO (dual)'
+            print((rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho).T, 'Dumb HO (dual)')
             dumbho = np.squeeze(np.array(rsa_testkm.T * la.inv(rsaKho + regparam * eye(rsaKho.shape[0])) * Yho))
             
             dualrls_naive.solve(regparam)
             predho1 = np.squeeze(dualrls_naive.predictor.predict(testX))
-            print predho1.T, 'Naive HO (dual)'
+            print(predho1.T, 'Naive HO (dual)')
             
             #dualrls.solve(regparam)
             #predho2 = np.squeeze(dualrls.computeHO(hoindices))

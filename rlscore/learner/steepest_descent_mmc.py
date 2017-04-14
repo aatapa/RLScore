@@ -27,7 +27,7 @@ import numpy as np
 import random as pyrandom
 pyrandom.seed(200)
 
-import _steepest_descent_mmc
+from . import _steepest_descent_mmc
 
 from rlscore.utilities import adapter
 from rlscore.utilities import array_tools
@@ -205,17 +205,8 @@ class SteepestDescentMMC(PredictorInterface):
         
         
         converged = False
-        #print self.classcounts.T
         if not self.callbackfun is None:
             self.callbackfun.callback(self)
-        '''while True:
-            
-            converged = self.findSteepestDir()
-            print self.classcounts.T
-            self.callback()
-            if converged: break
-        
-        '''
         
         cons = self.size / self.labelcount
         for i in range(20):
@@ -304,7 +295,6 @@ class SteepestDescentMMC(PredictorInterface):
             #self.focusset = self.findNewFocusSet(j)
             #self.focusset = pyrandom.sample(range(self.size),50)
             #takenum = 2*((len(self.focusset) / self.labelcount) - (len(self.focusset) / self.size) * self.classcounts[j] + int(howmany))
-            #print takenum
             #self.focusset = pyrandom.sample(range(self.size),takenum[0,0])
             #self.focusset = self.findNewFocusSet(j, maxtake)
             #self.focusset = set(range(self.size))
@@ -392,7 +382,7 @@ class RandomLabelSource(object):
         allinds = set(range(size))
         self.classcounts = np.zeros((labelcount), dtype = np.int32)
         for i in range(labelcount-1):
-            inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
+            inds = self.rand.sample(allinds, int(size / labelcount)) #sampling without replacement
             allinds = allinds - set(inds)
             for ind in inds:
                 self.Y[ind, i] = 1.

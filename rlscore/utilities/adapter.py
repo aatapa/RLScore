@@ -89,7 +89,7 @@ class SvdAdapter(object):
         """
         train_X = rpool['X']
         kernel = rpool['kernel_obj']
-        if rpool.has_key('basis_vectors'):
+        if 'basis_vectors' in rpool:
             basis_vectors = rpool['basis_vectors']
             if not train_X.shape[1] == basis_vectors.shape[1]:
                 raise Exception("X and basis_vectors have different number of columns")
@@ -127,7 +127,7 @@ class LinearSvdAdapter(SvdAdapter):
     def decompositionFromPool(self, rpool):
         kernel = rpool['kernel_obj']
         self.X = array_tools.as_2d_array(rpool['X'], True)
-        if rpool.has_key('basis_vectors'):
+        if 'basis_vectors' in rpool:
             basis_vectors = array_tools.as_2d_array(rpool['basis_vectors'], True)
             if not self.X.shape[1] == basis_vectors.shape[1]:
                 raise Exception("X and basis_vectors have different number of columns")
@@ -206,7 +206,7 @@ class PreloadedKernelMatrixSvdAdapter(SvdAdapter):
     
     def decompositionFromPool(self, rpool):
         K_train = rpool['kernel_matrix']
-        if rpool.has_key('basis_vectors'):
+        if 'basis_vectors' in rpool:
             if not K_train.shape[1] == rpool["basis_vectors"].shape[1]:
                 raise Exception("When using basis vectors, both kernel matrices must contain equal number of columns")
             svals, rsvecs, U, Z = decomposeSubsetKM(K_train.T, rpool['basis_vectors'])
@@ -237,8 +237,8 @@ def decomposeSubsetKM(K_r, K_rr):
     try:
         C = la.cholesky(K_rr)
     except LinAlgError:
-        print "Warning: chosen basis vectors not linearly independent"
-        print "Shifting the diagonal of kernel matrix"
+        print("Warning: chosen basis vectors not linearly independent")
+        print("Shifting the diagonal of kernel matrix")
         C = la.cholesky(K_rr+0.000000001 * np.eye(K_rr.shape[0]))
     C_T_inv = la.inv(C.T)
     H = np.dot(K_r.T, C_T_inv)

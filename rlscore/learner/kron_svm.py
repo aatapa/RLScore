@@ -78,22 +78,22 @@ class KronSVM(PairwisePredictorInterface):
         self.label_col_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
         self.Y = Y
         self.trained = False
-        if kwargs.has_key("regparam"):
+        if "regparam" in kwargs:
             self.regparam = kwargs["regparam"]
         else:
             self.regparam = 1.0
-        if kwargs.has_key(CALLBACK_FUNCTION):
+        if CALLBACK_FUNCTION in kwargs:
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
             self.callbackfun = None
-        if kwargs.has_key("compute_risk"):
+        if "compute_risk" in kwargs:
             self.compute_risk = kwargs["compute_risk"]
         else:
             self.compute_risk = False
         
         regparam = self.regparam
         
-        if not self.resource_pool.has_key('K1'):
+        if not 'K1' in self.resource_pool:
             self.regparam = regparam
             X1 = self.resource_pool['X1']
             X2 = self.resource_pool['X2']

@@ -35,7 +35,7 @@ from rlscore.measure import cindex
 from rlscore.learner.rls import NfoldCV
 from rlscore.learner.rls import LPOCV
 
-import _global_rankrls
+from . import _global_rankrls
 
 class GlobalRankRLS(PredictorInterface):
     """RankRLS: Regularized least-squares ranking.
@@ -425,7 +425,7 @@ class GlobalRankRLS(PredictorInterface):
                 BTGLY0 = CTGDY - (GDYi + GDYj + BTGB00 * BTY0 + BTGB01 * BTY1 + BTGB02 * BTY2)
                 BTGLY1 = sqrtsm2GDY_[i] - (BTGB01 * BTY0 + BTGBBTY_[i] + BTGB12 * BTY2)
                 BTGLY2 = sqrtsm2GDY_[j] - (BTGB02 * BTY0 + BTGB12 * BTY1 + BTGBBTY_[j])
-                print CTGDY, BTGLY0
+                print(CTGDY, BTGLY0)
                 BTGB00m1 = BTGB00 - 1.
                 BTGB11m1 = sm2Gdiag_[i]
                 BTGB22m1 = sm2Gdiag_[j]

@@ -25,7 +25,7 @@
 
 import numpy as np
 
-from rlscore.utilities import _sampled_kronecker_products
+from . import _sampled_kronecker_products
 
 
 def _compute_subset_of_matprod_entries(*args):

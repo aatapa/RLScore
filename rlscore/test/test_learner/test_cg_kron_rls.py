@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
         rowstimescols = train_rows * train_columns
         allindices = np.arange(rowstimescols)
         all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (train_rows, train_columns), order = 'F') 
-        incinds = pyrandom.sample(allindices, 50)
+        incinds = np.random.choice(allindices, 50, replace=False)
         label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds] 
         Y_train_known_outputs = Y_train.reshape(rowstimescols, order = 'F')[incinds]
         

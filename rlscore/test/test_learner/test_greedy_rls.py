@@ -21,7 +21,7 @@ def speedtest():
     rpool = {}
     class TestCallback(object):
         def callback(self, learner):
-            print 'round'
+            print('round')
         def finished(self, learner):
             pass
     tcb = TestCallback()
@@ -34,9 +34,9 @@ def speedtest():
     rpool['bias'] = bias
     grls = GreedyRLS(**rpool)
     
-    print grls.selected
-    print grls.A[grls.selected]
-    print grls.b
+    print(grls.selected)
+    print(grls.A[grls.selected])
+    print(grls.b)
 
 
 
@@ -76,13 +76,7 @@ class Test(unittest.TestCase):
 
     
     def testRLS(self):
-        print
-        print
-        print
-        print
-        print "Testing the correctness of the GreedyRLS module."
-        print
-        print
+        print("\n\n\n\nTesting the correctness of the GreedyRLS module.\n\n")
         tsize, fsize = 10, 30
         desiredfcount = 5
         Xtrain = mat(random.rand(fsize, tsize), dtype=float64)
@@ -102,7 +96,7 @@ class Test(unittest.TestCase):
                 updK = Xtrain_biased[selected_plus_bias+[ci]].T*Xtrain_biased[selected_plus_bias+[ci]]
                 looperf = 0.
                 for hi in range(tsize):
-                    hoinds = range(0, hi) + range(hi + 1, tsize)
+                    hoinds = list(range(0, hi)) + list(range(hi + 1, tsize))
                     updcutK = updK[ix_(hoinds, hoinds)]
                     updcrossK = updK[ix_([hi], hoinds)]
                     loopred = updcrossK * la.inv(updcutK + rp * mat(eye(tsize-1))) * Y[hoinds]
@@ -110,19 +104,19 @@ class Test(unittest.TestCase):
                 if looperf < bestlooperf:
                     bestcind = ci
                     bestlooperf = looperf
-                print 'Tester ', ci, looperf
+                print('Tester ', ci, looperf)
             selected.append(bestcind)
-            print 'Tester ', selected
+            print('Tester ', selected)
             currentfcount += 1
         selected_plus_bias = selected + [fsize]
         K = Xtrain_biased[selected_plus_bias].T*Xtrain_biased[selected_plus_bias]
         G = la.inv(K+rp * mat(eye(tsize)))
         A = Xtrain_biased[selected_plus_bias]*G*Y
-        print 'Tester ', A
+        print('Tester ', A)
         rpool = {}
         class TestCallback(object):
             def callback(self, learner):
-                print 'GreedyRLS', learner.looperf.T
+                print('GreedyRLS', learner.looperf.T)
                 pass
             def finished(self, learner):
                 pass
