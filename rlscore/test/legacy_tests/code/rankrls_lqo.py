@@ -19,7 +19,7 @@ learner = LeaveQueryOutRankRLS(**kwargs)
 grid = kwargs['regparams']
 perfs = learner.cv_performances
 for i in range(len(grid)):
-    print "parameter %f cv_performance %f" %(grid[i], perfs[i])
+    print("parameter %f cv_performance %f" %(grid[i], perfs[i]))
 P = learner.predict(test_features)
 from rlscore.measure.measure_utilities import UndefinedPerformance
 from rlscore.measure.measure_utilities import qids_to_splits
@@ -32,4 +32,4 @@ for query in test_qids:
     except UndefinedPerformance:
         pass
 test_perf = np.mean(perfs)
-print "test set performance: %f" %test_perf
+print("test set performance: %f" %test_perf)

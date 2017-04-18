@@ -19,4 +19,4 @@ kwargs["subsetsize"] = 10
 learner = GreedyRLS(**kwargs)
 P = learner.predict(test_features)
 test_perf = auc(test_labels, P)
-print "test set performance: %f" %test_perf
+print("test set performance: %f" %test_perf)

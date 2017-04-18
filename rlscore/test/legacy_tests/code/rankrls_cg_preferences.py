@@ -14,4 +14,4 @@ kwargs["regparam"] = 1
 learner = PCGRankRLS(**kwargs)
 P = learner.predict(test_features)
 test_perf = cindex(test_labels, P)
-print "test set performance: %f" %test_perf
+print("test set performance: %f" %test_perf)

@@ -6,7 +6,7 @@ if __name__=="__main__":
     fnames = listdir('legacy_tests/code/')
     for fname in fnames:
         if fname[-3:] == ".py":
-            print fname
+            print(fname)
             path = 'legacy_tests/code/' + fname
             sys.stdout.flush()
             sys.stderr.flush()

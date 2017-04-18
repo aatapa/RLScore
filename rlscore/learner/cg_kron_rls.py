@@ -133,6 +133,13 @@ class CGKronRLS(PairwisePredictorInterface):
             self.bestloss = float("inf")
             def mv(v):
                 return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds) + regparam * v
+            def mv_mk(v):
+                vsum = regparam * v
+                for i in range(len(K1)):
+                    K1i = K1[i]
+                    K2i = K2[i]
+                    vsum += sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
+                return vsum
             
             def mvr(v):
                 raise Exception('You should not be here!')
@@ -152,9 +159,11 @@ class CGKronRLS(PairwisePredictorInterface):
                 if not self.callbackfun is None:
                     self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
                     self.callbackfun.callback(self)
-    
             
-            G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
+            if isinstance(K1, (list, tuple)):
+                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
+            else:
+                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self. A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
         else:
@@ -165,8 +174,13 @@ class CGKronRLS(PairwisePredictorInterface):
             if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
             else: maxiter = None
             
-            x1tsize, x1fsize = X1.shape #m, d
-            x2tsize, x2fsize = X2.shape #q, r
+            if isinstance(X1, (list, tuple)):
+                raise NotImplementedError("Got list or tuple as X1 but multiple kernel learning has not been implemented for the proal case yet.")
+                x1tsize, x1fsize = X1[0].shape #m, d
+                x2tsize, x2fsize = X2[0].shape #q, r
+            else:
+                x1tsize, x1fsize = X1.shape #m, d
+                x2tsize, x2fsize = X2.shape #q, r
             
             kronfcount = x1fsize * x2fsize
             
@@ -176,6 +190,15 @@ class CGKronRLS(PairwisePredictorInterface):
                 v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
                 v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
                 return v_after
+            def mv_mk(v):
+                vsum = regparam * v
+                for i in range(len(X1)):
+                    X1i = X1[i]
+                    X2i = X2[i]
+                    v_after = sampled_kronecker_products.sampled_vec_trick(v, X2i, X1i, self.input2_inds, self.input1_inds)
+                    v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2i.T, X1i.T, None, None, self.input2_inds, self.input1_inds)
+                    vsum = vsum + v_after
+                return vsum
             
             def mvr(v):
                 raise Exception('You should not be here!')
@@ -194,11 +217,21 @@ class CGKronRLS(PairwisePredictorInterface):
                 if not self.callbackfun is None:
                     self.predictor = LinearPairwisePredictor(self.W)
                     self.callbackfun.callback(self)
-                
-            G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
             
-            v_init = np.array(self.Y).reshape(self.Y.shape[0])
-            v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
+            if isinstance(X1, (list, tuple)):
+                G = LinearOperator((kronfcount, kronfcount), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
+                vsum = np.zeros(kronfcount)
+                v_init = np.array(self.Y).reshape(self.Y.shape[0])
+                for i in range(len(X1)):
+                    X1i = X1[i]
+                    X2i = X2[i]
+                    vsum += sampled_kronecker_products.sampled_vec_trick(v_init, X2i.T, X1i.T, None, None, self.input2_inds, self.input1_inds)
+                v_init = vsum
+            else:
+                G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
+                v_init = np.array(self.Y).reshape(self.Y.shape[0])
+                v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
+            
             v_init = np.array(v_init).reshape(kronfcount)
             if 'warm_start' in self.resource_pool:
                 x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')

@@ -15,4 +15,4 @@ kwargs["callbackfun"] = EarlyStopCB(test_features, test_labels, measure=auc)
 learner = CGRLS(**kwargs)
 P = learner.predict(test_features)
 test_perf = auc(test_labels, P)
-print "test set performance: %f" %test_perf
+print("test set performance: %f" %test_perf)

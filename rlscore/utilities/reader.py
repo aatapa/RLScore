@@ -108,7 +108,7 @@ def read_sparse(fname, fdim=None):
         linecounter += 1
         #Empty lines and commented lines are passed over
         if len(line.strip()) == 0 or line[0] == '#':
-            print "Warning: no inputs on line %d" % linecounter
+            print("Warning: no inputs on line %d" % linecounter)
             continue
         line = line.split("#",1)
         attributes = line[0].split()

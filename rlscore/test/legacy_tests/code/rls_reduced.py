@@ -19,7 +19,7 @@ learner = LeaveOneOutRLS(**kwargs)
 grid = kwargs['regparams']
 perfs = learner.cv_performances
 for i in range(len(grid)):
-    print "parameter %f cv_performance %f" %(grid[i], perfs[i])
+    print("parameter %f cv_performance %f" %(grid[i], perfs[i]))
 P = learner.predict(test_features)
 test_perf = auc(test_labels, P)
-print "test set performance: %f" %test_perf
+print("test set performance: %f" %test_perf)
