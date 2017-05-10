@@ -52,12 +52,15 @@ class CGKronRLS(PairwisePredictorInterface):
     X2 : {array-like}, shape = [n_samples2, n_features2] 
         Data matrix 2 (for linear KronRLS)
         
-    K1 : {array-like}, shape = [n_samples1, n_samples1]
+    K1 : {array-like, list of equally shaped array-likes}, shape = [n_samples1, n_samples1]
         Kernel matrix 1 (for kernel KronRLS)
 
-    K2 : {array-like}, shape = [n_samples1, n_samples1]
+    K2 : {array-like, list of equally shaped array-likes}, shape = [n_samples1, n_samples1]
         Kernel matrix 2 (for kernel KronRLS)
         
+    weights : {list, tuple, array-like}, shape = [n_kernels], optional
+        weights used by multiple pairwise kernel predictors
+    
     Y : {array-like}, shape = [n_train_pairs]
         Training set labels. 
         
@@ -100,7 +103,6 @@ class CGKronRLS(PairwisePredictorInterface):
     
     
     def __init__(self, **kwargs):
-        self.resource_pool = kwargs
         Y = kwargs["Y"]
         self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
         self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
@@ -121,12 +123,12 @@ class CGKronRLS(PairwisePredictorInterface):
             self.compute_risk = False
         
         regparam = self.regparam
-        if 'K1' in self.resource_pool:
+        if 'K1' in kwargs:
             
-            K1 = self.resource_pool['K1']
-            K2 = self.resource_pool['K2']
+            K1 = kwargs['K1']
+            K2 = kwargs['K2']
             
-            if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
+            if 'maxiter' in kwargs: maxiter = int(kwargs['maxiter'])
             else: maxiter = None
             
             Y = np.array(self.Y).ravel(order = 'F')
@@ -138,7 +140,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 for i in range(len(K1)):
                     K1i = K1[i]
                     K2i = K2[i]
-                    vsum += sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
+                    vsum += weights[i] * sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
                 return vsum
             
             def mvr(v):
@@ -161,17 +163,20 @@ class CGKronRLS(PairwisePredictorInterface):
                     self.callbackfun.callback(self)
             
             if isinstance(K1, (list, tuple)):
+                if 'weights' in kwargs: weights = kwargs['weights']
+                else: weights = np.ones((len(K1)))
                 G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
             else:
+                weights = None
                 G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self. A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
-            self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
+            self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, weights)
         else:
-            X1 = self.resource_pool['X1']
-            X2 = self.resource_pool['X2']
+            X1 = kwargs['X1']
+            X2 = kwargs['X2']
             self.X1, self.X2 = X1, X2
             
-            if 'maxiter' in self.resource_pool: maxiter = int(self.resource_pool['maxiter'])
+            if 'maxiter' in kwargs: maxiter = int(kwargs['maxiter'])
             else: maxiter = None
             
             if isinstance(X1, (list, tuple)):
@@ -233,8 +238,8 @@ class CGKronRLS(PairwisePredictorInterface):
                 v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
             
             v_init = np.array(v_init).reshape(kronfcount)
-            if 'warm_start' in self.resource_pool:
-                x0 = np.array(self.resource_pool['warm_start']).reshape(kronfcount, order = 'F')
+            if 'warm_start' in kwargs:
+                x0 = np.array(kwargs['warm_start']).reshape(kronfcount, order = 'F')
             else:
                 x0 = None
             minres(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb, tol=1e-20)[0].reshape((x1fsize, x2fsize), order='F')

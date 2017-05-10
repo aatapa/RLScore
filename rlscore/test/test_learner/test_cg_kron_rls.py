@@ -160,8 +160,9 @@ class Test(unittest.TestCase):
         #Train multiple kernel Kronecker RLS
         params = {}
         params["regparam"] = regparam
-        params["K1"] = [K_train1 / 3, 2 * K_train1 / 3]
+        params["K1"] = [K_train1, K_train1]
         params["K2"] = [K_train2, K_train2]
+        params["weights"] = [1. / 3, 2. / 3]
         params["Y"] = Y_train_known_outputs
         params["label_row_inds"] = label_row_inds
         params["label_col_inds"] = label_col_inds
@@ -177,8 +178,8 @@ class Test(unittest.TestCase):
         tcb = KernelCallback()
         params['callback'] = tcb
         kernel_kron_learner = CGKronRLS(**params)
-        kernel_kron_testpred = kernel_kron_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
-        kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, [0, 0, 1], [0, 1, 0])
+        kernel_kron_testpred = kernel_kron_learner.predict([K_test1, K_test1], [K_test2, K_test2]).reshape((test_rows, test_columns), order = 'F')
+        #kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, [0, 0, 1], [0, 1, 0])
         
         print('Predictions: Linear CgKronRLS, Kernel CgKronRLS, ordinary RLS')
         print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))#, linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]

@@ -62,6 +62,8 @@ class KernelPairwisePredictor(object):
         maps dual coefficients to rows of K1, not needed if learning from complete data (i.e. n_train_pairs = n_samples1*n_samples2)
     row_inds_K2training : list of indices, shape = [n_train_pairs], optional
         maps dual coefficients to rows of K2, not needed if learning from complete data (i.e. n_train_pairs = n_samples1*n_samples2)
+    weights : {list, tuple, array-like}, shape = [n_kernels], optional
+         weights used by multiple pairwise kernel predictors  
     
     Attributes
     ----------
@@ -71,11 +73,14 @@ class KernelPairwisePredictor(object):
         maps dual coefficients to rows of K1, not needed if learning from complete data (i.e. n_train_pairs = n_samples1*n_samples2)
     row_inds_K2training : list of indices, shape = [n_train_pairs] or None
         maps dual coefficients to rows of K2, not needed if learning from complete data (i.e. n_train_pairs = n_samples1*n_samples2)
-        """
+    weights : {list, tuple, array-like}, shape = [n_kernels], optional
+         weights used by multiple pairwise kernel predictors  
+    """
     
-    def __init__(self, A, row_inds_K1training = None, row_inds_K2training = None):
+    def __init__(self, A, row_inds_K1training = None, row_inds_K2training = None, weights = None):
         self.A = A
         self.row_inds_K1training, self.row_inds_K2training = row_inds_K1training, row_inds_K2training
+        if not weights == None: self.weights = weights
     
     
     def predict(self, K1pred, K2pred, row_inds_K1pred = None, row_inds_K2pred = None):
@@ -83,9 +88,9 @@ class KernelPairwisePredictor(object):
 
         Parameters
         ----------
-        K1pred : array-like, shape = [n_samples1, n_train_pairs]
+        K1pred : {array-like, list of equally shaped array-likes}, shape = [n_samples1, n_train_pairs]
             the first part of the test data matrix
-        K2pred : array-like, shape = [n_samples2, n_train_pairs]
+        K2pred : {array-like, list of equally shaped array-likes}, shape = [n_samples2, n_train_pairs]
             the second part of the test data matrix
         row_inds_K1pred : list of indices, shape = [n_test_pairs], optional
             maps rows of K1pred to vector of predictions P. If not supplied, predictions are computed for all possible test pair combinations.
@@ -98,34 +103,47 @@ class KernelPairwisePredictor(object):
             predictions, either ordered according to the supplied row indices, or if no such are supplied by default
             prediction for (K1[i], K2[j]) maps to P[i + j*n_samples1].
         """
-        if len(K1pred.shape) == 1:
-            K1pred = K1pred.reshape(1, K1pred.shape[0])
-        if len(K2pred.shape) == 1:
-            K2pred = K2pred.reshape(1, K2pred.shape[0])
-        if row_inds_K1pred is not None:
-            row_inds_K1pred = np.array(row_inds_K1pred, dtype = np.int32)
-            row_inds_K2pred = np.array(row_inds_K2pred, dtype = np.int32)
-            P = sampled_kronecker_products.sampled_vec_trick(
-                self.A,
-                K2pred,
-                K1pred,
-                row_inds_K2pred,
-                row_inds_K1pred,
-                self.row_inds_K2training,
-                self.row_inds_K1training)
+        def inner_predict(K1pred, K2pred, row_inds_K1pred = None, row_inds_K2pred = None):
+            if len(K1pred.shape) == 1:
+                K1pred = K1pred.reshape(1, K1pred.shape[0])
+            if len(K2pred.shape) == 1:
+                K2pred = K2pred.reshape(1, K2pred.shape[0])
+            if row_inds_K1pred is not None:
+                row_inds_K1pred = np.array(row_inds_K1pred, dtype = np.int32)
+                row_inds_K2pred = np.array(row_inds_K2pred, dtype = np.int32)
+                P = sampled_kronecker_products.sampled_vec_trick(
+                    self.A,
+                    K2pred,
+                    K1pred,
+                    row_inds_K2pred,
+                    row_inds_K1pred,
+                    self.row_inds_K2training,
+                    self.row_inds_K1training)
+            else:
+                P = sampled_kronecker_products.sampled_vec_trick(
+                    self.A,
+                    K2pred,
+                    K1pred,
+                    None,
+                    None,
+                    self.row_inds_K2training,
+                    self.row_inds_K1training)
+                
+                #P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order = 'F')
+            P = np.array(P)
+            return P
+        
+        if isinstance(K1pred, (list, tuple)):
+            P = None
+            for i in range(len(K1pred)):
+                K1i = K1pred[i]
+                K2i = K2pred[i]
+                Pi = inner_predict(K1i, K2i, row_inds_K1pred, row_inds_K2pred)
+                if P == None: P = self.weights[i] * Pi
+                else: P = P + self.weights[i] * Pi
+            return P
         else:
-            P = sampled_kronecker_products.sampled_vec_trick(
-                self.A,
-                K2pred,
-                K1pred,
-                None,
-                None,
-                self.row_inds_K2training,
-                self.row_inds_K1training)
-            
-            #P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order = 'F')
-        P = np.array(P)
-        return P
+            return inner_predict(K1pred, K2pred, row_inds_K1pred, row_inds_K2pred)
 
 
 class LinearPairwisePredictor(object):
