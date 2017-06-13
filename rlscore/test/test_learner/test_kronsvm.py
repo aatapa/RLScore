@@ -120,10 +120,10 @@ class Test(unittest.TestCase):
                 K2 = learner.resource_pool['K2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
-                loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
+                #loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
                 #loss = learner.bestloss
                 print("iteration", self.iter)
-                print("Dual SVM loss", loss)
+                #print("Dual SVM loss", loss)
                 #model = learner.predictor
                 self.iter += 1
             def finished(self, learner):
@@ -136,12 +136,31 @@ class Test(unittest.TestCase):
         params["label_col_inds"] = cols
         params["maxiter"] = 100
         params["inneriter"] = 100
-        params["regparam"] = regparam  
-        params['callback'] = DualCallback()     
+        params["regparam"] = regparam
+        params['callback'] = DualCallback()
         learner = KronSVM(**params)
         P_dual = learner.predictor.predict(K1_test, K2_test)
         print(np.max(1. - np.abs(P_linear / P_dual)))
-        assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001       
+        assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001
+        
+        params = {}
+        params["K1"] = [K1_train, K1_train]
+        params["K2"] = [K2_train, K2_train]
+        #params["weights"] = [1, 1]
+        params["weights"] = [1. / 3, 2. / 3]
+        #params["weights"] = [1.]# / np.sqrt(3), np.sqrt(2. / 3)]
+        params["Y"] = Y_train
+        params["label_row_inds"] = rows
+        params["label_col_inds"] = cols
+        params["maxiter"] = 100
+        params["inneriter"] = 100
+        params["regparam"] = regparam
+        params['callback'] = DualCallback()
+        learner = KronSVM(**params)
+        P_dual = learner.predictor.predict(K1_test, K2_test)
+        print(np.max(1. - np.abs(P_linear / P_dual)))
+        assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001
+        
 
 
 
