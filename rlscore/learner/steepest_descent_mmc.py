@@ -144,6 +144,7 @@ class SteepestDescentMMC(PredictorInterface):
         self.size = self.Y.shape[0]
         self.labelcount = self.Y.shape[1]
         self.classvec = - np.ones((self.size), dtype = np.int32)
+        self.lockvec = np.zeros((self.size), dtype = np.int32)
         self.classcounts = np.zeros((self.labelcount), dtype = np.int32)
         for i in range(self.size):
             clazzind = 0
@@ -180,20 +181,22 @@ class SteepestDescentMMC(PredictorInterface):
         self.VTY = self.svecs.T * self.Y
         
         self.sqrtR = np.multiply(np.sqrt(newevalslamtilde), self.svecs)
+        
         self.R = self.sqrtR * self.sqrtR.T
         self.mdiagRx2 = - 2 * np.diag(self.R)
         
-        '''
+        #'''
         #Space efficient variation
-        self.R = None
-        self.mdiagRx2 = - 2 * array(sum(np.multiply(self.sqrtR, self.sqrtR), axis = 1)).reshape((self.size))
-        '''
+        #self.R = None
+        #self.mdiagRx2 = - 2 * np.array(np.sum(np.multiply(self.sqrtR, self.sqrtR), axis = 1)).reshape((self.size))
+        #'''
         
         self.RY = self.sqrtR * (self.sqrtR.T * self.Y)
         self.Y_Schur_RY = np.multiply(self.Y, self.RY)
         
         self.YTRY_list = []
         self.classFitnessList = []
+        
         for i in range(self.labelcount):
             YTRY_i = self.Y[:,i].T * self.RY[:,i]
             self.YTRY_list.append(YTRY_i)
@@ -233,6 +236,22 @@ class SteepestDescentMMC(PredictorInterface):
     def updateA(self):
         self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
     
+    def claim_n_points(self, howmany, newclazz):
+        _steepest_descent_mmc.claim_n_points(self.Y,
+                                                self.R,
+                                                self.RY,
+                                                self.Y_Schur_RY,
+                                                self.classFitnessRowVec,
+                                                self.mdiagRx2,
+                                                self.classcounts,
+                                                self.classvec,
+                                                self.size,
+                                                self.labelcount,
+                                                howmany,
+                                                self.sqrtR,
+                                                self.sqrtR.shape[1],
+                                                self.lockvec,
+                                                newclazz)
     
     def findSteepestDirRotateClasses(self, howmany, LOO = False):
         _steepest_descent_mmc.findSteepestDirRotateClasses(self.Y,
@@ -247,7 +266,8 @@ class SteepestDescentMMC(PredictorInterface):
                                                 self.labelcount,
                                                 howmany,
                                                 self.sqrtR,
-                                                self.sqrtR.shape[1])
+                                                self.sqrtR.shape[1],
+                                                self.lockvec)
         return
         
         #The slow python code. Use the above cython instead.

@@ -110,7 +110,8 @@ def findSteepestDirRotateClasses(double [:, :] Y,
                                  int labelcount,
                                  int howmany,
                                  double [:, :] sqrtR,
-                                 int rank_R):
+                                 int rank_R,
+                                 int [:] lockvec):
     cdef int h, takenum
     
     for newclazz in range(labelcount):
@@ -120,7 +121,7 @@ def findSteepestDirRotateClasses(double [:, :] Y,
         
         for h in range(takenum):
             
-            claim_a_point(Y, R, RY, Y_Schur_RY, minus_diagRx2, classcounts, classvec, size, 1, None, None, rank_R, newclazz, None, 0)
+            claim_a_point(Y, R, RY, Y_Schur_RY, minus_diagRx2, classcounts, classvec, size, 1, None, None, rank_R, newclazz, None, 0, lockvec)
     
     #Book keeping stuff
     for newclazz in range(labelcount):
@@ -130,6 +131,38 @@ def findSteepestDirRotateClasses(double [:, :] Y,
         classFitnessRowVec[newclazz] = YTRY_newclazz
         
     return False
+
+
+def claim_n_points(double [:, :] Y,
+                     double [:, :] R,
+                     double [:, :] RY,
+                     double [:, :] Y_Schur_RY,
+                     double [:] classFitnessRowVec,
+                     double [:] minus_diagRx2,
+                     int [:] classcounts,
+                     int [:] classvec,
+                     int size,
+                     int labelcount,
+                     int howmany,
+                     double [:, :] sqrtR,
+                     int rank_R,
+                     int [:] lockvec,
+                     int newclazz):
+    cdef int h, takenum
+    
+    for h in range(howmany):
+        
+        claim_a_point(Y, R, RY, Y_Schur_RY, minus_diagRx2, classcounts, classvec, size, 1, None, None, rank_R, newclazz, None, 0, lockvec)
+    
+    #Book keeping stuff
+    for newclazz in range(labelcount):
+        YTRY_newclazz = 0
+        for i in range(size):
+            YTRY_newclazz += Y_Schur_RY[i, newclazz]
+        classFitnessRowVec[newclazz] = YTRY_newclazz
+        
+    return False
+
 
 def claim_a_point(double [:, :] Y,
                      double [:, :] R,
@@ -145,9 +178,10 @@ def claim_a_point(double [:, :] Y,
                      int rank_R,
                      int newclazz,
                      double [:] tempvec,
-                     int tempveclen):  #This function should be explicitly inlined to gain faster running speed.
+                     int tempveclen,
+                     int [:] lockvec):  #This function should be explicitly inlined to gain faster running speed.
     
-    cdef int oldclazz, steepestdir, i, j
+    cdef int oldclazz, steepestdir, i, j, lock
     cdef double YTRY_oldclazz, YTRY_newclazz, dirsnegdiff_base, dirsnegdiff_i, R_is_x2, inf, foo
     
     inf = float('Inf')
@@ -161,6 +195,8 @@ def claim_a_point(double [:, :] Y,
         for i in range(size):
             oldclazz = classvec[i]
             if oldclazz == newclazz: continue
+            lock = lockvec[i]
+            if lock == 1: continue
             dirsnegdiff_i = tempvec[oldclazz]
             for j in range(rank_R):
                 foo = DVTY[j, newclazz] + sqrtRx2[i, j]
