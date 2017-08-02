@@ -210,6 +210,8 @@ def claim_a_point(double [:, :] Y,
         for i in range(size):
             oldclazz = classvec[i]
             if oldclazz == newclazz: continue
+            lock = lockvec[i]
+            if lock == 1: continue
             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
             if dirsnegdiff_i < steepness:
                 steepness = dirsnegdiff_i

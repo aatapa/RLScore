@@ -3654,9 +3654,10 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
   Py_ssize_t __pyx_t_61;
   Py_ssize_t __pyx_t_62;
   Py_ssize_t __pyx_t_63;
-  PyObject *__pyx_t_64 = NULL;
+  Py_ssize_t __pyx_t_64;
   PyObject *__pyx_t_65 = NULL;
   PyObject *__pyx_t_66 = NULL;
+  PyObject *__pyx_t_67 = NULL;
   __Pyx_RefNannySetupContext("claim_a_point", 0);
 
   /* "rlscore/learner/_steepest_descent_mmc.pyx":187
@@ -4075,7 +4076,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
  *         for i in range(size):
  *             oldclazz = classvec[i]             # <<<<<<<<<<<<<<
  *             if oldclazz == newclazz: continue
- *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
+ *             lock = lockvec[i]
  */
       __pyx_t_28 = __pyx_v_i;
       __pyx_t_5 = -1;
@@ -4093,8 +4094,8 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
  *         for i in range(size):
  *             oldclazz = classvec[i]
  *             if oldclazz == newclazz: continue             # <<<<<<<<<<<<<<
- *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
- *             if dirsnegdiff_i < steepness:
+ *             lock = lockvec[i]
+ *             if lock == 1: continue
  */
       __pyx_t_2 = ((__pyx_v_oldclazz == __pyx_v_newclazz) != 0);
       if (__pyx_t_2) {
@@ -4104,54 +4105,85 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
       /* "rlscore/learner/_steepest_descent_mmc.pyx":213
  *             oldclazz = classvec[i]
  *             if oldclazz == newclazz: continue
- *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]             # <<<<<<<<<<<<<<
- *             if dirsnegdiff_i < steepness:
- *                 steepness = dirsnegdiff_i
+ *             lock = lockvec[i]             # <<<<<<<<<<<<<<
+ *             if lock == 1: continue
+ *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
  */
       __pyx_t_29 = __pyx_v_i;
       __pyx_t_5 = -1;
       if (__pyx_t_29 < 0) {
-        __pyx_t_29 += __pyx_v_minus_diagRx2.shape[0];
+        __pyx_t_29 += __pyx_v_lockvec.shape[0];
         if (unlikely(__pyx_t_29 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_29 >= __pyx_v_minus_diagRx2.shape[0])) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_29 >= __pyx_v_lockvec.shape[0])) __pyx_t_5 = 0;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
         __PYX_ERR(0, 213, __pyx_L1_error)
       }
-      __pyx_t_30 = __pyx_v_i;
-      __pyx_t_31 = __pyx_v_oldclazz;
-      __pyx_t_5 = -1;
-      if (__pyx_t_30 < 0) {
-        __pyx_t_30 += __pyx_v_Y_Schur_RY.shape[0];
-        if (unlikely(__pyx_t_30 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_30 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_31 < 0) {
-        __pyx_t_31 += __pyx_v_Y_Schur_RY.shape[1];
-        if (unlikely(__pyx_t_31 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_31 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 213, __pyx_L1_error)
-      }
-      __pyx_t_32 = __pyx_v_i;
-      __pyx_t_33 = __pyx_v_newclazz;
-      __pyx_t_5 = -1;
-      if (__pyx_t_32 < 0) {
-        __pyx_t_32 += __pyx_v_Y_Schur_RY.shape[0];
-        if (unlikely(__pyx_t_32 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_32 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_33 < 0) {
-        __pyx_t_33 += __pyx_v_Y_Schur_RY.shape[1];
-        if (unlikely(__pyx_t_33 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_33 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 213, __pyx_L1_error)
-      }
-      __pyx_v_dirsnegdiff_i = (((*((double *) ( /* dim=0 */ (__pyx_v_minus_diagRx2.data + __pyx_t_29 * __pyx_v_minus_diagRx2.strides[0]) ))) + (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_30 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_31 * __pyx_v_Y_Schur_RY.strides[1]) )))) + (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_32 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_33 * __pyx_v_Y_Schur_RY.strides[1]) ))));
+      __pyx_v_lock = (*((int *) ( /* dim=0 */ (__pyx_v_lockvec.data + __pyx_t_29 * __pyx_v_lockvec.strides[0]) )));
 
       /* "rlscore/learner/_steepest_descent_mmc.pyx":214
  *             if oldclazz == newclazz: continue
+ *             lock = lockvec[i]
+ *             if lock == 1: continue             # <<<<<<<<<<<<<<
+ *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
+ *             if dirsnegdiff_i < steepness:
+ */
+      __pyx_t_2 = ((__pyx_v_lock == 1) != 0);
+      if (__pyx_t_2) {
+        goto __pyx_L15_continue;
+      }
+
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":215
+ *             lock = lockvec[i]
+ *             if lock == 1: continue
+ *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]             # <<<<<<<<<<<<<<
+ *             if dirsnegdiff_i < steepness:
+ *                 steepness = dirsnegdiff_i
+ */
+      __pyx_t_30 = __pyx_v_i;
+      __pyx_t_5 = -1;
+      if (__pyx_t_30 < 0) {
+        __pyx_t_30 += __pyx_v_minus_diagRx2.shape[0];
+        if (unlikely(__pyx_t_30 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_30 >= __pyx_v_minus_diagRx2.shape[0])) __pyx_t_5 = 0;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 215, __pyx_L1_error)
+      }
+      __pyx_t_31 = __pyx_v_i;
+      __pyx_t_32 = __pyx_v_oldclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_31 < 0) {
+        __pyx_t_31 += __pyx_v_Y_Schur_RY.shape[0];
+        if (unlikely(__pyx_t_31 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_31 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_32 < 0) {
+        __pyx_t_32 += __pyx_v_Y_Schur_RY.shape[1];
+        if (unlikely(__pyx_t_32 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_32 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 215, __pyx_L1_error)
+      }
+      __pyx_t_33 = __pyx_v_i;
+      __pyx_t_34 = __pyx_v_newclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_33 < 0) {
+        __pyx_t_33 += __pyx_v_Y_Schur_RY.shape[0];
+        if (unlikely(__pyx_t_33 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_33 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_34 < 0) {
+        __pyx_t_34 += __pyx_v_Y_Schur_RY.shape[1];
+        if (unlikely(__pyx_t_34 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_34 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 215, __pyx_L1_error)
+      }
+      __pyx_v_dirsnegdiff_i = (((*((double *) ( /* dim=0 */ (__pyx_v_minus_diagRx2.data + __pyx_t_30 * __pyx_v_minus_diagRx2.strides[0]) ))) + (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_31 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_32 * __pyx_v_Y_Schur_RY.strides[1]) )))) + (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_33 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_34 * __pyx_v_Y_Schur_RY.strides[1]) ))));
+
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":216
+ *             if lock == 1: continue
  *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
  *             if dirsnegdiff_i < steepness:             # <<<<<<<<<<<<<<
  *                 steepness = dirsnegdiff_i
@@ -4160,7 +4192,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
       __pyx_t_2 = ((__pyx_v_dirsnegdiff_i < __pyx_v_steepness) != 0);
       if (__pyx_t_2) {
 
-        /* "rlscore/learner/_steepest_descent_mmc.pyx":215
+        /* "rlscore/learner/_steepest_descent_mmc.pyx":217
  *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
  *             if dirsnegdiff_i < steepness:
  *                 steepness = dirsnegdiff_i             # <<<<<<<<<<<<<<
@@ -4169,7 +4201,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
  */
         __pyx_v_steepness = __pyx_v_dirsnegdiff_i;
 
-        /* "rlscore/learner/_steepest_descent_mmc.pyx":216
+        /* "rlscore/learner/_steepest_descent_mmc.pyx":218
  *             if dirsnegdiff_i < steepness:
  *                 steepness = dirsnegdiff_i
  *                 steepestdir = i             # <<<<<<<<<<<<<<
@@ -4178,8 +4210,8 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
  */
         __pyx_v_steepestdir = __pyx_v_i;
 
-        /* "rlscore/learner/_steepest_descent_mmc.pyx":214
- *             if oldclazz == newclazz: continue
+        /* "rlscore/learner/_steepest_descent_mmc.pyx":216
+ *             if lock == 1: continue
  *             dirsnegdiff_i = minus_diagRx2[i] + Y_Schur_RY[i, oldclazz] + Y_Schur_RY[i, newclazz]
  *             if dirsnegdiff_i < steepness:             # <<<<<<<<<<<<<<
  *                 steepness = dirsnegdiff_i
@@ -4191,119 +4223,100 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
   }
   __pyx_L3:;
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":217
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":219
  *                 steepness = dirsnegdiff_i
  *                 steepestdir = i
  *     oldclazz = classvec[steepestdir]             # <<<<<<<<<<<<<<
  * 
  *     Y[steepestdir, oldclazz] = -1.
  */
-  __pyx_t_34 = __pyx_v_steepestdir;
+  __pyx_t_35 = __pyx_v_steepestdir;
   __pyx_t_3 = -1;
-  if (__pyx_t_34 < 0) {
-    __pyx_t_34 += __pyx_v_classvec.shape[0];
-    if (unlikely(__pyx_t_34 < 0)) __pyx_t_3 = 0;
-  } else if (unlikely(__pyx_t_34 >= __pyx_v_classvec.shape[0])) __pyx_t_3 = 0;
+  if (__pyx_t_35 < 0) {
+    __pyx_t_35 += __pyx_v_classvec.shape[0];
+    if (unlikely(__pyx_t_35 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_35 >= __pyx_v_classvec.shape[0])) __pyx_t_3 = 0;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 217, __pyx_L1_error)
+    __PYX_ERR(0, 219, __pyx_L1_error)
   }
-  __pyx_v_oldclazz = (*((int *) ( /* dim=0 */ (__pyx_v_classvec.data + __pyx_t_34 * __pyx_v_classvec.strides[0]) )));
+  __pyx_v_oldclazz = (*((int *) ( /* dim=0 */ (__pyx_v_classvec.data + __pyx_t_35 * __pyx_v_classvec.strides[0]) )));
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":219
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":221
  *     oldclazz = classvec[steepestdir]
  * 
  *     Y[steepestdir, oldclazz] = -1.             # <<<<<<<<<<<<<<
  *     Y[steepestdir, newclazz] = 1.
  *     classvec[steepestdir] = newclazz
  */
-  __pyx_t_35 = __pyx_v_steepestdir;
-  __pyx_t_36 = __pyx_v_oldclazz;
+  __pyx_t_36 = __pyx_v_steepestdir;
+  __pyx_t_37 = __pyx_v_oldclazz;
   __pyx_t_3 = -1;
-  if (__pyx_t_35 < 0) {
-    __pyx_t_35 += __pyx_v_Y.shape[0];
-    if (unlikely(__pyx_t_35 < 0)) __pyx_t_3 = 0;
-  } else if (unlikely(__pyx_t_35 >= __pyx_v_Y.shape[0])) __pyx_t_3 = 0;
   if (__pyx_t_36 < 0) {
-    __pyx_t_36 += __pyx_v_Y.shape[1];
-    if (unlikely(__pyx_t_36 < 0)) __pyx_t_3 = 1;
-  } else if (unlikely(__pyx_t_36 >= __pyx_v_Y.shape[1])) __pyx_t_3 = 1;
+    __pyx_t_36 += __pyx_v_Y.shape[0];
+    if (unlikely(__pyx_t_36 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_36 >= __pyx_v_Y.shape[0])) __pyx_t_3 = 0;
+  if (__pyx_t_37 < 0) {
+    __pyx_t_37 += __pyx_v_Y.shape[1];
+    if (unlikely(__pyx_t_37 < 0)) __pyx_t_3 = 1;
+  } else if (unlikely(__pyx_t_37 >= __pyx_v_Y.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 219, __pyx_L1_error)
+    __PYX_ERR(0, 221, __pyx_L1_error)
   }
-  *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_35 * __pyx_v_Y.strides[0]) ) + __pyx_t_36 * __pyx_v_Y.strides[1]) )) = -1.;
+  *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_36 * __pyx_v_Y.strides[0]) ) + __pyx_t_37 * __pyx_v_Y.strides[1]) )) = -1.;
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":220
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":222
  * 
  *     Y[steepestdir, oldclazz] = -1.
  *     Y[steepestdir, newclazz] = 1.             # <<<<<<<<<<<<<<
  *     classvec[steepestdir] = newclazz
  *     classcounts[oldclazz] -= 1
  */
-  __pyx_t_37 = __pyx_v_steepestdir;
-  __pyx_t_38 = __pyx_v_newclazz;
+  __pyx_t_38 = __pyx_v_steepestdir;
+  __pyx_t_39 = __pyx_v_newclazz;
   __pyx_t_3 = -1;
-  if (__pyx_t_37 < 0) {
-    __pyx_t_37 += __pyx_v_Y.shape[0];
-    if (unlikely(__pyx_t_37 < 0)) __pyx_t_3 = 0;
-  } else if (unlikely(__pyx_t_37 >= __pyx_v_Y.shape[0])) __pyx_t_3 = 0;
   if (__pyx_t_38 < 0) {
-    __pyx_t_38 += __pyx_v_Y.shape[1];
-    if (unlikely(__pyx_t_38 < 0)) __pyx_t_3 = 1;
-  } else if (unlikely(__pyx_t_38 >= __pyx_v_Y.shape[1])) __pyx_t_3 = 1;
+    __pyx_t_38 += __pyx_v_Y.shape[0];
+    if (unlikely(__pyx_t_38 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_38 >= __pyx_v_Y.shape[0])) __pyx_t_3 = 0;
+  if (__pyx_t_39 < 0) {
+    __pyx_t_39 += __pyx_v_Y.shape[1];
+    if (unlikely(__pyx_t_39 < 0)) __pyx_t_3 = 1;
+  } else if (unlikely(__pyx_t_39 >= __pyx_v_Y.shape[1])) __pyx_t_3 = 1;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 220, __pyx_L1_error)
+    __PYX_ERR(0, 222, __pyx_L1_error)
   }
-  *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_37 * __pyx_v_Y.strides[0]) ) + __pyx_t_38 * __pyx_v_Y.strides[1]) )) = 1.;
+  *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_38 * __pyx_v_Y.strides[0]) ) + __pyx_t_39 * __pyx_v_Y.strides[1]) )) = 1.;
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":221
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":223
  *     Y[steepestdir, oldclazz] = -1.
  *     Y[steepestdir, newclazz] = 1.
  *     classvec[steepestdir] = newclazz             # <<<<<<<<<<<<<<
  *     classcounts[oldclazz] -= 1
  *     classcounts[newclazz] += 1
  */
-  __pyx_t_39 = __pyx_v_steepestdir;
+  __pyx_t_40 = __pyx_v_steepestdir;
   __pyx_t_3 = -1;
-  if (__pyx_t_39 < 0) {
-    __pyx_t_39 += __pyx_v_classvec.shape[0];
-    if (unlikely(__pyx_t_39 < 0)) __pyx_t_3 = 0;
-  } else if (unlikely(__pyx_t_39 >= __pyx_v_classvec.shape[0])) __pyx_t_3 = 0;
+  if (__pyx_t_40 < 0) {
+    __pyx_t_40 += __pyx_v_classvec.shape[0];
+    if (unlikely(__pyx_t_40 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_40 >= __pyx_v_classvec.shape[0])) __pyx_t_3 = 0;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 221, __pyx_L1_error)
+    __PYX_ERR(0, 223, __pyx_L1_error)
   }
-  *((int *) ( /* dim=0 */ (__pyx_v_classvec.data + __pyx_t_39 * __pyx_v_classvec.strides[0]) )) = __pyx_v_newclazz;
+  *((int *) ( /* dim=0 */ (__pyx_v_classvec.data + __pyx_t_40 * __pyx_v_classvec.strides[0]) )) = __pyx_v_newclazz;
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":222
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":224
  *     Y[steepestdir, newclazz] = 1.
  *     classvec[steepestdir] = newclazz
  *     classcounts[oldclazz] -= 1             # <<<<<<<<<<<<<<
  *     classcounts[newclazz] += 1
  * 
  */
-  __pyx_t_40 = __pyx_v_oldclazz;
-  __pyx_t_3 = -1;
-  if (__pyx_t_40 < 0) {
-    __pyx_t_40 += __pyx_v_classcounts.shape[0];
-    if (unlikely(__pyx_t_40 < 0)) __pyx_t_3 = 0;
-  } else if (unlikely(__pyx_t_40 >= __pyx_v_classcounts.shape[0])) __pyx_t_3 = 0;
-  if (unlikely(__pyx_t_3 != -1)) {
-    __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 222, __pyx_L1_error)
-  }
-  *((int *) ( /* dim=0 */ (__pyx_v_classcounts.data + __pyx_t_40 * __pyx_v_classcounts.strides[0]) )) -= 1;
-
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":223
- *     classvec[steepestdir] = newclazz
- *     classcounts[oldclazz] -= 1
- *     classcounts[newclazz] += 1             # <<<<<<<<<<<<<<
- * 
- *     if use_full_caches == 0:
- */
-  __pyx_t_41 = __pyx_v_newclazz;
+  __pyx_t_41 = __pyx_v_oldclazz;
   __pyx_t_3 = -1;
   if (__pyx_t_41 < 0) {
     __pyx_t_41 += __pyx_v_classcounts.shape[0];
@@ -4311,11 +4324,30 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
   } else if (unlikely(__pyx_t_41 >= __pyx_v_classcounts.shape[0])) __pyx_t_3 = 0;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 223, __pyx_L1_error)
+    __PYX_ERR(0, 224, __pyx_L1_error)
   }
-  *((int *) ( /* dim=0 */ (__pyx_v_classcounts.data + __pyx_t_41 * __pyx_v_classcounts.strides[0]) )) += 1;
+  *((int *) ( /* dim=0 */ (__pyx_v_classcounts.data + __pyx_t_41 * __pyx_v_classcounts.strides[0]) )) -= 1;
 
   /* "rlscore/learner/_steepest_descent_mmc.pyx":225
+ *     classvec[steepestdir] = newclazz
+ *     classcounts[oldclazz] -= 1
+ *     classcounts[newclazz] += 1             # <<<<<<<<<<<<<<
+ * 
+ *     if use_full_caches == 0:
+ */
+  __pyx_t_42 = __pyx_v_newclazz;
+  __pyx_t_3 = -1;
+  if (__pyx_t_42 < 0) {
+    __pyx_t_42 += __pyx_v_classcounts.shape[0];
+    if (unlikely(__pyx_t_42 < 0)) __pyx_t_3 = 0;
+  } else if (unlikely(__pyx_t_42 >= __pyx_v_classcounts.shape[0])) __pyx_t_3 = 0;
+  if (unlikely(__pyx_t_3 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_3);
+    __PYX_ERR(0, 225, __pyx_L1_error)
+  }
+  *((int *) ( /* dim=0 */ (__pyx_v_classcounts.data + __pyx_t_42 * __pyx_v_classcounts.strides[0]) )) += 1;
+
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":227
  *     classcounts[newclazz] += 1
  * 
  *     if use_full_caches == 0:             # <<<<<<<<<<<<<<
@@ -4325,7 +4357,7 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
   __pyx_t_2 = ((__pyx_v_use_full_caches == 0) != 0);
   if (__pyx_t_2) {
 
-    /* "rlscore/learner/_steepest_descent_mmc.pyx":226
+    /* "rlscore/learner/_steepest_descent_mmc.pyx":228
  * 
  *     if use_full_caches == 0:
  *         for j in range(rank_R):             # <<<<<<<<<<<<<<
@@ -4336,96 +4368,96 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
       __pyx_v_j = __pyx_t_4;
 
-      /* "rlscore/learner/_steepest_descent_mmc.pyx":227
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":229
  *     if use_full_caches == 0:
  *         for j in range(rank_R):
  *             DVTY[j, newclazz] += sqrtRx2[steepestdir, j]             # <<<<<<<<<<<<<<
  *             DVTY[j, oldclazz] -= sqrtRx2[steepestdir, j]
  *     else:
  */
-      __pyx_t_42 = __pyx_v_steepestdir;
-      __pyx_t_43 = __pyx_v_j;
-      __pyx_t_5 = -1;
-      if (__pyx_t_42 < 0) {
-        __pyx_t_42 += __pyx_v_sqrtRx2.shape[0];
-        if (unlikely(__pyx_t_42 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_42 >= __pyx_v_sqrtRx2.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_43 < 0) {
-        __pyx_t_43 += __pyx_v_sqrtRx2.shape[1];
-        if (unlikely(__pyx_t_43 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_43 >= __pyx_v_sqrtRx2.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 227, __pyx_L1_error)
-      }
+      __pyx_t_43 = __pyx_v_steepestdir;
       __pyx_t_44 = __pyx_v_j;
-      __pyx_t_45 = __pyx_v_newclazz;
       __pyx_t_5 = -1;
+      if (__pyx_t_43 < 0) {
+        __pyx_t_43 += __pyx_v_sqrtRx2.shape[0];
+        if (unlikely(__pyx_t_43 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_43 >= __pyx_v_sqrtRx2.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_44 < 0) {
-        __pyx_t_44 += __pyx_v_DVTY.shape[0];
-        if (unlikely(__pyx_t_44 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_44 >= __pyx_v_DVTY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_45 < 0) {
-        __pyx_t_45 += __pyx_v_DVTY.shape[1];
-        if (unlikely(__pyx_t_45 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_45 >= __pyx_v_DVTY.shape[1])) __pyx_t_5 = 1;
+        __pyx_t_44 += __pyx_v_sqrtRx2.shape[1];
+        if (unlikely(__pyx_t_44 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_44 >= __pyx_v_sqrtRx2.shape[1])) __pyx_t_5 = 1;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 227, __pyx_L1_error)
+        __PYX_ERR(0, 229, __pyx_L1_error)
       }
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_DVTY.data + __pyx_t_44 * __pyx_v_DVTY.strides[0]) ) + __pyx_t_45 * __pyx_v_DVTY.strides[1]) )) += (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sqrtRx2.data + __pyx_t_42 * __pyx_v_sqrtRx2.strides[0]) ) + __pyx_t_43 * __pyx_v_sqrtRx2.strides[1]) )));
+      __pyx_t_45 = __pyx_v_j;
+      __pyx_t_46 = __pyx_v_newclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_45 < 0) {
+        __pyx_t_45 += __pyx_v_DVTY.shape[0];
+        if (unlikely(__pyx_t_45 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_45 >= __pyx_v_DVTY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_46 < 0) {
+        __pyx_t_46 += __pyx_v_DVTY.shape[1];
+        if (unlikely(__pyx_t_46 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_46 >= __pyx_v_DVTY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 229, __pyx_L1_error)
+      }
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_DVTY.data + __pyx_t_45 * __pyx_v_DVTY.strides[0]) ) + __pyx_t_46 * __pyx_v_DVTY.strides[1]) )) += (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sqrtRx2.data + __pyx_t_43 * __pyx_v_sqrtRx2.strides[0]) ) + __pyx_t_44 * __pyx_v_sqrtRx2.strides[1]) )));
 
-      /* "rlscore/learner/_steepest_descent_mmc.pyx":228
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":230
  *         for j in range(rank_R):
  *             DVTY[j, newclazz] += sqrtRx2[steepestdir, j]
  *             DVTY[j, oldclazz] -= sqrtRx2[steepestdir, j]             # <<<<<<<<<<<<<<
  *     else:
  *         Y_Schur_RY[steepestdir, oldclazz] *= -1
  */
-      __pyx_t_46 = __pyx_v_steepestdir;
-      __pyx_t_47 = __pyx_v_j;
-      __pyx_t_5 = -1;
-      if (__pyx_t_46 < 0) {
-        __pyx_t_46 += __pyx_v_sqrtRx2.shape[0];
-        if (unlikely(__pyx_t_46 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_46 >= __pyx_v_sqrtRx2.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_47 < 0) {
-        __pyx_t_47 += __pyx_v_sqrtRx2.shape[1];
-        if (unlikely(__pyx_t_47 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_47 >= __pyx_v_sqrtRx2.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 228, __pyx_L1_error)
-      }
+      __pyx_t_47 = __pyx_v_steepestdir;
       __pyx_t_48 = __pyx_v_j;
-      __pyx_t_49 = __pyx_v_oldclazz;
       __pyx_t_5 = -1;
+      if (__pyx_t_47 < 0) {
+        __pyx_t_47 += __pyx_v_sqrtRx2.shape[0];
+        if (unlikely(__pyx_t_47 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_47 >= __pyx_v_sqrtRx2.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_48 < 0) {
-        __pyx_t_48 += __pyx_v_DVTY.shape[0];
-        if (unlikely(__pyx_t_48 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_48 >= __pyx_v_DVTY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_49 < 0) {
-        __pyx_t_49 += __pyx_v_DVTY.shape[1];
-        if (unlikely(__pyx_t_49 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_49 >= __pyx_v_DVTY.shape[1])) __pyx_t_5 = 1;
+        __pyx_t_48 += __pyx_v_sqrtRx2.shape[1];
+        if (unlikely(__pyx_t_48 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_48 >= __pyx_v_sqrtRx2.shape[1])) __pyx_t_5 = 1;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 228, __pyx_L1_error)
+        __PYX_ERR(0, 230, __pyx_L1_error)
       }
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_DVTY.data + __pyx_t_48 * __pyx_v_DVTY.strides[0]) ) + __pyx_t_49 * __pyx_v_DVTY.strides[1]) )) -= (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sqrtRx2.data + __pyx_t_46 * __pyx_v_sqrtRx2.strides[0]) ) + __pyx_t_47 * __pyx_v_sqrtRx2.strides[1]) )));
+      __pyx_t_49 = __pyx_v_j;
+      __pyx_t_50 = __pyx_v_oldclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_49 < 0) {
+        __pyx_t_49 += __pyx_v_DVTY.shape[0];
+        if (unlikely(__pyx_t_49 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_49 >= __pyx_v_DVTY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_50 < 0) {
+        __pyx_t_50 += __pyx_v_DVTY.shape[1];
+        if (unlikely(__pyx_t_50 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_50 >= __pyx_v_DVTY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 230, __pyx_L1_error)
+      }
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_DVTY.data + __pyx_t_49 * __pyx_v_DVTY.strides[0]) ) + __pyx_t_50 * __pyx_v_DVTY.strides[1]) )) -= (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sqrtRx2.data + __pyx_t_47 * __pyx_v_sqrtRx2.strides[0]) ) + __pyx_t_48 * __pyx_v_sqrtRx2.strides[1]) )));
     }
 
-    /* "rlscore/learner/_steepest_descent_mmc.pyx":225
+    /* "rlscore/learner/_steepest_descent_mmc.pyx":227
  *     classcounts[newclazz] += 1
  * 
  *     if use_full_caches == 0:             # <<<<<<<<<<<<<<
  *         for j in range(rank_R):
  *             DVTY[j, newclazz] += sqrtRx2[steepestdir, j]
  */
-    goto __pyx_L19;
+    goto __pyx_L20;
   }
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":230
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":232
  *             DVTY[j, oldclazz] -= sqrtRx2[steepestdir, j]
  *     else:
  *         Y_Schur_RY[steepestdir, oldclazz] *= -1             # <<<<<<<<<<<<<<
@@ -4433,48 +4465,48 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
  *         for i in range(size):
  */
   /*else*/ {
-    __pyx_t_50 = __pyx_v_steepestdir;
-    __pyx_t_51 = __pyx_v_oldclazz;
+    __pyx_t_51 = __pyx_v_steepestdir;
+    __pyx_t_52 = __pyx_v_oldclazz;
     __pyx_t_3 = -1;
-    if (__pyx_t_50 < 0) {
-      __pyx_t_50 += __pyx_v_Y_Schur_RY.shape[0];
-      if (unlikely(__pyx_t_50 < 0)) __pyx_t_3 = 0;
-    } else if (unlikely(__pyx_t_50 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_3 = 0;
     if (__pyx_t_51 < 0) {
-      __pyx_t_51 += __pyx_v_Y_Schur_RY.shape[1];
-      if (unlikely(__pyx_t_51 < 0)) __pyx_t_3 = 1;
-    } else if (unlikely(__pyx_t_51 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_3 = 1;
+      __pyx_t_51 += __pyx_v_Y_Schur_RY.shape[0];
+      if (unlikely(__pyx_t_51 < 0)) __pyx_t_3 = 0;
+    } else if (unlikely(__pyx_t_51 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_3 = 0;
+    if (__pyx_t_52 < 0) {
+      __pyx_t_52 += __pyx_v_Y_Schur_RY.shape[1];
+      if (unlikely(__pyx_t_52 < 0)) __pyx_t_3 = 1;
+    } else if (unlikely(__pyx_t_52 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_3 = 1;
     if (unlikely(__pyx_t_3 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_3);
-      __PYX_ERR(0, 230, __pyx_L1_error)
+      __PYX_ERR(0, 232, __pyx_L1_error)
     }
-    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_50 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_51 * __pyx_v_Y_Schur_RY.strides[1]) )) *= -1.0;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_51 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_52 * __pyx_v_Y_Schur_RY.strides[1]) )) *= -1.0;
 
-    /* "rlscore/learner/_steepest_descent_mmc.pyx":231
+    /* "rlscore/learner/_steepest_descent_mmc.pyx":233
  *     else:
  *         Y_Schur_RY[steepestdir, oldclazz] *= -1
  *         Y_Schur_RY[steepestdir, newclazz] *= -1             # <<<<<<<<<<<<<<
  *         for i in range(size):
  *             R_is_x2 = 2 * R[i, steepestdir]
  */
-    __pyx_t_52 = __pyx_v_steepestdir;
-    __pyx_t_53 = __pyx_v_newclazz;
+    __pyx_t_53 = __pyx_v_steepestdir;
+    __pyx_t_54 = __pyx_v_newclazz;
     __pyx_t_3 = -1;
-    if (__pyx_t_52 < 0) {
-      __pyx_t_52 += __pyx_v_Y_Schur_RY.shape[0];
-      if (unlikely(__pyx_t_52 < 0)) __pyx_t_3 = 0;
-    } else if (unlikely(__pyx_t_52 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_3 = 0;
     if (__pyx_t_53 < 0) {
-      __pyx_t_53 += __pyx_v_Y_Schur_RY.shape[1];
-      if (unlikely(__pyx_t_53 < 0)) __pyx_t_3 = 1;
-    } else if (unlikely(__pyx_t_53 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_3 = 1;
+      __pyx_t_53 += __pyx_v_Y_Schur_RY.shape[0];
+      if (unlikely(__pyx_t_53 < 0)) __pyx_t_3 = 0;
+    } else if (unlikely(__pyx_t_53 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_3 = 0;
+    if (__pyx_t_54 < 0) {
+      __pyx_t_54 += __pyx_v_Y_Schur_RY.shape[1];
+      if (unlikely(__pyx_t_54 < 0)) __pyx_t_3 = 1;
+    } else if (unlikely(__pyx_t_54 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_3 = 1;
     if (unlikely(__pyx_t_3 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_3);
-      __PYX_ERR(0, 231, __pyx_L1_error)
+      __PYX_ERR(0, 233, __pyx_L1_error)
     }
-    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_52 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_53 * __pyx_v_Y_Schur_RY.strides[1]) )) *= -1.0;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_53 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_54 * __pyx_v_Y_Schur_RY.strides[1]) )) *= -1.0;
 
-    /* "rlscore/learner/_steepest_descent_mmc.pyx":232
+    /* "rlscore/learner/_steepest_descent_mmc.pyx":234
  *         Y_Schur_RY[steepestdir, oldclazz] *= -1
  *         Y_Schur_RY[steepestdir, newclazz] *= -1
  *         for i in range(size):             # <<<<<<<<<<<<<<
@@ -4485,130 +4517,130 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
       __pyx_v_i = __pyx_t_4;
 
-      /* "rlscore/learner/_steepest_descent_mmc.pyx":233
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":235
  *         Y_Schur_RY[steepestdir, newclazz] *= -1
  *         for i in range(size):
  *             R_is_x2 = 2 * R[i, steepestdir]             # <<<<<<<<<<<<<<
  * 
  *             #Space efficient variation
  */
-      __pyx_t_54 = __pyx_v_i;
-      __pyx_t_55 = __pyx_v_steepestdir;
+      __pyx_t_55 = __pyx_v_i;
+      __pyx_t_56 = __pyx_v_steepestdir;
       __pyx_t_5 = -1;
-      if (__pyx_t_54 < 0) {
-        __pyx_t_54 += __pyx_v_R.shape[0];
-        if (unlikely(__pyx_t_54 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_54 >= __pyx_v_R.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_55 < 0) {
-        __pyx_t_55 += __pyx_v_R.shape[1];
-        if (unlikely(__pyx_t_55 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_55 >= __pyx_v_R.shape[1])) __pyx_t_5 = 1;
+        __pyx_t_55 += __pyx_v_R.shape[0];
+        if (unlikely(__pyx_t_55 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_55 >= __pyx_v_R.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_56 < 0) {
+        __pyx_t_56 += __pyx_v_R.shape[1];
+        if (unlikely(__pyx_t_56 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_56 >= __pyx_v_R.shape[1])) __pyx_t_5 = 1;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 233, __pyx_L1_error)
+        __PYX_ERR(0, 235, __pyx_L1_error)
       }
-      __pyx_v_R_is_x2 = (2.0 * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_R.data + __pyx_t_54 * __pyx_v_R.strides[0]) ) + __pyx_t_55 * __pyx_v_R.strides[1]) ))));
+      __pyx_v_R_is_x2 = (2.0 * (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_R.data + __pyx_t_55 * __pyx_v_R.strides[0]) ) + __pyx_t_56 * __pyx_v_R.strides[1]) ))));
 
-      /* "rlscore/learner/_steepest_descent_mmc.pyx":244
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":246
  *             #RY[i, newclazz] += R_is_x2
  * 
  *             Y_Schur_RY[i, oldclazz] -= Y[i, oldclazz] * R_is_x2             # <<<<<<<<<<<<<<
  *             Y_Schur_RY[i, newclazz] += Y[i, newclazz] * R_is_x2
  *     return steepestdir, oldclazz
  */
-      __pyx_t_56 = __pyx_v_i;
-      __pyx_t_57 = __pyx_v_oldclazz;
+      __pyx_t_57 = __pyx_v_i;
+      __pyx_t_58 = __pyx_v_oldclazz;
       __pyx_t_5 = -1;
-      if (__pyx_t_56 < 0) {
-        __pyx_t_56 += __pyx_v_Y.shape[0];
-        if (unlikely(__pyx_t_56 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_56 >= __pyx_v_Y.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_57 < 0) {
-        __pyx_t_57 += __pyx_v_Y.shape[1];
-        if (unlikely(__pyx_t_57 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_57 >= __pyx_v_Y.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 244, __pyx_L1_error)
-      }
-      __pyx_t_58 = __pyx_v_i;
-      __pyx_t_59 = __pyx_v_oldclazz;
-      __pyx_t_5 = -1;
+        __pyx_t_57 += __pyx_v_Y.shape[0];
+        if (unlikely(__pyx_t_57 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_57 >= __pyx_v_Y.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_58 < 0) {
-        __pyx_t_58 += __pyx_v_Y_Schur_RY.shape[0];
-        if (unlikely(__pyx_t_58 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_58 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_59 < 0) {
-        __pyx_t_59 += __pyx_v_Y_Schur_RY.shape[1];
-        if (unlikely(__pyx_t_59 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_59 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+        __pyx_t_58 += __pyx_v_Y.shape[1];
+        if (unlikely(__pyx_t_58 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_58 >= __pyx_v_Y.shape[1])) __pyx_t_5 = 1;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 244, __pyx_L1_error)
+        __PYX_ERR(0, 246, __pyx_L1_error)
       }
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_58 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_59 * __pyx_v_Y_Schur_RY.strides[1]) )) -= ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_56 * __pyx_v_Y.strides[0]) ) + __pyx_t_57 * __pyx_v_Y.strides[1]) ))) * __pyx_v_R_is_x2);
+      __pyx_t_59 = __pyx_v_i;
+      __pyx_t_60 = __pyx_v_oldclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_59 < 0) {
+        __pyx_t_59 += __pyx_v_Y_Schur_RY.shape[0];
+        if (unlikely(__pyx_t_59 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_59 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_60 < 0) {
+        __pyx_t_60 += __pyx_v_Y_Schur_RY.shape[1];
+        if (unlikely(__pyx_t_60 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_60 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 246, __pyx_L1_error)
+      }
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_59 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_60 * __pyx_v_Y_Schur_RY.strides[1]) )) -= ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_57 * __pyx_v_Y.strides[0]) ) + __pyx_t_58 * __pyx_v_Y.strides[1]) ))) * __pyx_v_R_is_x2);
 
-      /* "rlscore/learner/_steepest_descent_mmc.pyx":245
+      /* "rlscore/learner/_steepest_descent_mmc.pyx":247
  * 
  *             Y_Schur_RY[i, oldclazz] -= Y[i, oldclazz] * R_is_x2
  *             Y_Schur_RY[i, newclazz] += Y[i, newclazz] * R_is_x2             # <<<<<<<<<<<<<<
  *     return steepestdir, oldclazz
  */
-      __pyx_t_60 = __pyx_v_i;
-      __pyx_t_61 = __pyx_v_newclazz;
+      __pyx_t_61 = __pyx_v_i;
+      __pyx_t_62 = __pyx_v_newclazz;
       __pyx_t_5 = -1;
-      if (__pyx_t_60 < 0) {
-        __pyx_t_60 += __pyx_v_Y.shape[0];
-        if (unlikely(__pyx_t_60 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_60 >= __pyx_v_Y.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_61 < 0) {
-        __pyx_t_61 += __pyx_v_Y.shape[1];
-        if (unlikely(__pyx_t_61 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_61 >= __pyx_v_Y.shape[1])) __pyx_t_5 = 1;
-      if (unlikely(__pyx_t_5 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 245, __pyx_L1_error)
-      }
-      __pyx_t_62 = __pyx_v_i;
-      __pyx_t_63 = __pyx_v_newclazz;
-      __pyx_t_5 = -1;
+        __pyx_t_61 += __pyx_v_Y.shape[0];
+        if (unlikely(__pyx_t_61 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_61 >= __pyx_v_Y.shape[0])) __pyx_t_5 = 0;
       if (__pyx_t_62 < 0) {
-        __pyx_t_62 += __pyx_v_Y_Schur_RY.shape[0];
-        if (unlikely(__pyx_t_62 < 0)) __pyx_t_5 = 0;
-      } else if (unlikely(__pyx_t_62 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
-      if (__pyx_t_63 < 0) {
-        __pyx_t_63 += __pyx_v_Y_Schur_RY.shape[1];
-        if (unlikely(__pyx_t_63 < 0)) __pyx_t_5 = 1;
-      } else if (unlikely(__pyx_t_63 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+        __pyx_t_62 += __pyx_v_Y.shape[1];
+        if (unlikely(__pyx_t_62 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_62 >= __pyx_v_Y.shape[1])) __pyx_t_5 = 1;
       if (unlikely(__pyx_t_5 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_5);
-        __PYX_ERR(0, 245, __pyx_L1_error)
+        __PYX_ERR(0, 247, __pyx_L1_error)
       }
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_62 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_63 * __pyx_v_Y_Schur_RY.strides[1]) )) += ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_60 * __pyx_v_Y.strides[0]) ) + __pyx_t_61 * __pyx_v_Y.strides[1]) ))) * __pyx_v_R_is_x2);
+      __pyx_t_63 = __pyx_v_i;
+      __pyx_t_64 = __pyx_v_newclazz;
+      __pyx_t_5 = -1;
+      if (__pyx_t_63 < 0) {
+        __pyx_t_63 += __pyx_v_Y_Schur_RY.shape[0];
+        if (unlikely(__pyx_t_63 < 0)) __pyx_t_5 = 0;
+      } else if (unlikely(__pyx_t_63 >= __pyx_v_Y_Schur_RY.shape[0])) __pyx_t_5 = 0;
+      if (__pyx_t_64 < 0) {
+        __pyx_t_64 += __pyx_v_Y_Schur_RY.shape[1];
+        if (unlikely(__pyx_t_64 < 0)) __pyx_t_5 = 1;
+      } else if (unlikely(__pyx_t_64 >= __pyx_v_Y_Schur_RY.shape[1])) __pyx_t_5 = 1;
+      if (unlikely(__pyx_t_5 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_5);
+        __PYX_ERR(0, 247, __pyx_L1_error)
+      }
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y_Schur_RY.data + __pyx_t_63 * __pyx_v_Y_Schur_RY.strides[0]) ) + __pyx_t_64 * __pyx_v_Y_Schur_RY.strides[1]) )) += ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Y.data + __pyx_t_61 * __pyx_v_Y.strides[0]) ) + __pyx_t_62 * __pyx_v_Y.strides[1]) ))) * __pyx_v_R_is_x2);
     }
   }
-  __pyx_L19:;
+  __pyx_L20:;
 
-  /* "rlscore/learner/_steepest_descent_mmc.pyx":246
+  /* "rlscore/learner/_steepest_descent_mmc.pyx":248
  *             Y_Schur_RY[i, oldclazz] -= Y[i, oldclazz] * R_is_x2
  *             Y_Schur_RY[i, newclazz] += Y[i, newclazz] * R_is_x2
  *     return steepestdir, oldclazz             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_64 = __Pyx_PyInt_From_int(__pyx_v_steepestdir); if (unlikely(!__pyx_t_64)) __PYX_ERR(0, 246, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_64);
-  __pyx_t_65 = __Pyx_PyInt_From_int(__pyx_v_oldclazz); if (unlikely(!__pyx_t_65)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_65 = __Pyx_PyInt_From_int(__pyx_v_steepestdir); if (unlikely(!__pyx_t_65)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_65);
-  __pyx_t_66 = PyTuple_New(2); if (unlikely(!__pyx_t_66)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_66 = __Pyx_PyInt_From_int(__pyx_v_oldclazz); if (unlikely(!__pyx_t_66)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_66);
-  __Pyx_GIVEREF(__pyx_t_64);
-  PyTuple_SET_ITEM(__pyx_t_66, 0, __pyx_t_64);
+  __pyx_t_67 = PyTuple_New(2); if (unlikely(!__pyx_t_67)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_67);
   __Pyx_GIVEREF(__pyx_t_65);
-  PyTuple_SET_ITEM(__pyx_t_66, 1, __pyx_t_65);
-  __pyx_t_64 = 0;
+  PyTuple_SET_ITEM(__pyx_t_67, 0, __pyx_t_65);
+  __Pyx_GIVEREF(__pyx_t_66);
+  PyTuple_SET_ITEM(__pyx_t_67, 1, __pyx_t_66);
   __pyx_t_65 = 0;
-  __pyx_r = __pyx_t_66;
   __pyx_t_66 = 0;
+  __pyx_r = __pyx_t_67;
+  __pyx_t_67 = 0;
   goto __pyx_L0;
 
   /* "rlscore/learner/_steepest_descent_mmc.pyx":167
@@ -4621,9 +4653,9 @@ static PyObject *__pyx_pf_7rlscore_7learner_21_steepest_descent_mmc_6claim_a_poi
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_64);
   __Pyx_XDECREF(__pyx_t_65);
   __Pyx_XDECREF(__pyx_t_66);
+  __Pyx_XDECREF(__pyx_t_67);
   __Pyx_AddTraceback("rlscore.learner._steepest_descent_mmc.claim_a_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
