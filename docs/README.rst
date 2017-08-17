@@ -10,9 +10,9 @@ RLScore - regularized least-squares machine learning algorithms package.
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
 :Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
-:Version:         0.7
+:Version:         0.8
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            September 19. 2016
+:Date:            August 17. 2017
 
 .. contents::
 
@@ -85,7 +85,7 @@ Software dependencies
 =====================
 
 RLScore is written in Python and thus requires a working
-installation of Python 2.7.x. The package is also dependent on
+installation of Python 3.x or Python 2.7.x. The package is also dependent on
 the `NumPy <http://numpy.scipy.org/>`_ package for matrix
 operations, and `SciPy <http://www.scipy.org/>`_ package for sparse
 matrix implementations.
@@ -100,6 +100,10 @@ RLScore is described in the following article:
 
 History
 =======
+
+Version 0.8 (2017.08.17)
+------------------------
+- Compatible with Python 3
 
 Version 0.7 (2016.09.19)
 ------------------------
