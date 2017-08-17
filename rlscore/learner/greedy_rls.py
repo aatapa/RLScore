@@ -478,9 +478,9 @@ class DefaultCallback(object):
     
     
     def callback(self, learner):
-        print()
-        print('LOOCV mean squared error', learner.bestlooperf)
-        print('The indices of selected features', learner.selected)
+        print('')
+        print('LOOCV mean squared error %f' %learner.bestlooperf)
+        print('The indices of selected features %s' %str(learner.selected))
         if not self.test_features is None:
             mod = learner.predictor
             tpreds = mod.predict(self.test_features)
@@ -489,7 +489,7 @@ class DefaultCallback(object):
             else:
                 testdiff = self.test_labels - tpreds
                 test_perf = np.mean(np.multiply(testdiff, testdiff))
-            print('Test performance', test_perf)
+            print('Test performance %f' %test_perf)
     
     def finished(self, learner):
         pass
