@@ -80,7 +80,7 @@ class KernelPairwisePredictor(object):
     def __init__(self, A, row_inds_K1training = None, row_inds_K2training = None, weights = None):
         self.A = A
         self.row_inds_K1training, self.row_inds_K2training = row_inds_K1training, row_inds_K2training
-        if not weights == None: self.weights = weights
+        if weights is not None: self.weights = weights
     
     
     def predict(self, K1pred, K2pred, row_inds_K1pred = None, row_inds_K2pred = None):
@@ -103,7 +103,7 @@ class KernelPairwisePredictor(object):
             predictions, either ordered according to the supplied row indices, or if no such are supplied by default
             prediction for (K1[i], K2[j]) maps to P[i + j*n_samples1].
         """
-        def inner_predict(K1pred, K2pred, row_inds_K1pred = None, row_inds_K2pred = None):
+        def inner_predict(K1pred, K2pred, row_inds_K1training, row_inds_K2training, row_inds_K1pred = None, row_inds_K2pred = None):
             if len(K1pred.shape) == 1:
                 K1pred = K1pred.reshape(1, K1pred.shape[0])
             if len(K2pred.shape) == 1:
@@ -117,8 +117,8 @@ class KernelPairwisePredictor(object):
                     K1pred,
                     row_inds_K2pred,
                     row_inds_K1pred,
-                    self.row_inds_K2training,
-                    self.row_inds_K1training)
+                    row_inds_K2training,
+                    row_inds_K1training)
             else:
                 P = sampled_kronecker_products.sampled_vec_trick(
                     self.A,
@@ -126,8 +126,8 @@ class KernelPairwisePredictor(object):
                     K1pred,
                     None,
                     None,
-                    self.row_inds_K2training,
-                    self.row_inds_K1training)
+                    row_inds_K2training,
+                    row_inds_K1training)
                 
                 #P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order = 'F')
             P = np.array(P)
@@ -138,12 +138,19 @@ class KernelPairwisePredictor(object):
             for i in range(len(K1pred)):
                 K1i = K1pred[i]
                 K2i = K2pred[i]
-                Pi = inner_predict(K1i, K2i, row_inds_K1pred, row_inds_K2pred)
-                if P == None: P = self.weights[i] * Pi
+                inds1training = self.row_inds_K1training[i]
+                inds2training = self.row_inds_K2training[i]
+                if row_inds_K1pred is not None:
+                    inds1pred = row_inds_K1pred[i]
+                    inds2pred = row_inds_K2pred[i]
+                    Pi = inner_predict(K1i, K2i, inds1training, inds2training, inds1pred, inds2pred)
+                else:
+                    Pi = inner_predict(K1i, K2i, inds1training, inds2training, None, None)
+                if P is None: P = self.weights[i] * Pi
                 else: P = P + self.weights[i] * Pi
             return P
         else:
-            return inner_predict(K1pred, K2pred, row_inds_K1pred, row_inds_K2pred)
+            return inner_predict(K1pred, K2pred, self.row_inds_K1training, self.row_inds_K2training, row_inds_K1pred, row_inds_K2pred)
 
 
 class LinearPairwisePredictor(object):

@@ -140,7 +140,9 @@ class CGKronRLS(PairwisePredictorInterface):
                 for i in range(len(K1)):
                     K1i = K1[i]
                     K2i = K2[i]
-                    vsum += weights[i] * sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
+                    inds2 = self.input2_inds[i]
+                    inds1 = self.input1_inds[i]
+                    vsum += weights[i] * sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, inds2, inds1, inds2, inds1)
                 return vsum
             
             def mvr(v):
@@ -165,11 +167,11 @@ class CGKronRLS(PairwisePredictorInterface):
             if isinstance(K1, (list, tuple)):
                 if 'weights' in kwargs: weights = kwargs['weights']
                 else: weights = np.ones((len(K1)))
-                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
+                G = LinearOperator((len(self.input1_inds[0]), len(self.input1_inds[0])), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
             else:
                 weights = None
                 G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
-            self. A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
+            self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, weights)
         else:
             X1 = kwargs['X1']
