@@ -55,6 +55,8 @@ def sampled_vec_trick(v, M, N, row_inds_M = None, row_inds_N = None, col_inds_M 
         #Not sure why the next row is necessary
         #row_inds_N, row_inds_M = np.array(row_inds_N, dtype = np.int32), np.array(row_inds_M, dtype = np.int32)
     else:
+        row_inds_N = np.atleast_1d(np.squeeze(np.asarray(row_inds_N, dtype=np.int32)))
+        row_inds_M = np.atleast_1d(np.squeeze(np.asarray(row_inds_M, dtype=np.int32)))
         u_len = len(row_inds_N)
         assert len(row_inds_N) == len(row_inds_M)
         assert np.min(row_inds_N) >= 0
@@ -67,6 +69,8 @@ def sampled_vec_trick(v, M, N, row_inds_M = None, row_inds_N = None, col_inds_M 
         #Not sure why the next row is necessary
         #col_inds_N, col_inds_M = np.array(col_inds_N, dtype = np.int32), np.array(col_inds_M, dtype = np.int32)
     else:
+        col_inds_N = np.atleast_1d(np.squeeze(np.asarray(col_inds_N, dtype=np.int32)))
+        col_inds_M = np.atleast_1d(np.squeeze(np.asarray(col_inds_M, dtype=np.int32)))
         v_len = len(col_inds_N)
         assert len(col_inds_N) == len(col_inds_M)
         assert len(col_inds_N) == v.shape[0]
