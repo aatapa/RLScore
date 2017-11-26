@@ -221,12 +221,20 @@ class Test(unittest.TestCase):
         #Train polynomial kernel Kronecker RLS
         params = {}
         params["regparam"] = regparam
-        params["K1"] = [K_train1, K_train1, K_train2]
-        params["K2"] = [K_train1, K_train2, K_train2]
-        params["weights"] = [1., 2., 1.]
+        #params["K1"] = [K_train1, K_train1, K_train2]
+        #params["K2"] = [K_train1, K_train2, K_train2]
+        #params["weights"] = [1., 2., 1.]
+        params["pko"] = pairwise_kernel_operator.PairwiseKernelOperator(
+                                [K_train1, K_train1, K_train2],
+                                [K_train1, K_train2, K_train2],
+                                [label_row_inds, label_row_inds, label_col_inds],
+                                [label_row_inds, label_col_inds, label_col_inds],
+                                [label_row_inds, label_row_inds, label_col_inds],
+                                [label_row_inds, label_col_inds, label_col_inds],
+                                [1., 2., 1.])
         params["Y"] = Y_train_known_outputs
-        params["label_row_inds"] = [label_row_inds, label_row_inds, label_col_inds]
-        params["label_col_inds"] = [label_row_inds, label_col_inds, label_col_inds]
+        #params["label_row_inds"] = [label_row_inds, label_row_inds, label_col_inds]
+        #params["label_col_inds"] = [label_row_inds, label_col_inds, label_col_inds]
         class KernelCallback():
             def __init__(self):
                 self.round = 0
@@ -246,7 +254,7 @@ class Test(unittest.TestCase):
                                 [all_test_label_row_inds, all_test_label_col_inds, all_test_label_col_inds],
                                 [label_row_inds, label_row_inds, label_col_inds],
                                 [label_row_inds, label_col_inds, label_col_inds],
-                                params["weights"])
+                                [1., 2., 1.])
         #poly_kernel_kron_testpred = poly_kernel_kron_learner.predict(pko = pko)
         poly_kernel_kron_testpred = poly_kernel_kron_learner.predict([K_test1, K_test1, K_test2], [K_test1, K_test2, K_test2], [all_test_label_row_inds, all_test_label_row_inds, all_test_label_col_inds], [all_test_label_row_inds, all_test_label_col_inds, all_test_label_col_inds])
         #print(poly_kernel_kron_testpred, 'Polynomial kernel via CGKronRLS')

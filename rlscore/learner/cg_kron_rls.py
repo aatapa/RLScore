@@ -105,8 +105,6 @@ class CGKronRLS(PairwisePredictorInterface):
     
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
-        self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
-        self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
         Y = array_tools.as_2d_array(Y)
         self.Y = np.mat(Y)
         self.trained = False
@@ -114,6 +112,7 @@ class CGKronRLS(PairwisePredictorInterface):
             self.regparam = kwargs["regparam"]
         else:
             self.regparam = 0.
+        regparam = self.regparam
         if CALLBACK_FUNCTION in kwargs:
             self.callbackfun = kwargs[CALLBACK_FUNCTION]
         else:
@@ -123,15 +122,18 @@ class CGKronRLS(PairwisePredictorInterface):
         else:
             self.compute_risk = False
         
-        regparam = self.regparam
-        if 'K1' in kwargs:
-            
-            K1 = kwargs['K1']
-            K2 = kwargs['K2']
-            if 'weights' in kwargs: weights = kwargs['weights']
-            else: weights = None
-            pko = pairwise_kernel_operator.PairwiseKernelOperator(K1, K2, self.input1_inds, self.input2_inds, self.input1_inds, self.input2_inds, weights)
-            
+        if 'K1' in kwargs or 'pko' in kwargs:
+            if 'pko' in kwargs:
+                pko = kwargs['pko']
+            else:
+                self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
+                self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
+                K1 = kwargs['K1']
+                K2 = kwargs['K2']
+                if 'weights' in kwargs: weights = kwargs['weights']
+                else: weights = None
+                pko = pairwise_kernel_operator.PairwiseKernelOperator(K1, K2, self.input1_inds, self.input2_inds, self.input1_inds, self.input2_inds, weights)
+            self.pko = pko
             if 'maxiter' in kwargs: maxiter = int(kwargs['maxiter'])
             else: maxiter = None
             
@@ -166,19 +168,24 @@ class CGKronRLS(PairwisePredictorInterface):
                 else:
                     self.A = v
                 if not self.callbackfun is None:
-                    self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
+                    #self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
+                    self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
                     self.callbackfun.callback(self)
             
-            if isinstance(K1, (list, tuple)):
+            '''if isinstance(K1, (list, tuple)):
                 if 'weights' in kwargs: weights = kwargs['weights']
                 else: weights = np.ones((len(K1)))
                 G = LinearOperator((len(self.input1_inds[0]), len(self.input1_inds[0])), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
             else:
                 weights = None
-                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)
+                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)'''
+            G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
-            self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, weights)
+            #self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, weights)
+            self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
         else:
+            self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
+            self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
             X1 = kwargs['X1']
             X2 = kwargs['X2']
             self.X1, self.X2 = X1, X2
