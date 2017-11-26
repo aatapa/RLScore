@@ -34,7 +34,8 @@ class PairwiseKernelOperator(object):
         self.K1, self.K2 = K1, K2
         self.row_inds_K1, self.row_inds_K2 = row_inds_K1, row_inds_K2
         self.col_inds_K1, self.col_inds_K2 = col_inds_K1, col_inds_K2
-        if weights is not None: self.weights = weights
+        #if weights is not None: 
+        self.weights = weights
     
     def mv(self, v):
         
