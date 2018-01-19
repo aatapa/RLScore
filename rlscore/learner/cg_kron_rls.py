@@ -47,32 +47,29 @@ class CGKronRLS(PairwisePredictorInterface):
 
     Parameters
     ----------
-    X1 : {array-like}, shape = [n_samples1, n_features1] 
-        Data matrix 1 (for linear KronRLS)
-        
-    X2 : {array-like}, shape = [n_samples2, n_features2] 
-        Data matrix 2 (for linear KronRLS)
-        
-    K1 : {array-like, list of array-likes}, shape = [n_samples1, n_samples1]
-        Kernel matrix 1 (for kernel KronRLS)
-
-    K2 : {array-like, list of array-likes}, shape = [n_samples1, n_samples1]
-        Kernel matrix 2 (for kernel KronRLS)
-        
-    weights : {list, tuple, array-like}, shape = [n_kernels], optional
-        weights used by multiple pairwise kernel predictors
+    pko : {rlscore.utilities.PairwiseKernelOperator}, shape = [n_samples1, n_samples1], alternative to X1, X2, etc.
+        Linear operator that determines the type of the Kronecker product kernel (for kernel CGKronRLS)..
     
     Y : {array-like}, shape = [n_train_pairs]
         Training set labels. 
+        
+    regparam : float, optional
+        regularization parameter, regparam > 0 (default=1.0)
+    
+    X1 : {array-like}, shape = [n_samples1, n_features1]
+        Data matrix 1 (for primal CGKronRLS)
+        
+    X2 : {array-like}, shape = [n_samples2, n_features2] 
+        Data matrix 2 (for primal CGKronRLS)
         
     label_row_inds : {array-like, list of equal length array-likes}, shape = [n_train_pairs]
         row indices from X1, corresponding to labels in Y
     
     label_col_inds : {array-like, list of equal length array-likes}, shape = [n_train_pairs]
         row indices from X2, corresponding to labels in Y
-        
-    regparam : float, optional
-        regularization parameter, regparam > 0 (default=1.0)
+    
+    weights : {list, tuple, array-like}, shape = [n_kernels], optional
+        weights used by multiple pairwise kernel predictors
     
     maxiter : int, optional
         maximum number of iterations (default: no upper limit)
@@ -104,9 +101,8 @@ class CGKronRLS(PairwisePredictorInterface):
     
     
     def __init__(self, **kwargs):
-        Y = kwargs["Y"]
-        Y = array_tools.as_2d_array(Y)
-        self.Y = np.mat(Y)
+        self.Y = kwargs["Y"]
+        #self.Y = array_tools.as_2d_array(Y)
         self.trained = False
         if "regparam" in kwargs:
             self.regparam = kwargs["regparam"]
@@ -140,50 +136,31 @@ class CGKronRLS(PairwisePredictorInterface):
             Y = np.array(self.Y).ravel(order = 'F')
             self.bestloss = float("inf")
             def mv(v):
-                #return sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds) + regparam * v
-                return pko.mv(v) + regparam * v
-            def mv_mk(v):
-                '''vsum = regparam * v
-                for i in range(len(K1)):
-                    K1i = K1[i]
-                    K2i = K2[i]
-                    inds2 = self.input2_inds[i]
-                    inds1 = self.input1_inds[i]
-                    vsum += weights[i] * sampled_kronecker_products.sampled_vec_trick(v, K2i, K1i, inds2, inds1, inds2, inds1)'''
-                return pko.mv(v) + regparam * v#vsum
+                return pko.matvec(v) + regparam * v
             
             def mvr(v):
-                raise Exception('You should not be here!')
+                raise Exception('This function should not be called!')
             
             def cgcb(v):
                 if self.compute_risk:
                     P =  sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
                     z = (Y - P)
                     Ka = sampled_kronecker_products.sampled_vec_trick(v, K2, K1, self.input2_inds, self.input1_inds, self.input2_inds, self.input1_inds)
-                    loss = (np.dot(z,z)+regparam*np.dot(v,Ka))
-                    print("loss", 0.5*loss)
+                    loss = (np.dot(z, z) + regparam * np.dot(v, Ka))
+                    print("loss", 0.5 * loss)
                     if loss < self.bestloss:
                         self.A = v.copy()
                         self.bestloss = loss
                 else:
                     self.A = v
                 if not self.callbackfun is None:
-                    #self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds)
                     self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
                     self.callbackfun.callback(self)
             
-            '''if isinstance(K1, (list, tuple)):
-                if 'weights' in kwargs: weights = kwargs['weights']
-                else: weights = np.ones((len(K1)))
-                G = LinearOperator((len(self.input1_inds[0]), len(self.input1_inds[0])), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
-            else:
-                weights = None
-                G = LinearOperator((len(self.input1_inds), len(self.input1_inds)), matvec = mv, rmatvec = mvr, dtype = np.float64)'''
             G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
-            #self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, weights)
             self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
-        else:
+        else: #Primal case. Does not work with the operator interface yet.
             self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
             self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
             X1 = kwargs['X1']
@@ -212,21 +189,9 @@ class CGKronRLS(PairwisePredictorInterface):
                 v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
                 v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
                 return v_after
-            def mv_mk(v):
-                vsum = regparam * v
-                for i in range(len(X1)):
-                    X1i = X1[i]
-                    X2i = X2[i]
-                    inds2 = self.input2_inds[i]
-                    inds1 = self.input1_inds[i]
-                    v_after = sampled_kronecker_products.sampled_vec_trick(v, X2i, X1i, inds2, inds1)
-                    v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2i.T, X1i.T, None, None, inds2, inds1)
-                    vsum = vsum + v_after
-                return vsum
             
             def mvr(v):
-                raise Exception('You should not be here!')
-                return None
+                raise Exception('This function should not be called!')
             
             def cgcb(v):
                 if self.compute_risk:
@@ -242,21 +207,9 @@ class CGKronRLS(PairwisePredictorInterface):
                     self.predictor = LinearPairwisePredictor(self.W)
                     self.callbackfun.callback(self)
             
-            if isinstance(X1, (list, tuple)):
-                G = LinearOperator((kronfcount, kronfcount), matvec = mv_mk, rmatvec = mvr, dtype = np.float64)
-                vsum = np.zeros(kronfcount)
-                v_init = np.array(self.Y).reshape(self.Y.shape[0])
-                for i in range(len(X1)):
-                    X1i = X1[i]
-                    X2i = X2[i]
-                    inds2 = self.input2_inds[i]
-                    inds1 = self.input1_inds[i]
-                    vsum += sampled_kronecker_products.sampled_vec_trick(v_init, X2i.T, X1i.T, None, None, inds2, inds1)
-                v_init = vsum
-            else:
-                G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
-                v_init = np.array(self.Y).reshape(self.Y.shape[0])
-                v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
+            G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
+            v_init = np.array(self.Y).reshape(self.Y.shape[0])
+            v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
             
             v_init = np.array(v_init).reshape(kronfcount)
             if 'warm_start' in kwargs:

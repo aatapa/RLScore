@@ -106,7 +106,7 @@ class KernelPairwisePredictor(object):
             prediction for (K1[i], K2[j]) maps to P[i + j*n_samples1].
         """
         if pko == None: pko = pairwise_kernel_operator.PairwiseKernelOperator(K1pred, K2pred, row_inds_K1pred, row_inds_K2pred, self.row_inds_K1training, self.row_inds_K2training, self.weights)
-        return pko.mv(self.A)
+        return pko.matvec(self.A)
         '''
         def inner_predict(K1pred, K2pred, row_inds_K1training, row_inds_K2training, row_inds_K1pred = None, row_inds_K2pred = None):
             if len(K1pred.shape) == 1:

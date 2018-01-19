@@ -204,15 +204,15 @@ class Test(unittest.TestCase):
         mkl_linear_kron_learner = CGKronRLS(**params)
         mkl_linear_kron_testpred = mkl_linear_kron_learner.predict([X_test1, X_test1], [X_test2, X_test2]).reshape((test_rows, test_columns), order = 'F')
         #kernel_kron_testpred_alt = kernel_kron_learner.predict(K_test1, K_test2, [0, 0, 1], [0, 1, 0])
-        
-        print('Predictions: Linear CgKronRLS, MKL Kernel CgKronRLS, MKL linear CgKronRLS, ordinary RLS')
-        print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(mkl_kernel_kron_testpred[0, 0]) + ' ' + str(mkl_linear_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))#, linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]
-        print('[0, 1]: ' + str(linear_kron_testpred[0, 1]) + ' ' + str(mkl_kernel_kron_testpred[0, 1]) + ' ' + str(mkl_linear_kron_testpred[0, 1]) + ' ' + str(ordrls_testpred[0, 1]))#, linear_kron_testpred_alt[1], kernel_kron_testpred_alt[1]
-        print('[1, 0]: ' + str(linear_kron_testpred[1, 0]) + ' ' + str(mkl_kernel_kron_testpred[1, 0]) + ' ' + str(mkl_linear_kron_testpred[1, 0]) + ' ' + str(ordrls_testpred[1, 0]))#, linear_kron_testpred_alt[2], kernel_kron_testpred_alt[2]
+        '''
+        print('Predictions: Linear CgKronRLS, MKL Kernel CgKronRLS, ordinary RLS')#, MKL linear CgKronRLS
+        print('[0, 0]: ' + str(linear_kron_testpred[0, 0]) + ' ' + str(mkl_kernel_kron_testpred[0, 0]) + ' ' + str(ordrls_testpred[0, 0]))# + ' ' + str(mkl_linear_kron_testpred[0, 0]), linear_kron_testpred_alt[0], kernel_kron_testpred_alt[0]
+        print('[0, 1]: ' + str(linear_kron_testpred[0, 1]) + ' ' + str(mkl_kernel_kron_testpred[0, 1]) + ' ' + str(ordrls_testpred[0, 1]))# + ' ' + str(mkl_linear_kron_testpred[0, 1]), linear_kron_testpred_alt[1], kernel_kron_testpred_alt[1]
+        print('[1, 0]: ' + str(linear_kron_testpred[1, 0]) + ' ' + str(mkl_kernel_kron_testpred[1, 0]) + ' ' + str(ordrls_testpred[1, 0]))# + ' ' + str(mkl_linear_kron_testpred[1, 0]), linear_kron_testpred_alt[2], kernel_kron_testpred_alt[2]
         print('Meanabsdiff: MKL kernel KronRLS - ordinary RLS')
         print(str(np.mean(np.abs(mkl_kernel_kron_testpred - ordrls_testpred))))
         np.testing.assert_almost_equal(mkl_kernel_kron_testpred, ordrls_testpred, decimal=3)
-        '''
+        #'''
         
         
         
