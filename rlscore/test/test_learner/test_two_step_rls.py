@@ -118,6 +118,7 @@ class Test(unittest.TestCase):
         kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         kernel_lro = kernel_two_step_learner.leave_x1_out()
         kernel_lco = kernel_two_step_learner.leave_x2_out()
+        kernel_lmco = kernel_two_step_learner.x2_kfold_cv([[0]])
         tspred = kernel_two_step_learner.predict(K_train1, K_train2)
         
         #Train ordinary linear RLS in two steps for a reference
@@ -267,10 +268,13 @@ class Test(unittest.TestCase):
         print(linear_lco[range(train_rows)])
         print('Leave-column-out with kernel two-step RLS:')
         print(kernel_lco[range(train_rows)])
+        print('Leave-column-out with kernel two-step RLS using kfoldcv:')
+        print(kernel_lmco[range(train_rows)])
         print('Two-step RLS trained without the held-out column predictions for the column:')
         print(kernel_two_step_testpred_lco_0)
         np.testing.assert_almost_equal(linear_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
         np.testing.assert_almost_equal(kernel_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
+        np.testing.assert_almost_equal(kernel_lmco[range(train_rows)], kernel_two_step_testpred_lco_0)
         
         print('')
         print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordinary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')

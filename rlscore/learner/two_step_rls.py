@@ -240,6 +240,58 @@ class TwoStepRLS(PairwisePredictorInterface):
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred).ravel(order='F')
     
+    '''
+    def in_sample_kfoldcv(self):
+        """
+        Computes the in-sample leave-one-out cross-validation predictions. By in-sample we denote the
+        setting, where we leave out one entry of Y at a time.
+        
+        Returns
+        -------
+        F : array, shape = [n_samples1*n_samples2]
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
+            
+        Notes
+        -----    
+                
+        Computational complexity:
+        
+        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
+        
+        O(mne + mnd) Linear version (assumption: d < m, e < n)
+        
+        O(mn^2 + m^2n) Kernel version
+        """
+        if not self.kernelmode:
+            X1, X2 = self.X1, self.X2
+            P = X1 * self.W * X2.T
+        else:
+            P = self.K1 * self.A * self.K2.T
+        
+        newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
+        
+        
+        indices = array_tools.as_index_list(indices, self.Y.shape[0])
+        
+        if len(indices) != len(np.unique(indices)):
+            raise IndexError('Hold-out can have each index only once.')
+        
+        A1 = self.V[indices1]
+        right = self.svecsTY - A.T * self.Y[indices] #O(hrl)
+        RQY = A * multiply(bevals.T, right) #O(hrl)
+        B = multiply(bevals.T, A.T)
+        if len(indices) <= A.shape[1]: #h < r
+            I = mat(identity(len(indices)))
+            result = la.inv(I - A * B) * RQY #O(h^3 + h^2 * l)
+        else: #h > r
+            I = mat(identity(A.shape[1]))
+            result = RQY - A * (la.inv(B * A - I) * (B * RQY)) #O(r^3 + r^2 * l + h * r * l)
+        return np.squeeze(np.array(result))
+        
+        loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
+        return np.asarray(loopred).ravel(order='F')'''
+    
     
     def leave_x2_out(self):
         """
@@ -272,6 +324,46 @@ class TwoStepRLS(PairwisePredictorInterface):
         ordinary_rls_for_columns = RLS(**rlsparams)
         lco = ordinary_rls_for_columns.leave_one_out().T.ravel(order = 'F')
         return lco
+    
+    
+    def x2_kfold_cv(self, folds):
+        """
+        Computes the leave-column-out cross-validation predictions. Here, all instances
+        related to a single object from domain 2 are left out together at a time.
+        
+        Returns
+        -------
+        F : array, shape = [n_samples1*n_samples2]
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
+        """
+        
+        VTY = self.V.T * self.Y
+        
+        filteredevals1 = self.evals1 / (self.evals1 + self.regparam1)
+        
+        foo = np.multiply(VTY, filteredevals1)
+        foo = self.V * foo
+        foo = np.array(foo)
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam2
+        rlsparams["Y"] = foo.T
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K2)
+            rlsparams['kernel'] = 'PrecomputedKernel'
+        else:
+            rlsparams["X"] = np.array(self.X2)
+        ordinary_rls_for_columns = RLS(**rlsparams)
+        
+        allhopreds = np.zeros(foo.shape)
+        for fold in folds:
+            Pfold = ordinary_rls_for_columns.holdout(fold)
+            #print(allhopreds.shape, Pfold.shape)
+            if len(fold) == 1: Pfold = Pfold.reshape((1, Pfold.shape[0]))
+            allhopreds[:, fold] = Pfold.T
+
+        return allhopreds.ravel(order = 'F')
     
     
     def leave_x1_out(self):
