@@ -23,6 +23,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import warnings
+
 import numpy as np
 from scipy.sparse.linalg import LinearOperator
 
@@ -55,24 +57,37 @@ class PairwiseKernelOperator(LinearOperator):
     
     def __init__(self, K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None, weights = None):
         
-        self.K1, self.K2 = K1, K2
-        self.row_inds_K1, self.row_inds_K2 = row_inds_K1, row_inds_K2
-        self.col_inds_K1, self.col_inds_K2 = col_inds_K1, col_inds_K2
-        self.weights = weights if not weights is None else np.ones(len(K1))
-        
-        if isinstance(self.K1, (list, tuple)):
+        if isinstance(K1, (list, tuple)):
+            #This should not happen if interface is used according to requirements
+            if len(K1[0].shape) == 1:
+                raise Exception("Initialized PairwiseKernelOperator object with 1D kernel matrix K1 in a list which is not supported")
+            if len(K2[0].shape) == 1:
+                raise Exception("Initialized PairwiseKernelOperator object with 1D kernel matrix K2 in a list which is not supported")
+            
             if row_inds_K1 is None: rows = K1[0].shape[0] * K2[0].shape[0]
             else: rows = len(row_inds_K1[0])
             if col_inds_K1 is None: cols = K1[0].shape[1] * K2[0].shape[1]
             else: cols = len(col_inds_K1[0])
             self.dtype = K1[0].dtype
         else:
+            #This should not happen if interface is used according to requirements
+            if len(K1.shape) == 1:
+                warnings.warn("Initialized PairwiseKernelOperator object with 1D kernel matrix K1")
+                K1 = K1.reshape(1, K1.shape[0])
+            if len(K2.shape) == 1:
+                warnings.warn("Initialized PairwiseKernelOperator object with 1D kernel matrix K2")
+                K2 = K2.reshape(1, K2.shape[0])
+            
             if row_inds_K1 is None: rows = K1.shape[0] * K2.shape[0]
             else: rows = len(row_inds_K1)
             if col_inds_K1 is None: cols = K1.shape[1] * K2.shape[1]
             else: cols = len(col_inds_K1)
             self.dtype = K1.dtype
         self.shape = rows, cols
+        self.K1, self.K2 = K1, K2
+        self.row_inds_K1, self.row_inds_K2 = row_inds_K1, row_inds_K2
+        self.col_inds_K1, self.col_inds_K2 = col_inds_K1, col_inds_K2
+        self.weights = weights if not weights is None else np.ones(len(K1))
     
     def _matvec(self, v):
         
