@@ -166,10 +166,11 @@ class TwoStepRLS(PairwisePredictorInterface):
             self.A = np.multiply(self.VTYU, newevals)
             self.A = self.V * self.A * self.U.T
             self.A = np.array(self.A)
-            label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
-            label_row_inds = np.array(label_row_inds, dtype = np.int32)
-            label_col_inds = np.array(label_col_inds, dtype = np.int32)
-            self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
+            #label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
+            #label_row_inds = np.array(label_row_inds, dtype = np.int32)
+            #label_col_inds = np.array(label_col_inds, dtype = np.int32)
+            #self.predictor = KernelPairwisePredictor(self.A.ravel(), label_row_inds, label_col_inds)
+            self.predictor = KernelPairwisePredictor(self.A.ravel(order='F'))
             
         else:
             X1, X2 = self.X1, self.X2
@@ -397,6 +398,45 @@ class TwoStepRLS(PairwisePredictorInterface):
         ordinary_rls_for_rows = RLS(**rlsparams)
         lro = ordinary_rls_for_rows.leave_one_out().ravel(order = 'F')
         return lro
+    
+    
+    def x1_kfold_cv(self, folds):
+        """
+        Computes the leave-row-out cross-validation predictions. Here, all instances
+        related to a single object from domain 1 are left out together at a time.
+        
+        Returns
+        -------
+        F : array, shape = [n_samples1*n_samples2]
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
+        """
+        
+        YU = self.Y * self.U
+        
+        filteredevals2 = self.evals2 / (self.evals2 + self.regparam2)
+        
+        foo = np.multiply(YU, filteredevals2.T)
+        foo = foo * self.U.T
+        foo = np.array(foo)
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam1
+        rlsparams["Y"] = foo
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K1)
+            rlsparams['kernel'] = 'PrecomputedKernel'
+        else:
+            rlsparams["X"] = np.array(self.X1)
+        ordinary_rls_for_rows = RLS(**rlsparams)
+        
+        allhopreds = np.zeros(foo.shape)
+        for fold in folds:
+            Pfold = ordinary_rls_for_rows.holdout(fold)
+            if len(fold) == 1: Pfold = Pfold.reshape((Pfold.shape[0], 1))
+            allhopreds[fold] = Pfold
+        
+        return allhopreds.ravel(order = 'F')
     
     
     def out_of_sample_loo(self):

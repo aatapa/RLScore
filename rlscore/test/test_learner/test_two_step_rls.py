@@ -106,6 +106,7 @@ class Test(unittest.TestCase):
         linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         linear_lro = linear_two_step_learner.leave_x1_out()
         linear_lco = linear_two_step_learner.leave_x2_out()
+        linear_lmro = linear_two_step_learner.x1_kfold_cv([[1,2,4]])
                                                               
         #Train kernel two-step RLS with pre-computed kernel matrices
         params = {}
@@ -119,6 +120,7 @@ class Test(unittest.TestCase):
         kernel_lro = kernel_two_step_learner.leave_x1_out()
         kernel_lco = kernel_two_step_learner.leave_x2_out()
         kernel_lmco = kernel_two_step_learner.x2_kfold_cv([[0]])
+        kernel_lmro = linear_two_step_learner.x1_kfold_cv([[1,2,4]])
         tspred = kernel_two_step_learner.predict(K_train1, K_train2)
         
         #Train ordinary linear RLS in two steps for a reference
@@ -232,7 +234,7 @@ class Test(unittest.TestCase):
         params["K2"] = K_train2[np.ix_([0, 1, 2, 3] + list(range(5, K_train2.shape[0])), [0, 1, 2, 3] + list(range(5, K_train2.shape[0])))]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_([0, 1] + list(range(3, train_rows)), [0, 1, 2, 3] + list(range(5, train_columns)))].ravel(order = 'F')
         kernel_two_step_learner_24 = TwoStepRLS(**params)
-        kernel_two_step_testpred_24 = kernel_two_step_learner_24.predict(K_train1[[0, 1] + list(range(3, K_train1.shape[0])), 2], K_train2[4, [0, 1, 2, 3] + list(range(5, K_train2.shape[0]))])
+        kernel_two_step_testpred_24 = kernel_two_step_learner_24.predict(K_train1[2, [0, 1] + list(range(3, K_train1.shape[0]))], K_train2[4, [0, 1, 2, 3] + list(range(5, K_train2.shape[0]))])
         
         #Train kernel two-step RLS without out-of-sample row 0
         params = {}
@@ -242,7 +244,7 @@ class Test(unittest.TestCase):
         params["K2"] = K_train2
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[range(1, train_rows)].ravel(order = 'F')
         kernel_two_step_learner_lro_0 = TwoStepRLS(**params)
-        kernel_two_step_testpred_lro_0 = kernel_two_step_learner_lro_0.predict(K_train1[range(1, K_train1.shape[0]), 0], K_train2)
+        kernel_two_step_testpred_lro_0 = kernel_two_step_learner_lro_0.predict(K_train1[0, range(1, K_train1.shape[0])], K_train2)
         print('')
         print('Leave-row-out with linear two-step RLS:')
         print(linear_lro.reshape((train_rows, train_columns), order = 'F')[0])
@@ -253,6 +255,25 @@ class Test(unittest.TestCase):
         np.testing.assert_almost_equal(linear_lro.reshape((train_rows, train_columns), order = 'F')[0], kernel_two_step_testpred_lro_0)
         np.testing.assert_almost_equal(kernel_lro.reshape((train_rows, train_columns), order = 'F')[0], kernel_two_step_testpred_lro_0)
         
+        #Train kernel two-step RLS without out-of-sample rows 1,2 and 4
+        params = {}
+        params["regparam1"] = regparam1
+        params["regparam2"] = regparam2
+        params["K1"] = K_train1[np.ix_([0, 3] + range(5, K_train1.shape[0]), [0, 3] + range(5, K_train1.shape[0]))]
+        params["K2"] = K_train2
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[[0, 3] + range(5, train_rows)].ravel(order = 'F')
+        kernel_two_step_learner_lmro = TwoStepRLS(**params)
+        kernel_two_step_testpred_lmro = kernel_two_step_learner_lmro.predict(K_train1[np.ix_([1,2,4], [0, 3] + range(5, K_train1.shape[0]))], K_train2)
+        print('')
+        print('Leave-multiple-rows-out with linear two-step RLS:')
+        print(linear_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]])
+        print('Leave-row-out with kernel two-step RLS:')
+        print(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]])
+        print('Two-step RLS trained without the held-out row predictions for the row:')
+        print(kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
+        np.testing.assert_almost_equal(linear_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]], kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
+        np.testing.assert_almost_equal(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]], kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
+        
         
         #Train kernel two-step RLS without out-of-sample column 0
         params = {}
@@ -262,7 +283,7 @@ class Test(unittest.TestCase):
         params["K2"] = K_train2[np.ix_(range(1, K_train2.shape[0]), range(1, K_train2.shape[1]))]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[:, range(1, train_columns)].ravel(order = 'F')
         kernel_two_step_learner_lco_0 = TwoStepRLS(**params)
-        kernel_two_step_testpred_lco_0 = kernel_two_step_learner_lco_0.predict(K_train1, K_train2[range(1, K_train2.shape[0]), 0])
+        kernel_two_step_testpred_lco_0 = kernel_two_step_learner_lco_0.predict(K_train1, K_train2[0, range(1, K_train2.shape[0])])
         print('')
         print('Leave-column-out with linear two-step RLS:')
         print(linear_lco[range(train_rows)])
@@ -295,6 +316,8 @@ class Test(unittest.TestCase):
         np.testing.assert_almost_equal(secondsteploo_linear_rls, kernel_twostepoutofsampleloo)
         np.testing.assert_almost_equal(secondsteploo_linear_rls[0, 0], linear_two_step_testpred_00)
         np.testing.assert_almost_equal(secondsteploo_linear_rls[0, 0], kernel_two_step_testpred_00)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls[2, 4], linear_two_step_testpred_24)
+        np.testing.assert_almost_equal(secondsteploo_linear_rls[2, 4], kernel_two_step_testpred_24)
         
         
         #Train kernel two-step RLS with pre-computed kernel matrices and with output at position [2, 4] changed
@@ -341,6 +364,10 @@ class Test(unittest.TestCase):
         print('In-sample LOO: Kernel two-step RLS ISLOO with original outputs, Kernel two-step RLS ISLOO with modified output at [0, 0]')
         print('[0, 0] ' + str(kernel_two_step_learner_inSampleLOO_00a) + ' ' + str(kernel_two_step_learner_inSampleLOO_00b))
         np.testing.assert_almost_equal(kernel_two_step_learner_inSampleLOO_00a, kernel_two_step_learner_inSampleLOO_00b)
+        
+        
+        
+        
         
         
         #Create symmetric data

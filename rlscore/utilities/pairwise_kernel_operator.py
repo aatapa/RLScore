@@ -40,16 +40,22 @@ class PairwiseKernelOperator(LinearOperator):
     ----------
     
     K1 : {array-like, list of array-likes}, shape = [n_samples1, n_samples1]
-        Kernel matrix 1 (for kernel CGKronRLS)
+        Kernel matrix 1
 
     K2 : {array-like, list of array-likes}, shape = [n_samples1, n_samples1]
-        Kernel matrix 2 (for kernel CGKronRLS)
+        Kernel matrix 2
         
-    label_row_inds : {array-like, list of equal length array-likes}, shape = [n_train_pairs]
-        row indices from X1, corresponding to labels in Y
+    row_inds_K1 : {array-like, list of equal length array-likes}, shape = [n_rows_of_operator]
+        maps rows of the operator to rows of K1
+        
+    row_inds_K2 : {array-like, list of equal length array-likes}, shape = [n_rows_of_operator]
+        maps rows of the operator to rows of K2
     
-    label_col_inds : {array-like, list of equal length array-likes}, shape = [n_train_pairs]
-        row indices from X2, corresponding to labels in Y
+    col_inds_K1 : {array-like, list of equal length array-likes}, shape = [n_columns_of_operator]
+        maps columns of the operator to columns of K1
+    
+    col_inds_K2 : {array-like, list of equal length array-likes}, shape = [n_columns_of_operator]
+        maps columns of the operator to columns of K2
     
     weights : {list, tuple, array-like}, shape = [n_kernels], optional
         weights used by multiple pairwise kernel predictors
