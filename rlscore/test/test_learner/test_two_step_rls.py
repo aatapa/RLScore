@@ -95,6 +95,11 @@ class Test(unittest.TestCase):
         #print K_train1.shape, K_train2.shape, K_test1.shape, K_test2.shape, train_rows, train_columns
         trainlabelcount = train_rows * train_columns
         
+        row_hoinds = [1,2,4]
+        row_hocompl = sorted(list(set(range(train_rows))-set(row_hoinds)))
+        col_hoinds = [1,3,4,5]
+        col_hocompl = sorted(list(set(range(train_columns))-set(col_hoinds)))
+        
         #Train linear two-step RLS with data-matrices
         params = {}
         params["regparam1"] = regparam1
@@ -106,7 +111,8 @@ class Test(unittest.TestCase):
         linear_twostepoutofsampleloo = linear_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         linear_lro = linear_two_step_learner.leave_x1_out()
         linear_lco = linear_two_step_learner.leave_x2_out()
-        linear_lmro = linear_two_step_learner.x1_kfold_cv([[1,2,4]])
+        linear_lmro = linear_two_step_learner.x1_kfold_cv([row_hoinds])
+        linear_lmco = linear_two_step_learner.x2_kfold_cv([col_hoinds])
                                                               
         #Train kernel two-step RLS with pre-computed kernel matrices
         params = {}
@@ -119,8 +125,8 @@ class Test(unittest.TestCase):
         kernel_twostepoutofsampleloo = kernel_two_step_learner.out_of_sample_loo().reshape((train_rows, train_columns), order = 'F')
         kernel_lro = kernel_two_step_learner.leave_x1_out()
         kernel_lco = kernel_two_step_learner.leave_x2_out()
-        kernel_lmco = kernel_two_step_learner.x2_kfold_cv([[0]])
-        kernel_lmro = linear_two_step_learner.x1_kfold_cv([[1,2,4]])
+        kernel_lmro = linear_two_step_learner.x1_kfold_cv([row_hoinds])
+        kernel_lmco = kernel_two_step_learner.x2_kfold_cv([col_hoinds])
         tspred = kernel_two_step_learner.predict(K_train1, K_train2)
         
         #Train ordinary linear RLS in two steps for a reference
@@ -259,20 +265,20 @@ class Test(unittest.TestCase):
         params = {}
         params["regparam1"] = regparam1
         params["regparam2"] = regparam2
-        params["K1"] = K_train1[np.ix_([0, 3] + range(5, K_train1.shape[0]), [0, 3] + range(5, K_train1.shape[0]))]
+        params["K1"] = K_train1[np.ix_(row_hocompl, row_hocompl)]
         params["K2"] = K_train2
-        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[[0, 3] + range(5, train_rows)].ravel(order = 'F')
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[row_hocompl].ravel(order = 'F')
         kernel_two_step_learner_lmro = TwoStepRLS(**params)
-        kernel_two_step_testpred_lmro = kernel_two_step_learner_lmro.predict(K_train1[np.ix_([1,2,4], [0, 3] + range(5, K_train1.shape[0]))], K_train2)
+        kernel_two_step_testpred_lmro = kernel_two_step_learner_lmro.predict(K_train1[np.ix_(row_hoinds, row_hocompl)], K_train2)
         print('')
         print('Leave-multiple-rows-out with linear two-step RLS:')
-        print(linear_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]])
+        print(linear_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds])
         print('Leave-row-out with kernel two-step RLS:')
-        print(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]])
+        print(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds])
         print('Two-step RLS trained without the held-out row predictions for the row:')
-        print(kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
-        np.testing.assert_almost_equal(linear_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]], kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
-        np.testing.assert_almost_equal(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[[1,2,4]], kernel_two_step_testpred_lmro.reshape((3, train_columns), order = 'F'))
+        print(kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
+        np.testing.assert_almost_equal(linear_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds], kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
+        np.testing.assert_almost_equal(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds], kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
         
         
         #Train kernel two-step RLS without out-of-sample column 0
@@ -289,13 +295,32 @@ class Test(unittest.TestCase):
         print(linear_lco[range(train_rows)])
         print('Leave-column-out with kernel two-step RLS:')
         print(kernel_lco[range(train_rows)])
-        print('Leave-column-out with kernel two-step RLS using kfoldcv:')
-        print(kernel_lmco[range(train_rows)])
         print('Two-step RLS trained without the held-out column predictions for the column:')
         print(kernel_two_step_testpred_lco_0)
         np.testing.assert_almost_equal(linear_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
         np.testing.assert_almost_equal(kernel_lco[range(train_rows)], kernel_two_step_testpred_lco_0)
-        np.testing.assert_almost_equal(kernel_lmco[range(train_rows)], kernel_two_step_testpred_lco_0)
+        
+        
+        #Train kernel two-step RLS without out-of-sample columns 1, 3, 4 and 5
+        params = {}
+        params["regparam1"] = regparam1
+        params["regparam2"] = regparam2
+        params["K1"] = K_train1
+        params["K2"] = K_train2[np.ix_(col_hocompl, col_hocompl)]
+        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[:, col_hocompl].ravel(order = 'F')
+        kernel_two_step_learner_lmco = TwoStepRLS(**params)
+        kernel_two_step_testpred_lmco = kernel_two_step_learner_lmco.predict(K_train1, K_train2[np.ix_(col_hoinds, col_hocompl)])
+        print('')
+        print('Leave-column-out with linear two-step RLS:')
+        print(linear_lco[range(train_rows)])
+        print('Leave-column-out with kernel two-step RLS:')
+        print(kernel_lco[range(train_rows)])
+        print('Two-step RLS trained without the held-out column predictions for the column:')
+        print(kernel_two_step_testpred_lco_0)
+        np.testing.assert_almost_equal(linear_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds], kernel_two_step_testpred_lmco.reshape((train_rows, len(col_hoinds)), order = 'F'))
+        np.testing.assert_almost_equal(kernel_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds], kernel_two_step_testpred_lmco.reshape((train_rows, len(col_hoinds)), order = 'F'))
+        #np.testing.assert_almost_equal(linear_lmco[range(train_rows)], kernel_two_step_testpred_lmco)
+        #np.testing.assert_almost_equal(kernel_lmco[range(train_rows)], kernel_two_step_testpred_lmco)
         
         print('')
         print('Out-of-sample LOO: Stacked ordinary linear RLS LOO, Stacked ordinary kernel RLS LOO, linear two-step RLS OOSLOO, kernel two-step RLS OOSLOO, linear two-step RLS OOS-pred, kernel two-step RLS OOS-pred')
