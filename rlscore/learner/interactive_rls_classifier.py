@@ -109,6 +109,10 @@ class InteractiveRlsClassifier(object):
         
         if not self.callbackfun is None:
             self.callbackfun.callback(self)
+        
+        #Initial working set contains all points
+        self.new_working_set(list(range(self.size)))
+        
     
     
     def computeGlobalFitness(self):
