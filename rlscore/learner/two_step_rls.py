@@ -24,9 +24,15 @@
 # THE SOFTWARE.
 
 import numpy as np
+import numpy.linalg as la
+
+from scipy.sparse.linalg import LinearOperator
+from scipy.sparse.linalg import minres
+
 from rlscore.learner.rls import RLS
 from rlscore.utilities import array_tools
 from rlscore.utilities import linalg
+from rlscore.utilities import PairwiseKernelOperator
 
 
 from . import _two_step_rls
@@ -241,11 +247,11 @@ class TwoStepRLS(PairwisePredictorInterface):
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred).ravel(order='F')
     
-    '''
-    def in_sample_kfoldcv(self):
+    
+    def in_sample_kfoldcv(self, folds):
         """
-        Computes the in-sample leave-one-out cross-validation predictions. By in-sample we denote the
-        setting, where we leave out one entry of Y at a time.
+        Computes the in-sample k-fold cross-validation predictions. By in-sample we denote the
+        setting, where we leave a set of arbitrary entries of Y out at a time.
         
         Returns
         -------
@@ -253,45 +259,27 @@ class TwoStepRLS(PairwisePredictorInterface):
             Training set labels. Label for (X1[i], X2[j]) maps to
             F[i + j*n_samples1] (column order).
             
-        Notes
-        -----    
-                
-        Computational complexity:
-        
-        m = n_samples1, n = n_samples2, d = n_features1, e  = n_features2
-        
-        O(mne + mnd) Linear version (assumption: d < m, e < n)
-        
-        O(mn^2 + m^2n) Kernel version
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
             P = X1 * self.W * X2.T
         else:
             P = self.K1 * self.A * self.K2.T
+            H1 = self.K1 @ la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
+            H2 = self.K2 @ la.inv(self.K2 + self.regparam2 * np.eye(self.K2.shape[0]))
         
-        newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
-        
-        
-        indices = array_tools.as_index_list(indices, self.Y.shape[0])
-        
-        if len(indices) != len(np.unique(indices)):
-            raise IndexError('Hold-out can have each index only once.')
-        
-        A1 = self.V[indices1]
-        right = self.svecsTY - A.T * self.Y[indices] #O(hrl)
-        RQY = A * multiply(bevals.T, right) #O(hrl)
-        B = multiply(bevals.T, A.T)
-        if len(indices) <= A.shape[1]: #h < r
-            I = mat(identity(len(indices)))
-            result = la.inv(I - A * B) * RQY #O(h^3 + h^2 * l)
-        else: #h > r
-            I = mat(identity(A.shape[1]))
-            result = RQY - A * (la.inv(B * A - I) * (B * RQY)) #O(r^3 + r^2 * l + h * r * l)
-        return np.squeeze(np.array(result))
-        
-        loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
-        return np.asarray(loopred).ravel(order='F')'''
+        allhopreds = np.zeros(self.Y.shape)
+        for fold in folds:
+            row_inds_K1, row_inds_K2 = fold
+            pko = PairwiseKernelOperator(H1, H2, row_inds_K1, row_inds_K2, row_inds_K1, row_inds_K2)
+            temp = P[row_inds_K1, row_inds_K2]
+            temp -= np.array(pko.matvec(np.array(self.Y)[row_inds_K1, row_inds_K2].squeeze())).squeeze()
+            def mv(v):
+                return v - pko.matvec(v)
+            G = LinearOperator((len(row_inds_K1), len(row_inds_K1)), matvec = mv, dtype = np.float64)
+            hopred = minres(G, temp.T, tol=1e-20)[0]
+            allhopreds[row_inds_K1, row_inds_K2] = hopred
+        return allhopreds.ravel(order = 'F')
     
     
     def leave_x2_out(self):
@@ -478,7 +466,57 @@ class TwoStepRLS(PairwisePredictorInterface):
         LOO_ek_row = (1. / (1. - RQR_row))
         LOO_two_step = np.multiply(LOO_ek_row, self.V * (svecsm_row.T * LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
         LOO_two_step = np.array(LOO_two_step)
+        
+        '''
+        allhopreds = np.zeros(foo.shape)
+        for fold in folds:
+            Pfold = ordinary_rls_for_rows.holdout(fold)
+            if len(fold) == 1: Pfold = Pfold.reshape((Pfold.shape[0], 1))
+            allhopreds[fold] = Pfold
+        
+        return allhopreds.ravel(order = 'F')
+        '''
         return LOO_two_step.ravel(order = 'F')
+    
+    
+    def out_of_sample_kfold_cv(self, rowfolds, colfolds):
+        
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam1
+        rlsparams["Y"] = self.Y
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K1)
+            rlsparams['kernel'] = 'PrecomputedKernel'
+        else:
+            rlsparams["X"] = np.array(self.X1)
+        ordinary_rls_for_rows = RLS(**rlsparams)
+        
+        allrowhopreds = np.zeros(self.Y.shape)
+        for fold in rowfolds:
+            Pfold = ordinary_rls_for_rows.holdout(fold)
+            if len(fold) == 1: Pfold = Pfold.reshape((Pfold.shape[0], 1))
+            allrowhopreds[fold] = Pfold
+        
+        rlsparams = {}
+        rlsparams["regparam"] = self.regparam2
+        rlsparams["Y"] = allrowhopreds.T
+        rlsparams["bias"] = 0.
+        if self.kernelmode:
+            rlsparams["X"] = np.array(self.K2)
+            rlsparams['kernel'] = 'PrecomputedKernel'
+        else:
+            rlsparams["X"] = np.array(self.X2)
+        ordinary_rls_for_columns = RLS(**rlsparams)
+        
+        allcolhopreds = np.zeros(self.Y.shape)
+        for fold in colfolds:
+            Pfold = ordinary_rls_for_columns.holdout(fold)
+            #print(allhopreds.shape, Pfold.shape)
+            if len(fold) == 1: Pfold = Pfold.reshape((1, Pfold.shape[0]))
+            allcolhopreds[:, fold] = Pfold.T
+        
+        return allcolhopreds.ravel(order = 'F')
     
     
     def out_of_sample_loo_symmetric(self):

@@ -84,13 +84,13 @@ def sampled_vec_trick(v, M, N, row_inds_M = None, row_inds_N = None, col_inds_M 
             temp = np.dot(v.reshape((cc_n, cc_m), order = 'F'), M.T)
         else:
             temp = np.zeros((cc_n, rc_m), order='C')
-            M = np.array(M, order = 'FORTRAN')
+            M = np.array(M, order = 'F')
             _sampled_kronecker_products.sparse_mat_from_left(temp, v, M.T, col_inds_N, col_inds_M, v_len, rc_m)
         if row_inds_N is None:
             x_after = np.dot(N, temp)
             x_after = x_after.reshape((u_len,), order = 'F')
         else:
-            temp = np.array(temp, order = 'FORTRAN')
+            temp = np.array(temp, order = 'F')
             N = np.array(N, order = 'C')
             x_after = np.zeros((u_len))
             _sampled_kronecker_products.compute_subset_of_matprod_entries(x_after, N, temp, row_inds_N, row_inds_M, u_len, cc_n)
@@ -98,8 +98,8 @@ def sampled_vec_trick(v, M, N, row_inds_M = None, row_inds_N = None, col_inds_M 
         if col_inds_N is None:
             temp = np.dot(N, v.reshape((cc_n, cc_m), order = 'F'))
         else:
-            temp = np.zeros((rc_n, cc_m), order = 'FORTRAN')
-            N = np.array(N, order = 'FORTRAN')            
+            temp = np.zeros((rc_n, cc_m), order = 'F')
+            N = np.array(N, order = 'F') 
             _sampled_kronecker_products.sparse_mat_from_right(temp, N, v, col_inds_N, col_inds_M, v_len, rc_n)
         if row_inds_N is None:
             x_after = np.dot(temp, M.T)
