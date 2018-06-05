@@ -248,7 +248,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         return np.asarray(loopred).ravel(order='F')
     
     
-    def in_sample_kfoldcv(self, folds):
+    def in_sample_kfoldcv(self, folds, maxiter = None):
         """
         Computes the in-sample k-fold cross-validation predictions. By in-sample we denote the
         setting, where we leave a set of arbitrary entries of Y out at a time.
@@ -277,7 +277,7 @@ class TwoStepRLS(PairwisePredictorInterface):
             def mv(v):
                 return v - pko.matvec(v)
             G = LinearOperator((len(row_inds_K1), len(row_inds_K1)), matvec = mv, dtype = np.float64)
-            hopred = minres(G, temp.T, tol=1e-20)[0]
+            hopred = minres(G, temp.T, tol=1e-20, maxiter = maxiter)[0]
             allhopreds[row_inds_K1, row_inds_K2] = hopred
         return allhopreds.ravel(order = 'F')
     
