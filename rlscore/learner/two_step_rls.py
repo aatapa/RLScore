@@ -262,7 +262,9 @@ class TwoStepRLS(PairwisePredictorInterface):
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
-            P = X1 * self.W * X2.T
+            P = X1 @ self.W @ X2.T
+            R1 = la.inv(X1.T @ X1 + self.regparam1 * np.eye(X1.shape[1])) @ X1.T
+            R2 = la.inv(X2.T @ X2 + self.regparam2 * np.eye(X2.shape[1])) @ X2.T
         else:
             P = self.K1 * self.A * self.K2.T
             H1 = self.K1 @ la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
@@ -271,7 +273,16 @@ class TwoStepRLS(PairwisePredictorInterface):
         allhopreds = np.zeros(self.Y.shape)
         for fold in folds:
             row_inds_K1, row_inds_K2 = fold
-            pko = PairwiseKernelOperator(H1, H2, row_inds_K1, row_inds_K2, row_inds_K1, row_inds_K2)
+            if not self.kernelmode:
+                u_inds_1, i_inds_1 = np.unique(row_inds_K1, return_inverse = True)
+                r_inds_1 = np.arange(len(u_inds_1))[i_inds_1]
+                H1_ho = X1[u_inds_1] @ R1[:, u_inds_1]
+                u_inds_2, i_inds_2 = np.unique(row_inds_K2, return_inverse = True)
+                r_inds_2 = np.arange(len(u_inds_2))[i_inds_2]
+                H2_ho = X2[u_inds_2] @ R2[:, u_inds_2]
+                pko = PairwiseKernelOperator(H1_ho, H2_ho, r_inds_1, r_inds_2, r_inds_1, r_inds_2)
+            else:
+                pko = PairwiseKernelOperator(H1, H2, row_inds_K1, row_inds_K2, row_inds_K1, row_inds_K2)
             temp = P[row_inds_K1, row_inds_K2]
             temp -= np.array(pko.matvec(np.array(self.Y)[row_inds_K1, row_inds_K2].squeeze())).squeeze()
             def mv(v):
