@@ -34,7 +34,7 @@ def random_folds(ssize, k, seed = None):
         myrandom = random
     folds = []
     indices = set(range(ssize))
-    foldsize = ssize / k
+    foldsize = ssize // k
     leftover = ssize % k
     for i in range(k):
         sample_size = foldsize
