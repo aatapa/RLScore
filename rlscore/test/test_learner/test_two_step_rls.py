@@ -176,7 +176,7 @@ class Test(unittest.TestCase):
         params['kernel'] = 'PrecomputedKernel'
         params["Y"] = Y_train
         ordinary_one_step_kernel_rls_with_crazy_kernel_whole_data = RLS(**params)
-        crazyloo = ordinary_one_step_kernel_rls_with_crazy_kernel_whole_data.leave_one_out()[0]
+        crazyloo = ordinary_one_step_kernel_rls_with_crazy_kernel_whole_data.leave_one_out()
         allinds = np.arange(trainlabelcount)
         allinds_fortran_shaped = allinds.reshape((train_rows, train_columns), order = 'F')
         #hoinds = sorted(allinds_fortran_shaped[0].tolist() + allinds_fortran_shaped[1:, 0].tolist())
@@ -205,9 +205,14 @@ class Test(unittest.TestCase):
         #params["Y"] = Y_train[hocompl]
         params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(range(1, train_rows), range(1, train_columns))].ravel(order = 'F')
         ordinary_one_step_kernel_rls_with_crazy_kernel = RLS(**params)'''
-        print('In-sample hold-out, ordinary RLS with crazy kernel hold-out, ordinary RLS with crazy kernel prediction', kernel_iscv[hoinds], crazy_ho, prediction_with_crazy_kernel)
+        print('In-sample hold-out, ordinary RLS with crazy kernel hold-out, ordinary RLS with crazy kernel prediction:\n', kernel_iscv[hoinds], crazy_ho, prediction_with_crazy_kernel)
         np.testing.assert_almost_equal(kernel_iscv[hoinds], crazy_ho)
         np.testing.assert_almost_equal(prediction_with_crazy_kernel, crazy_ho)
+        
+        kernel_two_step_learner_inSampleLOO = kernel_two_step_learner.in_sample_loo()#.reshape((train_rows, train_columns), order = 'F')
+        print('')
+        print('In-sample LOO, ordinary RLS with crazy kernel LOO:\n', kernel_two_step_learner_inSampleLOO[5], crazyloo[5])
+        np.testing.assert_almost_equal( kernel_two_step_learner_inSampleLOO, crazyloo)
         
         #Train linear two-step RLS without out-of-sample rows or columns for [0,0]
         params = {}
@@ -282,7 +287,7 @@ class Test(unittest.TestCase):
         print(linear_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds])
         print('Leave-multiple-rows-out with kernel two-step RLS:')
         print(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds])
-        print('Two-step RLS trained without the held-out row predictions for the row:')
+        print('Two-step RLS trained without the held-out rows predictions for the rows:')
         print(kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
         np.testing.assert_almost_equal(linear_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds], kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
         np.testing.assert_almost_equal(kernel_lmro.reshape((train_rows, train_columns), order = 'F')[row_hoinds], kernel_two_step_testpred_lmro.reshape((len(row_hoinds), train_columns), order = 'F'))
@@ -322,8 +327,8 @@ class Test(unittest.TestCase):
         print(linear_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds])
         print('Leave-multiple-columns-out with kernel two-step RLS:')
         print(kernel_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds])
-        print('Two-step RLS trained without the held-out column predictions for the column:')
-        print(kernel_two_step_testpred_lco_0)
+        print('Two-step RLS trained without the held-out columns predictions for the columns:')
+        print(kernel_two_step_testpred_lmco.reshape((train_rows, len(col_hoinds)), order = 'F'))
         np.testing.assert_almost_equal(linear_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds], kernel_two_step_testpred_lmco.reshape((train_rows, len(col_hoinds)), order = 'F'))
         np.testing.assert_almost_equal(kernel_lmco.reshape((train_rows, train_columns), order = 'F')[:, col_hoinds], kernel_two_step_testpred_lmco.reshape((train_rows, len(col_hoinds)), order = 'F'))
         #np.testing.assert_almost_equal(linear_lmco[range(train_rows)], kernel_two_step_testpred_lmco)
@@ -437,50 +442,92 @@ class Test(unittest.TestCase):
             )
         K_train1 = K_train2
         K_test1 = K_test2
-        Y_train = 0.5 * (Y_train + Y_train.T)
+        Y_train_symm = 0.5 * (Y_train + Y_train.T)
+        Y_train_asymm = 0.5 * (Y_train - Y_train.T)
         
-        Y_train = Y_train.ravel(order = 'F')
-        Y_test = Y_test.ravel(order = 'F')
+        Y_train_symm = Y_train_symm.ravel(order = 'F')
+        Y_train_asymm = Y_train_asymm.ravel(order = 'F')
+        #Y_test = Y_test.ravel(order = 'F')
         train_rows, train_columns = K_train1.shape[0], K_train2.shape[0]
-        test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
+        #test_rows, test_columns = K_test1.shape[0], K_test2.shape[0]
         trainlabelcount = train_rows * train_columns
         
-        #Train symmetric kernel two-step RLS with pre-computed kernel matrices
-        params = {}
-        params["regparam1"] = regparam2
-        params["regparam2"] = regparam2
-        params["K1"] = K_train1
-        params["K2"] = K_train2
-        params["Y"] = Y_train
-        kernel_two_step_learner = TwoStepRLS(**params)
-        kernel_two_step_testpred = kernel_two_step_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
+        def test_symm_and_asymm_cases(Y_train_symm_or_asymm):
+            #Train symmetric kernel two-step RLS with pre-computed kernel matrices
+            params = {}
+            params["regparam1"] = regparam2
+            params["regparam2"] = regparam2
+            params["K1"] = K_train1
+            params["K2"] = K_train2
+            params["Y"] = Y_train_symm_or_asymm
+            kernel_two_step_learner_symmetric = TwoStepRLS(**params)
+            #kernel_two_step_testpred = kernel_two_step_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
+            
+            #Train two-step RLS without out-of-sample rows or columns
+            rowind, colind = 2, 4
+            trainrowinds = list(range(K_train1.shape[0]))
+            trainrowinds.remove(rowind)
+            trainrowinds.remove(colind)
+            traincolinds = list(range(K_train2.shape[0]))
+            traincolinds.remove(rowind)
+            traincolinds.remove(colind)
+            params = {}
+            params["regparam1"] = regparam2
+            params["regparam2"] = regparam2
+            params["K1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
+            params["K2"] = K_train2[np.ix_(traincolinds, traincolinds)]
+            params["Y"] = Y_train_symm_or_asymm.reshape((train_rows, train_columns), order = 'F')[np.ix_(trainrowinds, traincolinds)].ravel(order = 'F')
+            kernel_kron_learner = TwoStepRLS(**params)
+            kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')
+            
+            fcsho = kernel_two_step_learner_symmetric.out_of_sample_loo_symmetric().reshape((train_rows, train_columns), order = 'F')
+            
+            print(fcsho)
+            print(kernel_kron_testpred)
+            print('')
+            print('Symmetric double out-of-sample LOO: Test prediction, LOO')
+            print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]))
+            np.testing.assert_almost_equal(kernel_kron_testpred[0, 0], fcsho[2, 4])
+            
+            #Train ordinary kernel RLS in one step with the crazy kernel and symmetric labels for a reference
+            params = {}
+            params["regparam"] = 1.
+            crazykernel = la.inv(regparam2 * regparam2 * np.kron(la.inv(K_train2), la.inv(K_train1))
+                           + regparam2 * np.kron(np.eye(K_train2.shape[0]), la.inv(K_train1))
+                           + regparam2 * np.kron(la.inv(K_train2), np.eye(K_train1.shape[0])))
+            params["X"] = crazykernel
+            params['kernel'] = 'PrecomputedKernel'
+            params["Y"] = Y_train_symm_or_asymm
+            ordinary_one_step_kernel_rls_with_crazy_kernel_whole_data_symmetric = RLS(**params)
+            allinds = np.arange(trainlabelcount)
+            allinds_fortran_shaped = allinds.reshape((train_rows, train_columns), order = 'F')
+            symmhoinds = [allinds_fortran_shaped[2, 3], allinds_fortran_shaped[3, 2]]
+            crazylto = ordinary_one_step_kernel_rls_with_crazy_kernel_whole_data_symmetric.holdout(symmhoinds)
+            
+            print()
+            print('(anti-)symmetric hold-out with crazy kernel RLS, two-step symmetric in-sample LOO, ho')
+            print(crazylto)
+            fcsloo = kernel_two_step_learner_symmetric.in_sample_loo_symmetric()#.reshape((train_rows, train_columns), order = 'F')
+            #print(fcsloo[2, 3], fcsloo[3, 2])
+            print(fcsloo[symmhoinds[0]], fcsloo[symmhoinds[1]])
+            #print(fcsloo-fcsloo.T)
+            kernel_iscv_symmetric = kernel_two_step_learner_symmetric.in_sample_kfoldcv([([2, 3], [3, 2])])
+            print(kernel_iscv_symmetric[symmhoinds])#, kernel_iscv_symmetric[3, 2])
+            
+            #print(kernel_two_step_learner_symmetric.leave_vertex_out())
         
-        #Train two-step RLS without out-of-sample rows or columns
-        rowind, colind = 2, 4
-        trainrowinds = list(range(K_train1.shape[0]))
-        trainrowinds.remove(rowind)
-        trainrowinds.remove(colind)
-        traincolinds = list(range(K_train2.shape[0]))
-        traincolinds.remove(rowind)
-        traincolinds.remove(colind)
+        test_symm_and_asymm_cases(Y_train_symm)
+        test_symm_and_asymm_cases(Y_train_asymm)
         
-        params = {}
-        params["regparam1"] = regparam2
-        params["regparam2"] = regparam2
-        params["K1"] = K_train1[np.ix_(trainrowinds, trainrowinds)]
-        params["K2"] = K_train2[np.ix_(traincolinds, traincolinds)]
-        params["Y"] = Y_train.reshape((train_rows, train_columns), order = 'F')[np.ix_(trainrowinds, traincolinds)].ravel(order = 'F')
-        kernel_kron_learner = TwoStepRLS(**params)
-        kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')
-        
-        fcsho = kernel_two_step_learner.out_of_sample_loo_symmetric().reshape((train_rows, train_columns), order = 'F')
+        '''
+        kernel_two_step_learner_inSampleLOO = kernel_two_step_learner_symmetric.in_sample_loo()#.reshape((train_rows, train_columns), order = 'F')
+        print('')
+        print('In-sample LOO, ordinary RLS with crazy kernel LOO:\n', kernel_two_step_learner_inSampleLOO[5], crazyloo[5])
+        np.testing.assert_almost_equal( kernel_two_step_learner_inSampleLOO, crazyloo)
         
         print('')
-        print('Symmetric double out-of-sample LOO: Test prediction, LOO')
-        print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]))
-        np.testing.assert_almost_equal(kernel_kron_testpred[0, 0], fcsho[2, 4])
-        
-        
+        print('Symmetric in-sample LOO: Test prediction, LOO')
+        print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsloo[2, 4]))'''
 
 if __name__ == '__main__':
     unittest.main()

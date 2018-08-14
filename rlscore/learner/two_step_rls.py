@@ -101,16 +101,15 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
-        Y = np.mat(array_tools.as_2d_array(Y))
         if 'K1' in kwargs:
-            K1 = np.mat(kwargs['K1'])
-            K2 = np.mat(kwargs['K2'])
+            K1 = kwargs['K1']
+            K2 = kwargs['K2']
             Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
-            X1 = np.mat(kwargs['X1'])
-            X2 = np.mat(kwargs['X2'])
+            X1 = kwargs['X1']
+            X2 = kwargs['X2']
             Y = Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
@@ -151,26 +150,25 @@ class TwoStepRLS(PairwisePredictorInterface):
             if not self.trained:
                 self.trained = True
                 evals1, V  = linalg.eig_psd(K1)
-                evals1 = np.mat(evals1).T
-                evals1 = np.multiply(evals1, evals1)
-                V = np.mat(V)
+                evals1 = evals1[:,np.newaxis]
+                evals1 = evals1 * evals1
+                V = V
                 self.evals1 = evals1
                 self.V = V
                 
                 evals2, U = linalg.eig_psd(K2)
-                evals2 = np.mat(evals2).T
+                evals2 = evals2[:,np.newaxis]
                 evals2 = np.multiply(evals2, evals2)
-                U = np.mat(U)
                 self.evals2 = evals2
                 self.U = U
-                self.VTYU = V.T * self.Y * U
+                self.VTYU = V.T @ self.Y @ U
             
             self.newevals1 = 1. / (self.evals1 + regparam1)
             self.newevals2 = 1. / (self.evals2 + regparam2)
-            newevals = self.newevals1 * self.newevals2.T
+            newevals = self.newevals1 @ self.newevals2.T
             
             self.A = np.multiply(self.VTYU, newevals)
-            self.A = self.V * self.A * self.U.T
+            self.A = self.V @ self.A @ self.U.T
             self.A = np.array(self.A)
             #label_row_inds, label_col_inds = np.unravel_index(np.arange(K1.shape[0] * K2.shape[0]), (K1.shape[0],  K2.shape[0]))
             #label_row_inds = np.array(label_row_inds, dtype = np.int32)
@@ -184,32 +182,32 @@ class TwoStepRLS(PairwisePredictorInterface):
             if not self.trained:
                 self.trained = True
                 V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
-                svals1 = np.mat(svals1)
-                self.svals1 = svals1.T
-                self.evals1 = np.multiply(self.svals1, self.svals1)
+                self.svals1 = svals1[:,np.newaxis]
+                #self.svals1 = svals1.T
+                self.evals1 = self.svals1 * self.svals1
                 self.V = V
-                self.rsvecs1 = np.mat(rsvecs1)
+                self.rsvecs1 = rsvecs1
                 
                 if X1.shape == X2.shape and (X1 == X2).all():
                     svals2, U, rsvecs2 = svals1, V, rsvecs1
                 else:
                     U, svals2, rsvecs2 = linalg.svd_economy_sized(X2)
-                    svals2 = np.mat(svals2)
-                self.svals2 = svals2.T
-                self.evals2 = np.multiply(self.svals2, self.svals2)
+                    svals2 = svals2[:,np.newaxis]
+                self.svals2 = svals2
+                self.evals2 = self.svals2 * self.svals2
                 self.U = U
-                self.rsvecs2 = np.mat(rsvecs2)
+                self.rsvecs2 = rsvecs2
                 
-                self.VTYU = V.T * Y * U
+                self.VTYU = V.T @ Y @ U
             
             self.newevals1 = 1. / (self.evals1 + regparam1)
             self.newevals2 = 1. / (self.evals2 + regparam2)
-            newevals = np.multiply(self.svals1, self.newevals1) * np.multiply(self.svals2, self.newevals2).T
+            newevals = np.multiply(self.svals1, self.newevals1) @ np.multiply(self.svals2, self.newevals2).T
             
             self.W = np.multiply(self.VTYU, newevals)
-            self.W = self.rsvecs1.T * self.W * self.rsvecs2
-            #self.predictor = LinearPairwisePredictor(self.W)
-            self.predictor = LinearPairwisePredictor(np.array(self.W))
+            self.W = self.rsvecs1.T @ self.W @ self.rsvecs2
+            self.predictor = LinearPairwisePredictor(self.W)
+            #self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
     def in_sample_loo(self):
@@ -236,16 +234,30 @@ class TwoStepRLS(PairwisePredictorInterface):
         """
         if not self.kernelmode:
             X1, X2 = self.X1, self.X2
-            P = X1 * self.W * X2.T
+            P = X1 @ self.W @ X2.T
         else:
-            P = self.K1 * self.A * self.K2.T
+            P = self.K1 @ self.A @ self.K2.T
         
-        newevals = np.multiply(self.evals2 * self.evals1.T, 1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
-        Vsqr = np.multiply(self.V, self.V)
-        Usqr = np.multiply(self.U, self.U)
-        ccc = Vsqr * newevals.T * Usqr.T
+        newevals = (self.evals2 * self.evals1.T) * (1. / ((self.evals2 + self.regparam2) * (self.evals1.T + self.regparam1)))
+        Vsqr = self.V * self.V
+        Usqr = self.U * self.U
+        ccc = Vsqr @ newevals.T @ Usqr.T
         loopred = np.multiply(1. / (1. - ccc), P - np.multiply(ccc, self.Y))
         return np.asarray(loopred).ravel(order='F')
+    
+    
+    def in_sample_loo_symmetric(self):
+        Y_S = self.Y
+        AS_flag = 0
+        assert Y_S.shape[0] == Y_S.shape[1]
+        if (Y_S == Y_S.T).all(): AS_flag = 1
+        elif (Y_S == -Y_S.T).all(): AS_flag = -1
+        assert AS_flag == 1 or AS_flag == -1
+        F_S = self.K1 @ self.A @ self.K1.T
+        H = self.K1 @ la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
+        H_diags = np.diag(H).reshape((-1, 1)) @ np.diag(H).reshape((1, -1))
+        F_S_loo = (Y_S * H_diags + Y_S * H**2 - F_S) / (H_diags + AS_flag * H**2 - 1)
+        return F_S_loo.ravel(order = 'F')
     
     
     def in_sample_kfoldcv(self, folds, maxiter = None):
@@ -266,7 +278,7 @@ class TwoStepRLS(PairwisePredictorInterface):
             R1 = la.inv(X1.T @ X1 + self.regparam1 * np.eye(X1.shape[1])) @ X1.T
             R2 = la.inv(X2.T @ X2 + self.regparam2 * np.eye(X2.shape[1])) @ X2.T
         else:
-            P = self.K1 * self.A * self.K2.T
+            P = self.K1 @ self.A @ self.K2.T
             H1 = self.K1 @ la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
             H2 = self.K2 @ la.inv(self.K2 + self.regparam2 * np.eye(self.K2.shape[0]))
         
@@ -305,12 +317,12 @@ class TwoStepRLS(PairwisePredictorInterface):
             F[i + j*n_samples1] (column order).
         """
         
-        VTY = self.V.T * self.Y
+        VTY = self.V.T @ self.Y
         
         filteredevals1 = self.evals1 / (self.evals1 + self.regparam1)
         
         foo = np.multiply(VTY, filteredevals1)
-        foo = self.V * foo
+        foo = self.V @ foo
         foo = np.array(foo)
         rlsparams = {}
         rlsparams["regparam"] = self.regparam2
@@ -338,12 +350,12 @@ class TwoStepRLS(PairwisePredictorInterface):
             F[i + j*n_samples1] (column order).
         """
         
-        VTY = self.V.T * self.Y
+        VTY = self.V.T @ self.Y
         
         filteredevals1 = self.evals1 / (self.evals1 + self.regparam1)
         
         foo = np.multiply(VTY, filteredevals1)
-        foo = self.V * foo
+        foo = self.V @ foo
         foo = np.array(foo)
         rlsparams = {}
         rlsparams["regparam"] = self.regparam2
@@ -378,12 +390,12 @@ class TwoStepRLS(PairwisePredictorInterface):
             F[i + j*n_samples1] (column order).
         """
         
-        YU = self.Y * self.U
+        YU = self.Y @ self.U
         
         filteredevals2 = self.evals2 / (self.evals2 + self.regparam2)
         
         foo = np.multiply(YU, filteredevals2.T)
-        foo = foo * self.U.T
+        foo = foo @ self.U.T
         foo = np.array(foo)
         rlsparams = {}
         rlsparams["regparam"] = self.regparam1
@@ -411,12 +423,12 @@ class TwoStepRLS(PairwisePredictorInterface):
             F[i + j*n_samples1] (column order).
         """
         
-        YU = self.Y * self.U
+        YU = self.Y @ self.U
         
         filteredevals2 = self.evals2 / (self.evals2 + self.regparam2)
         
         foo = np.multiply(YU, filteredevals2.T)
-        foo = foo * self.U.T
+        foo = foo @ self.U.T
         foo = np.array(foo)
         rlsparams = {}
         rlsparams["regparam"] = self.regparam1
@@ -436,6 +448,38 @@ class TwoStepRLS(PairwisePredictorInterface):
             allhopreds[fold] = Pfold
         
         return allhopreds.ravel(order = 'F')
+    
+    
+    def leave_vertex_out(self):
+        Y_S = self.Y
+        AS_flag = 0
+        if (Y_S == Y_S.T).all(): AS_flag = 1
+        elif (Y_S == -Y_S.T).all(): AS_flag = -1
+        assert AS_flag == 1 or AS_flag == -1
+        F_S = self.K1 * self.A * self.K1.T
+        H = self.K1 @ la.inv(self.K1 + self.regparam1 * np.eye(self.K1.shape[0]))
+        H_diags = np.diag(H).reshape((-1, 1)) @ np.diag(H).reshape((1, -1))
+        
+        diag_m = lambda H : np.diag(np.diag(H))
+        
+        def leave_one_row_out(Y, H):
+            """
+            Computes the matrix F^LOO where F^LOO_{i.} is
+            the prediction of using Y without row i
+            """
+            return ((H - diag_m(H)) @ Y ) / (1 - np.diag(H)).reshape((-1, 1))
+        
+        def leave_one_row_complement(Y, H):
+            """
+            Computes the matrix F^COMP where F^COMP_{i.} is
+            the pred
+            """
+            n, _ = H.shape
+            return H @ (Y + diag_m ( (H - np.eye(n) @ Y / (1 - np.diag(H)).reshape((-1, 1)))))
+        
+        #def leave_one_vertex_out(Y, H):
+        Yloo = leave_one_row_complement(Y_S.T, H).T
+        return leave_one_row_complement(Yloo, H)    
     
     
     def out_of_sample_loo(self):
@@ -465,17 +509,17 @@ class TwoStepRLS(PairwisePredictorInterface):
         bevals_col = np.multiply(self.evals2, self.newevals2).T
         
         svecsm_col = np.multiply(bevals_col, self.U)
-        RQR_col = np.sum(np.multiply(self.U, svecsm_col), axis = 1)
+        RQR_col = np.sum(np.multiply(self.U, svecsm_col), axis = 1)[:, np.newaxis]
         LOO_ek_col = (1. / (1. - RQR_col))
-        LOO_col = (np.multiply(LOO_ek_col, self.U * (svecsm_col.T * self.Y.T)) - np.multiply(LOO_ek_col, np.multiply(RQR_col, self.Y.T))).T
+        LOO_col = (np.multiply(LOO_ek_col, self.U @ (svecsm_col.T @ self.Y.T)) - np.multiply(LOO_ek_col, np.multiply(RQR_col, self.Y.T))).T
         
         
         bevals_row = np.multiply(self.evals1, self.newevals1).T
         
         svecsm_row = np.multiply(bevals_row, self.V)
-        RQR_row = np.sum(np.multiply(self.V, svecsm_row), axis = 1)
+        RQR_row = np.sum(np.multiply(self.V, svecsm_row), axis = 1)[:, np.newaxis]
         LOO_ek_row = (1. / (1. - RQR_row))
-        LOO_two_step = np.multiply(LOO_ek_row, self.V * (svecsm_row.T * LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
+        LOO_two_step = np.multiply(LOO_ek_row, self.V @ (svecsm_row.T @ LOO_col)) - np.multiply(LOO_ek_row, np.multiply(RQR_row, LOO_col))
         LOO_two_step = np.array(LOO_two_step)
         
         '''
@@ -544,12 +588,13 @@ class TwoStepRLS(PairwisePredictorInterface):
         """
         
         
-        G = np.multiply((self.newevals1.T-(1./self.regparam1)), self.V) * self.V.T + (1./self.regparam1) * np.mat(np.identity(self.K1.shape[0]))
-        GY = G * self.Y
-        GYG = GY * G
+        G = ((self.newevals1.T-(1./self.regparam1)) * self.V) @ self.V.T + (1./self.regparam1) * np.identity(self.K1.shape[0])
+        GY = G @ self.Y
+        YG = self.Y @ G
+        GYG = GY @ G
         
         results = np.zeros((self.Y.shape[0], self.Y.shape[1]))
-        _two_step_rls.out_of_sample_loo_symmetric(G, self.Y, GY, GYG, results, self.Y.shape[0], self.Y.shape[1])
+        _two_step_rls.out_of_sample_loo_symmetric(G, self.Y, GY, YG, GYG, results, self.Y.shape[0], self.Y.shape[1])
         return results.ravel(order = 'F')
 
 
