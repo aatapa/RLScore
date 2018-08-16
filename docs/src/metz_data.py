@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 def load_metz():
     Y = np.loadtxt("known_drug-target_interaction_affinities_pKi__Metz_et_al.2011.txt")
@@ -9,12 +8,12 @@ def load_metz():
     Y = Y[drug_inds, target_inds]
     return XD, XT, Y, drug_inds, target_inds
 
-def setting1_split():
+def settingA_split():
     XD, XT, Y, drug_inds, target_inds = load_metz()
-    random.seed(77)
-    #random split to train/test, corresponds to setting 1
-    ind = range(len(Y))
-    random.shuffle(ind)
+    np.random.seed(77)
+    #random split to train/test, corresponds to setting A
+    ind = list(range(len(Y)))
+    np.random.shuffle(ind)
     train_ind = ind[:50000]
     test_ind = ind[50000:]
     train_drug_inds = drug_inds[train_ind]
@@ -25,12 +24,12 @@ def setting1_split():
     Y_test = Y[test_ind]
     return XD, XT, train_drug_inds, train_target_inds, Y_train, test_drug_inds, test_target_inds, Y_test
 
-def setting2_split():
+def settingB_split():
     XD, XT, Y, drug_inds, target_inds = load_metz()
-    random.seed(77)
-    #random split to train/test, corresponds to setting 2
-    drows = range(XD.shape[0])
-    random.shuffle(drows)
+    np.random.seed(77)
+    #random split to train/test, corresponds to setting B
+    drows = list(range(XD.shape[0]))
+    np.random.shuffle(drows)
     train_drows = set(drows[:800])
     #test_drug_ind = set(drug_ind[800:])
     train_ind = []
@@ -48,12 +47,12 @@ def setting2_split():
     Y_test = Y[test_ind]
     return XD, XT, train_drug_inds, train_target_inds, Y_train, test_drug_inds, test_target_inds, Y_test
 
-def setting3_split():
+def settingC_split():
     XD, XT, Y, drug_inds, target_inds = load_metz()
-    random.seed(77)
-    #random split to train/test, corresponds to setting 3
-    trows = range(XT.shape[0])
-    random.shuffle(trows)
+    np.random.seed(77)
+    #random split to train/test, corresponds to setting C
+    trows = list(range(XT.shape[0]))
+    np.random.shuffle(trows)
     train_trows = set(trows[:80])
     train_ind = []
     test_ind = []
@@ -71,15 +70,15 @@ def setting3_split():
     return XD, XT, train_drug_inds, train_target_inds, Y_train, test_drug_inds, test_target_inds, Y_test
 
 
-def setting4_split():
+def settingD_split():
     XD, XT, Y, drug_inds, target_inds = load_metz()
-    random.seed(77)
-    #random split to train/test, corresponds to setting 4
-    drows = range(XD.shape[0])
-    random.shuffle(drows)
+    np.random.seed(77)
+    #random split to train/test, corresponds to setting D
+    drows = list(range(XD.shape[0]))
+    np.random.shuffle(drows)
     train_drows = set(drows[:800])
-    trows = range(XT.shape[0])
-    random.shuffle(trows)
+    trows = list(range(XT.shape[0]))
+    np.random.shuffle(trows)
     train_trows = set(trows[:80])
     train_ind = []
     test_ind = []

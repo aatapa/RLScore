@@ -23,7 +23,7 @@ class CallBack(object):
         pass
     
 def main():
-    XD, XT, train_drug_inds, train_target_inds, Y_train, test_drug_inds, test_target_inds, Y_test = metz_data.setting3_split()
+    XD, XT, train_drug_inds, train_target_inds, Y_train, test_drug_inds, test_target_inds, Y_test = metz_data.settingC_split()
     cb = CallBack(XD, XT, Y_test, test_drug_inds, test_target_inds)
     learner = CGKronRLS(X1 = XD, X2 = XT, Y=Y_train, label_row_inds = train_drug_inds, label_col_inds = train_target_inds, callback = cb, maxiter=1000)
     

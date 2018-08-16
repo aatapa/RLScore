@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 def load_davis():
     Y = np.loadtxt("drug-target_interaction_affinities_Kd__Davis_et_al.2011.txt")
@@ -7,11 +6,11 @@ def load_davis():
     XT = np.loadtxt("target-target_similarities_WS.txt")    
     return XD, XT, Y
 
-def setting2_split():
-    random.seed(1)
+def settingB_split():
+    np.random.seed(1)
     XD, XT, Y = load_davis()
-    drug_ind = range(Y.shape[0])
-    random.shuffle(drug_ind)
+    drug_ind = list(range(Y.shape[0]))
+    np.random.shuffle(drug_ind)
     train_drug_ind = drug_ind[:40]
     test_drug_ind = drug_ind[40:]
     #Setting 2: split according to drugs
@@ -25,12 +24,12 @@ def setting2_split():
     XT_test = XT
     return XD_train, XT_train, Y_train, XD_test, XT_test, Y_test   
 
-def setting3_split():
-    random.seed(1)
+def settingC_split():
+    np.random.seed(1)
     XD, XT, Y = load_davis()
-    drug_ind = range(Y.shape[0])
-    target_ind = range(Y.shape[1])
-    random.shuffle(target_ind)
+    drug_ind = list(range(Y.shape[0]))
+    target_ind = list(range(Y.shape[1]))
+    np.random.shuffle(target_ind)
     train_target_ind = target_ind[:300]
     test_target_ind = target_ind[300:]
     #Setting 3: split according to targets
@@ -44,13 +43,13 @@ def setting3_split():
     XT_test = XT[test_target_ind]
     return XD_train, XT_train, Y_train, XD_test, XT_test, Y_test  
 
-def setting4_split():
-    random.seed(1)
+def settingD_split():
+    np.random.seed(1)
     XD, XT, Y = load_davis()
-    drug_ind = range(Y.shape[0])
-    target_ind = range(Y.shape[1])
-    random.shuffle(drug_ind)
-    random.shuffle(target_ind)
+    drug_ind = list(range(Y.shape[0]))
+    target_ind = list(range(Y.shape[1]))
+    np.random.shuffle(drug_ind)
+    np.random.shuffle(target_ind)
     train_drug_ind = drug_ind[:40]
     test_drug_ind = drug_ind[40:]
     train_target_ind = target_ind[:300]

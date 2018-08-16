@@ -3,7 +3,7 @@ from rlscore.measure import cindex
 import davis_data
 
 def main():
-    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.setting2_split()
+    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.settingB_split()
     learner = TwoStepRLS(X1 = X1_train, X2 = X2_train, Y = Y_train, regparam1=1.0, regparam2=1.0)
     log_regparams1 = range(-8, -4)
     log_regparams2 = range(20,25)

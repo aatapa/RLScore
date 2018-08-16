@@ -14,7 +14,7 @@ Data set
 --------
 
 We consider the classical
-`Boston Housing data set <https://archive.ics.uci.edu/ml/datasets/Housing>`_
+`Boston Housing data set <https://archive.ics.uci.edu/ml/machine-learning-databases/housing/>`_
 from the UCI machine learning repository. The data consists of 506 instances,
 13 features and 1 output to be predicted.
 
@@ -223,7 +223,7 @@ Adult data set
 --------------
 
 In this experiment, we build a binary classifier on the 
-`Adult data set https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html`_.
+`Adult data set <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_.
 We model this as a regression problem, where +1 encodes the positive class,
 and -1 the negative one. This is the standard encoding assumed by the
 performance measures within the RLScore package.

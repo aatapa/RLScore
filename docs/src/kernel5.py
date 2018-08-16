@@ -4,7 +4,7 @@ from rlscore.measure import sqerror
 
 from housing_data import load_housing
 import random
-random.seed(55)
+random.seed(1)
 
 def train_rls():
     X_train, Y_train, X_test, Y_test = load_housing()

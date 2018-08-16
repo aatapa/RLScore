@@ -3,7 +3,7 @@ from rlscore.measure import cindex
 import davis_data
 
 def main():
-    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.setting4_split()
+    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.settingD_split()
     K1_train = X1_train.dot(X1_train.T)
     K2_train = X2_train.dot(X2_train.T)
     K1_test = X1_test.dot(X1_train.T)

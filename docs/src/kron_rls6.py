@@ -4,7 +4,7 @@ from rlscore.kernel.gaussian_kernel import GaussianKernel
 import davis_data
 
 def main():
-    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.setting4_split()
+    X1_train, X2_train, Y_train, X1_test, X2_test, Y_test = davis_data.settingD_split()
     kernel1 = GaussianKernel(X1_train, gamma=0.01)
     kernel2 = GaussianKernel(X2_train, gamma=10**-9)
     K1_train = kernel1.getKM(X1_train)

@@ -1,0 +1,40 @@
+regparam 2**-8 2**20, test set cindex 0.859528
+regparam 2**-8 2**20, K-fold cindex 0.848338
+regparam 2**-8 2**21, test set cindex 0.864690
+regparam 2**-8 2**21, K-fold cindex 0.852689
+regparam 2**-8 2**22, test set cindex 0.868333
+regparam 2**-8 2**22, K-fold cindex 0.855798
+regparam 2**-8 2**23, test set cindex 0.870697
+regparam 2**-8 2**23, K-fold cindex 0.857111
+regparam 2**-8 2**24, test set cindex 0.871736
+regparam 2**-8 2**24, K-fold cindex 0.856163
+regparam 2**-7 2**20, test set cindex 0.858433
+regparam 2**-7 2**20, K-fold cindex 0.846538
+regparam 2**-7 2**21, test set cindex 0.863401
+regparam 2**-7 2**21, K-fold cindex 0.850740
+regparam 2**-7 2**22, test set cindex 0.866956
+regparam 2**-7 2**22, K-fold cindex 0.853785
+regparam 2**-7 2**23, test set cindex 0.869128
+regparam 2**-7 2**23, K-fold cindex 0.854982
+regparam 2**-7 2**24, test set cindex 0.869852
+regparam 2**-7 2**24, K-fold cindex 0.853804
+regparam 2**-6 2**20, test set cindex 0.856016
+regparam 2**-6 2**20, K-fold cindex 0.843186
+regparam 2**-6 2**21, test set cindex 0.860732
+regparam 2**-6 2**21, K-fold cindex 0.847180
+regparam 2**-6 2**22, test set cindex 0.864151
+regparam 2**-6 2**22, K-fold cindex 0.850133
+regparam 2**-6 2**23, test set cindex 0.866186
+regparam 2**-6 2**23, K-fold cindex 0.851215
+regparam 2**-6 2**24, test set cindex 0.866570
+regparam 2**-6 2**24, K-fold cindex 0.849806
+regparam 2**-5 2**20, test set cindex 0.851254
+regparam 2**-5 2**20, K-fold cindex 0.837417
+regparam 2**-5 2**21, test set cindex 0.855569
+regparam 2**-5 2**21, K-fold cindex 0.841089
+regparam 2**-5 2**22, test set cindex 0.858841
+regparam 2**-5 2**22, K-fold cindex 0.843835
+regparam 2**-5 2**23, test set cindex 0.860764
+regparam 2**-5 2**23, K-fold cindex 0.844748
+regparam 2**-5 2**24, test set cindex 0.860787
+regparam 2**-5 2**24, K-fold cindex 0.843035

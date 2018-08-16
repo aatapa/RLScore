@@ -75,7 +75,7 @@ Feature selection with MNIST
 
 In this tutorial, we select features for the `MNIST handwritten digit recognition data set
 <http://yann.lecun.com/exdb/mnist/>`_. For reading in the data, we use the
-`python-mnist package <https://pypi.python.org/pypi/python-mnist/>`_. (Easiest way to install: 'pip install python-mnist').
+`python-mnist package <https://pypi.python.org/pypi/python-mnist/>`_. (Easiest way to install: 'pip install python-mnist'). We assume, the unzipped MNIST data is stored in folder 'data'.
 
 There are now 60000 training examples, 10000 test examples, 784 features and 10 classes. The goal is to
 select such common features that allow jointly predicting all the 10 classes as well as possible. The
