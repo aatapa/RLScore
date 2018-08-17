@@ -479,7 +479,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         
         #def leave_one_vertex_out(Y, H):
         Yloo = leave_one_row_complement(Y_S.T, H).T
-        return leave_one_row_complement(Yloo, H)    
+        return leave_one_row_complement(Yloo, H).ravel(order="F")    
     
     
     def out_of_sample_loo(self):
