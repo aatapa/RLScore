@@ -21,7 +21,7 @@ A is the standard setting of matrix completion, that has been considered especia
 problems, that can also be solved by using the regular RLS. Setting D can be seen as an example
 of the zero-shot learning problem, where we need to generalize from related learning tasks to a new
 problem, for which we have no training data. For the homogenous network case, settings B and C become equivalent.
-For a more detailed overview of these four settings, as well as analysis and comparison of different Kronecker kernel RLS methods, see [1]_ and [2]_.
+For a more detailed overview of these four settings, as well as analysis and comparison of different Kronecker kernel RLS methods, see [1]_ and [2]_. Terminology varies between the articles, the settings considered in [2]_ can be mapped to this tutorial as follows: I=A, R=B, C=C, B=D (bipartite case); E=A, V=B/C (homogenous case).
 
 We assume that the feature representations of the inputs are given either as two data matrices
 X1 and X2, or as two kernel matrices K1 and K2. The feature representation can then be formed
@@ -216,7 +216,7 @@ Kfold cross-validation. Same as above, but several (drug, target) pairs left out
 
 .. literalinclude:: src/two_step4b.out
 
-Tutorial 2: TwoStepRLS, cross-validation with bipartite network
+Tutorial 2: TwoStepRLS, cross-validation with homogenous network
 ***************************************************************
 
 Here, our goal is to predict one type of drug similarity matrix (ECFP4 similarities) from another (2D similarities). For these experiments, we need to download
@@ -224,6 +224,8 @@ from the `drug-target binding affinity data sets <http://staff.cs.utu.fi/~aatapa
 for the Metz et al. data the
 `drug-drug ECFP4 similarities (Y) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-drug_similarities_ECFP4.txt>`_ and
 `drug-drug 2D similarities (X) <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/drug-drug_similarities_2D__Metz_et_al.2011.txt>`_.
+
+These implementations are a work in progress, and the inteface may still change. Currently, only the kernel versions are implemented, and only symmetric (f(u,v) = f(v,u)) or antisymmetric (f(u,v) = -f(v,u)) labels are supported.
 
 Setting A
 ---------
