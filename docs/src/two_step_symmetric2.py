@@ -12,7 +12,7 @@ def main():
     log_regparams = range(-10, 0)
     for log_regparam in log_regparams:
         learner.solve(2.**log_regparam, 2.**log_regparam)
-        P = learner.leave_vertex_out().ravel(order="F")
+        P = learner.leave_vertex_out()
         perf = cindex(Y, P)
         print("regparam 2**%d, cindex %f" %(log_regparam, perf))
 
