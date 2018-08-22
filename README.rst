@@ -110,7 +110,7 @@ Version 0.8.1 (2018.08.22):
 Version 0.8 (2017.08.17):
 
 - Compatible with Python 3
-- Still works with Python 2.7
+- Last version still working properly with Python 2.7
 
 Version 0.7 (2016.09.19):
 
