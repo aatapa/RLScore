@@ -49,6 +49,24 @@ class PairwisePredictorInterface(object):
     """
         
     def predict(self, X1 = None, X2 = None, inds_X1pred = None, inds_X2pred = None, pko = None):
+        """Computes predictions for test examples.
+    
+        Parameters
+        ----------
+        X1 : {array-like}, shape = [n_samples1, n_features1]
+            first test data matrix
+        X2 : {array-like}, shape = [n_samples2, n_features2]
+            second test data matrix
+        inds_X1pred : array of indices, optional
+            rows of X1, for which predictions are needed
+        inds_X2pred : array of indices, optional
+            rows of X2, for which predictions are needed
+            
+        Notes
+        -----
+        
+        If using kernels, give kernel matrices K1 and K2 as arguments instead of X1 and X2   
+        """
         return self.predictor.predict(X1, X2, inds_X1pred, inds_X2pred, pko)
 
 class KernelPairwisePredictor(object):

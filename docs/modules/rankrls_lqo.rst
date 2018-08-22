@@ -1,5 +1,5 @@
 LeaveQueryOutRankRLS - QueryRankRLS with leave-query-out regularization parameter selection
-=================================================
+===========================================================================================
 
 .. module:: rlscore.learner.query_rankrls
 

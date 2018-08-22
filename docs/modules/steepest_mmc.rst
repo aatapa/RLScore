@@ -1,5 +1,5 @@
 SteepestDescentMMC - unsupervised RLS; maximum margin clustering type, steepest descent 
-==========================================
+=======================================================================================
 
 .. module:: rlscore.learner.steepest_descent_mmc
 

@@ -1,5 +1,5 @@
 KfoldRankRLS - GlobalRankRLS with Kfold cross-validation regularization parameter selection
-=================================================
+===========================================================================================
 
 .. module:: rlscore.learner.global_rankrls
 

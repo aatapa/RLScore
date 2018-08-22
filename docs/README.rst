@@ -10,9 +10,9 @@ RLScore - regularized least-squares machine learning algorithms package.
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
 :Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
-:Version:         0.8
+:Version:         0.8.1
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            August 17. 2017
+:Date:            August 22. 2018
 
 .. contents::
 
@@ -101,28 +101,35 @@ RLScore is described in the following article:
 History
 =======
 
-Version 0.8 (2017.08.17)
-------------------------
-- Compatible with Python 3
+Version 0.8.1 (2018.08.22):
 
-Version 0.7 (2016.09.19)
-------------------------
+- New tutorials for stacked (two-step) kernel ridge regression e.g. two-step RLS
+- Many technical improvements for learning with pairwise data
+- Requires Python 3.5 or newer due to the use of matrix product infix notation etc.
+
+Version 0.8 (2017.08.17):
+
+- Compatible with Python 3
+- Still works with Python 2.7
+
+Version 0.7 (2016.09.19):
+
 - Tutorials available
 - API documentation finished
 - TwoStep-learning cross-validation methods available
 - Unit testing extended
 - Simplified internal structure of the package
 
-Version 0.6 (2016.02.18)
-------------------------
+Version 0.6 (2016.02.18):
+
 - Major overhaul of learner interface, leaners now trained directly when initialized
 - TwoStep-learning method, better Kronecker learners
 - Cythonization of leave-pair-out cross-validation
 - Automated regularization parameter selection via cross-validation for RLS and RankRLS added
 - Old documentation removed as out-of-date, new documentation and tutorials in preparation
 
-Version 0.5.1 (2014.07.31)
-------------------------
+Version 0.5.1 (2014.07.31):
+
 - This is a work in progress version maintained in a github repository.
 - The command line functionality is dropped and the main focus is shifted towards the library interface.
 - The interface has been considerably simplified to ease the use of the library.
@@ -131,16 +138,15 @@ Version 0.5.1 (2014.07.31)
 - Support for a new type of interactive classification usable for image segmentation and various other tasks.
 - Numerous internal changes in the software.
 
-Version 0.5 (2012.06.19)
-------------------------
+Version 0.5 (2012.06.19):
+
 - CGRLS and CGRankRLS learners for conjugate gradient -based training of RLS/RankRLS on large and high-dimensional, but sparse data.
 - CGRankRLS supports learning from pairwise preferences between data points in addition to learning from utility values.
 - Library interface for Python. Code examples for almost all included learning algorithms.
 - Support for learning with Kronecker kernels.
 - Numerous internal changes in the software.
 
-Version 0.4 (2010.04.14)
-------------------------
+Version 0.4 (2010.04.14):
 
 - A linear time greedy forward feature selection with leave-one-out criterion for RLS (greedy RLS) included.
 - Example data and codes for basic use cases included in the distribution.
@@ -148,34 +154,28 @@ Version 0.4 (2010.04.14)
 - Modifications to the configuration file format.
 - All command line interfaces other than rls_core.py removed.
 
-
-Version 0.3 (2009.12.03)
-------------------------
+Version 0.3 (2009.12.03):
 
 - Major restructuring of the code to make the software more modular.
 - Configuration files introduced for more flexible use of software.
 - Evolutionary maximum-margin clustering included.
 - Model file format changed.
 
-Version 0.2.1 (2009.06.24)
---------------------------
+Version 0.2.1 (2009.06.24):
 
 - Fixed a bug causing one of the features to get ignored.
 
-Version 0.2 (2009.03.13)
-------------------------
+Version 0.2 (2009.03.13):
 
 - Major overhaul of the file formats.
 - RLScore now supports learning multiple tasks simultaneously.
 - Reduced set approximation included for large scale learning.
 
-Version 0.1.1 (2009.01.11)
---------------------------
+Version 0.1.1 (2009.01.11):
 
 - Fixed a bug causing a memory leak after training with sparse data and linear kernel.
 
-Version 0.1 (2008.10.18)
-------------------------
+Version 0.1 (2008.10.18):
 
 - First public release.
 

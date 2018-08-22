@@ -1,5 +1,5 @@
 LeavePairOutRankRLS - GlobalRankRLS with leave-pair-out regularization parameter selection
-=================================================
+==========================================================================================
 
 .. module:: rlscore.learner.global_rankrls
 

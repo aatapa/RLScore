@@ -217,7 +217,7 @@ Kfold cross-validation. Same as above, but several (drug, target) pairs left out
 .. literalinclude:: src/two_step4b.out
 
 Tutorial 2: TwoStepRLS, cross-validation with homogenous network
-***************************************************************
+****************************************************************
 
 Here, our goal is to predict one type of drug similarity matrix (ECFP4 similarities) from another (2D similarities). For these experiments, we need to download
 from the `drug-target binding affinity data sets <http://staff.cs.utu.fi/~aatapa/data/DrugTarget/>`_ page
@@ -256,7 +256,7 @@ Out-of-sample leave-one-out. On each CV round, a single (drug_i, drug_j) pair is
 .. literalinclude:: src/two_step_symmetric3.out
 
 Tutorial 3: CGKronRLS, incomplete data
-***************************
+**************************************
 
 In many applications one does not have available the correct labels for all (u,v) pairs
 in the training set. Rather, only a (possibly small) fraction of these are known. Next,
@@ -343,7 +343,7 @@ References
 .. [1] Michiel Stock, Tapio Pahikkala, Antti Airola, Bernard De Baets, and Willem Waegeman. A Comparative Study of Pairwise Learning Methods Based on Kernel Ridge Regression. Neural Computation, 30(8):2245--2283, 2018.
 .. [2] Michiel Stock, Tapio Pahikkala, Antti Airola, Willem Waegeman, and Bernard De Baets. (2018). Algebraic shortcuts for leave-one-out cross-validation in supervised network inference. bioRxiv, 242321.
 .. [3] Tapio Pahikkala, Willem Waegeman, Antti Airola, Tapio Salakoski, and Bernard De Baets. Conditional ranking on relational data. In José L. Balcázar, Francesco Bonchi, Aristides Gionis, and Michèle Sebag, editors, Machine Learning and Knowledge Discovery in Databases (ECML PKDD 2010), volume 6322 of Lecture Notes in Computer Science, pages 499--514. Springer, 2010.
-.. [4] 	Tapio Pahikkala, Antti Airola, Michiel Stock, Bernard De Baets, and Willem Waegeman. Efficient regularized least-squares algorithms for conditional ranking on relational data. Machine Learning, 93(2-3):321--356, 2013.
+.. [4] Tapio Pahikkala, Antti Airola, Michiel Stock, Bernard De Baets, and Willem Waegeman. Efficient regularized least-squares algorithms for conditional ranking on relational data. Machine Learning, 93(2-3):321--356, 2013.
 .. [5] Tapio Pahikkala, Michiel Stock, Antti Airola, Tero Aittokallio, Bernard De Baets, and Willem Waegeman. A two-step learning approach for solving full and almost full cold start problems in dyadic prediction. In Toon Calders, Floriana Esposito, Eyke Hüllermeier, and Rosa Meo, editors, Machine Learning and Knowledge Discovery in Databases (ECML PKDD 2014), volume 8725 of Lecture Notes in Computer Science, pages 517--532. Springer, 2014.
 .. [6] Tapio Pahikkala, Antti Airola, Sami Pietilä, Sushil Shakyawar, Agnieszka Szwajda, Jing Tang, and Tero Aittokallio. Toward more realistic drug-target interaction predictions. Briefings in Bioinformatics, 16(2):325--337, 2015.
 .. [7] Antti Airola, and Tapio Pahikkala. "Fast Kronecker Product Kernel Methods via Generalized Vec Trick." IEEE transactions on neural networks and learning systems 99 (2017): 1-14.

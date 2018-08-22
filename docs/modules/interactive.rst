@@ -1,5 +1,5 @@
 InteractiveRlsClassifier - interactive RLS clustering
-==========================================
+=====================================================
 
 .. module:: rlscore.learner.interactive_rls_classifier
 

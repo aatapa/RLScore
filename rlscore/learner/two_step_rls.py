@@ -75,7 +75,7 @@ class TwoStepRLS(PairwisePredictorInterface):
     -----------
     predictor : {LinearPairwisePredictor, KernelPairwisePredictor}
         trained predictor
-                  
+    
     Notes
     -----
     
@@ -247,6 +247,19 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def in_sample_loo_symmetric(self):
+        """
+        Computes the in-sample leave-one-out cross-validation predictions.
+        By in-sample we denote the setting, where we leave out one entry of
+        Y at a time, and due to (anti-)symmetry, where X1 = X2 (or K1 = K2)
+        and (a,b)=(b,a) (or (a,b)=-(b,a)) in Y, we further remove (b,a).
+        
+        Returns
+        -------
+        F : array, shape = [n_samples1*n_samples2]
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
+            
+        """
         Y_S = self.Y
         AS_flag = 0
         assert Y_S.shape[0] == Y_S.shape[1]
@@ -535,6 +548,23 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     
     def out_of_sample_kfold_cv(self, rowfolds, colfolds):
+        """
+        Computes the out-of-sample cross-validation predictions with given
+        subset of rows and columns. By out-of-sample we denote the
+        setting, where when leaving out an entry (a,b) in Y, we also remove
+        from training set all instances of type (a,x) and (x,b).
+        
+        Returns
+        -------
+        F : array, shape = [n_samples1*n_samples2]
+            Training set labels. Label for (X1[i], X2[j]) maps to
+            F[i + j*n_samples1] (column order).
+            
+        Notes
+        -----    
+                
+        Computational complexity [TODO]
+        """
         
         rlsparams = {}
         rlsparams["regparam"] = self.regparam1
@@ -576,9 +606,12 @@ class TwoStepRLS(PairwisePredictorInterface):
     
     def out_of_sample_loo_symmetric(self):
         """
-        Computes the out-of-sample cross-validation predictions. By out-of-sample we denote the
-        setting, where when leaving out an entry (a,b) in Y, we also remove from training set
-        all instances of type (a,x) and (x,b). For symmetric data, where X1 = X2 (or K1 = K2).
+        Computes the out-of-sample cross-validation predictions. By
+        out-of-sample we denote the setting, where when leaving out an entry
+        (a,b) in Y, we also remove from training set all instances of type
+        (a,x) and (x,b), and due to (anti-)symmetry, where X1 = X2 (or K1 = K2)
+        and (a,b)=(b,a) (or (a,b)=-(b,a)), we further remove from training set
+        all instances of type (x,a) and (b,x).
         
         Returns
         -------

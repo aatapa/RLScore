@@ -1,5 +1,5 @@
 GreedyRLS - greedy regularized least-squares feature selection
-==========================================
+==============================================================
 
 .. module:: rlscore.learner.greedy_rls
 

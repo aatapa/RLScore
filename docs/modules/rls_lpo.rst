@@ -1,5 +1,5 @@
 LeavePairOutRLS - RLS with leave-pair-out regularization parameter selection
-======================================================================
+============================================================================
 
 .. module:: rlscore.learner.rls
 

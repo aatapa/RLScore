@@ -1,5 +1,5 @@
 Learning to rank
-=============================
+================
 
 
 In this tutorial, we show how to train the ranking regularized least-squares (RankRLS)
@@ -182,7 +182,7 @@ cindex for each test query separately, and finally take the mean.
 .. literalinclude:: src/parse_ranking1.out
 
 Leave-query-out cross-validation
-------------------------------
+--------------------------------
 
 Next, we estimate the ranking accuracy on training set using leave-query-out cross-validation,
 where each query is in turn left out of the training set as holdout set. This is implemented
