@@ -73,7 +73,7 @@ Support for different tasks
 
    - Learning with Kronecker product kernels
        - Closed form solution for training models from complete data with labels for all pair-inputs available (KronRLS, TwoStepRLS)
-       - Four different types of leave-one-out cross-validation algorithms for pair-input data (TwoStepRLS)
+       - Leave-one-out and k-fold cross-validation algorithms for pair-input data (TwoStepRLS)
        - Iterative training algorithm for pair-input data, where only a subset of pairwise labels are known (CGKronRLS)
 
 -  Clustering
@@ -85,10 +85,10 @@ Software dependencies
 =====================
 
 RLScore is written in Python and thus requires a working
-installation of Python 3.x or Python 2.7.x. The package is also dependent on
+installation of Python 3.5 or newer. The package is also dependent on
 the `NumPy <http://numpy.scipy.org/>`_ package for matrix
 operations, and `SciPy <http://www.scipy.org/>`_ package for sparse
-matrix implementations.
+matrix implementations, and a c-compiler for building Cython extensions.
 
 Citing RLScore
 ==============
