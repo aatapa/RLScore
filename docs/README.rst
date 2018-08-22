@@ -182,9 +182,15 @@ Version 0.1 (2008.10.18):
 Credits
 =======
 
-:Former Contributors: `Evgeni Tsivtsivadze <http://learning-machines.com/>`_ -
-                      participated in designing the version 0.1 and co-authored some
-                      of the articles in which the implemented methods were proposed.
+:Other Contributors: 
+
+`Michiel Stock  <https://michielstock.github.io/>`_
+                provided code for fast cross-validation with stacked (two-step) kernel ridge regression (version 0.8.1)
+
+`Evgeni Tsivtsivadze <http://learning-machines.com/>`_
+                      participated in designing the version 0.1
+                        
+                       
 
 
 
