@@ -40,7 +40,7 @@ def as_2d_array(A, allow_sparse = False):
         A = A.todense()
     A = np.array(A, copy = False)
     shape = A.shape
-    if not np.issubdtype(A.dtype, int) and not np.issubdtype(A.dtype, float):
+    if not np.issubdtype(A.dtype, np.number):
         raise ValueError("Argument array contains non-numerical data") 
     if not len(shape) < 3:
         raise ValueError("Argument array of incorrect shape: expected 1D or 2D array, got %d dimensions" %len(shape))

@@ -9,7 +9,7 @@ def createKernelByModuleName(**kwargs):
     exec("from ..kernel import " + kname)
     kernelclazz = eval(kname)
     #get kernel arguments
-    args = inspect.getargspec(kernelclazz.__init__)[0]
+    args = inspect.getfullargspec(kernelclazz.__init__)[0]
     args = set(kwargs.keys()).intersection(set(args))
     #filter unnecessary arguments
     new_kwargs = {}
