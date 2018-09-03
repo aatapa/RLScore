@@ -182,23 +182,19 @@ class TwoStepRLS(PairwisePredictorInterface):
             if not self.trained:
                 self.trained = True
                 V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
-                self.svals1 = svals1[:,np.newaxis]
-                #self.svals1 = svals1.T
+                self.svals1 = svals1[:, np.newaxis]
                 self.evals1 = self.svals1 * self.svals1
                 self.V = V
                 self.rsvecs1 = rsvecs1
                 
                 if X1.shape == X2.shape and (X1 == X2).all():
-                    svals2, U, rsvecs2 = svals1, V, rsvecs1
+                    self.svals2, self.U, self.rsvecs2, self.evals2 = self.svals1, self.V, self.rsvecs1, self.evals1
                 else:
-                    U, svals2, rsvecs2 = linalg.svd_economy_sized(X2)
-                    svals2 = svals2[:,np.newaxis]
-                self.svals2 = svals2
-                self.evals2 = self.svals2 * self.svals2
-                self.U = U
-                self.rsvecs2 = rsvecs2
+                    self.U, self.svals2, self.rsvecs2 = linalg.svd_economy_sized(X2)
+                    self.svals2 = self.svals2[: ,np.newaxis]
+                    self.evals2 = self.svals2 * self.svals2
                 
-                self.VTYU = V.T @ Y @ U
+                self.VTYU = self.V.T @ Y @ self.U
             
             self.newevals1 = 1. / (self.evals1 + regparam1)
             self.newevals2 = 1. / (self.evals2 + regparam2)
@@ -207,7 +203,6 @@ class TwoStepRLS(PairwisePredictorInterface):
             self.W = np.multiply(self.VTYU, newevals)
             self.W = self.rsvecs1.T @ self.W @ self.rsvecs2
             self.predictor = LinearPairwisePredictor(self.W)
-            #self.predictor = LinearPairwisePredictor(np.array(self.W))
     
     
     def in_sample_loo(self):
@@ -621,7 +616,7 @@ class TwoStepRLS(PairwisePredictorInterface):
         """
         
         
-        G = ((self.newevals1.T-(1./self.regparam1)) * self.V) @ self.V.T + (1./self.regparam1) * np.identity(self.K1.shape[0])
+        G = ((self.newevals1.T-(1./self.regparam1)) * self.V) @ self.V.T + (1./self.regparam1) * np.identity(self.Y.shape[0])
         GY = G @ self.Y
         YG = self.Y @ G
         GYG = GY @ G

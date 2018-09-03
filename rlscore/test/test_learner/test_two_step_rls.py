@@ -442,6 +442,8 @@ class Test(unittest.TestCase):
             )
         K_train1 = K_train2
         K_test1 = K_test2
+        X_train1 = X_train2
+        X_test1 = X_test2
         Y_train_symm = 0.5 * (Y_train + Y_train.T)
         Y_train_asymm = 0.5 * (Y_train - Y_train.T)
         
@@ -453,7 +455,7 @@ class Test(unittest.TestCase):
         trainlabelcount = train_rows * train_columns
         
         def test_symm_and_asymm_cases(Y_train_symm_or_asymm):
-            #Train symmetric kernel two-step RLS with pre-computed kernel matrices
+            #Train (anti-)symmetric kernel two-step RLS with pre-computed kernel matrices
             params = {}
             params["regparam1"] = regparam2
             params["regparam2"] = regparam2
@@ -462,6 +464,15 @@ class Test(unittest.TestCase):
             params["Y"] = Y_train_symm_or_asymm
             kernel_two_step_learner_symmetric = TwoStepRLS(**params)
             #kernel_two_step_testpred = kernel_two_step_learner.predict(K_test1, K_test2).reshape((test_rows, test_columns), order = 'F')
+            
+            #Train (anti-)symmetric linear two-step RLS with data-matrices
+            params = {}
+            params["regparam1"] = regparam2
+            params["regparam2"] = regparam2
+            params["X1"] = X_train1
+            params["X2"] = X_train2
+            params["Y"] = Y_train_symm_or_asymm
+            linear_two_step_learner_symmetric = TwoStepRLS(**params)
             
             #Train two-step RLS without out-of-sample rows or columns
             rowind, colind = 2, 4
@@ -481,13 +492,15 @@ class Test(unittest.TestCase):
             kernel_kron_testpred = kernel_kron_learner.predict(K_train1[np.ix_([rowind], trainrowinds)], K_train2[np.ix_([colind], traincolinds)]).reshape((1, 1), order = 'F')
             
             fcsho = kernel_two_step_learner_symmetric.out_of_sample_loo_symmetric().reshape((train_rows, train_columns), order = 'F')
+            fcsho_linear = linear_two_step_learner_symmetric.out_of_sample_loo_symmetric().reshape((train_rows, train_columns), order = 'F')
             
             print(fcsho)
             print(kernel_kron_testpred)
             print('')
-            print('Symmetric double out-of-sample LOO: Test prediction, LOO')
-            print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]))
+            print('Symmetric double out-of-sample LOO: Test prediction, LOO_kernel, LOO_linear')
+            print('[2, 4]: ' + str(kernel_kron_testpred[0, 0]) + ' ' + str(fcsho[2, 4]) + ' ' + str(fcsho_linear[2, 4]))
             np.testing.assert_almost_equal(kernel_kron_testpred[0, 0], fcsho[2, 4])
+            np.testing.assert_almost_equal(kernel_kron_testpred[0, 0], fcsho_linear[2, 4])
             
             #Train ordinary kernel RLS in one step with the crazy kernel and symmetric labels for a reference
             params = {}
@@ -508,9 +521,12 @@ class Test(unittest.TestCase):
             print('(anti-)symmetric hold-out with crazy kernel RLS, two-step symmetric in-sample LOO, ho')
             print(crazylto)
             fcsloo = kernel_two_step_learner_symmetric.in_sample_loo_symmetric()#.reshape((train_rows, train_columns), order = 'F')
-            #print(fcsloo[2, 3], fcsloo[3, 2])
+            
+            #Not implemented yet
+            #fcsloo_linear = linear_two_step_learner_symmetric.in_sample_loo_symmetric()#.reshape((train_rows, train_columns), order = 'F')
+            
             print(fcsloo[symmhoinds[0]], fcsloo[symmhoinds[1]])
-            #print(fcsloo-fcsloo.T)
+            
             kernel_iscv_symmetric = kernel_two_step_learner_symmetric.in_sample_kfoldcv([([2, 3], [3, 2])])
             print(kernel_iscv_symmetric[symmhoinds])#, kernel_iscv_symmetric[3, 2])
             
