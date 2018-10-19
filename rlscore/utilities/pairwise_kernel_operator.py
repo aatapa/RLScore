@@ -63,7 +63,47 @@ class PairwiseKernelOperator(LinearOperator):
     
     def __init__(self, K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None, weights = None):
         
+        def slice_off_unnecessarities(K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None):
+            if row_inds_K1 is not None:
+                ui, ii = np.unique(row_inds_K1, return_inverse=True)
+                if K1.shape[0] - len(ui) > 0:
+                    nui = np.arange(len(ui))
+                    K1 = K1[ui]
+                    row_inds_K1 = nui[ii]
+            if col_inds_K1 is not None:
+                ui, ii = np.unique(col_inds_K1, return_inverse=True)
+                if K1.shape[1] - len(ui) > 0:
+                    nui = np.arange(len(ui))
+                    K1 = K1[:, ui]
+                    col_inds_K1 = nui[ii]
+            if row_inds_K2 is not None:
+                ui, ii = np.unique(row_inds_K2, return_inverse=True)
+                if K2.shape[0] - len(ui) > 0:
+                    nui = np.arange(len(ui))
+                    K2 = K2[ui]
+                    row_inds_K2 = nui[ii]
+            if col_inds_K2 is not None:
+                ui, ii = np.unique(col_inds_K2, return_inverse=True)
+                if K2.shape[1] - len(ui) > 0:
+                    nui = np.arange(len(ui))
+                    K2 = K2[:, ui]
+                    col_inds_K2 = nui[ii]
+            return K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2
+            
+        
         if isinstance(K1, (list, tuple)):
+            for i in range(len(self.K1)):
+                K1i = K1[i]
+                K2i = K2[i]
+                col_inds_K1i = col_inds_K1[i]
+                col_inds_K2i = col_inds_K2[i]
+                if row_inds_K1 is not None:
+                    row_inds_K1i = row_inds_K1[i]
+                    row_inds_K2i = row_inds_K2[i]
+                    K1[i], K2[i], row_inds_K1[i], row_inds_K2[i], col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, row_inds_K1i, row_inds_K2i, col_inds_K1i, col_inds_K2i)
+                else:
+                    K1[i], K2[i], foo, bar, col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, None, None, col_inds_K1i, col_inds_K2i)
+                    
             #This should not happen if interface is used according to requirements
             if len(K1[0].shape) == 1:
                 raise Exception("Initialized PairwiseKernelOperator object with 1D kernel matrix K1 in a list which is not supported")
@@ -76,6 +116,7 @@ class PairwiseKernelOperator(LinearOperator):
             else: cols = len(col_inds_K1[0])
             self.dtype = K1[0].dtype
         else:
+            K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2 = slice_off_unnecessarities(K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2)
             #This should not happen if interface is used according to requirements
             if len(K1.shape) == 1:
                 warnings.warn("Initialized PairwiseKernelOperator object with 1D kernel matrix K1")
@@ -105,6 +146,9 @@ class PairwiseKernelOperator(LinearOperator):
             if len(K2i.shape) == 1:
                 K2i = K2i.reshape(1, K2i.shape[0])
             if row_inds_K1i is not None:
+                if set(np.arange(K1i.shape[1])) != set(col_inds_K1i):
+                    print(len(set(np.arange(K1i.shape[1])) - set(col_inds_K1i)))
+                    print(K1i.shape[1] - len(np.unique(col_inds_K1i)))
                 P = sampled_kronecker_products.sampled_vec_trick(
                     v,
                     K2i,
