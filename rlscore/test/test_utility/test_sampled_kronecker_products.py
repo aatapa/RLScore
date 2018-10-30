@@ -57,6 +57,8 @@ class Test(unittest.TestCase):
                 if row_inds_N is None:
                     ss += 'row_inds_N is None\n'
             print(ss)
+            M = np.array(M, order = 'C')
+            N = np.array(N, order = 'C')
             return sampled_kronecker_products.sampled_vec_trick(v, M, N, row_inds_N, row_inds_M, col_inds_N, col_inds_M)
         
         def dd(M_rows, M_columns, N_rows, N_columns):
@@ -77,7 +79,7 @@ class Test(unittest.TestCase):
             
             V_replace_nans_with_zeros = (C.T * (C * V.ravel(order = 'F'))).reshape(N_columns, M_columns, order='F')
             res = verbosity_wrapper(v, M, N, u_col_inds, u_row_inds, v_col_inds, v_row_inds)
-            contr = (R * (N * np.mat(V_replace_nans_with_zeros * np.mat(M).T)).ravel(order = 'F').T).T
+            contr = (R * (N @ (V_replace_nans_with_zeros @ M.T)).ravel(order = 'F').T).T
             np.testing.assert_almost_equal(res.squeeze(), np.array(contr).squeeze())
             
             res = verbosity_wrapper(v, M, N, None, None, v_col_inds, v_row_inds)

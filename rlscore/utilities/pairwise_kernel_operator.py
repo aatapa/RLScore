@@ -30,6 +30,15 @@ from scipy.sparse.linalg import LinearOperator
 
 from rlscore.utilities import sampled_kronecker_products
 
+def create_ind_vecs(rows, columns):
+    rowstimescols = rows * columns
+    indmatrix = np.arange(rowstimescols).reshape(rows, columns)
+    row_inds, col_inds = np.unravel_index(indmatrix, (rows, columns))
+    row_inds, col_inds = np.array(row_inds.ravel(order = 'F'), dtype = np.int32), np.array(col_inds.ravel(order = 'F'), dtype = np.int32)
+    return row_inds, col_inds
+
+
+
 class PairwiseKernelOperator(LinearOperator):
     
     """Operator consisting of weighted sums of Kronecker product kernels for possibly incomplete data set.
@@ -64,73 +73,82 @@ class PairwiseKernelOperator(LinearOperator):
     def __init__(self, K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None, weights = None):
         
         def slice_off_unnecessarities(K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None):
-            if row_inds_K1 is not None:
-                ui, ii = np.unique(row_inds_K1, return_inverse=True)
-                if K1.shape[0] - len(ui) > 0:
-                    nui = np.arange(len(ui))
-                    K1 = K1[ui]
-                    row_inds_K1 = nui[ii]
-            if col_inds_K1 is not None:
-                ui, ii = np.unique(col_inds_K1, return_inverse=True)
-                if K1.shape[1] - len(ui) > 0:
-                    nui = np.arange(len(ui))
-                    K1 = K1[:, ui]
-                    col_inds_K1 = nui[ii]
-            if row_inds_K2 is not None:
-                ui, ii = np.unique(row_inds_K2, return_inverse=True)
-                if K2.shape[0] - len(ui) > 0:
-                    nui = np.arange(len(ui))
-                    K2 = K2[ui]
-                    row_inds_K2 = nui[ii]
-            if col_inds_K2 is not None:
-                ui, ii = np.unique(col_inds_K2, return_inverse=True)
-                if K2.shape[1] - len(ui) > 0:
-                    nui = np.arange(len(ui))
-                    K2 = K2[:, ui]
-                    col_inds_K2 = nui[ii]
+            
+            if len(K1.shape) == 1: K1 = K1.reshape(1, K1.shape[0])
+            if len(K2.shape) == 1: K2 = K2.reshape(1, K2.shape[0])
+            rc_m, cc_m = K2.shape
+            rc_n, cc_n = K1.shape
+            
+            if row_inds_K1 is None:
+                row_inds_K1, row_inds_K2 = create_ind_vecs(rc_n, rc_m)
+            if col_inds_K1 is None:
+                col_inds_K1, col_inds_K2 = create_ind_vecs(cc_n, cc_m)
+            
+            row_inds_K1 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K1, dtype=np.int32)))
+            row_inds_K2 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K2, dtype=np.int32)))
+            assert len(row_inds_K1) == len(row_inds_K2)
+            assert np.min(row_inds_K1) >= 0
+            assert np.min(row_inds_K2) >= 0
+            assert np.max(row_inds_K1) < rc_n
+            assert np.max(row_inds_K2) < rc_m
+            
+            col_inds_K1 = np.atleast_1d(np.squeeze(np.asarray(col_inds_K1, dtype=np.int32)))
+            col_inds_K2 = np.atleast_1d(np.squeeze(np.asarray(col_inds_K2, dtype=np.int32)))
+            assert len(col_inds_K1) == len(col_inds_K2)
+            assert np.min(col_inds_K1) >= 0
+            assert np.min(col_inds_K2) >= 0
+            assert np.max(col_inds_K1) < cc_n
+            assert np.max(col_inds_K2) < cc_m
+            
+            ui, ii = np.unique(row_inds_K1, return_inverse=True)
+            nui = np.arange(len(ui))
+            K1 = K1[ui]
+            row_inds_K1 = nui[ii]
+            
+            ui, ii = np.unique(col_inds_K1, return_inverse=True)
+            nui = np.arange(len(ui))
+            K1 = K1[:, ui]
+            col_inds_K1 = nui[ii]
+            
+            ui, ii = np.unique(row_inds_K2, return_inverse=True)
+            nui = np.arange(len(ui))
+            K2 = K2[ui]
+            row_inds_K2 = nui[ii]
+            
+            ui, ii = np.unique(col_inds_K2, return_inverse=True)
+            nui = np.arange(len(ui))
+            K2 = K2[:, ui]
+            col_inds_K2 = nui[ii]
+            
+            #These have to be re-assigned due to the above shape changes
+            rc_m, cc_m = K2.shape
+            rc_n, cc_n = K1.shape
+            
+            K1 = np.array(K1, order = 'C')
+            K2 = np.array(K2, order = 'C')
+            
             return K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2
             
         
         if isinstance(K1, (list, tuple)):
-            for i in range(len(self.K1)):
+            if row_inds_K1 is None:
+                row_inds_K1 = [None for i in range(len(K1))]
+                row_inds_K2 = [None for i in range(len(K2))]
+            for i in range(len(K1)):
                 K1i = K1[i]
                 K2i = K2[i]
                 col_inds_K1i = col_inds_K1[i]
                 col_inds_K2i = col_inds_K2[i]
-                if row_inds_K1 is not None:
-                    row_inds_K1i = row_inds_K1[i]
-                    row_inds_K2i = row_inds_K2[i]
-                    K1[i], K2[i], row_inds_K1[i], row_inds_K2[i], col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, row_inds_K1i, row_inds_K2i, col_inds_K1i, col_inds_K2i)
-                else:
-                    K1[i], K2[i], foo, bar, col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, None, None, col_inds_K1i, col_inds_K2i)
-                    
-            #This should not happen if interface is used according to requirements
-            if len(K1[0].shape) == 1:
-                raise Exception("Initialized PairwiseKernelOperator object with 1D kernel matrix K1 in a list which is not supported")
-            if len(K2[0].shape) == 1:
-                raise Exception("Initialized PairwiseKernelOperator object with 1D kernel matrix K2 in a list which is not supported")
-            
-            if row_inds_K1 is None: rows = K1[0].shape[0] * K2[0].shape[0]
-            else: rows = len(row_inds_K1[0])
-            if col_inds_K1 is None: cols = K1[0].shape[1] * K2[0].shape[1]
-            else: cols = len(col_inds_K1[0])
+                row_inds_K1i = row_inds_K1[i]
+                row_inds_K2i = row_inds_K2[i]
+                K1[i], K2[i], row_inds_K1[i], row_inds_K2[i], col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, row_inds_K1i, row_inds_K2i, col_inds_K1i, col_inds_K2i)
             self.dtype = K1[0].dtype
+            self.shape = len(row_inds_K1[0]), len(col_inds_K1[0])
         else:
             K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2 = slice_off_unnecessarities(K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2)
-            #This should not happen if interface is used according to requirements
-            if len(K1.shape) == 1:
-                warnings.warn("Initialized PairwiseKernelOperator object with 1D kernel matrix K1")
-                K1 = K1.reshape(1, K1.shape[0])
-            if len(K2.shape) == 1:
-                warnings.warn("Initialized PairwiseKernelOperator object with 1D kernel matrix K2")
-                K2 = K2.reshape(1, K2.shape[0])
-            
-            if row_inds_K1 is None: rows = K1.shape[0] * K2.shape[0]
-            else: rows = len(row_inds_K1)
-            if col_inds_K1 is None: cols = K1.shape[1] * K2.shape[1]
-            else: cols = len(col_inds_K1)
             self.dtype = K1.dtype
-        self.shape = rows, cols
+            self.shape = len(row_inds_K1), len(col_inds_K1)
+        
         self.K1, self.K2 = K1, K2
         self.row_inds_K1, self.row_inds_K2 = row_inds_K1, row_inds_K2
         self.col_inds_K1, self.col_inds_K2 = col_inds_K1, col_inds_K2
@@ -140,34 +158,16 @@ class PairwiseKernelOperator(LinearOperator):
         
         if len(v.shape) > 1:
             v = np.squeeze(v)
-        def inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i = None, row_inds_K2i = None):
-            if len(K1i.shape) == 1:
-                K1i = K1i.reshape(1, K1i.shape[0])
-            if len(K2i.shape) == 1:
-                K2i = K2i.reshape(1, K2i.shape[0])
-            if row_inds_K1i is not None:
-                if set(np.arange(K1i.shape[1])) != set(col_inds_K1i):
-                    print(len(set(np.arange(K1i.shape[1])) - set(col_inds_K1i)))
-                    print(K1i.shape[1] - len(np.unique(col_inds_K1i)))
-                P = sampled_kronecker_products.sampled_vec_trick(
-                    v,
-                    K2i,
-                    K1i,
-                    row_inds_K2i,
-                    row_inds_K1i,
-                    col_inds_K2i,
-                    col_inds_K1i)
-            else:
-                P = sampled_kronecker_products.sampled_vec_trick(
-                    v,
-                    K2i,
-                    K1i,
-                    None,
-                    None,
-                    col_inds_K2i,
-                    col_inds_K1i)
-                
-                #P = P.reshape((K1i.shape[0], K2i.shape[0]), order = 'F')
+        
+        def inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i):
+            P = sampled_kronecker_products.sampled_vec_trick(
+                v,
+                K2i,
+                K1i,
+                row_inds_K2i,
+                row_inds_K1i,
+                col_inds_K2i,
+                col_inds_K1i)
             P = np.array(P)
             return P
         
@@ -178,12 +178,9 @@ class PairwiseKernelOperator(LinearOperator):
                 K2i = self.K2[i]
                 col_inds_K1i = self.col_inds_K1[i]
                 col_inds_K2i = self.col_inds_K2[i]
-                if self.row_inds_K1 is not None:
-                    row_inds_K1i = self.row_inds_K1[i]
-                    row_inds_K2i = self.row_inds_K2[i]
-                    Pi = inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i)
-                else:
-                    Pi = inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, None, None)
+                row_inds_K1i = self.row_inds_K1[i]
+                row_inds_K2i = self.row_inds_K2[i]
+                Pi = inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i)
                 if P is None: P = self.weights[i] * Pi
                 else: P = P + self.weights[i] * Pi
         else:

@@ -30,7 +30,6 @@ from scipy.sparse.linalg import minres
 
 from rlscore.predictor import LinearPairwisePredictor
 from rlscore.predictor import KernelPairwisePredictor
-from rlscore.utilities import array_tools
 from rlscore.utilities import sampled_kronecker_products
 from rlscore.utilities import pairwise_kernel_operator
 from rlscore.predictor import PairwisePredictorInterface
@@ -186,8 +185,8 @@ class CGKronRLS(PairwisePredictorInterface):
             Y = np.array(self.Y).ravel(order = 'F')
             self.bestloss = float("inf")
             def mv(v):
-                v_after = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, self.input2_inds, self.input1_inds)
-                v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
+                v_after = sampled_kronecker_products.sampled_vec_trick(v, X2_C, X1_C, self.input2_inds, self.input1_inds)
+                v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2_F.T, X1_F.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
                 return v_after
             
             def mvr(v):
@@ -209,7 +208,11 @@ class CGKronRLS(PairwisePredictorInterface):
             
             G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
             v_init = np.array(self.Y).reshape(self.Y.shape[0])
-            v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2.T, X1.T, None, None, self.input2_inds, self.input1_inds)
+            X2_F = np.array(X2, order = 'F')
+            X1_F = np.array(X1, order = 'F')
+            X2_C = np.array(X2, order = 'C')
+            X1_C = np.array(X1, order = 'C')
+            v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2_F.T, X1_F.T, None, None, self.input2_inds, self.input1_inds)
             
             v_init = np.array(v_init).reshape(kronfcount)
             if 'warm_start' in kwargs:
