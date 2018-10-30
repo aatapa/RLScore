@@ -7,7 +7,7 @@ from cython.parallel import prange
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_width):
+def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):
     
     cdef Py_ssize_t innerind, outerind
     for innerind in prange(dst.shape[1], nogil=True):
@@ -31,7 +31,7 @@ def sparse_mat_from_left_old(double [:, ::1] dst, double [:] sparse_matrix, doub
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_height):
+def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):
     
     cdef Py_ssize_t innerind, outerind
     #for innerind in range(dst.shape[0]):
@@ -63,7 +63,7 @@ def sparse_mat_from_right_old(double [::1, :] dst, double [::1, :] dense_matrix,
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen, int veclen):
+def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen):
     
     cdef Py_ssize_t i, j
     cdef Py_ssize_t innerind, outerind

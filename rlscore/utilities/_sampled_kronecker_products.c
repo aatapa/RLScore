@@ -1716,7 +1716,6 @@ static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_struct[] = "struct";
 static const char __pyx_k_unpack[] = "unpack";
 static const char __pyx_k_update[] = "update";
-static const char __pyx_k_veclen[] = "veclen";
 static const char __pyx_k_fortran[] = "fortran";
 static const char __pyx_k_memview[] = "memview";
 static const char __pyx_k_Ellipsis[] = "Ellipsis";
@@ -1910,12 +1909,11 @@ static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
-static PyObject *__pyx_n_s_veclen;
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, CYTHON_UNUSED int __pyx_v_dense_width); /* proto */
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count); /* proto */
 static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_2sparse_mat_from_left_old(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, int __pyx_v_dense_width); /* proto */
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, CYTHON_UNUSED int __pyx_v_dense_height); /* proto */
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count); /* proto */
 static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_6sparse_mat_from_right_old(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, CYTHON_UNUSED int __pyx_v_dense_height); /* proto */
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_matrix_left, __Pyx_memviewslice __pyx_v_matrix_right, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, CYTHON_UNUSED int __pyx_v_subsetlen, CYTHON_UNUSED int __pyx_v_veclen); /* proto */
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_matrix_left, __Pyx_memviewslice __pyx_v_matrix_right, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, CYTHON_UNUSED int __pyx_v_subsetlen); /* proto */
 static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_10cpy_reorder(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_dst, PyObject *__pyx_v_src, PyObject *__pyx_v_rowcount, PyObject *__pyx_v_colcount); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -2012,7 +2010,7 @@ static PyObject *__pyx_codeobj__40;
 /* "rlscore/utilities/_sampled_kronecker_products.pyx":10
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_width):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -2027,19 +2025,16 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_1spa
   __Pyx_memviewslice __pyx_v_row_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_col_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_entry_count;
-  CYTHON_UNUSED int __pyx_v_dense_width;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("sparse_mat_from_left (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_sparse_matrix,&__pyx_n_s_dense_matrix,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_entry_count,&__pyx_n_s_dense_width,0};
-    PyObject* values[7] = {0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_sparse_matrix,&__pyx_n_s_dense_matrix,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_entry_count,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-        CYTHON_FALLTHROUGH;
         case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
         CYTHON_FALLTHROUGH;
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
@@ -2064,43 +2059,37 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_1spa
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_sparse_matrix)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 1); __PYX_ERR(0, 10, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, 1); __PYX_ERR(0, 10, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dense_matrix)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 2); __PYX_ERR(0, 10, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, 2); __PYX_ERR(0, 10, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_row_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 3); __PYX_ERR(0, 10, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, 3); __PYX_ERR(0, 10, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_col_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 4); __PYX_ERR(0, 10, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, 4); __PYX_ERR(0, 10, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_entry_count)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 5); __PYX_ERR(0, 10, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dense_width)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, 6); __PYX_ERR(0, 10, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, 5); __PYX_ERR(0, 10, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sparse_mat_from_left") < 0)) __PYX_ERR(0, 10, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 7) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -2109,7 +2098,6 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_1spa
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
       values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
     }
     __pyx_v_dst = __Pyx_PyObject_to_MemoryviewSlice_dcd__double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dst.memview)) __PYX_ERR(0, 10, __pyx_L3_error)
     __pyx_v_sparse_matrix = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_sparse_matrix.memview)) __PYX_ERR(0, 10, __pyx_L3_error)
@@ -2117,24 +2105,23 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_1spa
     __pyx_v_row_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_row_inds.memview)) __PYX_ERR(0, 10, __pyx_L3_error)
     __pyx_v_col_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_col_inds.memview)) __PYX_ERR(0, 10, __pyx_L3_error)
     __pyx_v_entry_count = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_entry_count == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L3_error)
-    __pyx_v_dense_width = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_dense_width == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 7, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 10, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sparse_mat_from_left", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 10, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("rlscore.utilities._sampled_kronecker_products.sparse_mat_from_left", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(__pyx_self, __pyx_v_dst, __pyx_v_sparse_matrix, __pyx_v_dense_matrix, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_entry_count, __pyx_v_dense_width);
+  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(__pyx_self, __pyx_v_dst, __pyx_v_sparse_matrix, __pyx_v_dense_matrix, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_entry_count);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, CYTHON_UNUSED int __pyx_v_dense_width) {
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_sparse_mat_from_left(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count) {
   Py_ssize_t __pyx_v_innerind;
   Py_ssize_t __pyx_v_outerind;
   PyObject *__pyx_r = NULL;
@@ -2264,7 +2251,7 @@ static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_spar
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":10
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_width):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -2520,7 +2507,7 @@ static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_2spa
 /* "rlscore/utilities/_sampled_kronecker_products.pyx":34
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_height):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -2535,19 +2522,16 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_5spa
   __Pyx_memviewslice __pyx_v_row_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_col_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_entry_count;
-  CYTHON_UNUSED int __pyx_v_dense_height;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("sparse_mat_from_right (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_dense_matrix,&__pyx_n_s_sparse_matrix,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_entry_count,&__pyx_n_s_dense_height,0};
-    PyObject* values[7] = {0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_dense_matrix,&__pyx_n_s_sparse_matrix,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_entry_count,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-        CYTHON_FALLTHROUGH;
         case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
         CYTHON_FALLTHROUGH;
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
@@ -2572,43 +2556,37 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_5spa
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dense_matrix)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 1); __PYX_ERR(0, 34, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, 1); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_sparse_matrix)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 2); __PYX_ERR(0, 34, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, 2); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_row_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 3); __PYX_ERR(0, 34, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, 3); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_col_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 4); __PYX_ERR(0, 34, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, 4); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_entry_count)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 5); __PYX_ERR(0, 34, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_dense_height)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, 6); __PYX_ERR(0, 34, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, 5); __PYX_ERR(0, 34, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sparse_mat_from_right") < 0)) __PYX_ERR(0, 34, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 7) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -2617,7 +2595,6 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_5spa
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
       values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
     }
     __pyx_v_dst = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dst.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
     __pyx_v_dense_matrix = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dense_matrix.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
@@ -2625,24 +2602,23 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_5spa
     __pyx_v_row_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_row_inds.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
     __pyx_v_col_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_col_inds.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
     __pyx_v_entry_count = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_entry_count == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
-    __pyx_v_dense_height = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_dense_height == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 7, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 34, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sparse_mat_from_right", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 34, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("rlscore.utilities._sampled_kronecker_products.sparse_mat_from_right", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(__pyx_self, __pyx_v_dst, __pyx_v_dense_matrix, __pyx_v_sparse_matrix, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_entry_count, __pyx_v_dense_height);
+  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(__pyx_self, __pyx_v_dst, __pyx_v_dense_matrix, __pyx_v_sparse_matrix, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_entry_count);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count, CYTHON_UNUSED int __pyx_v_dense_height) {
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4sparse_mat_from_right(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_dense_matrix, __Pyx_memviewslice __pyx_v_sparse_matrix, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, int __pyx_v_entry_count) {
   Py_ssize_t __pyx_v_innerind;
   Py_ssize_t __pyx_v_outerind;
   PyObject *__pyx_r = NULL;
@@ -2772,7 +2748,7 @@ static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_4spa
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":34
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_height):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -3030,7 +3006,7 @@ static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_6spa
 /* "rlscore/utilities/_sampled_kronecker_products.pyx":66
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen, int veclen):             # <<<<<<<<<<<<<<
+ * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t i, j
  */
@@ -3045,19 +3021,16 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_9com
   __Pyx_memviewslice __pyx_v_row_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_col_inds = { 0, 0, { 0 }, { 0 }, { 0 } };
   CYTHON_UNUSED int __pyx_v_subsetlen;
-  CYTHON_UNUSED int __pyx_v_veclen;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("compute_subset_of_matprod_entries (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_matrix_left,&__pyx_n_s_matrix_right,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_subsetlen,&__pyx_n_s_veclen,0};
-    PyObject* values[7] = {0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_dst,&__pyx_n_s_matrix_left,&__pyx_n_s_matrix_right,&__pyx_n_s_row_inds,&__pyx_n_s_col_inds,&__pyx_n_s_subsetlen,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-        CYTHON_FALLTHROUGH;
         case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
         CYTHON_FALLTHROUGH;
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
@@ -3082,43 +3055,37 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_9com
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_matrix_left)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 1); __PYX_ERR(0, 66, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, 1); __PYX_ERR(0, 66, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_matrix_right)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 2); __PYX_ERR(0, 66, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, 2); __PYX_ERR(0, 66, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_row_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 3); __PYX_ERR(0, 66, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, 3); __PYX_ERR(0, 66, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_col_inds)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 4); __PYX_ERR(0, 66, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, 4); __PYX_ERR(0, 66, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_subsetlen)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 5); __PYX_ERR(0, 66, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_veclen)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, 6); __PYX_ERR(0, 66, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, 5); __PYX_ERR(0, 66, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "compute_subset_of_matprod_entries") < 0)) __PYX_ERR(0, 66, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 7) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -3127,7 +3094,6 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_9com
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
       values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
     }
     __pyx_v_dst = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_dst.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
     __pyx_v_matrix_left = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_matrix_left.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
@@ -3135,24 +3101,23 @@ static PyObject *__pyx_pw_7rlscore_9utilities_27_sampled_kronecker_products_9com
     __pyx_v_row_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_row_inds.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
     __pyx_v_col_inds = __Pyx_PyObject_to_MemoryviewSlice_dc_int(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_col_inds.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
     __pyx_v_subsetlen = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_subsetlen == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L3_error)
-    __pyx_v_veclen = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_veclen == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 7, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 66, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compute_subset_of_matprod_entries", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 66, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("rlscore.utilities._sampled_kronecker_products.compute_subset_of_matprod_entries", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(__pyx_self, __pyx_v_dst, __pyx_v_matrix_left, __pyx_v_matrix_right, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_subsetlen, __pyx_v_veclen);
+  __pyx_r = __pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(__pyx_self, __pyx_v_dst, __pyx_v_matrix_left, __pyx_v_matrix_right, __pyx_v_row_inds, __pyx_v_col_inds, __pyx_v_subsetlen);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_matrix_left, __Pyx_memviewslice __pyx_v_matrix_right, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, CYTHON_UNUSED int __pyx_v_subsetlen, CYTHON_UNUSED int __pyx_v_veclen) {
+static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8compute_subset_of_matprod_entries(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_dst, __Pyx_memviewslice __pyx_v_matrix_left, __Pyx_memviewslice __pyx_v_matrix_right, __Pyx_memviewslice __pyx_v_row_inds, __Pyx_memviewslice __pyx_v_col_inds, CYTHON_UNUSED int __pyx_v_subsetlen) {
   Py_ssize_t __pyx_v_innerind;
   Py_ssize_t __pyx_v_outerind;
   PyObject *__pyx_r = NULL;
@@ -3274,7 +3239,7 @@ static PyObject *__pyx_pf_7rlscore_9utilities_27_sampled_kronecker_products_8com
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":66
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen, int veclen):             # <<<<<<<<<<<<<<
+ * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t i, j
  */
@@ -17288,7 +17253,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
-  {&__pyx_n_s_veclen, __pyx_k_veclen, sizeof(__pyx_k_veclen), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
@@ -17537,14 +17501,14 @@ static int __Pyx_InitCachedConstants(void) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":10
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_width):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
-  __pyx_tuple__22 = PyTuple_Pack(9, __pyx_n_s_dst, __pyx_n_s_sparse_matrix, __pyx_n_s_dense_matrix, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_entry_count, __pyx_n_s_dense_width, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(8, __pyx_n_s_dst, __pyx_n_s_sparse_matrix, __pyx_n_s_dense_matrix, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_entry_count, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(7, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_sparse_mat_from_left, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(6, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_sparse_mat_from_left, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 10, __pyx_L1_error)
 
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":21
  * @cython.boundscheck(False)
@@ -17561,14 +17525,14 @@ static int __Pyx_InitCachedConstants(void) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":34
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_height):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
-  __pyx_tuple__26 = PyTuple_Pack(9, __pyx_n_s_dst, __pyx_n_s_dense_matrix, __pyx_n_s_sparse_matrix, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_entry_count, __pyx_n_s_dense_height, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(8, __pyx_n_s_dst, __pyx_n_s_dense_matrix, __pyx_n_s_sparse_matrix, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_entry_count, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
-  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(7, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_sparse_mat_from_right, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(6, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_sparse_mat_from_right, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 34, __pyx_L1_error)
 
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":48
  * @cython.boundscheck(False)
@@ -17585,14 +17549,14 @@ static int __Pyx_InitCachedConstants(void) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":66
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen, int veclen):             # <<<<<<<<<<<<<<
+ * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t i, j
  */
-  __pyx_tuple__30 = PyTuple_Pack(11, __pyx_n_s_dst, __pyx_n_s_matrix_left, __pyx_n_s_matrix_right, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_subsetlen, __pyx_n_s_veclen, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(10, __pyx_n_s_dst, __pyx_n_s_matrix_left, __pyx_n_s_matrix_right, __pyx_n_s_row_inds, __pyx_n_s_col_inds, __pyx_n_s_subsetlen, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_innerind, __pyx_n_s_outerind); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__30);
   __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(7, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_compute_subset_of_matprod_entrie, 66, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(6, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rlscore_utilities__sampled_krone, __pyx_n_s_compute_subset_of_matprod_entrie, 66, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 66, __pyx_L1_error)
 
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":86
  * @cython.boundscheck(False)
@@ -17987,7 +17951,7 @@ if (!__Pyx_RefNanny) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":10
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_width):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_left(double [::1, :] dst, double [:] sparse_matrix, double [::1, :] dense_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -18011,7 +17975,7 @@ if (!__Pyx_RefNanny) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":34
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count, int dense_height):             # <<<<<<<<<<<<<<
+ * def sparse_mat_from_right(double [:, ::1] dst, double [:, ::1] dense_matrix, double [:] sparse_matrix, int [::1] row_inds, int [::1] col_inds, int entry_count):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t innerind, outerind
  */
@@ -18035,7 +17999,7 @@ if (!__Pyx_RefNanny) {
   /* "rlscore/utilities/_sampled_kronecker_products.pyx":66
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen, int veclen):             # <<<<<<<<<<<<<<
+ * def compute_subset_of_matprod_entries(double [::1] dst, double [:, ::1] matrix_left, double [::1, :] matrix_right, int [::1] row_inds, int [::1] col_inds, int subsetlen):             # <<<<<<<<<<<<<<
  * 
  *     cdef Py_ssize_t i, j
  */
