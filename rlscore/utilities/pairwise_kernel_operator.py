@@ -73,6 +73,10 @@ class PairwiseKernelOperator(LinearOperator):
     def __init__(self, K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None, weights = None):
         
         self.pko_adj = None
+        self.original_row_inds_K1 = row_inds_K1
+        self.original_row_inds_K2 = row_inds_K2
+        self.original_col_inds_K1 = col_inds_K1
+        self.original_col_inds_K2 = col_inds_K2
         
         def slice_off_unnecessarities(K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None):
             
@@ -150,13 +154,22 @@ class PairwiseKernelOperator(LinearOperator):
             return K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2, temp
         
         if isinstance(K1, (list, tuple)):
+            #These must be copied because the operator may modify the matrices
+            K1 = K1.copy()
+            K2 = K2.copy()
             self.temp = [None for i in range(len(K1))]
             if row_inds_K1 is None:
                 row_inds_K1 = [None for i in range(len(K1))]
                 row_inds_K2 = [None for i in range(len(K2))]
+            else:
+                row_inds_K1 = row_inds_K1.copy()
             if col_inds_K1 is None:
                 col_inds_K1 = [None for i in range(len(K1))]
                 col_inds_K2 = [None for i in range(len(K2))]
+            else:
+                row_inds_K2 = row_inds_K2.copy()
+            col_inds_K1 = col_inds_K1.copy()
+            col_inds_K2 = col_inds_K2.copy()
             for i in range(len(K1)):
                 K1i = K1[i]
                 K2i = K2[i]

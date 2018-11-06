@@ -93,8 +93,12 @@ class Test(unittest.TestCase):
         all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (train_rows, train_columns), order = 'F')
         #incinds = np.random.permutation(allindices)
         #incinds = np.random.choice(allindices, 50, replace = False)
-        incinds = np.random.choice(allindices, 40, replace = False)
-        label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds] 
+        incinds = np.random.choice(allindices, 10, replace = False)
+        label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds]
+        print(train_rows, train_columns)
+        print(np.unique(label_row_inds))
+        print(np.unique(label_col_inds))
+        #foo
         Y_train_known_outputs = Y_train.reshape(rowstimescols, order = 'F')[incinds]
         
         alltestindices = np.arange(test_rows * test_columns)
@@ -121,7 +125,7 @@ class Test(unittest.TestCase):
                 tp = LinearPairwisePredictor(learner.W).predict(X_test1, X_test2)
                 print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred.ravel(order = 'F')))))
             def finished(self, learner):
-                print('finished')
+                print('Training of linear Kronecker RLS finished')
         params = {}
         params["regparam"] = regparam
         params["X1"] = X_train1
@@ -151,7 +155,7 @@ class Test(unittest.TestCase):
                 tp = KernelPairwisePredictor(learner.A, learner.input1_inds, learner.input2_inds).predict(K_test1, K_test2)
                 print(str(self.round) + ' ' + str(np.mean(np.abs(tp - ordrls_testpred.ravel(order = 'F')))))
             def finished(self, learner):
-                print('finished')
+                print('Training of kernel Kronecker RLS finished')
         tcb = KernelCallback()
         params['callback'] = tcb
         kernel_kron_learner = CGKronRLS(**params)
