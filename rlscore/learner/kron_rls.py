@@ -200,7 +200,7 @@ class KronRLS(PairwisePredictorInterface):
             newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
             self.W = np.multiply(self.VTYU, newevals)
             self.W = self.rsvecs1.T * self.W * self.rsvecs2
-            self.predictor = LinearPairwisePredictor(np.array(self.W))
+            self.predictor = LinearPairwisePredictor(np.array(self.W).ravel(order = 'F'))
     
     
     def solve_linear_conditional_ranking(self, regparam):
@@ -247,7 +247,7 @@ class KronRLS(PairwisePredictorInterface):
         newevals = np.divide(kronsvals, np.multiply(kronsvals, kronsvals) + regparam)
         self.W = np.multiply(self.VTYU, newevals)
         self.W = self.rsvecs1.T * self.W * self.rsvecs2
-        self.predictor = LinearPairwisePredictor(np.array(self.W))
+        self.predictor = LinearPairwisePredictor(np.array(self.W).ravel(order = 'F'))
     
     
     def in_sample_loo(self):

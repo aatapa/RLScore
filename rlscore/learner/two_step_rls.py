@@ -202,7 +202,7 @@ class TwoStepRLS(PairwisePredictorInterface):
             
             self.W = np.multiply(self.VTYU, newevals)
             self.W = self.rsvecs1.T @ self.W @ self.rsvecs2
-            self.predictor = LinearPairwisePredictor(self.W)
+            self.predictor = LinearPairwisePredictor(self.W.ravel(order = 'F'))
     
     
     def in_sample_loo(self):

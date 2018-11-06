@@ -6,6 +6,7 @@ import numpy as np
 from scipy.sparse import lil_matrix
 
 from rlscore.utilities import sampled_kronecker_products
+from rlscore.utilities.pairwise_kernel_operator import PairwiseKernelOperator
 
 class Test(unittest.TestCase):
     
@@ -50,16 +51,21 @@ class Test(unittest.TestCase):
                     ss += 'col_inds_N is None\n'
                 if row_inds_N is None:
                     ss += 'row_inds_N is None\n'
+                temp = np.zeros((cc_n, rc_m), order = 'F')
             else:
                 ss += 'rc_m * v_len + cc_n * u_len >= rc_n * v_len + cc_m * u_len\n'
                 if col_inds_N is None:
                     ss += 'col_inds_N is None\n'
                 if row_inds_N is None:
                     ss += 'row_inds_N is None\n'
+                temp = np.zeros((rc_n, cc_m), order = 'C')
             print(ss)
-            M = np.array(M, order = 'C')
-            N = np.array(N, order = 'C')
-            return sampled_kronecker_products.sampled_vec_trick(v, M, N, row_inds_N, row_inds_M, col_inds_N, col_inds_M)
+            #M = np.array(M, order = 'C')
+            #N = np.array(N, order = 'C')
+            pko = PairwiseKernelOperator(N, M, row_inds_M, row_inds_N, col_inds_M, col_inds_N)
+            return pko.matvec(v)
+            x_after = np.zeros((u_len))
+            return sampled_kronecker_products.sampled_vec_trick(v, M, N, row_inds_N, row_inds_M, col_inds_N, col_inds_M, temp, x_after)
         
         def dd(M_rows, M_columns, N_rows, N_columns):
             #V is a sparse matrix and v is a vector containing the known entries of V in an arbitrary order
@@ -83,17 +89,18 @@ class Test(unittest.TestCase):
             np.testing.assert_almost_equal(res.squeeze(), np.array(contr).squeeze())
             
             res = verbosity_wrapper(v, M, N, None, None, v_col_inds, v_row_inds)
-            contr = ((N * np.mat(V_replace_nans_with_zeros * np.mat(M).T)).ravel(order = 'F').T).T
+            contr = (N @ V_replace_nans_with_zeros @ M.T).ravel(order = 'F')
+            np.testing.assert_almost_equal(np.sort(res.squeeze()), np.sort(np.array(contr).squeeze()))
             np.testing.assert_almost_equal(res.squeeze(), np.array(contr).squeeze())
             
             v_full = np.random.rand(M_columns * N_columns)
             res = verbosity_wrapper(v_full, M, N, u_col_inds, u_row_inds, None, None)
-            contr = (R * (N * np.mat(v_full.reshape(N_columns, M_columns, order='F') * np.mat(M).T)).ravel(order = 'F').T).T
+            contr = R @ (N @ v_full.reshape(N_columns, M_columns, order='F') @ M.T).ravel(order = 'F')
             np.testing.assert_almost_equal(res.squeeze(), np.array(contr).squeeze())
             
             v_full = np.random.rand(M_columns * N_columns)
             res = verbosity_wrapper(v_full, M, N, None, None, None, None)
-            contr = ((N * np.mat(v_full.reshape(N_columns, M_columns, order='F') * np.mat(M).T)).ravel(order = 'F').T).T
+            contr = (N @ (v_full.reshape(N_columns, M_columns, order='F') @ M.T)).ravel(order = 'F')
             np.testing.assert_almost_equal(res.squeeze(), np.array(contr).squeeze())
         
         print('\n')

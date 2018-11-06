@@ -159,7 +159,7 @@ class CGKronRLS(PairwisePredictorInterface):
             G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
-        else: #Primal case. Does not work with the operator interface yet.
+        else:
             self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
             self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
             X1 = kwargs['X1']
@@ -169,28 +169,15 @@ class CGKronRLS(PairwisePredictorInterface):
             if 'maxiter' in kwargs: maxiter = int(kwargs['maxiter'])
             else: maxiter = None
             
-            if isinstance(X1, (list, tuple)):
-                raise NotImplementedError("Got list or tuple as X1 but multiple kernel learning has not been implemented for the primal case yet.")
-                if 'weights' in kwargs: weights = kwargs['weights']
-                else: weights = np.ones((len(X1)))
-                x1tsize, x1fsize = X1[0].shape #m, d
-                x2tsize, x2fsize = X2[0].shape #q, r
-            else:
-                weights = None
-                x1tsize, x1fsize = X1.shape #m, d
-                x2tsize, x2fsize = X2.shape #q, r
-            
-            kronfcount = x1fsize * x2fsize
+            if 'weights' in kwargs: weights = kwargs['weights']
+            else: weights = None
             
             Y = np.array(self.Y).ravel(order = 'F')
             self.bestloss = float("inf")
             def mv(v):
-                v_after = sampled_kronecker_products.sampled_vec_trick(v, X2_C, X1_C, self.input2_inds, self.input1_inds)
-                v_after = sampled_kronecker_products.sampled_vec_trick(v_after, X2_F.T, X1_F.T, None, None, self.input2_inds, self.input1_inds) + regparam * v
+                v_after = pko.matvec(v)
+                v_after = pko.rmatvec(v_after) + regparam * v
                 return v_after
-            
-            def mvr(v):
-                raise Exception('This function should not be called!')
             
             def cgcb(v):
                 if self.compute_risk:
@@ -198,28 +185,23 @@ class CGKronRLS(PairwisePredictorInterface):
                     z = (Y - P)
                     loss = (np.dot(z,z)+regparam*np.dot(v,v))
                     if loss < self.bestloss:
-                        self.W = v.copy().reshape((x1fsize, x2fsize), order = 'F')
+                        self.W = v.copy().reshape(pko.shape, order = 'F')
                         self.bestloss = loss
                 else:
-                    self.W = v.reshape((x1fsize, x2fsize), order = 'F')
+                    self.W = v
                 if not self.callbackfun is None:
                     self.predictor = LinearPairwisePredictor(self.W)
                     self.callbackfun.callback(self)
             
-            G = LinearOperator((kronfcount, kronfcount), matvec = mv, rmatvec = mvr, dtype = np.float64)
             v_init = np.array(self.Y).reshape(self.Y.shape[0])
-            X2_F = np.array(X2, order = 'F')
-            X1_F = np.array(X1, order = 'F')
-            X2_C = np.array(X2, order = 'C')
-            X1_C = np.array(X1, order = 'C')
-            v_init = sampled_kronecker_products.sampled_vec_trick(v_init, X2_F.T, X1_F.T, None, None, self.input2_inds, self.input1_inds)
-            
-            v_init = np.array(v_init).reshape(kronfcount)
-            if 'warm_start' in kwargs:
+            pko = pairwise_kernel_operator.PairwiseKernelOperator(X1, X2, self.input1_inds, self.input2_inds, None, None, weights)
+            G = LinearOperator((pko.shape[1], pko.shape[1]), matvec = mv, dtype = np.float64)
+            v_init = pko.rmatvec(v_init)
+            '''if 'warm_start' in kwargs:
                 x0 = np.array(kwargs['warm_start']).reshape(kronfcount, order = 'F')
             else:
-                x0 = None
-            minres(G, v_init, x0 = x0, maxiter = maxiter, callback = cgcb, tol=1e-20)[0].reshape((x1fsize, x2fsize), order='F')
+                x0 = None'''
+            minres(G, v_init, maxiter = maxiter, callback = cgcb, tol=1e-20)#[0].reshape((pko_T.shape[0], pko.shape[1]), order='F')
             self.predictor = LinearPairwisePredictor(self.W, self.input1_inds, self.input2_inds, weights)
             if not self.callbackfun is None:
                     self.callbackfun.finished(self)

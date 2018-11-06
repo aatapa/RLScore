@@ -32,7 +32,7 @@ from rlscore.utilities import sampled_kronecker_products
 
 def create_ind_vecs(rows, columns):
     rowstimescols = rows * columns
-    indmatrix = np.arange(rowstimescols).reshape(rows, columns)
+    indmatrix = np.arange(rowstimescols).reshape(rows, columns, order = 'C')
     row_inds, col_inds = np.unravel_index(indmatrix, (rows, columns))
     row_inds, col_inds = np.array(row_inds.ravel(order = 'F'), dtype = np.int32), np.array(col_inds.ravel(order = 'F'), dtype = np.int32)
     return row_inds, col_inds
@@ -72,6 +72,8 @@ class PairwiseKernelOperator(LinearOperator):
     
     def __init__(self, K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None, weights = None):
         
+        self.pko_adj = None
+        
         def slice_off_unnecessarities(K1, K2, row_inds_K1 = None, row_inds_K2 = None, col_inds_K1 = None, col_inds_K2 = None):
             
             if len(K1.shape) == 1: K1 = K1.reshape(1, K1.shape[0])
@@ -83,6 +85,9 @@ class PairwiseKernelOperator(LinearOperator):
                 row_inds_K1, row_inds_K2 = create_ind_vecs(rc_n, rc_m)
             if col_inds_K1 is None:
                 col_inds_K1, col_inds_K2 = create_ind_vecs(cc_n, cc_m)
+            
+            v_len = len(col_inds_K1)
+            u_len = len(row_inds_K1)
             
             row_inds_K1 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K1, dtype=np.int32)))
             row_inds_K2 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K2, dtype=np.int32)))
@@ -120,6 +125,11 @@ class PairwiseKernelOperator(LinearOperator):
             K2 = K2[:, ui]
             col_inds_K2 = nui[ii]
             
+            if len(K1.shape) == 1:
+                K1 = K1[..., np.newaxis]
+            if len(K2.shape) == 1:
+                K2 = K2[..., np.newaxis]
+            
             #These have to be re-assigned due to the above shape changes
             rc_m, cc_m = K2.shape
             rc_n, cc_n = K1.shape
@@ -127,13 +137,26 @@ class PairwiseKernelOperator(LinearOperator):
             K1 = np.array(K1, order = 'C')
             K2 = np.array(K2, order = 'C')
             
-            return K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2
+            #if rc_m * v_len + cc_n * u_len < rc_n * v_len + cc_m * u_len:
+            #    temp = np.zeros((cc_n, rc_m), order = 'F')
+            #else:
+            #    temp = np.zeros((rc_n, cc_m), order = 'C')
+            temp = None
             
+            row_inds_K1 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K1, dtype=np.int32)))
+            row_inds_K2 = np.atleast_1d(np.squeeze(np.asarray(row_inds_K2, dtype=np.int32)))
+            col_inds_K1 = np.atleast_1d(np.squeeze(np.asarray(col_inds_K1, dtype=np.int32)))
+            col_inds_K2 = np.atleast_1d(np.squeeze(np.asarray(col_inds_K2, dtype=np.int32)))
+            return K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2, temp
         
         if isinstance(K1, (list, tuple)):
+            self.temp = [None for i in range(len(K1))]
             if row_inds_K1 is None:
                 row_inds_K1 = [None for i in range(len(K1))]
                 row_inds_K2 = [None for i in range(len(K2))]
+            if col_inds_K1 is None:
+                col_inds_K1 = [None for i in range(len(K1))]
+                col_inds_K2 = [None for i in range(len(K2))]
             for i in range(len(K1)):
                 K1i = K1[i]
                 K2i = K2[i]
@@ -141,11 +164,11 @@ class PairwiseKernelOperator(LinearOperator):
                 col_inds_K2i = col_inds_K2[i]
                 row_inds_K1i = row_inds_K1[i]
                 row_inds_K2i = row_inds_K2[i]
-                K1[i], K2[i], row_inds_K1[i], row_inds_K2[i], col_inds_K1[i], col_inds_K2[i] = slice_off_unnecessarities(K1i, K2i, row_inds_K1i, row_inds_K2i, col_inds_K1i, col_inds_K2i)
+                K1[i], K2[i], row_inds_K1[i], row_inds_K2[i], col_inds_K1[i], col_inds_K2[i], self.temp[i] = slice_off_unnecessarities(K1i, K2i, row_inds_K1i, row_inds_K2i, col_inds_K1i, col_inds_K2i)
             self.dtype = K1[0].dtype
             self.shape = len(row_inds_K1[0]), len(col_inds_K1[0])
         else:
-            K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2 = slice_off_unnecessarities(K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2)
+            K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2, self.temp = slice_off_unnecessarities(K1, K2, row_inds_K1, row_inds_K2, col_inds_K1, col_inds_K2)
             self.dtype = K1.dtype
             self.shape = len(row_inds_K1), len(col_inds_K1)
         
@@ -153,13 +176,14 @@ class PairwiseKernelOperator(LinearOperator):
         self.row_inds_K1, self.row_inds_K2 = row_inds_K1, row_inds_K2
         self.col_inds_K1, self.col_inds_K2 = col_inds_K1, col_inds_K2
         self.weights = weights if not weights is None else np.ones(len(K1))
+        self.x_after = None#np.zeros((self.shape[0]))
     
     def _matvec(self, v):
         
         if len(v.shape) > 1:
             v = np.squeeze(v)
         
-        def inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i):
+        def inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i, temp):
             P = sampled_kronecker_products.sampled_vec_trick(
                 v,
                 K2i,
@@ -167,7 +191,9 @@ class PairwiseKernelOperator(LinearOperator):
                 row_inds_K2i,
                 row_inds_K1i,
                 col_inds_K2i,
-                col_inds_K1i)
+                col_inds_K1i,
+                temp,
+                self.x_after)
             P = np.array(P)
             return P
         
@@ -180,12 +206,25 @@ class PairwiseKernelOperator(LinearOperator):
                 col_inds_K2i = self.col_inds_K2[i]
                 row_inds_K1i = self.row_inds_K1[i]
                 row_inds_K2i = self.row_inds_K2[i]
-                Pi = inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i)
+                tempi = self.temp[i]
+                Pi = inner_mv(v, K1i, K2i, col_inds_K1i, col_inds_K2i, row_inds_K1i, row_inds_K2i, tempi)
                 if P is None: P = self.weights[i] * Pi
                 else: P = P + self.weights[i] * Pi
         else:
-            P = inner_mv(v, self.K1, self.K2, self.col_inds_K1, self.col_inds_K2, self.row_inds_K1, self.row_inds_K2)
+            P = inner_mv(v, self.K1, self.K2, self.col_inds_K1, self.col_inds_K2, self.row_inds_K1, self.row_inds_K2, self.temp)
         #if len(origvshape) > 1:
         #    P = np.expand_dims(P, axis=1)
         return P
+    
+    def _adjoint(self):
+        if self.pko_adj is None:
+            if isinstance(self.K1, (list, tuple)):
+                K1_adj = [K1.T for K1 in self.K1]
+                K2_adj = [K2.T for K2 in self.K2]
+                self.pko_adj = PairwiseKernelOperator(K1_adj, K2_adj, self.col_inds_K1, self.col_inds_K2, self.row_inds_K1, self.row_inds_K2, self.weights)
+            else:
+                K1_adj = self.K1.T
+                K2_adj = self.K2.T
+                self.pko_adj = PairwiseKernelOperator(K1_adj, K2_adj, self.col_inds_K1, self.col_inds_K2, self.row_inds_K1, self.row_inds_K2, self.weights)
+        return self.pko_adj
         

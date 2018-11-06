@@ -132,56 +132,6 @@ class KernelPairwisePredictor(object):
                                                                   self.inds_K2training,
                                                                   self.weights)
         return pko.matvec(self.A)
-        '''
-        def inner_predict(K1pred, K2pred, inds_K1training, inds_K2training, inds_K1pred = None, inds_K2pred = None):
-            if len(K1pred.shape) == 1:
-                K1pred = K1pred.reshape(1, K1pred.shape[0])
-            if len(K2pred.shape) == 1:
-                K2pred = K2pred.reshape(1, K2pred.shape[0])
-            if inds_K1pred is not None:
-                inds_K1pred = np.array(inds_K1pred, dtype = np.int32)
-                inds_K2pred = np.array(inds_K2pred, dtype = np.int32)
-                P = sampled_kronecker_products.sampled_vec_trick(
-                    self.A,
-                    K2pred,
-                    K1pred,
-                    inds_K2pred,
-                    inds_K1pred,
-                    inds_K2training,
-                    inds_K1training)
-            else:
-                P = sampled_kronecker_products.sampled_vec_trick(
-                    self.A,
-                    K2pred,
-                    K1pred,
-                    None,
-                    None,
-                    inds_K2training,
-                    inds_K1training)
-                
-                #P = P.reshape((K1pred.shape[0], K2pred.shape[0]), order = 'F')
-            P = np.array(P)
-            return P
-        
-        if isinstance(K1pred, (list, tuple)):
-            P = None
-            for i in range(len(K1pred)):
-                K1i = K1pred[i]
-                K2i = K2pred[i]
-                inds1training = self.inds_K1training[i]
-                inds2training = self.inds_K2training[i]
-                if inds_K1pred is not None:
-                    inds1pred = inds_K1pred[i]
-                    inds2pred = inds_K2pred[i]
-                    Pi = inner_predict(K1i, K2i, inds1training, inds2training, inds1pred, inds2pred)
-                else:
-                    Pi = inner_predict(K1i, K2i, inds1training, inds2training, None, None)
-                if P is None: P = self.weights[i] * Pi
-                else: P = P + self.weights[i] * Pi
-            return P
-        else:
-            return inner_predict(K1pred, K2pred, self.inds_K1training, self.inds_K2training, inds_K1pred, inds_K2pred)
-        '''
 
 
 class LinearPairwisePredictor(object):
@@ -190,12 +140,12 @@ class LinearPairwisePredictor(object):
     
     Parameters
     ----------
-    W : {array-like}, shape = [n_features1, n_features2]
+    W : {array-like}, shape = [n_features1 * n_features2]
         primal coefficients for the Kronecker product features
         
     Attributes
     ----------
-    W : {array-like}, shape = [n_features1, n_features2]
+    W : {array-like}, shape = [n_features1 * n_features2]
         primal coefficients for the Kronecker product features
     
     """
@@ -204,6 +154,7 @@ class LinearPairwisePredictor(object):
         self.W = W
         self.inds_X1training, self.inds_X2training = inds_X1training, inds_X2training
         if weights is not None: self.weights = weights
+        else: self.weights = None
     
     
     def predict(self, X1pred, X2pred, inds_X1pred = None, inds_X2pred = None, pko = None):
@@ -227,46 +178,13 @@ class LinearPairwisePredictor(object):
             prediction for (X1[i], X2[j]) maps to P[i + j*n_samples1].
         """
         
-        def inner_predict(X1pred, X2pred, inds_X1training, inds_X2training, inds_X1pred = None, inds_X2pred = None):
-            if len(X1pred.shape) == 1:
-                if self.W.shape[0] > 1:
-                    X1pred = X1pred[np.newaxis, ...]
-                else:
-                    X1pred = X1pred[..., np.newaxis]
-            if len(X2pred.shape) == 1:
-                if self.W.shape[1] > 1:
-                    X2pred = X2pred[np.newaxis, ...]
-                else:
-                    X2pred = X2pred[..., np.newaxis]
-            if inds_X1pred is None:
-                P = np.dot(np.dot(X1pred, self.W), X2pred.T)
-            else:
-                P = sampled_kronecker_products.sampled_vec_trick(
-                        self.W.reshape((self.W.shape[0] * self.W.shape[1]), order = 'F'),
-                        X2pred,
-                        X1pred,
-                        np.array(inds_X2pred, dtype = np.int32),
-                        np.array(inds_X1pred, dtype = np.int32),
-                        None,
-                        None)
-            return P.ravel(order = 'F')
-        
-        if isinstance(X1pred, (list, tuple)):
-            P = None
-            for i in range(len(X1pred)):
-                X1i = X1pred[i]
-                X2i = X2pred[i]
-                inds1training = self.inds_X1training[i]
-                inds2training = self.inds_X2training[i]
-                if inds_X1pred is not None:
-                    inds1pred = inds_X1pred[i]
-                    inds2pred = inds_X2pred[i]
-                    Pi = inner_predict(X1i, X2i, inds1training, inds2training, inds1pred, inds2pred)
-                else:
-                    Pi = inner_predict(X1i, X2i, inds1training, inds2training, None, None)
-                if P is None: P = self.weights[i] * Pi
-                else: P = P + self.weights[i] * Pi
-            return P
-        else:
-            return inner_predict(X1pred, X2pred, self.inds_X1training, self.inds_X2training, inds_X1pred, inds_X2pred)
+        if pko == None:
+            pko = pairwise_kernel_operator.PairwiseKernelOperator(X1pred,
+                                                                  X2pred,
+                                                                  inds_X1pred,
+                                                                  inds_X2pred,
+                                                                  None,
+                                                                  None,
+                                                                  self.weights)
+        return pko.matvec(self.W)
 
