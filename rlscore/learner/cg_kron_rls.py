@@ -153,12 +153,14 @@ class CGKronRLS(PairwisePredictorInterface):
                 else:
                     self.A = v
                 if not self.callbackfun is None:
-                    self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
+                    self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, self.pko.weights)
                     self.callbackfun.callback(self)
             
             G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
             self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
-            self.predictor = KernelPairwisePredictor(self.A, self.pko.col_inds_K1, self.pko.col_inds_K2, self.pko.weights)
+            self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, self.pko.weights)
+            if not self.callbackfun is None:
+                    self.callbackfun.finished(self)
         else:
             self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
             self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
