@@ -29,8 +29,9 @@ import random as pyrandom
 pyrandom.seed(200)
 import numpy as np
 from rlscore.utilities import adapter
+from rlscore.learner.rls import RLS
 
-class InteractiveRlsClassifier(object):
+class InteractiveRlsClassifier(RLS):
     
     def __init__(self, X, regparam=1.0, number_of_clusters=2, kernel='LinearKernel', basis_vectors=None, Y = None, fixed_indices=None, callback=None,  **kwargs):
         kwargs['X'] = X 
@@ -65,10 +66,6 @@ class InteractiveRlsClassifier(object):
         self.fixedindices = []
         if fixed_indices is not None:
             self.fixedindices = fixed_indices
-        self.train()
-    
-    
-    def train(self):
         
         #Cached results
         self.evals = np.multiply(self.svals, self.svals)
@@ -112,6 +109,7 @@ class InteractiveRlsClassifier(object):
         
         #Initial working set contains all points
         self.new_working_set(list(range(self.size)))
+        self.updateA()
         
     
     
@@ -123,7 +121,8 @@ class InteractiveRlsClassifier(object):
     
     
     def updateA(self):
-        self.A = self.svecs * np.multiply(self.newevals.T, self.VTY)
+        self.A = self.svecs * self.DVTY
+        self.predictor = self.svdad.createModel(self)
     
     
     def new_working_set(self, working_set):
@@ -209,7 +208,7 @@ class InteractiveRlsClassifier(object):
         self.classvec[self.working_set] = self.classvec_ws
         for i in range(self.labelcount):
             self.classcounts[i] = self.size - np.count_nonzero(self.classvec - i)
-        
+        self.updateA()
         #self.compute_steepness_vector()
     
     
@@ -237,6 +236,7 @@ class InteractiveRlsClassifier(object):
         self.classvec[self.working_set] = self.classvec_ws
         for i in range(self.labelcount):
             self.classcounts[i] = self.size - np.count_nonzero(self.classvec - i)
+        self.updateA()
         return changecount
     
     
@@ -314,6 +314,7 @@ class InteractiveRlsClassifier(object):
         #self.compute_steepness_vector()
         #global_steepestdir = working_set[steepestdir]
         #return global_steepestdir
+        self.updateA()
     
     
 #     def findSteepestDirRotateClasses(self, howmany, LOO = False):
