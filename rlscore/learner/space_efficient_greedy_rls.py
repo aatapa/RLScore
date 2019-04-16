@@ -233,7 +233,7 @@ class SpaceEfficientGreedyRLS(object):
         while True:
             startind = blockcount * blocksize
             if (blockcount + 1) * blocksize < fsize:
-                print blockcount, fsize, (blockcount + 1) * blocksize
+                print(blockcount, fsize, (blockcount + 1) * blocksize)
                 endind = (blockcount + 1) * blocksize
                 blocks.append(range(startind, endind))
                 blockcount += 1
@@ -424,7 +424,7 @@ class SpaceEfficientGreedyRLS(object):
             self.looperf = np.mat(self.looperf)
             
             self.bestlooperf = bestlooperf
-            print bestlooperf
+            print(bestlooperf)
             self.performances.append(bestlooperf)
             cv = X[bestcind]
             GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T

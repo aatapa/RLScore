@@ -17,13 +17,13 @@ class Test(unittest.TestCase):
         
     def testRLS(self):
         
-        print
-        print
-        print
-        print
-        print "Testing the correctness of the GreedyRLS module."
-        print
-        print
+        print()
+        print()
+        print()
+        print()
+        print("Testing the correctness of the GreedyRLS module.")
+        print()
+        print()
         floattype = float64
         
         #m, n = 10, 30
@@ -120,24 +120,24 @@ class Test(unittest.TestCase):
                     #print foo
                     #print bar
                 
-                print looperf,'bar'
+                print(looperf,'bar')
                 if looperf < bestlooperf:
                     bestcind = ci
                     bestlooperf = looperf
             
             selected.append(bestcind)
-            print selected
+            print(selected)
             currentfcount += 1
         
         selected_plus_bias = selected + [fsize]
         K = Xtrain_biased[:, selected_plus_bias]*Xtrain_biased[:,selected_plus_bias].T
         G = la.inv(K+rp * mat(eye(tsize)))
         A = Xtrain_biased[:, selected_plus_bias].T*G*Y
-        print A
+        print(A)
         #A = mat(eye(fsize+1))[:,selected_plus_bias]*(Xtrain_biased[selected_plus_bias]*A)
         
-        print
-        print 'foo'        
+        print()
+        print('foo')        
     
         rpool = {}
         rpool['X'] = Xtrain
@@ -147,8 +147,8 @@ class Test(unittest.TestCase):
         rpool['regparam'] = rp
         rpool['bias'] = 2.
         grls = GreedyNFoldRLS(**rpool)
-        print grls.selected
-        print grls.A[selected_plus_bias]
+        print(grls.selected)
+        print(grls.A[selected_plus_bias])
         
 
 
