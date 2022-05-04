@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from setuptools.extension import Extension
 import numpy as np
 
-USE_CYTHON = False
+USE_CYTHON = True
 ext = '.pyx' if USE_CYTHON else '.c'
 
 #sys.argv[1:] = ['build_ext', '--inplace']
