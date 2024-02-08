@@ -26,7 +26,7 @@ setup(
     name = 'rlscore',
     description = 'machine learning package',
     url = "https://github.com/aatapa/RLScore",
-    version = "0.8",
+    version = "0.8.2alpha",
     license = "MIT",
     include_dirs = [np.get_include()],
     ext_modules = ext_modules,
