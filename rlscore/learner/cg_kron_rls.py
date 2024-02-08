@@ -120,6 +120,8 @@ class CGKronRLS(PairwisePredictorInterface):
         if 'K1' in kwargs or 'pko' in kwargs:
             if 'pko' in kwargs:
                 pko = kwargs['pko']
+                self.input1_inds = pko.original_col_inds_K1
+                self.input2_inds = pko.original_col_inds_K2
             else:
                 self.input1_inds = np.array(kwargs["label_row_inds"], dtype = np.int32)
                 self.input2_inds = np.array(kwargs["label_col_inds"], dtype = np.int32)
@@ -153,7 +155,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 else:
                     self.A = v
                 if not self.callbackfun is None:
-                    #self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, self.pko.weights)
+                    self.predictor = KernelPairwisePredictor(self.A, self.input1_inds, self.input2_inds, self.pko.weights)
                     self.callbackfun.callback(self)
             
             G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
@@ -203,7 +205,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 x0 = np.array(kwargs['warm_start']).reshape(kronfcount, order = 'F')
             else:
                 x0 = None'''
-            minres(G, v_init, maxiter = maxiter, callback = cgcb, tol=1e-20)#[0].reshape((pko_T.shape[0], pko.shape[1]), order='F')
+            self.W = minres(G, v_init, maxiter = maxiter, callback = cgcb, tol=1e-20)#[0].reshape((pko_T.shape[0], pko.shape[1]), order='F')
             self.predictor = LinearPairwisePredictor(self.W, self.input1_inds, self.input2_inds, weights)
             if not self.callbackfun is None:
                     self.callbackfun.finished(self)

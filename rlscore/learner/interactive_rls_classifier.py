@@ -52,7 +52,7 @@ class InteractiveRlsClassifier(RLS):
         #    self.oneclass = False
         
         if Y is None:
-            self.classvec = np.zeros(self.size, np.int)
+            self.classvec = np.zeros(self.size, int)
         else:
             self.classvec = Y
         #self.size = self.classvec.shape[0]

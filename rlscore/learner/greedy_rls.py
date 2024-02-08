@@ -26,7 +26,6 @@
 from scipy import sparse as sp
 import numpy as np
 from rlscore import predictor
-from rlscore.utilities import array_tools
 from rlscore.learner import _greedy_rls
 from rlscore.predictor import PredictorInterface
 
@@ -97,7 +96,8 @@ class GreedyRLS(PredictorInterface):
             self.X = X
         self.X = self.X.T
         self.X = self.X.astype("float64", copy=False)
-        self.Y = np.mat(array_tools.as_2d_array(Y))
+        self.Y = Y
+        if len(self.Y.shape) < 2: self.Y = np.expand_dims(self.Y, axis=1)
         #Number of training examples
         self.size = self.Y.shape[0]
         self.bias = bias

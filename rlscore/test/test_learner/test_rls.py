@@ -392,4 +392,10 @@ class Test(unittest.TestCase):
         print(str(predho2) + ' Fast HO')
         hopred = dualrls.leave_pair_out(np.array([hoindices2[0], 4, 6]), np.array([hoindices2[1], 5, 7]))
         print(str(hopred[0][0]) + '\n' + str(hopred[1][0]) + ' Fast LPO')
+ 
         
+
+if __name__=="__main__":
+    suite = unittest.TestLoader().loadTestsFromTestCase(Test)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+       

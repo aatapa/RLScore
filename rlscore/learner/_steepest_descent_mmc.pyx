@@ -51,8 +51,7 @@ def findSteepestDirRotateClasses_(double [:, :] Y,
      
     for newclazz in range(labelcount):
          
-        #!!!!!!!!!!!!!!!
-        takenum = (size / labelcount) - classcounts[newclazz] + howmany
+        takenum = int(size / labelcount) - classcounts[newclazz] + howmany
          
         for h in range(takenum):
              
@@ -116,8 +115,7 @@ def findSteepestDirRotateClasses(double [:, :] Y,
     
     for newclazz in range(labelcount):
         
-        #!!!!!!!!!!!!!!!
-        takenum = (size / labelcount) - classcounts[newclazz] + howmany
+        takenum = int(size / labelcount) - classcounts[newclazz] + howmany
         
         for h in range(takenum):
             

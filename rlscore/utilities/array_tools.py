@@ -56,7 +56,7 @@ def as_2d_array(A, allow_sparse = False):
     return A
 
 def as_index_list(I, maxind):
-    I = np.array(I, dtype=np.long, copy=False)
+    I = np.array(I, dtype=int, copy=False)
     if len(I.shape) != 1:
         raise ValueError("Index list should be one dimensional")
     if len(I) == 0:

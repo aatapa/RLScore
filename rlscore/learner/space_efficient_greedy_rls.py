@@ -55,10 +55,10 @@ class SpaceEfficientGreedyRLS(object):
         self.results = {}
         ##The current version works only with the squared error measure
         #self.measure = None
-        #self.solve_bu(self.regparam)
+        self.solve_bu(self.regparam)
         #return
         #if not self.Y.shape[1] == 1:
-        self.solve_weak(self.regparam)
+        #self.solve_weak(self.regparam)
         #else:
         #    self.solve_tradeoff(regparam)
     
@@ -233,7 +233,7 @@ class SpaceEfficientGreedyRLS(object):
         while True:
             startind = blockcount * blocksize
             if (blockcount + 1) * blocksize < fsize:
-                print blockcount, fsize, (blockcount + 1) * blocksize
+                print(blockcount, fsize, (blockcount + 1) * blocksize)
                 endind = (blockcount + 1) * blocksize
                 blocks.append(range(startind, endind))
                 blockcount += 1
@@ -424,7 +424,7 @@ class SpaceEfficientGreedyRLS(object):
             self.looperf = np.mat(self.looperf)
             
             self.bestlooperf = bestlooperf
-            print bestlooperf
+            print(bestlooperf)
             self.performances.append(bestlooperf)
             cv = X[bestcind]
             GXT_bci = VT.T * np.multiply(Omega.T, (VT * cv.T)) + rpinv * cv.T

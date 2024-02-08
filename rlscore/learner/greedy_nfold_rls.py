@@ -27,37 +27,29 @@ import scipy
 import scipy.sparse as sp
 import numpy as np
 
+from rlscore.measure import sqerror as measure
+
 class GreedyNFoldRLS(object):
     
-    def loadResources(self):
-        """
-        Loads the resources from the previously set resource pool.
-        
-        @raise Exception: when some of the resources required by the learner is not available in the ResourcePool object.
-        """
-        
-        Y = self.resource_pool['Y']
+    def __init__(self, X, Y, subsetsize, regparam = 1.0, bias=1.0, callbackfun=None, **kwargs):
+        self.callbackfun = callbackfun
         self.Y = Y
         #Number of training examples
         self.size = Y.shape[0]
         if not Y.shape[1] == 1:
-            raise Exception('GreedyRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
+            raise Exception('GreedyNFoldRLS currently supports only one output at a time. The output matrix is now of shape ' + str(Y.shape) + '.')
         
-        X = self.resource_pool['X']
         self.setDataMatrix(X.T)
-        if self.resource_pool.has_key('bias'):
-            self.bias = float(self.resource_pool['bias'])
+        self.bias = bias
+        if 'measure' in kwargs:
+            self.measure = kwargs['measure']
         else:
-            self.bias = 0.
-        if self.resource_pool.has_key('measure'):
-            self.measure = self.resource_pool['measure']
-        else:
-            self.measure = None
-        qids = self.resource_pool['qids']
-        if not self.resource_pool.has_key('cross-validation_folds'):
-            self.resource_pool['cross-validation_folds'] = qids
-        self.setQids(qids)
+            self.measure = measure
+        self.subsetsize = subsetsize
+        
+        self.setQids(kwargs['qids'])
         self.results = {}
+        self.solve_bu(regparam)
     
     
     def setQids(self, qids):
@@ -82,7 +74,7 @@ class GreedyNFoldRLS(object):
         self.qidmap = {}
         for i in range(len(self.qidlist)):
             qid = self.qidlist[i]
-            if self.qidmap.has_key(qid):
+            if qid in self.qidmap:
                 sameqids = self.qidmap[qid]
                 sameqids.append(i)
             else:
@@ -135,14 +127,12 @@ class GreedyNFoldRLS(object):
         rpinv = 1. / rp
         
         
-        if not self.resource_pool.has_key('subsetsize'):
-            raise Exception("Parameter 'subsetsize' must be given.")
-        desiredfcount = int(self.resource_pool['subsetsize'])
+        desiredfcount = self.subsetsize
         if not fsize >= desiredfcount:
             raise Exception('The overall number of features ' + str(fsize) + ' is smaller than the desired number ' + str(desiredfcount) + ' of features to be selected.')
         
         
-        
+        '''
         if self.resource_pool.has_key('calculate_test_error'):
             calculate_test_error = self.resource_pool['calculate_test_error']
             if calculate_test_error == 'True':
@@ -168,7 +158,7 @@ class GreedyNFoldRLS(object):
                 calculate_test_error = False
         else:
             calculate_test_error = False
-        
+        '''
         
         
         
@@ -217,8 +207,15 @@ class GreedyNFoldRLS(object):
                     V = GXT_ci[inds].T
                     MVT = yac[qi][:, ci]
                     gamma = (1. / (-const ** -1. + V * MVT))[0, 0]
-                    lqodiff = yyac[qi] - cvA * MVT - gamma * MVT * (MVT.T * updA[inds])
+                    '''lqodiff = yyac[qi] - cvA * MVT - gamma * MVT * (MVT.T * updA[inds])
                     lqocvperf += (lqodiff.T * lqodiff)[0, 0]
+                    '''
+                    lqopred = Y[inds] - (yyac[qi] - cvA * MVT - gamma * MVT * (MVT.T * updA[inds]))
+                    
+                    if self.measure.iserror:
+                        lqocvperf += self.measure(Y[inds], lqopred) *  len(inds)
+                    else:
+                        lqocvperf -= self.measure(Y[inds], lqopred) *  len(inds)
                 
                 if lqocvperf < bestlqocvperf:
                     bestcind = ci
@@ -262,7 +259,7 @@ class GreedyNFoldRLS(object):
             self.selected.append(bestcind)
             currentfcount += 1
             
-            if calculate_test_error:
+            '''if calculate_test_error:
                 bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
                 X_biased = np.vstack([X,bias_slice])
                 selected_plus_bias = self.selected+[fsize]
@@ -272,7 +269,7 @@ class GreedyNFoldRLS(object):
                 W = cutdiag * (X_biased[selected_plus_bias] * self.A)
                 bias_slice = np.sqrt(self.bias) * np.mat(np.ones((1,self.testX.shape[1]),dtype=np.float64))
                 testX_biased = np.vstack([self.testX,bias_slice])
-                self.Y_predicted = testX_biased.T * W
+                self.Y_predicted = testX_biased.T * W'''
             if not self.callbackfun is None:
                 self.callbackfun.callback(self)
         if not self.callbackfun is None:
@@ -287,5 +284,5 @@ class GreedyNFoldRLS(object):
         self.A = cutdiag * (X[selected_plus_bias] * self.A)
         self.results['selected_features'] = self.selected
         self.results['GreedyRLS_LOO_performances'] = self.performances
-        if calculate_test_error:
-            self.results['GreedyRLS_test_performances'] = self.testperformances
+        #if calculate_test_error:
+        #    self.results['GreedyRLS_test_performances'] = self.testperformances

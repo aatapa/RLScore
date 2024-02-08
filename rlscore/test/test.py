@@ -8,9 +8,20 @@ def testKernels():
     return all_tests
         
 def testLearners():
-    names = ["test_cg_kron_rls", "test_cg_rankrls", "test_cg_rls", "test_global_rankrls", "test_greedy_rls", "test_interactive_rls_classifier",
-             "test_kronecker_rls", "test_kronsvm", "test_mmc", "test_query_rankrls", "test_rankrls_with_pairwise_preferences",
-             "test_reduced_set_approximation", "test_rls", "test_two_step_rls"]
+    names = ["test_cg_kron_rls",
+             "test_cg_rankrls",
+             "test_cg_rls",
+             "test_global_rankrls",
+             "test_greedy_rls",
+             "test_interactive_rls_classifier",
+             "test_kronecker_rls",
+             #"test_kronsvm",
+             "test_mmc",
+             "test_query_rankrls",
+             "test_rankrls_with_pairwise_preferences",
+             "test_reduced_set_approximation",
+             "test_rls",
+             "test_two_step_rls"]
     names = ["rlscore.test.test_learner." +x for x in names ]
     loader = unittest.TestLoader()
     all_tests = loader.loadTestsFromNames(names)

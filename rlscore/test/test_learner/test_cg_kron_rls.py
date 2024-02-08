@@ -93,12 +93,12 @@ class Test(unittest.TestCase):
         all_label_row_inds, all_label_col_inds = np.unravel_index(allindices, (train_rows, train_columns), order = 'F')
         #incinds = np.random.permutation(allindices)
         #incinds = np.random.choice(allindices, 50, replace = False)
-        incinds = np.random.choice(allindices, 10, replace = False)
+        incinds = np.random.choice(allindices, 3, replace = False)
         label_row_inds, label_col_inds = all_label_row_inds[incinds], all_label_col_inds[incinds]
         print(train_rows, train_columns)
         print(np.unique(label_row_inds))
         print(np.unique(label_col_inds))
-        #foo
+        
         Y_train_known_outputs = Y_train.reshape(rowstimescols, order = 'F')[incinds]
         
         alltestindices = np.arange(test_rows * test_columns)

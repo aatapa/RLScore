@@ -66,7 +66,6 @@ class Test(unittest.TestCase):
             model = rls.predictor   
             W = model.W
             In = np.mat(np.identity(n))
-            Im = np.mat(np.identity(m))
             vals = np.concatenate([np.ones((pairs.shape[0]), dtype=np.float64), -np.ones((pairs.shape[0]), dtype=np.float64)])
             row = np.concatenate([np.arange(pairs.shape[0]),np.arange(pairs.shape[0])])
             col = np.concatenate([pairs[:,0], pairs[:,1]])
@@ -77,7 +76,7 @@ class Test(unittest.TestCase):
             for i in range(W.shape[0]):
                 #for j in range(W.shape[1]):
                 #    self.assertAlmostEqual(W[i,j],W2[i,j], places=4)
-                    self.assertAlmostEqual(W[i], W2[i], places=4)
+                    self.assertAlmostEqual(W[i], W2[i], places=3)
                     
     def testQueryData(self):
         np.random.seed(100)

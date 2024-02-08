@@ -6,13 +6,13 @@ RLScore
 RLScore - regularized least-squares machine learning algorithms package.
 
 
-:Authors:         `Tapio Pahikkala <http://staff.cs.utu.fi/~aatapa/>`_,
+:Authors:         `Tapio Pahikkala <https://staff.cs.utu.fi/~aatapa/>`_,
                   `Antti Airola <https://scholar.google.fi/citations?user=5CPOSr0AAAAJ>`_
 :Email:           firstname.lastname@utu.fi
-:Homepage:        `http://staff.cs.utu.fi/~aatapa/software/RLScore <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_
-:Version:         0.8.1
+:Homepage:        `https://staff.cs.utu.fi/~aatapa/software/RLScore <https://staff.cs.utu.fi/~aatapa/software/RLScore>`_
+:Version:         0.8.2a
 :License:         `The MIT License <LICENCE.TXT>`_
-:Date:            August 22. 2018
+:Date:            February 8th of 2024
 
 .. contents::
 
@@ -21,7 +21,8 @@ Overview
 
 RLScore is a machine learning software package for regularized kernel methods,
 focusing especially on Regularized Least-Squares (RLS) based methods. The main
-advantage of the RLS family of methods is that they admit a closed form solution, expressed as a system of linear equations.
+advantage of the RLS family of methods is that they admit a closed form solution,
+expressed as a system of linear equations.
 This allows deriving highly efficient algorithms for RLS methods, based on matrix
 algebraic optimization. Classical results include computational short-cuts for
 multi-target learning, fast regularization path and leave-one-out
@@ -32,7 +33,7 @@ learning with Kronecker kernels, ranking, stochastic hill climbing based
 clustering etc. The majority of the implemented methods are such that are not
 available in any other software package.
 
-For documentation, see project `home page <http://staff.cs.utu.fi/~aatapa/software/RLScore>`_.
+For documentation, see project `home page <https://staff.cs.utu.fi/~aatapa/software/RLScore>`_.
 
 
 Support for different tasks
@@ -100,6 +101,12 @@ RLScore is described in the following article:
 
 History
 =======
+
+Version 0.8.2alpha (2024.02.08):
+
+- Fixes circumventing deprecated Python and Numpy functionality
+- Not all modules, such as MMC and KronSVM are currently functional but will be fixed later
+- Introducing generalized vec-trick operators
 
 Version 0.8.1 (2018.08.22):
 
