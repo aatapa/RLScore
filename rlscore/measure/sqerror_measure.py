@@ -30,16 +30,16 @@ from rlscore.utilities import array_tools
 from rlscore.measure.measure_utilities import UndefinedPerformance
 
 def sqerror_singletask(correct, predictions):
-    correct = np.mat(correct)
-    predictions = np.mat(predictions)
+    correct = np.asmatrix(correct)
+    predictions = np.asmatrix(predictions)
     diff = correct - predictions
     sqerror = np.dot(diff.T, diff)[0,0]
     sqerror /= correct.shape[0]
     return sqerror
     
 def sqerror_multitask(Y, Y_predicted):  
-    Y = np.mat(Y)
-    Y_predicted = np.mat(Y_predicted)
+    Y = np.asmatrix(Y)
+    Y_predicted = np.asmatrix(Y_predicted)
     sqerror = Y - Y_predicted
     multiply(sqerror, sqerror, sqerror)
     performances = mean(sqerror, axis = 0)
