@@ -117,18 +117,18 @@ class GreedyRLS(PredictorInterface):
         self.regparam = regparam
         X = self.X
         Y = self.Y
-        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
+        bias_slice = np.sqrt(self.bias)*np.asmatrix(np.ones((1,X.shape[1]),dtype=np.float64))
         
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = np.mat(np.zeros((fsize, Y.shape[1])))
+        self.A = np.asmatrix(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
         
         #Biaz
-        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
+        cv = np.sqrt(self.bias)*np.asmatrix(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
         self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
@@ -175,7 +175,7 @@ class GreedyRLS(PredictorInterface):
                                                               tempvec3)
             #Reference code
             '''
-            diagG = np.mat(diagG).T
+            diagG = np.asmatrix(diagG).T
             for ci in allinds:
                 if ci in self.selected: continue
                 cv = listX[ci_mapped]
@@ -206,7 +206,7 @@ class GreedyRLS(PredictorInterface):
             '''
             #'''
             self.bestlooperf = self.looperf[bestcind]
-            self.looperf = np.mat(self.looperf)
+            self.looperf = np.asmatrix(self.looperf)
             self.performances.append(self.bestlooperf)
             ci_mapped = bestcind
             cv = listX[ci_mapped]
@@ -242,28 +242,28 @@ class GreedyRLS(PredictorInterface):
             raise Exception('This variation of GreedyRLS supports only one output at a time. The output matrix is now of shape ' + str(self.Y.shape) + '.')
         self.regparam = regparam
         X = self.X
-        Y = np.mat(self.Y, dtype=floattype)
+        Y = np.asmatrix(self.Y, dtype=floattype)
         
-        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]), dtype=floattype))
+        bias_slice = np.sqrt(self.bias)*np.asmatrix(np.ones((1,X.shape[1]), dtype=floattype))
         
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = np.mat(np.zeros((fsize,1),dtype=floattype))
+        self.A = np.asmatrix(np.zeros((fsize,1),dtype=floattype))
         
         rp = regparam
         rpinv = 1. / rp
         
         
         #Biaz
-        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize), dtype=floattype))
-        ca = np.mat(rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv), dtype=floattype)
+        cv = np.sqrt(self.bias)*np.asmatrix(np.ones((1, tsize), dtype=floattype))
+        ca = np.asmatrix(rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv), dtype=floattype)
         
         
         self.dualvec = rpinv * Y - cv.T * rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv * Y)
         
-        GXT = cv.T * np.mat((rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)) * X.T, dtype=floattype)
-        tempmatrix = np.mat(np.zeros(X.T.shape, dtype=floattype))
+        GXT = cv.T * np.asmatrix((rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)) * X.T, dtype=floattype)
+        tempmatrix = np.asmatrix(np.zeros(X.T.shape, dtype=floattype))
         np.multiply(X.T, rpinv, tempmatrix)
         #tempmatrix = rpinv * X.T
         np.subtract(tempmatrix, GXT, GXT)
@@ -272,13 +272,13 @@ class GreedyRLS(PredictorInterface):
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
-        diagG = np.mat(diagG, dtype=floattype).T
+        diagG = np.asmatrix(diagG, dtype=floattype).T
         
         self.selected = []
         self.performances = []
         currentfcount = 0
         
-        temp2 = np.mat(np.zeros(tempmatrix.shape, dtype=floattype))
+        temp2 = np.asmatrix(np.zeros(tempmatrix.shape, dtype=floattype))
         
         while currentfcount < self.desiredfcount:
             
@@ -303,7 +303,7 @@ class GreedyRLS(PredictorInterface):
                 np.multiply(temp2, 0, temp2)
                 np.add(temp2, Y, temp2)
                 looperf = self.measure.multiTaskPerformance(temp2, tempmatrix)
-                looperf = np.mat(looperf, dtype=floattype)
+                looperf = np.asmatrix(looperf, dtype=floattype)
                 if self.measure.iserror:
                     looperf[0, self.selected] = float('inf')
                     bestcind = np.argmin(looperf)
@@ -358,7 +358,7 @@ class GreedyRLS(PredictorInterface):
         X = self.X
         Y = self.Y
         
-        bias_slice = np.sqrt(self.bias)*np.mat(np.ones((1,X.shape[1]),dtype=np.float64))
+        bias_slice = np.sqrt(self.bias)*np.asmatrix(np.ones((1,X.shape[1]),dtype=np.float64))
         
         su = np.sum(X, axis = 1)
         cc = 0
@@ -366,13 +366,13 @@ class GreedyRLS(PredictorInterface):
         tsize = self.size
         fsize = X.shape[0]
         assert X.shape[1] == tsize
-        self.A = np.mat(np.zeros((fsize, Y.shape[1])))
+        self.A = np.asmatrix(np.zeros((fsize, Y.shape[1])))
         
         rp = regparam
         rpinv = 1. / rp
         
         #Biaz
-        cv = np.sqrt(self.bias)*np.mat(np.ones((1, tsize)))
+        cv = np.sqrt(self.bias)*np.asmatrix(np.ones((1, tsize)))
         ca = rpinv * (1. / (1. + cv * rpinv * cv.T)) * (cv * rpinv)
         
         
@@ -384,7 +384,7 @@ class GreedyRLS(PredictorInterface):
         for i in range(tsize):
             diagGi = rpinv - cv.T[i, 0] * ca[0, i]
             diagG.append(diagGi)
-        diagG = np.mat(diagG).T
+        diagG = np.asmatrix(diagG).T
         
         listX = []
         for ci in range(fsize):
@@ -428,7 +428,7 @@ class GreedyRLS(PredictorInterface):
                         bestcind = ci
                         bestlooperf = looperf_i
                 self.looperf.append(looperf_i)
-            self.looperf = np.mat(self.looperf)
+            self.looperf = np.asmatrix(self.looperf)
             self.bestlooperf = bestlooperf
             self.performances.append(bestlooperf)
             ci_mapped = bestcind
