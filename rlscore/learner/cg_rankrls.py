@@ -101,28 +101,28 @@ class CGRankRLS(PredictorInterface):
             P = P.tocsr()
             PT = P.tocsc().T
         else:
-            P = 1./sqrt(self.size)*(np.mat(np.ones((self.size,1), dtype=np.float64)))
+            P = 1./sqrt(self.size)*(np.asmatrix(np.ones((self.size,1), dtype=np.float64)))
             PT = P.T
         X = self.X.tocsc()
         X_csr = X.tocsr()
         def mv(v):
-            v = np.mat(v).T
+            v = np.asmatrix(v).T
             return X_csr*(X.T*v)-X_csr*(P*(PT*(X.T*v)))+regparam*v
         G = LinearOperator((X.shape[0],X.shape[0]), matvec=mv, dtype=np.float64)
         Y = self.Y
         if not self.callbackfun is None:
             def cb(v):
-                self.A = np.mat(v).T
-                self.b = np.mat(np.zeros((1,1)))
+                self.A = np.asmatrix(v).T
+                self.b = np.asmatrix(np.zeros((1,1)))
                 self.callbackfun.callback(self)
         else:
             cb = None
         XLY = X_csr*Y-X_csr*(P*(PT*Y))
         try:
-            self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
+            self.A = np.asmatrix(cg(G, XLY, callback=cb)[0]).T
         except Finished:
             pass
-        self.b = np.mat(np.zeros((1,1)))
+        self.b = np.asmatrix(np.zeros((1,1)))
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
 class PCGRankRLS(PredictorInterface):
@@ -175,22 +175,22 @@ class PCGRankRLS(PredictorInterface):
         pairs_csr = coo.tocsr()
         pairs_csc = coo.tocsc()
         def mv(v):
-            vmat = np.mat(v).T
+            vmat = np.asmatrix(v).T
             ret = np.array(X_csr * (pairs_csc.T * (pairs_csr * (X.T * vmat))))+regparam*vmat
             return ret
         G = LinearOperator((X.shape[0], X.shape[0]), matvec=mv, dtype=np.float64)
         self.As = []
-        M = np.mat(np.ones((self.pairs.shape[0], 1)))
+        M = np.asmatrix(np.ones((self.pairs.shape[0], 1)))
         if not self.callbackfun is None:
             def cb(v):
-                self.A = np.mat(v).T
-                self.b = np.mat(np.zeros((1,1)))
+                self.A = np.asmatrix(v).T
+                self.b = np.asmatrix(np.zeros((1,1)))
                 self.callbackfun.callback()
         else:
             cb = None
         XLY = X_csr * (pairs_csc.T * M)
-        self.A = np.mat(cg(G, XLY, callback=cb)[0]).T
-        self.b = np.mat(np.zeros((1,self.A.shape[1])))
+        self.A = np.asmatrix(cg(G, XLY, callback=cb)[0]).T
+        self.b = np.asmatrix(np.zeros((1,self.A.shape[1])))
         self.predictor = predictor.LinearPredictor(self.A, self.b)
     
 
@@ -230,7 +230,7 @@ class EarlyStopCB(object):
             self.iter += 1
             self.last_update += 1
         if self.last_update == self.maxiter:
-            learner.A = np.mat(self.bestA)
+            learner.A = np.asmatrix(self.bestA)
             raise Finished("Done")
 
         
