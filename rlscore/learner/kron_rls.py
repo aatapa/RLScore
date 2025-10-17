@@ -230,7 +230,7 @@ class KronRLS(PairwisePredictorInterface):
         self.rsvecs1 = np.asmatrix(rsvecs1)
         
         qlen = X2.shape[0]
-        onevec = (1. / np.math.sqrt(qlen)) * np.asmatrix(np.ones((qlen, 1)))
+        onevec = (1. / np.sqrt(qlen)) * np.asmatrix(np.ones((qlen, 1)))
         C = np.asmatrix(np.eye(qlen)) - onevec * onevec.T
         
         U, svals2, rsvecs2 = linalg.svd_economy_sized(C * X2)
