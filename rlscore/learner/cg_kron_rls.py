@@ -159,7 +159,7 @@ class CGKronRLS(PairwisePredictorInterface):
                     self.callbackfun.callback(self)
             
             G = LinearOperator((self.Y.shape[0], self.Y.shape[0]), matvec = mv, rmatvec = mvr, dtype = np.float64)
-            self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, tol=1e-20)[0]
+            self.A = minres(G, self.Y, maxiter = maxiter, callback = cgcb, rtol=1e-20)[0]
             self.predictor = KernelPairwisePredictor(self.A, self.pko.original_col_inds_K1, self.pko.original_col_inds_K2, self.pko.weights)
             if not self.callbackfun is None:
                     self.callbackfun.finished(self)
@@ -205,7 +205,7 @@ class CGKronRLS(PairwisePredictorInterface):
                 x0 = np.array(kwargs['warm_start']).reshape(kronfcount, order = 'F')
             else:
                 x0 = None'''
-            self.W = minres(G, v_init, maxiter = maxiter, callback = cgcb, tol=1e-20)#[0].reshape((pko_T.shape[0], pko.shape[1]), order='F')
+            self.W = minres(G, v_init, maxiter = maxiter, callback = cgcb, rtol=1e-20)#[0].reshape((pko_T.shape[0], pko.shape[1]), order='F')
             self.predictor = LinearPairwisePredictor(self.W, self.input1_inds, self.input2_inds, weights)
             if not self.callbackfun is None:
                     self.callbackfun.finished(self)
