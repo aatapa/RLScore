@@ -23,7 +23,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from numpy import identity, multiply, mat, sum
+from numpy import identity, multiply, sum
+from numpy import asmatrix as mat
 import numpy.linalg as la
 from rlscore.utilities import array_tools 
 from rlscore.utilities import adapter
