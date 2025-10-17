@@ -83,7 +83,7 @@ def as_dense_matrix(A):
     if sp.issparse(A):
         return A.todense()
     else:
-        return np.mat(A)
+        return np.asmatrix(A)
     
 def as_matrix(A):
     """Returns the input as matrix or sparse matrix
@@ -99,7 +99,7 @@ def as_matrix(A):
     if sp.issparse(A):
         return A
     else:
-        return np.mat(A)
+        return np.asmatrix(A)
     
 def as_array(A):
     """Returns the input as dense array
