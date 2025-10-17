@@ -31,21 +31,21 @@ from rlscore.measure.measure_utilities import UndefinedPerformance
 def sqmprank_singletask(Y, P):
     correct = Y
     predictions = P
-    correct = np.mat(correct)
-    predictions = np.mat(predictions)
+    correct = np.asmatrix(correct)
+    predictions = np.asmatrix(predictions)
     vlen = correct.shape[0]
     diff = correct - predictions
-    onevec = np.mat(np.ones((vlen, 1)))
+    onevec = np.asmatrix(np.ones((vlen, 1)))
     centereddiff = vlen * diff - onevec * (onevec.T * diff)
     sqerror = (centereddiff.T * diff)[0, 0] / ((len(correct) ** 2 - len(correct)) / 2)
     return sqerror
 
 def sqmprank_multitask(Y, Y_predicted):  
-    Y = np.mat(Y)
-    Y_predicted = np.mat(Y_predicted)
+    Y = np.asmatrix(Y)
+    Y_predicted = np.asmatrix(Y_predicted)
     vlen = Y.shape[0]
     centeredsqerror = Y - Y_predicted
-    onevec = np.mat(np.ones((vlen, 1)))
+    onevec = np.asmatrix(np.ones((vlen, 1)))
     tempvec = onevec.T * centeredsqerror
     np.multiply(vlen, centeredsqerror, centeredsqerror)
     np.subtract(centeredsqerror, tempvec, centeredsqerror)

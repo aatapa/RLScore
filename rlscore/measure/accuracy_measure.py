@@ -36,8 +36,8 @@ def accuracy_singletask(Y, P):
     return perf
 
 def accuracy_multitask(Y, P):
-    Y = np.mat(Y)
-    P = np.mat(P)
+    Y = np.asmatrix(Y)
+    P = np.asmatrix(P)
     if not np.all((Y==1) + (Y==-1)):
         raise UndefinedPerformance("binary classification accuracy accepts as Y-values only 1 and -1")
     vlen = float(Y.shape[0])

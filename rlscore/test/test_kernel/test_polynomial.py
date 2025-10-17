@@ -82,8 +82,8 @@ class Test(unittest.TestCase):
     def testDataTypes(self):
         X = self.trainsets[0]
         Xt = np.random.random((22,X.shape[1]))
-        X_mat = np.mat(X)
-        Xt_mat = np.mat(Xt)
+        X_mat = np.asmatrix(X)
+        Xt_mat = np.asmatrix(Xt)
         X_sp = sp.csr_matrix(X)
         Xt_sp = sp.csr_matrix(Xt)
         trainsets = [X, X_mat, X_sp]
