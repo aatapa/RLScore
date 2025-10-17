@@ -71,7 +71,7 @@ class CGRLS(PredictorInterface):
         self.bias = bias
         self.regparam = regparam
         if self.bias != 0.:
-            bias_slice = sqrt(self.bias)*np.mat(ones((1,self.X.shape[1]),dtype=np.float64))
+            bias_slice = sqrt(self.bias)*np.asmatrix(ones((1,self.X.shape[1]),dtype=np.float64))
             self.X = sparse.vstack([self.X,bias_slice]).tocsc()
         self.X_csr = self.X.tocsr()
         self.callbackfun = callbackfun
@@ -86,19 +86,19 @@ class CGRLS(PredictorInterface):
         self.AA = []
         if not self.callbackfun is None:
             def cb(v):
-                self.A = np.mat(v).T
+                self.A = np.asmatrix(v).T
                 self.callbackfun.callback(self)
         else:
             cb = None
         try:
-            self.A = np.mat(cg(G, Y, callback=cb)[0]).T
+            self.A = np.asmatrix(cg(G, Y, callback=cb)[0]).T
         except Finished:
             pass
         if self.callbackfun is not None:
             self.callbackfun.finished(self)
         self.A = X_csr*self.A
         if self.bias == 0.:
-            self.b = np.mat(np.zeros((1,1)))
+            self.b = np.asmatrix(np.zeros((1,1)))
         else:
             self.b = sqrt(self.bias)*self.A[-1]
             self.A = self.A[:-1]
@@ -123,7 +123,7 @@ class EarlyStopCB(object):
         b = learner.bias
         A = learner.X_csr*A
         if b == 0:
-            b = np.mat(np.zeros((1,1)))
+            b = np.asmatrix(np.zeros((1,1)))
         else:
             b = sqrt(b)*A[-1]
             A = A[:-1]
@@ -138,7 +138,7 @@ class EarlyStopCB(object):
             self.iter += 1
             self.last_update += 1
         if self.last_update == self.maxiter:
-            learner.A = np.mat(self.bestA)
+            learner.A = np.asmatrix(self.bestA)
             raise Finished("Done")
     
     
