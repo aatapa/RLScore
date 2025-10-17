@@ -102,16 +102,16 @@ class KronRLS(PairwisePredictorInterface):
     def __init__(self, **kwargs):
         Y = kwargs["Y"]
         Y = array_tools.as_2d_array(Y)
-        Y = np.mat(Y)
+        Y = np.asmatrix(Y)
         if 'K1' in kwargs:
-            K1 = np.mat(kwargs['K1'])
-            K2 = np.mat(kwargs['K2'])
+            K1 = np.asmatrix(kwargs['K1'])
+            K2 = np.asmatrix(kwargs['K2'])
             Y = Y.reshape((K1.shape[0], K2.shape[0]), order = 'F')
             self.K1, self.K2 = K1, K2
             self.kernelmode = True
         else:
-            X1 = np.mat(kwargs['X1'])
-            X2 = np.mat(kwargs['X2'])
+            X1 = np.asmatrix(kwargs['X1'])
+            X2 = np.asmatrix(kwargs['X2'])
             Y = Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
             self.X1, self.X2 = X1, X2
             self.kernelmode = False
@@ -150,14 +150,14 @@ class KronRLS(PairwisePredictorInterface):
             if not self.trained:
                 self.trained = True
                 evals1, V  = la.eigh(K1)
-                evals1 = np.mat(evals1).T
-                V = np.mat(V)
+                evals1 = np.asmatrix(evals1).T
+                V = np.asmatrix(V)
                 self.evals1 = evals1
                 self.V = V
                 
                 evals2, U = la.eigh(K2)
-                evals2 = np.mat(evals2).T
-                U = np.mat(U)
+                evals2 = np.asmatrix(evals2).T
+                U = np.asmatrix(U)
                 self.evals2 = evals2
                 self.U = U
                 self.VTYU = V.T * self.Y * U
@@ -177,21 +177,21 @@ class KronRLS(PairwisePredictorInterface):
             if not self.trained:
                 self.trained = True
                 V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
-                svals1 = np.mat(svals1)
+                svals1 = np.asmatrix(svals1)
                 self.svals1 = svals1.T
                 self.evals1 = np.multiply(self.svals1, self.svals1)
                 self.V = V
-                self.rsvecs1 = np.mat(rsvecs1)
+                self.rsvecs1 = np.asmatrix(rsvecs1)
                 
                 if X1.shape == X2.shape and (X1 == X2).all():
                     svals2, U, rsvecs2 = svals1, V, rsvecs1
                 else:
                     U, svals2, rsvecs2 = linalg.svd_economy_sized(X2)
-                    svals2 = np.mat(svals2)
+                    svals2 = np.asmatrix(svals2)
                 self.svals2 = svals2.T
                 self.evals2 = np.multiply(self.svals2, self.svals2)
                 self.U = U
-                self.rsvecs2 = np.mat(rsvecs2)
+                self.rsvecs2 = np.asmatrix(rsvecs2)
                 
                 self.VTYU = V.T * Y * U
             
@@ -223,22 +223,22 @@ class KronRLS(PairwisePredictorInterface):
         Y = self.Y.reshape((X1.shape[0], X2.shape[0]), order = 'F')
         
         V, svals1, rsvecs1 = linalg.svd_economy_sized(X1)
-        svals1 = np.mat(svals1)
+        svals1 = np.asmatrix(svals1)
         self.svals1 = svals1.T
         self.evals1 = np.multiply(self.svals1, self.svals1)
         self.V = V
-        self.rsvecs1 = np.mat(rsvecs1)
+        self.rsvecs1 = np.asmatrix(rsvecs1)
         
         qlen = X2.shape[0]
-        onevec = (1. / np.math.sqrt(qlen)) * np.mat(np.ones((qlen, 1)))
-        C = np.mat(np.eye(qlen)) - onevec * onevec.T
+        onevec = (1. / np.math.sqrt(qlen)) * np.asmatrix(np.ones((qlen, 1)))
+        C = np.asmatrix(np.eye(qlen)) - onevec * onevec.T
         
         U, svals2, rsvecs2 = linalg.svd_economy_sized(C * X2)
-        svals2 = np.mat(svals2)
+        svals2 = np.asmatrix(svals2)
         self.svals2 = svals2.T
         self.evals2 = np.multiply(self.svals2, self.svals2)
         self.U = U
-        self.rsvecs2 = np.mat(rsvecs2)
+        self.rsvecs2 = np.asmatrix(rsvecs2)
         
         self.VTYU = V.T * Y * C * U
         
@@ -299,8 +299,8 @@ class KronRLS(PairwisePredictorInterface):
         colcount = len(col_inds)
         hosize = rowcount * colcount
         
-        VV = np.mat(np.zeros((rowcount * rowcount, self.V.shape[1])))
-        UU = np.mat(np.zeros((colcount * colcount, self.U.shape[1])))
+        VV = np.asmatrix(np.zeros((rowcount * rowcount, self.V.shape[1])))
+        UU = np.asmatrix(np.zeros((colcount * colcount, self.U.shape[1])))
         
         def bar():
             for i in range(len(row_inds)):
@@ -316,9 +316,9 @@ class KronRLS(PairwisePredictorInterface):
         def baz():
             B_in_wrong_order = VV * newevals.T * UU.T
 
-            B_in_right_order = np.mat(np.zeros((hosize, hosize)))
+            B_in_right_order = np.asmatrix(np.zeros((hosize, hosize)))
             sampled_kronecker_products.cpy_reorder(B_in_right_order, B_in_wrong_order, rowcount, colcount)
-            hopred = la.inv(np.mat(np.eye(hosize)) - B_in_right_order) * (P_ho.ravel().T - B_in_right_order * self.Y[np.ix_(row_inds, col_inds)].ravel().T)
+            hopred = la.inv(np.asmatrix(np.eye(hosize)) - B_in_right_order) * (P_ho.ravel().T - B_in_right_order * self.Y[np.ix_(row_inds, col_inds)].ravel().T)
             return hopred
         bar()
         hopred = baz()
