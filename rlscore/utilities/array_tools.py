@@ -38,7 +38,7 @@ def as_2d_array(A, allow_sparse = False):
         return A        
     if not allow_sparse and sp.issparse(A):
         A = A.todense()
-    A = np.array(A, copy = False)
+    A = np.array(A)
     shape = A.shape
     if not np.issubdtype(A.dtype, np.number):
         raise ValueError("Argument array contains non-numerical data") 
@@ -56,7 +56,7 @@ def as_2d_array(A, allow_sparse = False):
     return A
 
 def as_index_list(I, maxind):
-    I = np.array(I, dtype=int, copy=False)
+    I = np.array(I, dtype=int)
     if len(I.shape) != 1:
         raise ValueError("Index list should be one dimensional")
     if len(I) == 0:
