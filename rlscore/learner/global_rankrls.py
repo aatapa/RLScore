@@ -25,7 +25,7 @@
 
 import numpy as np
 from numpy import array, eye, float64, multiply, ones, sqrt, zeros
-from numpy import asmatrix as mat
+from numpy import asmatrix
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
@@ -116,7 +116,7 @@ class GlobalRankRLS(PredictorInterface):
     
     def __init__(self, X, Y, regparam = 1.0, kernel='LinearKernel', basis_vectors = None, **kwargs):
         Y = array_tools.as_2d_array(Y)
-        self.Y = np.mat(Y)
+        self.Y = np.asmatrix(Y)
         if X.shape[0] != Y.shape[0]:
             raise Exception("First dimension of X and Y must be the same")
         if basis_vectors is not None:
@@ -129,8 +129,8 @@ class GlobalRankRLS(PredictorInterface):
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
-        self.svals = np.mat(self.svdad.svals)
-        self.svecs = np.mat(self.svdad.rsvecs)
+        self.svals = np.asmatrix(self.svdad.svals)
+        self.svecs = np.asmatrix(self.svdad.rsvecs)
         self.size = self.Y.shape[0]
         self.solve(self.regparam)
     
@@ -162,7 +162,7 @@ class GlobalRankRLS(PredictorInterface):
             
             #Temporary variables
             ssvecs = multiply(self.svecs, self.svals)
-            J = mat(ones((self.size, 1), dtype=float64))
+            J = asmatrix(ones((self.size, 1), dtype=float64))
             
             #These are cached for later use in solve function
             self.lowrankchange = ssvecs.T * J[range(ssvecs.shape[0])]
@@ -244,8 +244,8 @@ class GlobalRankRLS(PredictorInterface):
         Y = self.Y
         
         modevals = np.squeeze(np.array(np.multiply(evals, 1. / ((m - 2.) * evals + self.regparam))))
-        GDY = (self.size - 2.) * (svecs * np.multiply(np.mat(modevals).T, (svecs.T * Y)))
-        GC = np.squeeze(np.array(svecs * np.multiply(np.mat(modevals).T, np.sum(svecs.T, axis = 1))))
+        GDY = (self.size - 2.) * (svecs * np.multiply(np.asmatrix(modevals).T, (svecs.T * Y)))
+        GC = np.squeeze(np.array(svecs * np.multiply(np.asmatrix(modevals).T, np.sum(svecs.T, axis = 1))))
         CTGC = np.sum(GC)
         
         pairslen = len(pairs_start_inds)
@@ -498,8 +498,8 @@ class GlobalRankRLS(PredictorInterface):
         
         #results = []
         
-        C = np.mat(np.zeros((self.size, 3), dtype = np.float64))
-        onevec = np.mat(np.ones((self.size, 1), dtype = np.float64))
+        C = np.asmatrix(np.zeros((self.size, 3), dtype = np.float64))
+        onevec = np.asmatrix(np.ones((self.size, 1), dtype = np.float64))
         for i in range(self.size):
             C[i, 0] = 1.
         
@@ -512,7 +512,7 @@ class GlobalRankRLS(PredictorInterface):
         
         newevals = multiply(evals, 1. / ((m - holen) * evals + self.regparam))
         
-        R = np.mat(np.zeros((holen, holen + 1), dtype = np.float64))
+        R = np.asmatrix(np.zeros((holen, holen + 1), dtype = np.float64))
         for i in range(len(indices)):
             R[i, 0] = -1.
             R[i, i + 1] = sqrt(self.size - float(holen))
@@ -544,7 +544,7 @@ class GlobalRankRLS(PredictorInterface):
         BTGLY = R.T * GDYho - BTGB * BTY
         BTGLY[0] = BTGLY[0] + CTGDY[0]
         
-        F = GLYho - GBho * la.inv(-mat(eye(holen + 1)) + BTGB) * BTGLY
+        F = GLYho - GBho * la.inv(-asmatrix(eye(holen + 1)) + BTGB) * BTGLY
         
         #results.append(F)
         #return results
@@ -566,7 +566,7 @@ class GlobalRankRLS(PredictorInterface):
         rather use leave_pair_out.
 
         """        
-        LOO = mat(zeros((self.size, self.ysize), dtype=float64))
+        LOO = asmatrix(zeros((self.size, self.ysize), dtype=float64))
         for i in range(self.size):
             LOO[i,:] = self.holdout([i])
         return LOO
@@ -580,8 +580,8 @@ class GlobalRankRLS(PredictorInterface):
         
         results = []
         
-        D = mat(zeros((self.size, 1), dtype=float64))
-        C = mat(zeros((self.size, 3), dtype=float64))
+        D = asmatrix(zeros((self.size, 1), dtype=float64))
+        C = asmatrix(zeros((self.size, 3), dtype=float64))
         for i in range(self.size):
             D[i, 0] = self.size - 2.
             C[i, 0] = 1.
@@ -599,11 +599,11 @@ class GlobalRankRLS(PredictorInterface):
         CTY = CT * Y
         CTGDY = CT * GDY
         
-        minusI3 = -mat(eye(3))
+        minusI3 = -asmatrix(eye(3))
         for i, j in pairs:
             hoinds = [i, j]
             
-            R = mat(zeros((2, 3), dtype=float64))
+            R = asmatrix(zeros((2, 3), dtype=float64))
             R[0, 0] = -1.
             R[1, 0] = -1.
             R[0, 1] = sqrt(self.size - 2.)
