@@ -24,7 +24,8 @@
 # THE SOFTWARE.
 
 import numpy as np
-from numpy import array, eye, float64, multiply, mat, ones, sqrt, zeros
+from numpy import array, eye, float64, multiply, ones, sqrt, zeros
+from numpy import asmatrix as mat
 import numpy.linalg as la
 
 from rlscore.utilities import array_tools
