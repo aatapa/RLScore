@@ -202,10 +202,10 @@ class Test(unittest.TestCase):
         floattype = np.float64
         
         m, n = 100, 400 #data, features
-        Xtrain = np.mat(np.random.rand(m, n))
+        Xtrain = np.asmatrix(np.random.rand(m, n))
         K = Xtrain * Xtrain.T
         ylen = 1
-        Y = np.mat(np.zeros((m, ylen), dtype=floattype))
+        Y = np.asmatrix(np.zeros((m, ylen), dtype=floattype))
         Y[:, 0] = np.sum(Xtrain, 1)
         
         
@@ -228,13 +228,13 @@ class Test(unittest.TestCase):
         qidlist_cv = qidlist[5: len(qidlist)]
         
         objcount = max(qidlist) + 1
-        P = np.mat(np.zeros((m, objcount), dtype=np.float64))
+        P = np.asmatrix(np.zeros((m, objcount), dtype=np.float64))
         for i in range(m):
             qid = qidlist[i]
             P[i, qid] = 1.
         labelcounts = np.sum(P, axis=0)
         P = np.divide(P, np.sqrt(labelcounts))
-        D = np.mat(np.ones((1, m), dtype=np.float64))
+        D = np.asmatrix(np.ones((1, m), dtype=np.float64))
         L = np.multiply(np.eye(m), D) - P * P.T
         
         Kcv = K[np.ix_(hocompl, hocompl)]

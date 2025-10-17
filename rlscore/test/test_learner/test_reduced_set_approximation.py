@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         
         m, n = 100, 300
         Xtrain = random.rand(m, n)
-        Y = mat(random.rand(m, 1))
+        Y = asmatrix(random.rand(m, 1))
         basis_vectors = [0,3,7,8]
         
         #hoindices = [45, 50, 55]
@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         rpool = {}
         rpool['X'] = Xtrain
         bk2 = GaussianKernel(**{'X':Xtrain, 'gamma':0.001})
-        K = np.mat(bk2.getKM(Xtrain))
+        K = np.asmatrix(bk2.getKM(Xtrain))
         
         Yho = Y[hocompl]
         

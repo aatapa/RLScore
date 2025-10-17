@@ -8,16 +8,16 @@ from rlscore.learner import GreedyRLS
 from rlscore.learner import RLS
 import numpy as np
 
-    
-    
+
+
 def speedtest():
     tsize, fsize = 3000, 3000
     desiredfcount = 5
-    Xtrain = mat(random.rand(fsize, tsize), dtype=float64)
+    Xtrain = asmatrix(random.rand(fsize, tsize), dtype=float64)
     bias = 2.
     rp = 1.
     ylen = 2
-    Y = mat(random.rand(tsize, ylen), dtype=float64)
+    Y = asmatrix(random.rand(tsize, ylen), dtype=float64)
     
     rpool = {}
     class TestCallback(object):
@@ -80,12 +80,12 @@ class Test(unittest.TestCase):
         print("\n\n\n\nTesting the correctness of the GreedyRLS module.\n\n")
         tsize, fsize = 10, 30
         desiredfcount = 5
-        Xtrain = mat(random.rand(fsize, tsize), dtype=float64)
+        Xtrain = asmatrix(random.rand(fsize, tsize), dtype=float64)
         bias = 2.
-        bias_slice = sqrt(bias)*mat(ones((1,Xtrain.shape[1]), dtype=float64))
+        bias_slice = sqrt(bias)*asmatrix(ones((1,Xtrain.shape[1]), dtype=float64))
         Xtrain_biased = vstack([Xtrain,bias_slice])
         ylen = 2
-        Y = mat(random.rand(tsize, ylen), dtype=float64)
+        Y = asmatrix(random.rand(tsize, ylen), dtype=float64)
         selected = []
         rp = 1.
         currentfcount=0
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
                     hoinds = list(range(0, hi)) + list(range(hi + 1, tsize))
                     updcutK = updK[ix_(hoinds, hoinds)]
                     updcrossK = updK[ix_([hi], hoinds)]
-                    loopred = updcrossK * la.inv(updcutK + rp * mat(eye(tsize-1))) * Y[hoinds]
+                    loopred = updcrossK * la.inv(updcutK + rp * asmatrix(eye(tsize-1))) * Y[hoinds]
                     looperf += mean(multiply((loopred - Y[hi]), (loopred - Y[hi])))
                 if looperf < bestlooperf:
                     bestcind = ci
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
             currentfcount += 1
         selected_plus_bias = selected + [fsize]
         K = Xtrain_biased[selected_plus_bias].T*Xtrain_biased[selected_plus_bias]
-        G = la.inv(K+rp * mat(eye(tsize)))
+        G = la.inv(K+rp * asmatrix(eye(tsize)))
         A = Xtrain_biased[selected_plus_bias]*G*Y
         print('Tester ', A)
         rpool = {}

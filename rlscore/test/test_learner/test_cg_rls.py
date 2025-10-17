@@ -16,8 +16,8 @@ class Test(unittest.TestCase):
     def testCGRLS(self):
         m, n = 100, 300
         for regparam in [0.00000001, 1, 100000000]:
-            Xtrain = np.mat(np.random.rand(m, n))
-            Y = np.mat(np.random.rand(m, 1))
+            Xtrain = np.asmatrix(np.random.rand(m, n))
+            Y = np.asmatrix(np.random.rand(m, 1))
             rpool = {}
             rpool['X'] = Xtrain
             rpool['Y'] = Y

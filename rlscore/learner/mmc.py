@@ -188,8 +188,8 @@ class MMC(PredictorInterface):
         self.D = np.sqrt(newevalslamtilde)
         #self.D = -newevalslamtilde
         
-        self.VTY = self.svecs.T * self.Y
-        DVTY = np.multiply(self.D.T, self.svecs.T * self.Y)
+        self.VTY = self.svecs.T @ self.Y
+        DVTY = np.multiply(self.D.T, self.VTY)
         
         #Using lists in order to avoid unnecessary matrix slicings
         self.DVTY_list = []
@@ -546,7 +546,7 @@ class RandomLabelSource(object):
         allinds = set(range(size))
         self.classcounts = np.zeros((labelcount), dtype = np.int32)
         for i in range(labelcount-1):
-            inds = self.rand.sample(allinds, size / labelcount) #sampling without replacement
+            inds = self.rand.sample(list(allinds), int(size / labelcount)) #sampling without replacement
             allinds = allinds - set(inds)
             for ind in inds:
                 self.Y[ind, i] = 1.

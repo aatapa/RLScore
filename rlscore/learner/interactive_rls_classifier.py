@@ -39,8 +39,8 @@ class InteractiveRlsClassifier(RLS):
         if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.svals = np.mat(self.svdad.svals)
-        self.svecs = np.mat(self.svdad.rsvecs)
+        self.svals = np.asmatrix(self.svdad.svals)
+        self.svecs = np.asmatrix(self.svdad.rsvecs)
         self.callbackfun = callback
         self.regparam = regparam
         self.constraint = 0

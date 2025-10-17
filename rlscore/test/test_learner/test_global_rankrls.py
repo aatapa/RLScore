@@ -198,7 +198,7 @@ class Test(unittest.TestCase):
         trainkm = np.dot(Xtrain, Xtrain.T)
         ylen = 1
         
-        L = np.mat(m * np.eye(m) - np.ones((m, m), dtype=floattype))
+        L = np.asmatrix(m * np.eye(m) - np.ones((m, m), dtype=floattype))
         
         hoindices = [5, 7]
         hoindices3 = [5, 7, 9]
@@ -217,7 +217,7 @@ class Test(unittest.TestCase):
             Xcv = Xtrain[hocompl]
             Xtest = Xtrain[hoindices]
             
-            Lcv = np.mat((m - 2) * np.eye(m - 2) - np.ones((m - 2, m - 2), dtype=floattype))
+            Lcv = np.asmatrix((m - 2) * np.eye(m - 2) - np.ones((m - 2, m - 2), dtype=floattype))
             
             oind = 1
             rpool = {}
@@ -276,7 +276,7 @@ class Test(unittest.TestCase):
             print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' HO')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             
-            hopred = Xtest * la.inv(Xcv.T * Lcv * Xcv + regparam * np.mat(np.eye(n))) * Xcv.T * Lcv * Ycv
+            hopred = Xtest * la.inv(Xcv.T * Lcv * Xcv + regparam * np.asmatrix(np.eye(n))) * Xcv.T * Lcv * Ycv
             print(str(hopred[0, oind]) + ' ' + str(hopred[1, oind]) + ' Dumb (primal)')
             hopreds.append((hopred[0, oind], hopred[1, oind]))
             

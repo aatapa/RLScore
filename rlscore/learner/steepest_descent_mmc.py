@@ -105,8 +105,8 @@ class SteepestDescentMMC(PredictorInterface):
         if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.svals = np.mat(self.svdad.svals)
-        self.svecs = np.mat(self.svdad.rsvecs)
+        self.svals = np.asmatrix(self.svdad.svals)
+        self.svecs = np.asmatrix(self.svdad.rsvecs)
         self.callbackfun = callback
         self.regparam = regparam
         self.constraint = 0
@@ -306,7 +306,7 @@ class SteepestDescentMMC(PredictorInterface):
     
     def findSteepestDirRotateClasses_FOCUSSETSTUFF(self, howmany, LOO = False):
         
-        focusrange = np.mat(np.arange(self.size)).T
+        focusrange = np.asmatrix(np.arange(self.size)).T
         
         for j in range(self.labelcount):
             #!!!!!!!!!!!!!!!
@@ -341,7 +341,7 @@ class SteepestDescentMMC(PredictorInterface):
             while True:
                 if takecount >= takenum: break
                 for h in range(maxtake):
-                    diagR = mat(diag(self.R)).T
+                    diagR = asmatrix(diag(self.R)).T
                     dirsnegdiff = - 4 * diagR + 4 * np.multiply(self.Y, self.RY)
                     dirscc = dirsnegdiff[focusrange, self.classvec]
                     dirs = dirsnegdiff + dirscc
@@ -370,11 +370,11 @@ class SteepestDescentMMC(PredictorInterface):
     
     def findNewFocusSet(self, clazz = 0, focsize = 50):
         
-        diagR = np.mat(np.diag(self.R)).T
+        diagR = np.asmatrix(np.diag(self.R)).T
         dirsnegdiff = - 4 * diagR + 4 * np.multiply(self.Y, self.RY)
-        dirscc = dirsnegdiff[np.mat(np.arange(self.size)).T, self.classvec]
+        dirscc = dirsnegdiff[np.asmatrix(np.arange(self.size)).T, self.classvec]
         dirs = dirsnegdiff + dirscc
-        dirs[np.mat(np.arange(self.size)).T, self.classvec] = float('Inf')
+        dirs[np.asmatrix(np.arange(self.size)).T, self.classvec] = float('Inf')
         
         dirlist = []
         for i in range(self.size):
@@ -402,7 +402,7 @@ class RandomLabelSource(object):
         allinds = set(range(size))
         self.classcounts = np.zeros((labelcount), dtype = np.int32)
         for i in range(labelcount-1):
-            inds = self.rand.sample(allinds, int(size / labelcount)) #sampling without replacement
+            inds = self.rand.sample(list(allinds), int(size / labelcount)) #sampling without replacement
             allinds = allinds - set(inds)
             for ind in inds:
                 self.Y[ind, i] = 1.

@@ -20,8 +20,8 @@ class Test(unittest.TestCase):
         m, n = 100, 300
         for regparam in [0.00000001, 1, 100000000]:
         #for regparam in [1000]:
-            Xtrain = np.mat(np.random.rand(n, m))
-            Y = np.mat(np.random.rand(m, 1))
+            Xtrain = np.asmatrix(np.random.rand(n, m))
+            Y = np.asmatrix(np.random.rand(m, 1))
             rpool = {}
             rpool['X'] = Xtrain.T
             rpool['Y'] = Y
@@ -30,9 +30,9 @@ class Test(unittest.TestCase):
             rls = CGRankRLS(**rpool)
             model = rls.predictor   
             W = model.W
-            In = np.mat(np.identity(n))
-            Im = np.mat(np.identity(m))
-            L = np.mat(Im-(1./m)*np.ones((m,m), dtype=np.float64))
+            In = np.asmatrix(np.identity(n))
+            Im = np.asmatrix(np.identity(m))
+            L = np.asmatrix(Im-(1./m)*np.ones((m,m), dtype=np.float64))
             G = Xtrain*L*Xtrain.T+regparam*In
             W2 = np.squeeze(np.array(G.I*Xtrain*L*Y))
             for i in range(W.shape[0]):
@@ -44,8 +44,8 @@ class Test(unittest.TestCase):
     def testPairwisePreferences(self):
         m, n = 100, 300
         for regparam in [0.00000001, 1, 100000000]:
-            Xtrain = np.mat(np.random.rand(n, m))
-            Y = np.mat(np.random.rand(m, 1))
+            Xtrain = np.asmatrix(np.random.rand(n, m))
+            Y = np.asmatrix(np.random.rand(m, 1))
             
             pairs = []
             for i in range(1000):
@@ -65,14 +65,14 @@ class Test(unittest.TestCase):
             rls = PCGRankRLS(**rpool)
             model = rls.predictor   
             W = model.W
-            In = np.mat(np.identity(n))
+            In = np.asmatrix(np.identity(n))
             vals = np.concatenate([np.ones((pairs.shape[0]), dtype=np.float64), -np.ones((pairs.shape[0]), dtype=np.float64)])
             row = np.concatenate([np.arange(pairs.shape[0]),np.arange(pairs.shape[0])])
             col = np.concatenate([pairs[:,0], pairs[:,1]])
             coo = coo_matrix((vals, (row, col)), shape=(pairs.shape[0], Xtrain.T.shape[0]))
             L = (coo.T*coo).todense()
             G = Xtrain*L*Xtrain.T+regparam*In
-            W2 = np.squeeze(np.array(G.I*Xtrain*coo.T*np.mat(np.ones((pairs.shape[0],1)))))
+            W2 = np.squeeze(np.array(G.I*Xtrain*coo.T*np.asmatrix(np.ones((pairs.shape[0],1)))))
             for i in range(W.shape[0]):
                 #for j in range(W.shape[1]):
                 #    self.assertAlmostEqual(W[i,j],W2[i,j], places=4)
@@ -82,8 +82,8 @@ class Test(unittest.TestCase):
         np.random.seed(100)
         floattype = np.float64
         m, n = 100, 400 #data, features
-        Xtrain = np.mat(np.random.rand(m, n))
-        Y = np.mat(np.zeros((m, 1), dtype=floattype))
+        Xtrain = np.asmatrix(np.random.rand(m, n))
+        Y = np.asmatrix(np.zeros((m, 1), dtype=floattype))
         Y[:, 0] = np.sum(Xtrain, 1)
         qidlist = [0 for i in range(100)]
         for h in range(5, 12):
