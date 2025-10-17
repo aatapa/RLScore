@@ -106,7 +106,7 @@ class PPRankRLS(PredictorInterface):
         self.regparam = regparam
         self.pairs = np.vstack([pairs_start_inds, pairs_end_inds]).T
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.svals = np.mat(self.svdad.svals)
+        self.svals = np.asmatrix(self.svdad.svals)
         self.svecs = self.svdad.rsvecs
         self.results = {}
         self.X = csc_matrix(X)
@@ -144,9 +144,9 @@ class PPRankRLS(PredictorInterface):
             #These are cached for later use in solve and computeHO functions
             ssvecsTLssvecs = ssvecs.T * self.L * ssvecs
             LRsvals, LRevecs = linalg.eig_psd(ssvecsTLssvecs)
-            LRsvals = np.mat(LRsvals)
+            LRsvals = np.asmatrix(LRsvals)
             LRevals = np.multiply(LRsvals, LRsvals)
-            LY = coo.T * np.mat(np.ones((self.pairs.shape[0], 1)))
+            LY = coo.T * np.asmatrix(np.ones((self.pairs.shape[0], 1)))
             self.multipleright = LRevecs.T * (ssvecs.T * LY)
             self.multipleleft = ssvecs * LRevecs
             self.LRevals = LRevals
