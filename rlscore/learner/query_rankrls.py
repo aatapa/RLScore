@@ -111,9 +111,9 @@ class QueryRankRLS(PredictorInterface):
         if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.Y = np.mat(array_tools.as_2d_array(Y))
+        self.Y = np.asmatrix(array_tools.as_2d_array(Y))
         self.regparam = regparam
-        self.svals = np.mat(self.svdad.svals)
+        self.svals = np.asmatrix(self.svdad.svals)
         self.svecs = self.svdad.rsvecs
         self.size = self.Y.shape[0]
         self.size = self.Y.shape[0]
@@ -146,12 +146,12 @@ class QueryRankRLS(PredictorInterface):
             qidlist = self.qids
             objcount = max(qidlist) + 1
             
-            labelcounts = np.mat(np.zeros((1, objcount)))
+            labelcounts = np.asmatrix(np.zeros((1, objcount)))
             Pvals = np.ones(self.size)
             for i in range(self.size):
                 qid = qidlist[i]
                 labelcounts[0, qid] = labelcounts[0, qid] + 1
-            D = np.mat(np.ones((1, self.size), dtype=np.float64))
+            D = np.asmatrix(np.ones((1, self.size), dtype=np.float64))
             
             #The centering matrix way (HO computations should be modified accordingly too)
             for i in range(self.size):
@@ -177,7 +177,7 @@ class QueryRankRLS(PredictorInterface):
             #These are cached for later use in solve and holdout functions
             ssvecsTLssvecs = (np.multiply(ssvecs.T, D) - (ssvecs.T * P_csc) * P_csr.T) * ssvecs
             LRsvals, LRevecs = linalg.eig_psd(ssvecsTLssvecs)
-            LRsvals = np.mat(LRsvals)
+            LRsvals = np.asmatrix(LRsvals)
             LRevals = np.multiply(LRsvals, LRsvals)
             LY = np.multiply(D.T, self.Y) - P_csr * (P_csc.T * self.Y)
             self.multipleright = LRevecs.T * (ssvecs.T * LY)
@@ -235,7 +235,7 @@ class QueryRankRLS(PredictorInterface):
         Qleft = self.multipleleft[indices]
         sqrtQho = np.multiply(Qleft, np.sqrt(self.neweigvals))
         Qho = sqrtQho * sqrtQho.T
-        Pho = np.mat(np.ones((len(indices),1))) / np.sqrt(len(indices))
+        Pho = np.asmatrix(np.ones((len(indices),1))) / np.sqrt(len(indices))
         Yho = self.Y[indices]
         Dho = self.D[:, indices]
         LhoYho = np.multiply(Dho.T, Yho) - Pho * (Pho.T * Yho)
@@ -243,11 +243,11 @@ class QueryRankRLS(PredictorInterface):
         sqrtRQRTLho = np.multiply(Dho.T, sqrtQho) - Pho * (Pho.T * sqrtQho)
         if sqrtQho.shape[0] <= sqrtQho.shape[1]:
             RQRTLho = sqrtQho * sqrtRQRTLho.T
-            I = np.mat(np.identity(indlen))
+            I = np.asmatrix(np.identity(indlen))
             return np.squeeze(np.array((I - RQRTLho).I * RQY))
         else:
             RQRTLho = sqrtRQRTLho.T * sqrtQho
-            I = np.mat(np.identity(sqrtQho.shape[1]))
+            I = np.asmatrix(np.identity(sqrtQho.shape[1]))
             return np.squeeze(np.array(RQY + sqrtQho * ((I - RQRTLho).I * (sqrtRQRTLho.T * RQY))))
 
 class LeaveQueryOutRankRLS(PredictorInterface):
