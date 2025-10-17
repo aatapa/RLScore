@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 
 import numpy as np
-from numpy import asmatrix as mat
+from numpy import asmatrix
 from numpy import float64
 from scipy import sparse as sp
 from rlscore.utilities import array_tools
@@ -59,7 +59,7 @@ class GaussianKernel(object):
         if sp.issparse(self.train_X):
             self.train_norms = ((self.train_X.T.multiply(self.train_X.T)).sum(axis=0)).T
         else:
-            self.train_norms = np.mat((np.multiply(self.train_X.T, self.train_X.T).sum(axis=0))).T  
+            self.train_norms = np.asmatrix((np.multiply(self.train_X.T, self.train_X.T).sum(axis=0))).T  
         self.gamma = gamma
             
 
@@ -91,8 +91,8 @@ class GaussianKernel(object):
             test_norms = ((test_X.T.multiply(test_X.T)).sum(axis=0)).T
         else:
             test_norms = (np.multiply(test_X.T, test_X.T).sum(axis=0)).T
-        K = mat(np.ones((m, 1), dtype = float64)) * test_norms.T
-        K = K + self.train_norms * mat(np.ones((1, n), dtype = float64))
+        K = asmatrix(np.ones((m, 1), dtype = float64)) * test_norms.T
+        K = K + self.train_norms * asmatrix(np.ones((1, n), dtype = float64))
         K = K - 2 * linkm
         K = - gamma * K
         K = np.exp(K)

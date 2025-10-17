@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 
 from numpy import identity, multiply, sum
-from numpy import asmatrix as mat
+from numpy import asmatrix
 import numpy.linalg as la
 from rlscore.utilities import array_tools 
 from rlscore.utilities import adapter
@@ -133,8 +133,8 @@ class RLS(PredictorInterface):
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
         self.regparam = regparam
-        self.svals = np.mat(self.svdad.svals)
-        self.svecs = np.mat(self.svdad.rsvecs)
+        self.svals = np.asmatrix(self.svdad.svals)
+        self.svecs = np.asmatrix(self.svdad.rsvecs)
         self.size = self.Y.shape[0]
         self.solve(self.regparam)   
    
@@ -229,10 +229,10 @@ class RLS(PredictorInterface):
         RQY = A * multiply(bevals.T, right) #O(hrl)
         B = multiply(bevals.T, A.T)
         if len(indices) <= A.shape[1]: #h < r
-            I = mat(identity(len(indices)))
+            I = asmatrix(identity(len(indices)))
             result = la.inv(I - A * B) * RQY #O(h^3 + h^2 * l)
         else: #h > r
-            I = mat(identity(A.shape[1]))
+            I = asmatrix(identity(A.shape[1]))
             result = RQY - A * (la.inv(B * A - I) * (B * RQY)) #O(r^3 + r^2 * l + h * r * l)
         return np.squeeze(np.array(result))
     
