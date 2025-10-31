@@ -10,7 +10,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ic_index"
+name = "RLScore"
 dynamic = ["version"]
 authors = [
     {name = "Tapio Pahikkala"},
