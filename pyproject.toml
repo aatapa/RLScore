@@ -1,0 +1,28 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = [
+    "setuptools>=80",
+    "setuptools-scm>=8",
+    "wheel",
+    "Cython>=3.0.0",
+    "numpy>=2.0.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ic_index"
+dynamic = ["version"]
+authors = [
+    {name = "Tapio Pahikkala"},
+    {name = "Antti Airola"}
+]
+
+license = "MIT"
+license-files = ["LICENSE.TXT"]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0.0",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
