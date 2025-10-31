@@ -10,7 +10,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "RLScore"
+name = "rlscore"
 dynamic = ["version"]
 authors = [
     {name = "Tapio Pahikkala"},
