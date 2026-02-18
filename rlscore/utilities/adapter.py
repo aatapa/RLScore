@@ -30,7 +30,7 @@ from numpy import multiply, float64, ones
 from math import sqrt
 import numpy as np
 import numpy.linalg as la
-from numpy.linalg.linalg import LinAlgError
+from numpy.linalg import LinAlgError
 
 from rlscore.utilities import linalg
 from rlscore import predictor

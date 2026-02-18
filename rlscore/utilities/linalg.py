@@ -25,7 +25,7 @@
 
 import numpy as np
 import numpy.linalg as la
-from numpy.linalg.linalg import LinAlgError
+from numpy.linalg import LinAlgError
 
 SMALLEST_EVAL = 0.0000000001
 

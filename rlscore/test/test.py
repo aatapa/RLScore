@@ -15,7 +15,7 @@ def testLearners():
              "test_greedy_rls",
              "test_interactive_rls_classifier",
              "test_kronecker_rls",
-             #"test_kronsvm",
+             "test_kronsvm",
              "test_mmc",
              "test_query_rankrls",
              "test_rankrls_with_pairwise_preferences",

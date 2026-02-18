@@ -103,7 +103,7 @@ class MMC(PredictorInterface):
         if basis_vectors is not None:
             kwargs['basis_vectors'] = basis_vectors
         self.svdad = adapter.createSVDAdapter(**kwargs)
-        self.svals = np.mat(self.svdad.svals)
+        self.svals = np.asmatrix(self.svdad.svals)
         self.svecs = self.svdad.rsvecs
         self.regparam = regparam
         self.constraint = 0

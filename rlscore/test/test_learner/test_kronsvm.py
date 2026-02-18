@@ -7,6 +7,7 @@ from numpy import random as numpyrandom
 from rlscore.learner.kron_svm import KronSVM
 
 from rlscore.utilities import sampled_kronecker_products
+from rlscore.utilities.pairwise_kernel_operator import PairwiseKernelOperator
 
 def dual_svm_objective(a, K1, K2, Y, rowind, colind, lamb):
     #dual form of the objective function for support vector machine
@@ -16,14 +17,20 @@ def dual_svm_objective(a, K1, K2, Y, rowind, colind, lamb):
     #rowind: row indices for training pairs
     #colind: column indices for training pairs
     #lamb: regularization parameter
-    P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
+    K_kron = PairwiseKernelOperator(K2, K1, colind, rowind, colind, rowind)
+    P = K_kron*a
+    #P =  sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
     z = (1. - Y*P)
     z = np.where(z>0, z, 0)
-    Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
-    return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
+    #Ka = sampled_kronecker_products.sampled_vec_trick(a, K2, K1, colind, rowind, colind, rowind)
+    #return 0.5*(np.dot(z,z)+lamb*np.dot(a, Ka))
+    return 0.5*(np.dot(z,z)+lamb*np.dot(a, P))
 
 def primal_svm_objective(v, X1, X2, Y, rowind, colind, lamb):
-    P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
+    #X_kron = PairwiseKernelOperator(X2, X1, colind, rowind)
+    X_kron = PairwiseKernelOperator(X1, X2, rowind, colind)
+    P = X_kron * v
+    #P = sampled_kronecker_products.sampled_vec_trick(v, X2, X1, colind, rowind)
     z = (1. - Y*P)
     #print z
     z = np.where(z>0, z, 0)
@@ -43,9 +50,9 @@ def load_data(primal=True, fold_index=0):
     X2_train = X2[ttraininds, :]
     X1_test = X1[dfold,:]
     X2_test = X2[tfold,:]
-    KT = np.mat(X2)
+    KT = np.asmatrix(X2)
     KT = KT * KT.T
-    KD = np.mat(X1)
+    KD = np.asmatrix(X1)
     KD = KD * KD.T
     K1_train = KD[np.ix_(dtraininds, dtraininds)]
     K2_train = KT[np.ix_(ttraininds, ttraininds)]
@@ -87,7 +94,7 @@ class Test(unittest.TestCase):
                 X2 = learner.resource_pool['X2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
-                w = learner.W.ravel(order='F')
+                w = learner.predictor.W
                 loss = primal_svm_objective(w, X1, X2, Y_train, rowind, colind, regparam)
                 print("iteration", self.iter)
                 print("Primal SVM loss", loss)
@@ -100,12 +107,17 @@ class Test(unittest.TestCase):
         params["Y"] = Y_train
         params["label_row_inds"] = rows
         params["label_col_inds"] = cols
-        params["maxiter"] = 100
-        params["inneriter"] = 100
+        params["maxiter"] = 10
+        params["inneriter"] = 50
         params["regparam"] = regparam
         params['callback'] = PrimalCallback()  
         learner = KronSVM(**params)
-        P_linear = learner.predictor.predict(X1_test, X2_test)
+        print(X1_test.shape, X2_test.shape, learner.predictor.W.shape)
+        #P_linear = learner.predictor.predict(X1_test, X2_test)
+        P_linear = learner.predictor.predict(X1_train, X2_train, rows, cols)
+        #P_linear = learner.predictor.predict(X2_train, X1_train, cols, rows)
+        print("P_linear", P_linear)
+        #assert False
         pyrandom.seed(100)
         numpyrandom.seed(100)         
         K1_train, K2_train, Y_train, rows, cols, K1_test, K2_test, Y_test = load_data(primal=False)       
@@ -120,10 +132,9 @@ class Test(unittest.TestCase):
                 K2 = learner.resource_pool['K2']
                 rowind = learner.label_row_inds
                 colind = learner.label_col_inds
-                #loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
-                #loss = learner.bestloss
+                loss = dual_svm_objective(learner.A, K1, K2, Y_train, rowind, colind, regparam)
                 print("iteration", self.iter)
-                #print("Dual SVM loss", loss)
+                print("Dual SVM loss", loss)
                 #model = learner.predictor
                 self.iter += 1
             def finished(self, learner):
@@ -134,37 +145,17 @@ class Test(unittest.TestCase):
         params["Y"] = Y_train
         params["label_row_inds"] = rows
         params["label_col_inds"] = cols
-        params["maxiter"] = 100
-        params["inneriter"] = 100
+        params["maxiter"] = 10
+        params["inneriter"] = 50
         params["regparam"] = regparam
         params['callback'] = DualCallback()
         learner = KronSVM(**params)
-        P_dual = learner.predictor.predict(K1_test, K2_test)
+        #P_dual = learner.predictor.predict(K1_test, K2_test)
+        P_dual = learner.predictor.predict(K1_train, K2_train, rows, cols)
+        #print(P_linear)
+        print("P_dual", P_dual)
         print(np.max(1. - np.abs(P_linear / P_dual)))
         assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001
-        
-        '''
-        params = {}
-        params["K1"] = [K1_train, K1_train]
-        params["K2"] = [K2_train, K2_train]
-        #params["weights"] = [1, 1]
-        params["weights"] = [1. / 3, 2. / 3]
-        #params["weights"] = [1.]# / np.sqrt(3), np.sqrt(2. / 3)]
-        params["Y"] = Y_train
-        params["label_row_inds"] = rows
-        params["label_col_inds"] = cols
-        params["maxiter"] = 100
-        params["inneriter"] = 100
-        params["regparam"] = regparam
-        params['callback'] = DualCallback()
-        learner = KronSVM(**params)
-        P_dual = learner.predictor.predict([K1_test, K1_test], [K2_test, K2_test])
-        print(np.max(1. - np.abs(P_linear / P_dual)))
-        assert np.max(1. - np.abs(P_linear / P_dual)) < 0.001
-        '''
-        
-
-
 
 
 if __name__=="__main__":

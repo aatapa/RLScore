@@ -26,8 +26,8 @@
 import numpy as np
 
 def wrapper(measure, Y, Y_predicted, qids):
-    Y = np.mat(Y)
-    Y_predicted = np.mat(Y_predicted)
+    Y = np.asmatrix(Y)
+    Y_predicted = np.asmatrix(Y_predicted)
     qids_perfs = []
     for inds in qids:
         Y_sub = Y[inds]
